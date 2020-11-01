@@ -60,8 +60,9 @@ artifacts/
 StyleCopReport.xml
 
 # web.config
-Web/Web.config
 Web.config
+Web.Debug.config
+Web.Release.config
 
 # Files built by Visual Studio
 *_i.c
