@@ -61,8 +61,6 @@ StyleCopReport.xml
 
 # web.config & License file
 Web.config
-Web.Debug.config
-Web.Release.config
 raaivan.license
 
 # Files built by Visual Studio
