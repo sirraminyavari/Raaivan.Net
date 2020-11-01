@@ -184,6 +184,12 @@ namespace RaaiVan.Modules.Search
 
         private static void _remove_docs(Guid applicationId, List<SearchDoc> docs)
         {
+            if (RaaiVanSettings.Solr.Enabled)
+            {
+                SolrAPI.delete(applicationId, docs);
+                return;
+            }
+
             try
             {
                 //Delete from Hard
@@ -648,6 +654,12 @@ namespace RaaiVan.Modules.Search
 
         private static void update_index(Guid applicationId, List<SearchDoc> docs)
         {
+            if (RaaiVanSettings.Solr.Enabled)
+            {
+                SolrAPI.add(applicationId, docs);
+                return;
+            }
+
             _update_index(applicationId, docs);
         }
 

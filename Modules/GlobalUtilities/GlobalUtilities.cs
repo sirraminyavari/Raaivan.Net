@@ -681,6 +681,11 @@ namespace RaaiVan.Modules.GlobalUtilities
         private static SortedList<Guid, Dictionary<Guid, bool>> _SystemAdmins = 
             new SortedList<Guid, Dictionary<Guid, bool>>();
 
+        public static string get_environment_variable(string variable, string defaultValue = "")
+        {
+            return Environment.GetEnvironmentVariable(variable, EnvironmentVariableTarget.Machine) ?? defaultValue;
+        }
+
         public static bool is_system_admin(Guid? applicationId, Guid userId, bool ignoreAuthentication = false)
         {
             if (!applicationId.HasValue) applicationId = Guid.Empty;

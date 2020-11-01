@@ -212,12 +212,12 @@ namespace RaaiVan.Modules.Search
             }
         }
 
-        public static bool delete(Guid applicationId, SearchDoc document)
+        public static bool delete(Guid applicationId, List<SearchDoc> documents)
         {
             try
             {
                 ISolrOperations<SolrDoc> solr = get_solr_operator();
-                solr.Delete(document.toSolrDoc(applicationId));
+                documents.ForEach(d => solr.Delete(d.toSolrDoc(applicationId)));
                 ResponseHeader response = solr.Commit();
 
                 return response.Status == 0;
@@ -252,12 +252,13 @@ namespace RaaiVan.Modules.Search
             return results.ToList();
         }
 
-        public static string extract_file_content(string phrase, int count, int lowerBoundary)
+        public static string extract_file_content(Guid applicationId, DocFileInfo file)
         {
             ISolrOperations<SolrDoc> solr = get_solr_operator();
-            
-            using (FileStream file = File.OpenRead("")) {
-                ExtractResponse response = solr.Extract(new ExtractParameters(file, "12") {
+
+            using (Stream content = new MemoryStream(file.toByteArray(applicationId))) {
+                ExtractResponse response = solr.Extract(new ExtractParameters(content, 
+                    PublicMethods.get_random_number().ToString(), PublicMethods.random_string(10)) {
                     ExtractOnly = true,
                     ExtractFormat = ExtractFormat.Text
                 });
