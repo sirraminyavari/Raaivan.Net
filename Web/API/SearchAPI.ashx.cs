@@ -91,6 +91,9 @@ namespace RaaiVan.Web.API
 
             List<SearchDoc> exactItems = new List<SearchDoc>();
             List<SearchDoc> nodeTypes = new List<SearchDoc>();
+
+            int totalCount = 0;
+
             if (!lowerBoundary.HasValue || lowerBoundary == 0)
             {
                 string[] terms = searchText.Split(' ');
@@ -101,7 +104,7 @@ namespace RaaiVan.Web.API
                 {
                     exactItems = SearchUtilities.search(paramsContainer.Tenant.Id, itemTypes,
                         paramsContainer.CurrentUserID, new List<Guid>(), new List<string>(),
-                        true, false, false, false, false, false, false, terms[0].Trim(), ref _b, count.Value);
+                        true, false, false, false, false, false, false, terms[0].Trim(), ref _b, count.Value, false, ref totalCount);
                 }
 
                 if (itemTypes.Exists(u => u == SearchDocType.Node) && suggestNodeTypes.HasValue && suggestNodeTypes.Value)
@@ -110,16 +113,18 @@ namespace RaaiVan.Web.API
                     sdts.Add(SearchDocType.NodeType);
                     nodeTypes = SearchUtilities.search(paramsContainer.Tenant.Id, sdts,
                         paramsContainer.CurrentUserID, new List<Guid>(), new List<string>(),
-                        true, true, true, false, false, false, false, searchText, ref _b, count.Value);
+                        true, true, true, false, false, false, false, searchText, ref _b, count.Value, false, ref totalCount);
                 }
             }
+
+            totalCount = 0;
 
             List<SearchDoc> items = SearchUtilities.search(paramsContainer.Tenant.Id,
                 itemTypes, paramsContainer.CurrentUserID, typeIds, types, true,
                 title.HasValue && title.Value, description.HasValue && description.Value,
                 content.HasValue && content.Value, tags.HasValue && tags.Value,
                 fileContent.HasValue && fileContent.Value, forceHasContent.HasValue && forceHasContent.Value,
-                searchText, ref lowerBoundary, count.Value, getHighlightedText: !(excel.HasValue && excel.Value));
+                searchText, ref lowerBoundary, count.Value, highlight: !excel.HasValue || !excel.Value, ref totalCount);
 
             if (excel.HasValue && excel.Value)
             {
@@ -142,12 +147,11 @@ namespace RaaiVan.Web.API
                 return;
             }
 
-            responseText = "{\"LastItem\":" + lowerBoundary.ToString() + ",\"Items\":[" +
-                string.Join(",", items.Select(u => u.toJson(paramsContainer.Tenant.Id, false))) + "]" +
-                ",\"ExactItems\":[" +
-                string.Join(",", exactItems.Select(u => u.toJson(paramsContainer.Tenant.Id, true))) + "]" +
-                ",\"NodeTypes\":[" +
-                string.Join(",", nodeTypes.Select(u => u.toJson(paramsContainer.Tenant.Id, true))) + "]" +
+            responseText = "{\"LastItem\":" + lowerBoundary.ToString() +
+                (totalCount == 0 ? string.Empty : ",\"TotalCount\":" + totalCount.ToString()) +
+                ",\"Items\":[" + string.Join(",", items.Select(u => u.toJson(paramsContainer.Tenant.Id, false))) + "]" +
+                ",\"ExactItems\":[" + string.Join(",", exactItems.Select(u => u.toJson(paramsContainer.Tenant.Id, true))) + "]" +
+                ",\"NodeTypes\":[" + string.Join(",", nodeTypes.Select(u => u.toJson(paramsContainer.Tenant.Id, true))) + "]" +
                 ",\"NoMore\":" + (items.Count < count).ToString().ToLower() + "}";
 
             //Save Log

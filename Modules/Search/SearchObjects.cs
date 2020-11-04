@@ -220,7 +220,7 @@ namespace RaaiVan.Modules.Search
             return retSD;
         }
 
-        public static SearchDoc ToSearchDoc(Guid id, Guid typeID, string content, string additionalID, bool deleted, string type,
+        public static SearchDoc ToSearchDoc(Guid id, Guid? typeID, string content, string additionalID, bool deleted, string type,
             SearchDocType docType, string title = null, string tags = null, string description = null, string fileContect = null)
         {
             SearchDoc sd = new SearchDoc();
@@ -238,6 +238,23 @@ namespace RaaiVan.Modules.Search
             sd.SearchDocType = docType;
 
             return sd;
+        }
+
+        public static SearchDoc ToSearchDoc(SolrDoc doc) {
+            try
+            {
+                SearchDocType docType = SearchDocType.All;
+
+                string docId = doc.get_main_id();
+
+                if (!Enum.TryParse<SearchDocType>(doc.SearchDocType, out docType)) return null;
+
+                return ToSearchDoc(Guid.Parse(docId),
+                    string.IsNullOrEmpty(doc.TypeID) ? (Guid?)null : Guid.Parse(doc.TypeID),
+                    doc.Content, doc.AdditionalID, doc.Deleted, doc.Type, docType,
+                    doc.Title, doc.Tags, doc.Description, doc.FileContent);
+            }
+            catch { return null; }
         }
 
         public SolrDoc toSolrDoc(Guid applicationId) {

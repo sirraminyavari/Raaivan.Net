@@ -11,6 +11,7 @@ using RaaiVan.Modules.Log;
 using SolrNet.Commands.Parameters;
 using System.Text.RegularExpressions;
 using System.IO;
+using SolrNet.Impl;
 
 namespace RaaiVan.Modules.Search
 {
@@ -18,6 +19,9 @@ namespace RaaiVan.Modules.Search
     {
         [SolrUniqueKey("id")]
         public string ID { get; set; }
+
+        [SolrField("search_doc_type")]
+        public string SearchDocType { get; set; }
 
         [SolrField("type_id")]
         public string TypeID { get; set; }
@@ -37,9 +41,6 @@ namespace RaaiVan.Modules.Search
         [SolrField("tags")]
         public string Tags { get; set; }
 
-        [SolrField("deleted")]
-        public bool Deleted { get; set; }
-
         [SolrField("content")]
         public string Content { get; set; }
 
@@ -49,11 +50,17 @@ namespace RaaiVan.Modules.Search
         [SolrField("no_content")]
         public bool NoContent { get; set; }
 
-        [SolrField("search_doc_type")]
-        public string SearchDocType { get; set; }
+        [SolrField("deleted")]
+        public bool Deleted { get; set; }
+
+        public string get_main_id()
+        {
+            return (!string.IsNullOrEmpty(ID) && ID.LastIndexOf("!") > 0) ? ID.Substring(ID.LastIndexOf("!") + 1) : ID;
+        }
     }
 
-    public class QueryTerms {
+    public class QueryTerms
+    {
         /*
         List<string> specialChars = new List<string>() {
             "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "/"
@@ -62,13 +69,44 @@ namespace RaaiVan.Modules.Search
 
         private List<string> Terms;
 
-        public QueryTerms(string phrase) {
+        public QueryTerms(string phrase)
+        {
             Terms = QueryTerms.parse(phrase);
         }
 
-        public string get_query(List<KeyValuePair<string, double>> fieldBoosts)
+        public string get_query(List<KeyValuePair<string, double>> fieldBoosts,
+            List<SearchDocType> docTypes, List<Guid> typeIds, List<string> types, bool forceHasContent)
         {
-            return string.Join(" ", fieldBoosts.Select(f => f.Key + ":(" + string.Join(" ", Terms) + ")"));
+            List<string> constraints = new List<string>();
+
+            if (docTypes != null && docTypes.Count > 0)
+                constraints.Add("search_doc_type:(" + string.Join(" ", docTypes.Distinct()) + ")");
+
+            if (typeIds != null && typeIds.Count > 0)
+                constraints.Add("type_id:(" + string.Join(" ", typeIds.Distinct().Select(i => i.ToString())) + ")");
+
+            if (types != null && types.Count > 0)
+                constraints.Add("type:(" + string.Join(" ", types.Distinct().Select(i => i.ToString())) + ")");
+
+            if (forceHasContent) constraints.Add("!no_content:true");
+
+            string query = string.Join(" ", fieldBoosts.Select(f =>
+            {
+                double boostBase = f.Value;
+                bool noBoost = boostBase == 0;
+                if (boostBase <= 0) boostBase = 1;
+
+                return f.Key + ":(" + string.Join(" ", Terms.Select(t =>
+                {
+                    t += t.IndexOf(" ") > 0 || noBoost ? "" : "^" + (Math.Truncate(boostBase * 100) / 100).ToString();
+                    boostBase = boostBase * 0.8;
+                    if (boostBase <= 0.4) boostBase = 0.4;
+                    return t;
+                })) + ")";
+            })).Trim();
+
+            return constraints.Count == 0 ? query :
+                string.Join(" AND ", constraints) + (string.IsNullOrEmpty(query) ? string.Empty : " AND (" + query + ")");
         }
 
         private static List<string> parse(string phrase)
@@ -179,7 +217,7 @@ namespace RaaiVan.Modules.Search
         {
             if (Inited || !RaaiVanSettings.Solr.Enabled) return;
             Inited = true;
-            
+
             try { SolrNet.Startup.Init<SolrDoc>(SOLR_CONNECTION_STRING); }
             catch (Exception ex)
             {
@@ -187,17 +225,20 @@ namespace RaaiVan.Modules.Search
             }
         }
 
-        private static ISolrOperations<SolrDoc> get_solr_operator() {
+        private static ISolrOperations<SolrDoc> get_solr_operator()
+        {
             init();
 
             try { return ServiceLocator.Current.GetInstance<ISolrOperations<SolrDoc>>(); }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 LogController.save_error_log(null, null, "GetSolrOperatorInstance", ex, ModuleIdentifier.SRCH);
                 return null;
             }
         }
 
-        public static bool add(Guid applicationId, List<SearchDoc> documents) {
+        public static bool add(Guid applicationId, List<SearchDoc> documents)
+        {
             try
             {
                 ISolrOperations<SolrDoc> solr = get_solr_operator();
@@ -206,7 +247,8 @@ namespace RaaiVan.Modules.Search
 
                 return response.Status == 0;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 LogController.save_error_log(null, null, "SolrAddDocuments", ex, ModuleIdentifier.SRCH);
                 return false;
             }
@@ -229,25 +271,53 @@ namespace RaaiVan.Modules.Search
             }
         }
 
-        public static List<SolrDoc> search(Guid applicationId, string phrase, int count, int lowerBoundary)
+        public static List<SolrDoc> search(Guid applicationId, string phrase, List<SearchDocType> docTypes, List<Guid> typeIds,
+            List<string> types, bool additionalId, bool title, bool description, bool tags, bool content, bool fileContent,
+            bool forceHasContent, int count, int lowerBoundary, bool highlight, ref int totalCount)
         {
             ISolrOperations<SolrDoc> solr = get_solr_operator();
 
             QueryTerms searchTerms = new QueryTerms(phrase);
 
-            List<KeyValuePair<string, double>> fieldBoosts = new List<KeyValuePair<string, double>>() {
-                new KeyValuePair<string, double>("title", 1)
-            };
-            
-            SolrQueryResults<SolrDoc> results = solr.Query(searchTerms.get_query(fieldBoosts), new QueryOptions()
+            List<KeyValuePair<string, double>> fieldBoosts = new List<KeyValuePair<string, double>>();
+
+            docTypes = (docTypes == null ? new List<SearchDocType>() : docTypes.Where(d => d != SearchDocType.All)).Distinct().ToList();
+
+            if (title) fieldBoosts.Add(new KeyValuePair<string, double>("title", 5));
+            if (tags) fieldBoosts.Add(new KeyValuePair<string, double>("tags", 4));
+            if (description) fieldBoosts.Add(new KeyValuePair<string, double>("description", 3));
+            if (content) fieldBoosts.Add(new KeyValuePair<string, double>("content", 2));
+            if (fileContent) fieldBoosts.Add(new KeyValuePair<string, double>("file_content", 1));
+            if (additionalId) fieldBoosts.Add(new KeyValuePair<string, double>("additional_id", 0));
+
+            string query = searchTerms.get_query(fieldBoosts, docTypes, typeIds, types, forceHasContent);
+
+            QueryOptions queryOptions = new QueryOptions()
             {
-                Rows = count,
-                StartOrCursor = new StartOrCursor.Start(Math.Max(0, lowerBoundary - 1)),
-                Highlight = new HighlightingParameters() { Fields = new[] { "title", "description", "tags", "content", "file_content" } },
+                Rows = count + (count / 2),
+                StartOrCursor = new StartOrCursor.Start(Math.Max(0, lowerBoundary)),
                 ExtraParams = new List<KeyValuePair<string, string>>() {
                     new KeyValuePair<string, string>("_route_", applicationId.ToString() + "!")
-                }
-            });
+                },
+                Fields = new[] { "id", "search_doc_type", "type_id", "type", "additional_id", "title", "no_content", "deleted" }
+            };
+
+            if (highlight) queryOptions.Highlight = new HighlightingParameters()
+            {
+                Fields = fieldBoosts.Where(b => b.Key != "additional_id").Select(b => b.Key).ToArray()
+            };
+
+            SolrQueryResults<SolrDoc> results = solr.Query(query, queryOptions);
+
+            totalCount = results.NumFound;
+
+            if (highlight) {
+                results.Where(d => results.Highlights.ContainsKey(d.ID)).ToList().ForEach(doc => {
+                    HighlightedSnippets snippets = results.Highlights[doc.ID];
+                    doc.Description = string.Join(" ", snippets.Values.Select(v => string.Join(" ", v)))
+                        .Replace("<em>", "<b>").Replace("</em>", "</b>");
+                });
+            }
 
             return results.ToList();
         }
@@ -256,9 +326,11 @@ namespace RaaiVan.Modules.Search
         {
             ISolrOperations<SolrDoc> solr = get_solr_operator();
 
-            using (Stream content = new MemoryStream(file.toByteArray(applicationId))) {
-                ExtractResponse response = solr.Extract(new ExtractParameters(content, 
-                    PublicMethods.get_random_number().ToString(), PublicMethods.random_string(10)) {
+            using (Stream content = new MemoryStream(file.toByteArray(applicationId)))
+            {
+                ExtractResponse response = solr.Extract(new ExtractParameters(content,
+                    PublicMethods.get_random_number().ToString(), PublicMethods.random_string(10))
+                {
                     ExtractOnly = true,
                     ExtractFormat = ExtractFormat.Text
                 });
