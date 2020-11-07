@@ -73,9 +73,7 @@ namespace RaaiVan.Modules.Documents
 
             file.set_folder_name(applicationId, folderName);
 
-            string fileAddress = file.get_real_address(applicationId);
-            
-            bool find = !string.IsNullOrEmpty(fileAddress);
+            bool find = file.exists(applicationId);
 
             //estekhraje mant e file ba farakhani method e "ExtractFileContent" 
             string content = string.Empty;

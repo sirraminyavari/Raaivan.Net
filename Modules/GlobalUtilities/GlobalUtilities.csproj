@@ -66,6 +66,12 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AWSSDK.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWSSDK.Core.3.5.1.34\lib\net45\AWSSDK.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSSDK.S3, Version=3.3.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\AWSSDK.S3.3.5.3.12\lib\net45\AWSSDK.S3.dll</HintPath>
+    </Reference>
     <Reference Include="ClosedXML, Version=0.95.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\ClosedXML.0.95.3\lib\net46\ClosedXML.dll</HintPath>
     </Reference>
@@ -220,6 +226,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CallWebService.cs" />
+    <Compile Include="CephStorage.cs" />
     <Compile Include="DataProvider.cs" />
     <Compile Include="DocumentUtilities.cs" />
     <Compile Include="DownloadedFileMeta.cs" />
@@ -255,6 +262,9 @@
       <Project>{d54aebe3-5826-4a94-bfd9-4029612a89b1}</Project>
       <Name>RaaiVanConfig</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\packages\AWSSDK.S3.3.5.3.12\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

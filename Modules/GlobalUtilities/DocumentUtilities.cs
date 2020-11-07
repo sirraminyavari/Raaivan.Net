@@ -538,52 +538,6 @@ namespace RaaiVan.Modules.GlobalUtilities
                 "?timeStamp=" + DateTime.Now.Ticks.ToString() + "&FileID=" + fileId.ToString();
         }
 
-        public static void move_file(Guid? applicationId, DocFileInfo file,
-            FolderNames source, FolderNames destination, Guid? newGuidName = null)
-        {
-            try
-            {
-                if (file == null || !file.FileID.HasValue) return;
-
-                file.set_folder_name(applicationId, source);
-
-                string sourceAddress = file.get_real_address(applicationId);
-
-                if (string.IsNullOrEmpty(sourceAddress)) return;
-                
-                if (newGuidName.HasValue && newGuidName.Value != Guid.Empty) file.FileID = newGuidName;
-                string destFolder = file.get_folder_address(applicationId, destination);
-                string destinationAddress = file.get_address(applicationId, destination);
-
-                if (!Directory.Exists(destFolder)) Directory.CreateDirectory(destFolder);
-                File.Move(sourceAddress, destinationAddress);
-            }
-            catch { }
-        }
-
-        public static void move_files(Guid applicationId,
-            List<DocFileInfo> docFiles, FolderNames source, FolderNames destination)
-        {
-            if (docFiles != null)
-                foreach (DocFileInfo fi in docFiles) move_file(applicationId, fi, source, destination);
-        }
-        
-        public static void remove_files(Guid applicationId, List<DocFileInfo> files, FolderNames folderName)
-        {
-            if (files == null) return;
-
-            foreach (DocFileInfo fi in files) {
-                try
-                {
-                    fi.set_folder_name(applicationId, folderName);
-                    string address = fi.get_real_address(applicationId);
-
-                    if (File.Exists(address)) File.Delete(address);
-                }
-                catch { }
-            }
-        }
-        
         public static void encrypt_file_if_needed(Guid? applicationId, DocFileInfo file, FolderNames? folderName = null)
         {
             FolderNames? fn = folderName.HasValue ? folderName : file.get_folder_name();
@@ -732,6 +686,48 @@ namespace RaaiVan.Modules.GlobalUtilities
             return PublicMethods.get_mime_type_by_extension(Extension);
         }
 
+        public string stored_file_name {
+            get {
+                return !FileID.HasValue ? string.Empty : FileID.ToString() + (string.IsNullOrEmpty(Extension) ? "" : "." + Extension);
+            }
+        }
+
+        public void move(Guid? applicationId, FolderNames source, FolderNames destination, Guid? newGuidName = null)
+        {
+            try
+            {
+                if (!FileID.HasValue) return;
+
+                set_folder_name(applicationId, source);
+
+                string sourceAddress = get_real_address(applicationId);
+
+                if (string.IsNullOrEmpty(sourceAddress)) return;
+
+                if (newGuidName.HasValue && newGuidName.Value != Guid.Empty) FileID = newGuidName;
+                string destFolder = get_folder_address(applicationId, destination);
+                string destinationAddress = get_address(applicationId, destination);
+
+                if (!Directory.Exists(destFolder)) Directory.CreateDirectory(destFolder);
+                File.Move(sourceAddress, destinationAddress);
+            }
+            catch { }
+        }
+
+        public bool exists(Guid? applicationId) {
+            return RaaiVanSettings.CephStorage.Enabled ? CephStorage.file_exists(stored_file_name) :
+                !string.IsNullOrEmpty(get_real_address(applicationId));
+        }
+
+        public void delete(Guid? applicationId) {
+            try
+            {
+                string address = get_real_address(applicationId);
+                if (File.Exists(address)) File.Delete(address);
+            }
+            catch { }
+        }
+
         public void set_folder_name(Guid? applicationId, FolderNames name) {
             _FolderName = name;
             get_real_address(applicationId); //to set the property _Encrypted
@@ -767,7 +763,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                 get_folder_address(applicationId, _FolderName.Value);
         }
 
-        public string get_real_address(Guid? applicationId)
+        private string get_real_address(Guid? applicationId)
         {
             _Encrypted = false;
 
@@ -824,10 +820,12 @@ namespace RaaiVan.Modules.GlobalUtilities
             //string.IsNullOrEmpty(Extension) || !RaaiVanConfig.Modules.PDFViewer || Extension.ToLower() != "pdf";
         }
 
-        public byte[] toByteArray(Guid applicationId, ref string fileAddress)
+        public byte[] toByteArray(Guid? applicationId, ref string fileAddress)
         {
             try
             {
+                if (RaaiVanSettings.CephStorage.Enabled) return CephStorage.get_file(stored_file_name);
+
                 fileAddress = get_real_address(applicationId);
 
                 if (string.IsNullOrEmpty(fileAddress)) return new byte[0];
@@ -838,14 +836,14 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        public byte[] toByteArray(Guid applicationId) {
+        public byte[] toByteArray(Guid? applicationId) {
             string fileAddress = string.Empty;
             return toByteArray(applicationId, ref fileAddress);
         }
 
         public string url() {
-            return "../../download/" + FileID.ToString() +
-                (_FolderName.HasValue ? "?Category=" + _FolderName.ToString() : string.Empty);
+            return RaaiVanSettings.CephStorage.Enabled ? CephStorage.get_download_url(stored_file_name) :
+                "../../download/" + FileID.ToString() + (_FolderName.HasValue ? "?Category=" + _FolderName.ToString() : string.Empty);
         }
 
         public string toJson(Guid? applicationId, bool icon = false) {

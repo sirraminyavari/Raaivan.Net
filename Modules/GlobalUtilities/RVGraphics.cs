@@ -179,43 +179,37 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             if (!string.IsNullOrEmpty(forceExtension)) destFile.Extension = forceExtension;
 
-            string sourceAddress = sourceFile.get_real_address(applicationId);
-            if (string.IsNullOrEmpty(sourceAddress)) return false;
+            if (!sourceFile.exists(applicationId)) return false;
 
             Image retImage = null;
 
             try
             {
-                bool sourceEncrypted = sourceFile.is_encrypted(applicationId);
-
-                using (MemoryStream stream = !sourceEncrypted ? null :
-                    new MemoryStream(DocumentUtilities.decrypt_file_aes(sourceAddress)))
+                using (MemoryStream stream = new MemoryStream(sourceFile.toByteArray(applicationId)))
+                using (Image img = Bitmap.FromStream(stream))
                 {
-                    using (Image img = !sourceEncrypted ? Image.FromFile(sourceAddress) : Bitmap.FromStream(stream))
+                    bool result = make_thumbnail(img, width, height, minWidth, minHeight,
+                        ref retImage, ref errorMessage, stretch);
+
+                    if (img != null) img.Dispose();
+
+                    if (!result)
                     {
-                        bool result = make_thumbnail(img, width, height, minWidth, minHeight, 
-                            ref retImage, ref errorMessage, stretch);
+                        if (retImage != null) retImage.Dispose();
+                        if (img != null) retImage.Dispose();
 
-                        if (img != null) img.Dispose();
-
-                        if (!result)
-                        {
-                            if (retImage != null) retImage.Dispose();
-                            if (img != null) retImage.Dispose();
-
-                            return false;
-                        }
-                        
-                        using (FileStream fileStream = 
-                            new FileStream(destFile.get_address(applicationId, encrypted: false), FileMode.Create))
-                        {
-                            retImage.Save(fileStream, ImageFormat.Jpeg);
-                            retImage.Dispose();
-                            img.Dispose();
-                        }
-
-                        return true;
+                        return false;
                     }
+
+                    using (FileStream fileStream =
+                        new FileStream(destFile.get_address(applicationId, encrypted: false), FileMode.Create))
+                    {
+                        retImage.Save(fileStream, ImageFormat.Jpeg);
+                        retImage.Dispose();
+                        img.Dispose();
+                    }
+
+                    return true;
                 }
             }
             catch (Exception ex)
@@ -229,67 +223,60 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             try
             {
-                string sourceAddress = sourceFile.get_real_address(applicationId);
-                if (string.IsNullOrEmpty(sourceAddress)) return false;
+                if (!sourceFile.exists(applicationId)) return false;
 
                 bool result = true;
 
-                bool sourceEncrypted = sourceFile.is_encrypted(applicationId);
-
-                using (MemoryStream stream = !sourceEncrypted ? null :
-                    new MemoryStream(DocumentUtilities.decrypt_file_aes(sourceAddress)))
+                using (MemoryStream stream = new MemoryStream(sourceFile.toByteArray(applicationId)))
+                using (Bitmap image = Bitmap.FromStream(stream) as Bitmap)
                 {
-                    using (Bitmap image = (!sourceEncrypted ? Image.FromFile(sourceAddress) :
-                        Bitmap.FromStream(stream)) as Bitmap)
+                    if (image.Width < thumbnailWidth || image.Height < thumbnailHeight)
                     {
-                        if (image.Width < thumbnailWidth || image.Height < thumbnailHeight)
-                        {
-                            message = "{\"ErrorText\":\"" + Messages.ImageSizeIsNotValid.ToString() + "\"}";
-                            image.Dispose();
-                            return false;
-                        }
-
-                        if (x < 0 || y < 0 || width <= 0 || height <= 0)
-                        {
-                            double aspectRatio = (double)thumbnailWidth / (double)thumbnailHeight;
-                            int min = ((double)image.Width / (double)thumbnailWidth) < ((double)image.Height / (double)thumbnailHeight) ?
-                                image.Width : image.Height;
-
-                            if (min == image.Width)
-                            {
-                                width = image.Width;
-                                height = (int)Math.Floor((double)width / aspectRatio);
-                            }
-                            else
-                            {
-                                height = image.Height;
-                                width = (int)Math.Floor((double)height * aspectRatio);
-                            }
-
-                            x = (image.Width - width) / 2;
-                            y = (image.Height - height) / 2;
-                        }
-
-                        message = "{\"X\":" + x.ToString() + ",\"Y\":" + y.ToString() +
-                            ",\"Width\":" + width.ToString() + ",\"Height\":" + height.ToString() +
-                            ",\"HighQualityImageURL\":\"" + sourceFile.get_client_address(applicationId) + "\"" +
-                            ",\"ImageURL\":\"" + destFile.get_client_address(applicationId) + "\"" +
-                        "}";
-
-                        Rectangle rect = new Rectangle(x, y, width, height);
-
-                        using (Bitmap target = new Bitmap(rect.Width, rect.Height))
-                        {
-                            Graphics g = Graphics.FromImage(target);
-                            g.DrawImage(image, new Rectangle(0, 0, target.Width, target.Height), rect, GraphicsUnit.Pixel);
-
-                            result = make_thumbnail(target as Image,
-                                thumbnailWidth, thumbnailHeight, 0, 0, ref retImage, ref message, true);
-                        }
-                        
-                        if (!result) message = "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
-                        return result;
+                        message = "{\"ErrorText\":\"" + Messages.ImageSizeIsNotValid.ToString() + "\"}";
+                        image.Dispose();
+                        return false;
                     }
+
+                    if (x < 0 || y < 0 || width <= 0 || height <= 0)
+                    {
+                        double aspectRatio = (double)thumbnailWidth / (double)thumbnailHeight;
+                        int min = ((double)image.Width / (double)thumbnailWidth) < ((double)image.Height / (double)thumbnailHeight) ?
+                            image.Width : image.Height;
+
+                        if (min == image.Width)
+                        {
+                            width = image.Width;
+                            height = (int)Math.Floor((double)width / aspectRatio);
+                        }
+                        else
+                        {
+                            height = image.Height;
+                            width = (int)Math.Floor((double)height * aspectRatio);
+                        }
+
+                        x = (image.Width - width) / 2;
+                        y = (image.Height - height) / 2;
+                    }
+
+                    message = "{\"X\":" + x.ToString() + ",\"Y\":" + y.ToString() +
+                        ",\"Width\":" + width.ToString() + ",\"Height\":" + height.ToString() +
+                        ",\"HighQualityImageURL\":\"" + sourceFile.get_client_address(applicationId) + "\"" +
+                        ",\"ImageURL\":\"" + destFile.get_client_address(applicationId) + "\"" +
+                    "}";
+
+                    Rectangle rect = new Rectangle(x, y, width, height);
+
+                    using (Bitmap target = new Bitmap(rect.Width, rect.Height))
+                    {
+                        Graphics g = Graphics.FromImage(target);
+                        g.DrawImage(image, new Rectangle(0, 0, target.Width, target.Height), rect, GraphicsUnit.Pixel);
+
+                        result = make_thumbnail(target as Image,
+                            thumbnailWidth, thumbnailHeight, 0, 0, ref retImage, ref message, true);
+                    }
+
+                    if (!result) message = "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
+                    return result;
                 }
             }
             catch { message = "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}"; return false; }
@@ -300,8 +287,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             try
             {
-                string sourcePath = sourceFile.get_real_address(applicationId);
-                if (string.IsNullOrEmpty(sourcePath)) return false;
+                if (!sourceFile.exists(applicationId)) return false;
 
                 destFile.Extension = "jpg";
                 string destPath = destFile.get_address(applicationId);
@@ -310,20 +296,14 @@ namespace RaaiVan.Modules.GlobalUtilities
                 {
                     sourceFile.Extension = "jpg";
                     string newPath = sourceFile.get_address(applicationId);
-                    
-                    bool sourceEncrypted = sourceFile.is_encrypted(applicationId);
 
-                    using (MemoryStream stream = !sourceEncrypted ? null :
-                        new MemoryStream(DocumentUtilities.decrypt_file_aes(sourcePath)))
+                    using (MemoryStream stream = new MemoryStream(sourceFile.toByteArray(applicationId)))
+                    using (Image img = Bitmap.FromStream(stream))
                     {
-                        using (Image img = !sourceEncrypted ? Image.FromFile(sourcePath) : Bitmap.FromStream(stream))
-                        {
-                            img.Save(newPath);
-                            img.Dispose();
+                        img.Save(newPath);
+                        img.Dispose();
 
-                            File.Delete(sourcePath);
-                            sourcePath = newPath;
-                        }
+                        sourceFile.delete(applicationId);
                     }
                 }
 

@@ -69,9 +69,7 @@ namespace RaaiVan.Web.API
                 DocumentUtilities.get_folder_name(file.OwnerType);
             file.set_folder_name(paramsContainer.Tenant.Id, folderName);
 
-            string fileAddress = file.get_real_address(paramsContainer.Tenant.Id);
-
-            if (string.IsNullOrEmpty(fileAddress)) _return_response(ref responseText);
+            if (!file.exists(paramsContainer.Tenant.Id)) _return_response(ref responseText);
 
             string destFolder = DocumentUtilities.map_path(paramsContainer.Tenant.Id, FolderNames.PDFImages) +
                 "\\" + DocumentUtilities.get_sub_folder(file.FileID.ToString()) + "\\" + file.FileID.ToString();

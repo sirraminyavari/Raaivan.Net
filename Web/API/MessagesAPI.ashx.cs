@@ -310,14 +310,14 @@ namespace RaaiVan.Web.API
             if (!threadId.HasValue && ((isGroup.Value && receiverUserIds.Count > 1) || (!isGroup.Value && receiverUserIds.Count == 1)))
                 threadId = isGroup.Value ? Guid.NewGuid() : (receiverUserIds.Count == 1 ? receiverUserIds.First() : threadId);
 
-            DocumentUtilities.move_files(paramsContainer.Tenant.Id,
-                attachedFiles, FolderNames.TemporaryFiles, FolderNames.Attachments);
+            if (attachedFiles != null)
+                attachedFiles.ForEach(f => f.move(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles, FolderNames.Attachments));
 
             long result = MSGController.send_message(paramsContainer.Tenant.Id, messageId, forwardedFrom,
                 paramsContainer.CurrentUserID.Value, title, messageText, isGroup.Value, receiverUserIds, threadId, attachedFiles);
 
-            if (result <= 0) DocumentUtilities.move_files(paramsContainer.Tenant.Id,
-                attachedFiles, FolderNames.Attachments, FolderNames.TemporaryFiles);
+            if (result <= 0 && attachedFiles != null)
+                attachedFiles.ForEach(f => f.move(paramsContainer.Tenant.Id, FolderNames.Attachments, FolderNames.TemporaryFiles));
 
             List<User> receiverUsers;
             User senderUser = UsersController.get_user(paramsContainer.Tenant.Id, paramsContainer.CurrentUserID.Value);

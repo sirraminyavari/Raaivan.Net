@@ -213,8 +213,9 @@ namespace RaaiVan.Web.API
                 attachedFile.Extension = "jpg";
 
                 postInfo.HasPicture = true;
-                DocumentUtilities.move_file(paramsContainer.Tenant.Id, attachedFile,
-                    FolderNames.TemporaryFiles, FolderNames.Pictures, postInfo.PostID);
+
+                attachedFile.move(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles, FolderNames.Pictures, postInfo.PostID);
+
                 fileMoved = true;
             }
 
@@ -227,8 +228,7 @@ namespace RaaiVan.Web.API
                     Guid? oldId = attachedFile.FileID;
                     attachedFile.FileID = postInfo.PostID;
 
-                    DocumentUtilities.move_file(paramsContainer.Tenant.Id, attachedFile,
-                        FolderNames.Pictures, FolderNames.TemporaryFiles, oldId);
+                    attachedFile.move(paramsContainer.Tenant.Id, FolderNames.Pictures, FolderNames.TemporaryFiles, oldId);
                 }
 
                 responseText = "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";

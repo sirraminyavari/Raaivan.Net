@@ -2002,16 +2002,8 @@ namespace RaaiVan.Modules.GlobalUtilities
 
                 try
                 {
-                    string fileAddress = excelFile.get_real_address(applicationId);
-
-                    if (!excelFile.is_encrypted(applicationId)) wb = new XLWorkbook(fileAddress);
-                    else
-                    {
-                        using (MemoryStream stream = new MemoryStream(DocumentUtilities.decrypt_file_aes(fileAddress)))
-                        {
-                            wb = new XLWorkbook(stream);
-                        }
-                    }
+                    using (MemoryStream stream = new MemoryStream(excelFile.toByteArray(applicationId)))
+                        wb = new XLWorkbook(stream);
                 }
                 catch (Exception ex)
                 {

@@ -42,17 +42,9 @@ namespace RaaiVan.Modules.GlobalUtilities
                 Class parserClass = parser.GetType();
                 parseContext.set(parserClass, parser);
 
-                java.net.URL url = null;
-                byte[] fileContent = new byte[0];
+                byte[] fileContent = file.toByteArray(applicationId);
 
-                string fileAddress = file.get_real_address(applicationId);
-                bool encrypted = file.is_encrypted(applicationId);
-
-                if (encrypted) fileContent = DocumentUtilities.decrypt_file_aes(fileAddress);
-                else url = (new File(fileAddress)).toURI().toURL();
-
-                using (InputStream inputStream = encrypted ? 
-                    TikaInputStream.get(fileContent, metadata) : TikaInputStream.get(url, metadata))
+                using (InputStream inputStream = TikaInputStream.get(fileContent, metadata))
                 {
                     parser.parse(inputStream, getTransformerHandler(), metadata, parseContext);
                     inputStream.close();

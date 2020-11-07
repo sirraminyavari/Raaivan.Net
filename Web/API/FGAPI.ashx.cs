@@ -1300,16 +1300,16 @@ namespace RaaiVan.Web.API
                 e.AttachedFiles.ForEach(f => f.OwnerID = e.ElementID);
             });
 
-            DocumentUtilities.move_files(paramsContainer.Tenant.Id,
-                attachedFiles, FolderNames.TemporaryFiles, FolderNames.Attachments);
-            
+            if(attachedFiles != null)
+                attachedFiles.ForEach(f => f.move(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles, FolderNames.Attachments));
+
             string errorMessage = string.Empty;
 
             bool result = FGController.save_form_instance_elements(paramsContainer.Tenant.Id,
                 ref elements, elementsToClear, paramsContainer.CurrentUserID.Value, ref errorMessage);
 
-            if (!result) DocumentUtilities.move_files(paramsContainer.Tenant.Id,
-                attachedFiles, FolderNames.Attachments, FolderNames.TemporaryFiles);
+            if (!result && attachedFiles != null)
+                attachedFiles.ForEach(f => f.move(paramsContainer.Tenant.Id, FolderNames.Attachments, FolderNames.TemporaryFiles));
 
             //update AdditionalID for the form instance owner
             if (result && elements.Count > 0)

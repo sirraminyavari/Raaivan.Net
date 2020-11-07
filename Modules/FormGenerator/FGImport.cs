@@ -120,10 +120,8 @@ namespace RaaiVan.Modules.FormGenerator
             List<FormElement> nodeElements, ref string errorMessage)
         {
             if (!instanceId.HasValue || uploadedFile == null || !uploadedFile.FileID.HasValue) return false;
-            
-            string fileAddress = uploadedFile.get_real_address(applicationId);
 
-            if (string.IsNullOrEmpty(fileAddress)) return false;
+            if (!uploadedFile.exists(applicationId)) return false;
 
             if (map.ContainsKey("sub")) map = (Dictionary<string, object>)map["sub"];
 
@@ -140,14 +138,8 @@ namespace RaaiVan.Modules.FormGenerator
             
             try
             {
-                if (!uploadedFile.is_encrypted(applicationId)) doc.Load(fileAddress);
-                else
-                {
-                    using (MemoryStream stream = new MemoryStream(DocumentUtilities.decrypt_file_aes(fileAddress)))
-                    {
-                        doc.Load(stream);
-                    }
-                }
+                using (MemoryStream stream = new MemoryStream(uploadedFile.toByteArray(applicationId)))
+                    doc.Load(stream);
             }
             catch (Exception ex)
             {
@@ -212,16 +204,16 @@ namespace RaaiVan.Modules.FormGenerator
                 .Where(u => u.Type != FormElementTypes.Text || !string.IsNullOrEmpty(u.TextValue)).ToList();
             //end of remove empty text elements
 
-            DocumentUtilities.move_files(applicationId, newFiles, FolderNames.TemporaryFiles, FolderNames.Attachments);
-            
+            if (newFiles != null) newFiles.ForEach(f => f.move(applicationId, FolderNames.TemporaryFiles, FolderNames.Attachments));
+
             bool result = newFormInstances == null || newFormInstances.Count == 0 || 
                 FGController.create_form_instances(applicationId, newFormInstances, currentUserId);
             
             result = result && FGController.save_form_instance_elements(applicationId, 
                 ref newElements, new List<Guid>(), currentUserId, ref errorMessage);
 
-            if(!result) DocumentUtilities.move_files(applicationId, newFiles, 
-                FolderNames.Attachments, FolderNames.TemporaryFiles);
+            if(!result && newFiles != null)
+                newFiles.ForEach(f => f.move(applicationId, FolderNames.Attachments, FolderNames.TemporaryFiles));
 
             if (result) savedElements = theElements;
 

@@ -77,9 +77,7 @@ namespace RaaiVan.Web.API
                 return;
             }
 
-            string fileAddress = file.get_real_address(paramsContainer.Tenant.Id);
-
-            if (string.IsNullOrEmpty(fileAddress))
+            if (!file.exists(paramsContainer.Tenant.Id))
             {
                 responseText = "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
                 return;
@@ -89,14 +87,8 @@ namespace RaaiVan.Web.API
 
             try
             {
-                if (!file.is_encrypted(paramsContainer.Tenant.Id)) xmlDoc.Load(fileAddress);
-                else
-                {
-                    using (MemoryStream stream = new MemoryStream(DocumentUtilities.decrypt_file_aes(fileAddress)))
-                    {
-                        xmlDoc.Load(stream);
-                    }
-                }
+                using (MemoryStream stream = new MemoryStream(file.toByteArray(paramsContainer.Tenant.Id)))
+                    xmlDoc.Load(stream);
             }
             catch (Exception ex)
             {

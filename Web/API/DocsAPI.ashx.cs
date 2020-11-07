@@ -1343,10 +1343,8 @@ namespace RaaiVan.Web.API
 
             if (file != null) file.set_folder_name(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles);
 
-            string fileAddress = file.get_real_address(paramsContainer.Tenant.Id);
-
             if (file == null || !file.FileID.HasValue || string.IsNullOrEmpty(file.Extension) ||
-                file.Extension.ToLower() != "xml" || string.IsNullOrEmpty(fileAddress))
+                file.Extension.ToLower() != "xml" || !file.exists(paramsContainer.Tenant.Id))
             {
                 responseText = "{}";
                 return;
@@ -1356,14 +1354,8 @@ namespace RaaiVan.Web.API
 
             try
             {
-                if (!file.is_encrypted(paramsContainer.Tenant.Id)) doc.Load(fileAddress);
-                else
-                {
-                    using (MemoryStream stream = new MemoryStream(DocumentUtilities.decrypt_file_aes(fileAddress)))
-                    {
-                        doc.Load(stream);
-                    }
-                }
+                using (MemoryStream stream = new MemoryStream(file.toByteArray(paramsContainer.Tenant.Id)))
+                    doc.Load(stream);
             }
             catch (Exception ex)
             {

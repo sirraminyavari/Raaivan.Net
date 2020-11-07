@@ -162,7 +162,6 @@ namespace RaaiVan.Modules.Documents
             {
                 using (MagickImageCollection pages = new MagickImageCollection())
                 {
-                    string pdfAddress = pdf.get_real_address(applicationId);
                     MagickReadSettings settings = new MagickReadSettings() { Density = new Density(100, 100) };
 
                     bool invalidPassword = false;

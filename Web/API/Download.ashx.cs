@@ -132,13 +132,13 @@ namespace RaaiVan.Web.API
 
                 send_file(AttachFile, !isImage, addPDFCover: true,
                     addPDFFooter: addFooter.HasValue && addFooter.Value,
-                    pdfCoverPath: pdfCover == null ? null : pdfCover.get_real_address(paramsContainer.Tenant.Id),
+                    pdfCover: pdfCover == null ? null : pdfCover.toByteArray(paramsContainer.Tenant.Id),
                     pdfPassword: pdfPassword);
             }
         }
 
         protected void send_file(DocFileInfo file, bool logNeeded, 
-            bool addPDFCover = false, bool addPDFFooter = false, string pdfCoverPath = null, string pdfPassword = null)
+            bool addPDFCover = false, bool addPDFFooter = false, byte[] pdfCover = null, string pdfPassword = null)
         {
             byte[] fileContent = file.toByteArray(paramsContainer.Tenant.Id);
 
@@ -166,7 +166,7 @@ namespace RaaiVan.Web.API
 
             if (file.Extension.ToLower() == "pdf")
             {
-                addPDFCover = addPDFCover && file.OwnerNodeID.HasValue && !string.IsNullOrEmpty(pdfCoverPath);
+                addPDFCover = addPDFCover && file.OwnerNodeID.HasValue && pdfCover != null && pdfCover.Length > 0;
 
                 if (addPDFFooter || addPDFCover)
                 {
@@ -214,7 +214,7 @@ namespace RaaiVan.Web.API
                         TextValue = dic[key]
                     }).ToList();
 
-                    byte[] cover = PDFTemplates.fill_template(pdfCoverPath, tempElems);
+                    byte[] cover = PDFTemplates.fill_template(pdfCover, tempElems);
 
                     fileContent = PDFUtil.merge_documents(new List<object>() { cover, fileContent });
                 }

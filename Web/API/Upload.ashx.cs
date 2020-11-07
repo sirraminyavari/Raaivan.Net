@@ -348,7 +348,7 @@ namespace RaaiVan.Web.API
 
                 if (!result)
                 {
-                    DocumentUtilities.move_file(paramsContainer.ApplicationID, fileInfo, fn, FolderNames.TemporaryFiles);
+                    fileInfo.move(paramsContainer.ApplicationID, fn, FolderNames.TemporaryFiles);
                     responseText = "{\"success\":false}";
                     return false;
                 }
@@ -439,11 +439,8 @@ namespace RaaiVan.Web.API
         {
             try
             {
-                if (file.get_folder_name().HasValue && file.get_folder_name().Value == FolderNames.TemporaryFiles)
-                {
-                    string fileAddress = file == null ? string.Empty : file.get_real_address(paramsContainer.Tenant.Id);
-                    File.Delete(fileAddress);
-                }
+                if (file != null && file.get_folder_name().HasValue && file.get_folder_name().Value == FolderNames.TemporaryFiles)
+                    file.delete(paramsContainer.Tenant.Id);
             }
             catch { }
             

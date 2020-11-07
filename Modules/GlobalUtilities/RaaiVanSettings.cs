@@ -19,6 +19,12 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         StoragePath,
 
+        CephStorage,
+        CephAccessKey,
+        CephSecretKey,
+        CephURL,
+        CephBucket,
+
         ServiceUnavailable,
         IgnoreReturnURLOnLogin,
         DefaultPrivacy,
@@ -283,6 +289,43 @@ namespace RaaiVan.Modules.GlobalUtilities
                 }
 
                 return _StoragePath;
+            }
+        }
+
+        public static class CephStorage
+        {
+            public static bool Enabled
+            {
+                get
+                {
+                    return get_value(null, RVSettingsItem.CephStorage).ToLower() != "false" &&
+                        !string.IsNullOrEmpty(URL) && !string.IsNullOrEmpty(AccessKey) && !string.IsNullOrEmpty(SecretKey);
+                }
+            }
+
+            public static string URL
+            {
+                get
+                {
+                    string val = get_value(null, RVSettingsItem.CephURL);
+                    if (!string.IsNullOrEmpty(val) && val[val.Length - 1] == '/') val = val.Substring(0, val.Length - 1);
+                    return val;
+                }
+            }
+
+            public static string AccessKey
+            {
+                get { return get_value(null, RVSettingsItem.CephAccessKey); }
+            }
+
+            public static string SecretKey
+            {
+                get { return get_value(null, RVSettingsItem.CephSecretKey); }
+            }
+
+            public static string Bucket
+            {
+                get { return get_value(null, RVSettingsItem.CephBucket); }
             }
         }
 
@@ -636,7 +679,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static bool FileEncryption(Guid? applicationId)
         {
-            return get_value(applicationId, RVSettingsItem.FileEncryption).ToLower() == "true";
+            return get_value(applicationId, RVSettingsItem.FileEncryption).ToLower() == "true" && !CephStorage.Enabled;
         }
 
         public static string GATrackingID(Guid? applicationId) //TrackingID for Google Analytics Account

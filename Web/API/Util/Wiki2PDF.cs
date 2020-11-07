@@ -526,22 +526,15 @@ namespace RaaiVan.Web.API
                     Guid? fileId = PublicMethods.parse_guid(newSrc);
                     DocFileInfo fi = DocumentsController.get_file(ApplicationID, fileId.Value);
                     if (fi != null) fi.set_folder_name(ApplicationID, DocumentUtilities.get_folder_name(fi.OwnerType));
-                    string fileAddress = fi.get_real_address(ApplicationID);
-
-                    if (!string.IsNullOrEmpty(fileAddress))
+                    
+                    if (!fi.exists(ApplicationID))
                     {
                         try
                         {
                             System.Drawing.Image img = null;
 
-                            if (!fi.is_encrypted(ApplicationID)) img = System.Drawing.Image.FromFile(fileAddress);
-                            else
-                            {
-                                using (MemoryStream stream = new MemoryStream(DocumentUtilities.decrypt_file_aes(fileAddress)))
-                                {
-                                    img = System.Drawing.Bitmap.FromStream(stream);
-                                }
-                            }
+                            using (MemoryStream stream = new MemoryStream(fi.toByteArray(ApplicationID)))
+                                img = System.Drawing.Bitmap.FromStream(stream);
 
                             string strWidth = tag == null || tag.CSS == null || !tag.CSS.ContainsKey("width") ?
                                 string.Empty : tag.CSS["width"];

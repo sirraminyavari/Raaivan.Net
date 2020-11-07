@@ -5933,9 +5933,7 @@ namespace RaaiVan.Web.API
 
                 if (uploaded != null) uploaded.set_folder_name(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles);
 
-                string fileAddress = uploaded.get_real_address(paramsContainer.Tenant.Id);
-
-                if (string.IsNullOrEmpty(fileAddress))
+                if (!uploaded.exists(paramsContainer.Tenant.Id))
                 {
                     responseText = "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
                     return;
@@ -6250,15 +6248,11 @@ namespace RaaiVan.Web.API
 
             if (attachUploadedFile.HasValue && attachUploadedFile.Value)
             {
-                DocumentUtilities.move_file(paramsContainer.Tenant.Id, xmlFile,
-                    FolderNames.TemporaryFiles, FolderNames.Attachments);
+                xmlFile.move(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles, FolderNames.Attachments);
 
                 if (!DocumentsController.add_file(paramsContainer.Tenant.Id, nodeId,
                     FileOwnerTypes.Node, xmlFile, paramsContainer.CurrentUserID.Value))
-                {
-                    DocumentUtilities.move_file(paramsContainer.Tenant.Id, xmlFile,
-                        FolderNames.Attachments, FolderNames.TemporaryFiles);
-                }
+                    xmlFile.move(paramsContainer.Tenant.Id, FolderNames.Attachments, FolderNames.TemporaryFiles);
             }
             //end of register new node
         }

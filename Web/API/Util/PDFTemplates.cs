@@ -29,9 +29,8 @@ namespace RaaiVan.Web.API
             return BaseFont.CreateFont(PublicMethods.map_path(FontAddress), BaseFont.IDENTITY_H, true, true);
         }
 
-        public static byte[] fill_template(string templateFilePath, List<FormElement> elements)
+        public static byte[] fill_template(byte[] templateFile, List<FormElement> elements)
         {
-            using (FileStream templateFile = new FileStream(templateFilePath, FileMode.Open))
             using (MemoryStream output = new MemoryStream())
             using (PdfReader pdfReader = new PdfReader(templateFile))
             using (PdfStamper stamper = new PdfStamper(pdfReader, output))

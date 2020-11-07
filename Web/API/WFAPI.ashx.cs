@@ -3252,16 +3252,16 @@ namespace RaaiVan.Web.API
             }
             //end of find director
 
-            DocumentUtilities.move_files(paramsContainer.Tenant.Id,
-                attachedFiles, FolderNames.TemporaryFiles, FolderNames.Attachments);
+            if(attachedFiles != null)
+                attachedFiles.ForEach(f => f.move(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles, FolderNames.Attachments));
 
             string msg = string.Empty;
             List<Dashboard> sentDashboards = new List<Dashboard>();
             bool result = WFController.send_to_next_state(paramsContainer.Tenant.Id,
                 history, reject, ref msg, ref sentDashboards);
 
-            if (!result) DocumentUtilities.move_files(paramsContainer.Tenant.Id,
-                attachedFiles, FolderNames.Attachments, FolderNames.TemporaryFiles);
+            if (!result && attachedFiles != null)
+                attachedFiles.ForEach(f => f.move(paramsContainer.Tenant.Id, FolderNames.Attachments, FolderNames.TemporaryFiles));
 
             History oldHistory = new History();
             if (result)
