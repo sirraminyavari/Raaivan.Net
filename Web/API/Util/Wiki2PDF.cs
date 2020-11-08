@@ -525,7 +525,7 @@ namespace RaaiVan.Web.API
 
                     Guid? fileId = PublicMethods.parse_guid(newSrc);
                     DocFileInfo fi = DocumentsController.get_file(ApplicationID, fileId.Value);
-                    if (fi != null) fi.set_folder_name(ApplicationID, DocumentUtilities.get_folder_name(fi.OwnerType));
+                    if (fi != null) fi.refresh_folder_name();
                     
                     if (!fi.exists(ApplicationID))
                     {

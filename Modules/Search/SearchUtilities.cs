@@ -92,7 +92,7 @@ namespace RaaiVan.Modules.Search
 
             if (!_RamDirs.ContainsKey(applicationId))
             {
-                string path = DocumentUtilities.map_path(applicationId, FolderNames.Index);
+                string path = DocFileInfo.index_folder_address(applicationId);
                 if (!System.IO.Directory.Exists(path)) System.IO.Directory.CreateDirectory(path);
 
                 FSDirectory dir = FSDirectory.Open(new DirectoryInfo(path));
@@ -110,7 +110,7 @@ namespace RaaiVan.Modules.Search
 
             if (!_HardDirs.ContainsKey(applicationId))
             {
-                string path = DocumentUtilities.map_path(applicationId, FolderNames.Index);
+                string path = DocFileInfo.index_folder_address(applicationId);
                 if (!System.IO.Directory.Exists(path)) System.IO.Directory.CreateDirectory(path);
 
                 FSDirectory dir = FSDirectory.Open(new DirectoryInfo(path));

@@ -58,9 +58,6 @@ namespace RaaiVan.Web.API
                 case "uploadfile":
                 case "upload_file":
                     {
-                        FolderNames folderName = ownerId == Guid.Empty ?
-                            FolderNames.TemporaryFiles : DocumentUtilities.get_folder_name(ownerType);
-                        
                         DocFileInfo file = new DocFileInfo()
                         {
                             FileID = fileId != Guid.Empty ? fileId : Guid.NewGuid(),
@@ -68,8 +65,6 @@ namespace RaaiVan.Web.API
                             OwnerType = ownerType
                         };
 
-                        file.set_folder_name(paramsContainer.Tenant.Id, folderName);
-                        
                         _attach_file_command(paramsContainer.ApplicationID, file, ref responseText);
                         _return_response(ref responseText);
                         return;
@@ -87,10 +82,9 @@ namespace RaaiVan.Web.API
                         DocFileInfo file = new DocFileInfo()
                         {
                             FileID = PublicMethods.parse_guid(fileName.Substring(0, fileName.IndexOf("."))),
-                            Extension = "jpg"
+                            Extension = "jpg",
+                            FolderName = FolderNames.ProfileImages
                         };
-
-                        file.set_folder_name(paramsContainer.Tenant.Id, FolderNames.ProfileImages);
 
                         remove_file(file, ref responseText);
                         _return_response(ref responseText);
@@ -123,11 +117,11 @@ namespace RaaiVan.Web.API
                         
                         DocFileInfo uploaded = new DocFileInfo() {
                             FileID = Guid.NewGuid(),
-                            OwnerType = ownerType
+                            OwnerType = ownerType,
+                            FolderName = FolderNames.TemporaryFiles
                         };
 
                         if (ownerId != Guid.Empty) uploaded.OwnerID = ownerId;
-                        uploaded.set_folder_name(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles);
 
                         bool succeed = _attach_file_command(paramsContainer.ApplicationID, uploaded, ref responseText);
 
@@ -136,12 +130,11 @@ namespace RaaiVan.Web.API
                             DocFileInfo destFile = new DocFileInfo() {
                                 FileID = hasId ? pictureId : uploaded.FileID,
                                 OwnerType = ownerType,
-                                Extension = "jpg"
+                                Extension = "jpg",
+                                FolderName = hasId ? imageFolder : FolderNames.TemporaryFiles
                             };
 
                             if (ownerId != Guid.Empty) destFile.OwnerID = ownerId;
-                            destFile.set_folder_name(paramsContainer.Tenant.Id,
-                                hasId ? imageFolder : FolderNames.TemporaryFiles);
                             
                             RVGraphics.make_thumbnail(paramsContainer.Tenant.Id, uploaded, destFile,
                                 maxWidth, maxHeight, 0, 0, ref errorMessage, "jpg");
@@ -160,11 +153,10 @@ namespace RaaiVan.Web.API
                     {
                         DocFileInfo file = new DocFileInfo() {
                             FileID = PublicMethods.parse_guid(fileName.Substring(0, fileName.IndexOf("."))),
-                            Extension = "jpg"
+                            Extension = "jpg",
+                            FolderName = FolderNames.Icons
                         };
 
-                        file.set_folder_name(paramsContainer.ApplicationID, FolderNames.Icons);
-                        
                         remove_file(file, ref responseText);
                         _return_response(ref responseText);
                     }
@@ -221,11 +213,10 @@ namespace RaaiVan.Web.API
                         {
                             FileID = iconId,
                             OwnerID = ownerId,
-                            OwnerType = ownerType
+                            OwnerType = ownerType,
+                            FolderName = FolderNames.TemporaryFiles
                         };
                         
-                        uploaded.set_folder_name(applicationId, FolderNames.TemporaryFiles);
-
                         bool succeed = _attach_file_command(applicationId, uploaded, ref responseText);
 
                         if (!succeed) break;
@@ -275,11 +266,10 @@ namespace RaaiVan.Web.API
 
                         if (!isValid) break;
 
-                        DocFileInfo highQualityFile = new DocFileInfo() { FileID = iconId, Extension = "jpg" };
-                        highQualityFile.set_folder_name(applicationId, highQualityImageFolder);
+                        DocFileInfo highQualityFile = 
+                            new DocFileInfo() { FileID = iconId, Extension = "jpg", FolderName = highQualityImageFolder };
 
-                        DocFileInfo file = new DocFileInfo() { FileID = iconId, Extension = "jpg" };
-                        file.set_folder_name(applicationId, imageFolder);
+                        DocFileInfo file = new DocFileInfo() { FileID = iconId, Extension = "jpg", FolderName = imageFolder };
 
                         int x = string.IsNullOrEmpty(context.Request.Params["X"]) ? -1 : int.Parse(context.Request.Params["X"]);
                         int y = string.IsNullOrEmpty(context.Request.Params["Y"]) ? -1 : int.Parse(context.Request.Params["Y"]);
@@ -333,8 +323,8 @@ namespace RaaiVan.Web.API
 
             fileInfo.FileName = string.IsNullOrEmpty(fileInfo.Extension) ? filename : filename.Substring(0, indexOfLastDot);
 
-            FolderNames fn = fileInfo.get_folder_name().HasValue ?
-                fileInfo.get_folder_name().Value : FolderNames.TemporaryFiles;
+            FolderNames fn = fileInfo.FolderName.HasValue ?
+                fileInfo.FolderName.Value : FolderNames.TemporaryFiles;
             
             bool result = filename == null ?
                 __ie_response(applicationId, context.Request.Files[0], fileInfo, ref responseText) :
@@ -368,16 +358,14 @@ namespace RaaiVan.Web.API
             
             try
             {
-                string folderPath = fi.get_folder_address(applicationId);
-                if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
-
-                uploadedFile.SaveAs(fi.get_address(applicationId));
-                
                 fi.Size = uploadedFile.ContentLength;
-                
+
+                using (BinaryReader reader = new BinaryReader(uploadedFile.InputStream))
+                    fi.store(applicationId, reader.ReadBytes(uploadedFile.ContentLength));
+
                 responseText = "{\"success\":" + true.ToString().ToLower() +
                     ",\"AttachedFile\":" + fi.toJson(applicationId, true) +
-                    ",\"name\":\"" + fi.get_file_name_with_extension() + "\"" +
+                    ",\"name\":\"" + fi.file_name_with_extension + "\"" +
                     ",\"url\":\"" + fi.url() + "\"" +
                     ",\"Message\":\"~[[MSG]]\"}";
             }
@@ -397,25 +385,15 @@ namespace RaaiVan.Web.API
             
             try
             {
-                string folderPath = fi.get_folder_address(applicationId);
-                if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+                Stream st = HttpContext.Current.Request.Files.Count > 0 ?
+                    HttpContext.Current.Request.Files[0].InputStream : inputStream;
 
-                using (FileStream fileStream = new FileStream(fi.get_address(applicationId), FileMode.Create))
-                {
-                    if (HttpContext.Current.Request.Files.Count > 0)
-                    {
-                        HttpContext.Current.Request.Files[0].InputStream.CopyTo(fileStream);
-                        HttpContext.Current.Request.Files[0].InputStream.Close();
-                        HttpContext.Current.Request.Files[0].InputStream.Dispose();
-                    }
-                    else inputStream.CopyTo(fileStream);
-                }
+                using (BinaryReader reader = new BinaryReader(st))
+                    fi.store(applicationId, reader.ReadBytes(Convert.ToInt32(st.Length)));
 
-                DocumentUtilities.encrypt_file_if_needed(applicationId, fi);
-                
                 responseText = "{\"success\":" + true.ToString().ToLower() + 
                     ",\"AttachedFile\":" + fi.toJson(applicationId, true) +
-                    ",\"name\":\"" + fi.get_file_name_with_extension() + "\"" +
+                    ",\"name\":\"" + fi.file_name_with_extension + "\"" +
                     ",\"url\":\"" + fi.url() + "\"" +
                     ",\"Message\":\"~[[MSG]]\"}";
 
@@ -439,7 +417,7 @@ namespace RaaiVan.Web.API
         {
             try
             {
-                if (file != null && file.get_folder_name().HasValue && file.get_folder_name().Value == FolderNames.TemporaryFiles)
+                if (file != null && file.FolderName.HasValue && file.FolderName.Value == FolderNames.TemporaryFiles)
                     file.delete(paramsContainer.Tenant.Id);
             }
             catch { }

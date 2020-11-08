@@ -69,9 +69,7 @@ namespace RaaiVan.Modules.Documents
             }
             
             // vojoode file dar folder ha
-            FolderNames folderName = DocumentUtilities.get_folder_name(file.OwnerType);
-
-            file.set_folder_name(applicationId, folderName);
+            file.refresh_folder_name();
 
             bool find = file.exists(applicationId);
 

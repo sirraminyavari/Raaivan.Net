@@ -224,7 +224,7 @@ namespace RaaiVan.Modules.FormGenerator
             string map, Guid currentUserId, ref List<FormElement> savedElements, ref string nodeName,
             ref DocFileInfo logo, ref string errorMessage)
         {
-            if (uploadedFile != null) uploadedFile.set_folder_name(applicationId, FolderNames.TemporaryFiles);
+            if (uploadedFile != null) uploadedFile.FolderName = FolderNames.TemporaryFiles;
 
             List<FormElement> nodeElements = new List<FormElement>();
             nodeElements.Add(new FormElement() { ElementID = Guid.NewGuid(), Name = "node_name", Type = FormElementTypes.Text });

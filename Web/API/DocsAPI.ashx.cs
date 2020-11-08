@@ -1341,7 +1341,7 @@ namespace RaaiVan.Web.API
         {
             if (!paramsContainer.GBView) return;
 
-            if (file != null) file.set_folder_name(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles);
+            if (file != null) file.FolderName = FolderNames.TemporaryFiles;
 
             if (file == null || !file.FileID.HasValue || string.IsNullOrEmpty(file.Extension) ||
                 file.Extension.ToLower() != "xml" || !file.exists(paramsContainer.Tenant.Id))
@@ -1426,7 +1426,7 @@ namespace RaaiVan.Web.API
 
             try
             {
-                tempDir = DocumentUtilities.map_path(applicationId, FolderNames.TemporaryFiles);
+                tempDir = DocFileInfo.temporary_folder_address(applicationId);
                 if (Directory.Exists(tempDir)) files = Directory.GetFiles(tempDir).Take(100).ToList();
 
                 tempDir = PublicMethods.map_path(PublicConsts.TempDirectory);

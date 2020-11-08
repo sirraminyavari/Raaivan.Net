@@ -201,12 +201,13 @@ namespace RaaiVan.Modules.GlobalUtilities
                         return false;
                     }
 
-                    using (FileStream fileStream =
-                        new FileStream(destFile.get_address(applicationId, encrypted: false), FileMode.Create))
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        retImage.Save(fileStream, ImageFormat.Jpeg);
+                        retImage.Save(ms, ImageFormat.Jpeg);
                         retImage.Dispose();
                         img.Dispose();
+
+                        destFile.store(applicationId, ms.ToArray());
                     }
 
                     return true;
@@ -290,20 +291,20 @@ namespace RaaiVan.Modules.GlobalUtilities
                 if (!sourceFile.exists(applicationId)) return false;
 
                 destFile.Extension = "jpg";
-                string destPath = destFile.get_address(applicationId);
 
                 if (!string.IsNullOrEmpty(sourceFile.Extension) && sourceFile.Extension != "jpg")
                 {
-                    sourceFile.Extension = "jpg";
-                    string newPath = sourceFile.get_address(applicationId);
-
                     using (MemoryStream stream = new MemoryStream(sourceFile.toByteArray(applicationId)))
+                    using (MemoryStream newSt = new MemoryStream())
                     using (Image img = Bitmap.FromStream(stream))
                     {
-                        img.Save(newPath);
+                        img.Save(newSt, ImageFormat.Jpeg);
                         img.Dispose();
 
                         sourceFile.delete(applicationId);
+
+                        sourceFile.Extension = "jpg";
+                        sourceFile.store(applicationId, newSt.ToArray());
                     }
                 }
 
@@ -311,11 +312,13 @@ namespace RaaiVan.Modules.GlobalUtilities
                 if (extract_thumbnail(applicationId, sourceFile, destFile, x, y, width, height,
                     thumbnailWidth, thumbnailHeight, ref retImage, ref message))
                 {
-                    FileStream fileStream = new FileStream(destFile.get_address(applicationId), FileMode.Create);
-                    retImage.Save(fileStream, ImageFormat.Jpeg);
-                    fileStream.Close();
-                    fileStream.Dispose();
-                    retImage.Dispose();
+                    using (MemoryStream st = new MemoryStream())
+                    {
+                        retImage.Save(st, ImageFormat.Jpeg);
+                        retImage.Dispose();
+
+                        destFile.store(applicationId, st.ToArray());
+                    }
                 }
 
                 return true;
@@ -340,17 +343,8 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             if (!isValid) return false;
 
-            DocFileInfo highQualityFile = new DocFileInfo() { FileID = iconId, Extension = "jpg" };
-            highQualityFile.set_folder_name(applicationId, highQualityImageFolder);
-
-            DocFileInfo file = new DocFileInfo() { FileID = iconId, Extension = "jpg" };
-            file.set_folder_name(applicationId, imageFolder);
-
-            string highQualityFolderPath = highQualityFile.get_folder_address(applicationId);
-            string folderPath = file.get_folder_address(applicationId);
-
-            if (!Directory.Exists(highQualityFolderPath)) Directory.CreateDirectory(highQualityFolderPath);
-            if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+            DocFileInfo highQualityFile = new DocFileInfo() { FileID = iconId, Extension = "jpg", FolderName = highQualityImageFolder };
+            DocFileInfo file = new DocFileInfo() { FileID = iconId, Extension = "jpg", FolderName = imageFolder };
 
             bool succeed = RVGraphics.make_thumbnail(applicationId,
                 uploadedFile, highQualityFile, highQualityWidth, highQualityHeight,

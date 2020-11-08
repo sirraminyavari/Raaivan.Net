@@ -76,8 +76,6 @@ namespace RaaiVan.Modules.Documents
                     FileOwnerTypes fot = FileOwnerTypes.None;
                     if (Enum.TryParse<FileOwnerTypes>(reader["OwnerType"].ToString(), out fot)) file.OwnerType = fot;
 
-                    file.set_folder_name(applicationId, DocumentUtilities.get_folder_name(fot));
-
                     lstFiles.Add(file);
                 }
                 catch { }

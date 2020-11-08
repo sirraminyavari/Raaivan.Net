@@ -122,25 +122,6 @@ namespace RaaiVan.Modules.GlobalUtilities
                 "[" + string.Join(",", attachedFiles.Select(u => u.toJson(applicationId, icon))) + "]";
         }
 
-        private static bool _store_file(Guid applicationId, byte[] fileContent, DocFileInfo file, FolderNames folderName)
-        {
-            try
-            {
-                using (FileStream fs = new FileStream(file.get_address(applicationId, folderName), FileMode.CreateNew))
-                {
-                    using (BinaryWriter bw = new BinaryWriter(fs))
-                    {
-                        bw.Write(fileContent);
-                    }
-                }
-
-                encrypt_file_if_needed(applicationId, file, folderName);
-
-                return true;
-            }
-            catch { return false; }
-        }
-        
         public static DocFileInfo decode_base64_file_content(Guid applicationId, Guid? ownerId,
             string base64FileContent, FileOwnerTypes ownerType)
         {
@@ -189,7 +170,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
                         byte[] fileBytes = theReader.ReadBytes((int)ret.Size.Value);
 
-                        if (!_store_file(applicationId, fileBytes, ret, FolderNames.TemporaryFiles)) return null;
+                        if (!ret.store(applicationId, fileBytes, FolderNames.TemporaryFiles)) return null;
                     }
                 }
 
@@ -209,105 +190,12 @@ namespace RaaiVan.Modules.GlobalUtilities
                     ret.FileName = "img";
                     ret.Extension = "jpg";
 
-                    if (!_store_file(applicationId, imageBytes, ret, FolderNames.TemporaryFiles)) return null;
+                    if (!ret.store(applicationId, imageBytes, FolderNames.TemporaryFiles)) return null;
 
                     return ret;
                 }
                 catch { return null; }
             }
-        }
-
-        public static FolderNames get_folder_name(FileOwnerTypes ownerType)
-        {
-            switch (ownerType)
-            {
-                case FileOwnerTypes.Node:
-                case FileOwnerTypes.Wiki:
-                case FileOwnerTypes.Message:
-                case FileOwnerTypes.WorkFlow:
-                case FileOwnerTypes.FormElement:
-                    return FolderNames.Attachments;
-                case FileOwnerTypes.WikiContent:
-                    return FolderNames.WikiContent;
-                case FileOwnerTypes.PDFCover:
-                    return FolderNames.PDFCovers;
-                default:
-                    return FolderNames.TemporaryFiles;
-            }
-        }
-
-        private static string _get_folder_path(Guid? applicationId, FolderNames folderName)
-        {
-            bool isAppLogo = folderName == FolderNames.ApplicationIcons || folderName == FolderNames.HighQualityApplicationIcon;
-            bool isProfileImage = folderName == FolderNames.ProfileImages || folderName == FolderNames.HighQualityProfileImage;
-
-            if (isAppLogo || (RaaiVanSettings.SAASBasedMultiTenancy && isProfileImage)) applicationId = null;
-
-            string applicationPart = !applicationId.HasValue ? string.Empty : applicationId.Value.ToString() + "/";
-
-            switch (folderName)
-            {
-                case FolderNames.Attachments:
-                case FolderNames.WikiContent:
-                case FolderNames.Index:
-                case FolderNames.TemporaryFiles:
-                case FolderNames.Pictures:
-                case FolderNames.PDFImages:
-                case FolderNames.PDFCovers:
-                    return "App_Data/" + applicationPart + "Documents/" + folderName.ToString();
-                case FolderNames.Icons:
-                case FolderNames.ApplicationIcons:
-                case FolderNames.ProfileImages:
-                case FolderNames.CoverPhoto:
-                    return "Global_Documents/" + applicationPart + folderName.ToString();
-                case FolderNames.HighQualityIcon:
-                    return "Global_Documents/" + applicationPart + FolderNames.Icons.ToString() + "/" + "HighQuality";
-                case FolderNames.HighQualityApplicationIcon:
-                    return "Global_Documents/" + applicationPart + FolderNames.ApplicationIcons.ToString() + "/" + "HighQuality";
-                case FolderNames.HighQualityProfileImage:
-                    return "Global_Documents/" + applicationPart + FolderNames.ProfileImages.ToString() + "/" + "HighQuality";
-                case FolderNames.HighQualityCoverPhoto:
-                    return "Global_Documents/" + applicationPart + FolderNames.CoverPhoto.ToString() + "/" + "HighQuality";
-                case FolderNames.Themes:
-                    return "CSS/" + folderName.ToString();
-                case FolderNames.EmailTemplates:
-                    return "App_Data/" + applicationPart + folderName.ToString();
-                default:
-                    return string.Empty;
-            }
-        }
-
-        public static string get_sub_folder(string guidName, bool clientPath = false)
-        {
-            return guidName[0].ToString() + guidName[1].ToString() + (clientPath ? "/" : "\\") + guidName[2].ToString();
-        }
-        
-        public static string get_sub_folder(Guid fileId, bool clientPath = false)
-        {
-            return get_sub_folder(fileId.ToString(), clientPath);
-        }
-
-        public static bool has_sub_folder(FolderNames folderName)
-        {
-            return !(folderName == FolderNames.EmailTemplates || folderName == FolderNames.Index ||
-                folderName == FolderNames.TemporaryFiles || folderName == FolderNames.Themes);
-        }
-
-        public static string map_path(Guid? applicationId, FolderNames folderName, string dest = null)
-        {
-            return PublicMethods.map_path("~/" + _get_folder_path(applicationId, folderName)) +
-                (string.IsNullOrEmpty(dest) ? string.Empty : (dest[0] == '\\' ? string.Empty : "\\") + dest);
-        }
-        
-        public static string map_path(string path)
-        {
-            return PublicMethods.map_path("~" + (path[0] == '/' ? string.Empty : "/") + path);
-        }
-        
-        public static string get_client_path(Guid? applicationId, FolderNames folderName, string dest = null)
-        {
-            return "../../" + _get_folder_path(applicationId, folderName) +
-                (string.IsNullOrEmpty(dest) ? string.Empty : (dest[0] == '/' ? string.Empty : "/") + dest);
         }
 
         public static string get_personal_image_address(Guid? applicationId, 
@@ -325,15 +213,13 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             FolderNames folderName = highQuality ? FolderNames.HighQualityProfileImage : FolderNames.ProfileImages;
 
-            string serverSubFolder = get_sub_folder(userId);
-            string clientSubFolder = get_sub_folder(userId, true);
+            DocFileInfo fi = new DocFileInfo() {
+                FileID = userId,
+                Extension = "jpg",
+                FolderName = folderName
+            };
 
-            string serverAddress = map_path(applicationId, folderName) +
-                "\\" + serverSubFolder + "\\" + userId.ToString() + ".jpg";
-
-            string address = !File.Exists(serverAddress) ?
-                (highQuality ? string.Empty : "../../Images/unknown.jpg") :
-                get_client_path(applicationId, folderName) + "/" + clientSubFolder + "/" + userId.ToString() + ".jpg";
+            string address = !fi.exists(applicationId) ? (highQuality ? string.Empty : "../../Images/unknown.jpg") : fi.url();
 
             return networkAddress ? address.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : address;
         }
@@ -342,8 +228,13 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             if (pictureId == Guid.Empty) return false;
 
-            return File.Exists(map_path(applicationId, FolderNames.Pictures) +
-                "\\" + get_sub_folder(pictureId, false) + "\\" + pictureId.ToString() + ".jpg");
+            DocFileInfo fi = new DocFileInfo() {
+                FileID = pictureId,
+                Extension = "jpg",
+                FolderName = FolderNames.Pictures
+            };
+
+            return fi.exists(applicationId);
         }
 
         public static bool get_icon_parameters(IconType iconType, ref int width, ref int height, 
@@ -417,67 +308,67 @@ namespace RaaiVan.Modules.GlobalUtilities
         public static string get_icon_url(Guid applicationId, Guid ownerId, 
             DefaultIconTypes defaultIcon = DefaultIconTypes.Node, Guid? alternateOwnerId = null, bool networkAddress = false)
         {
-            string adr = string.Empty;
-
             if (ownerId == Guid.Empty) return string.Empty;
 
-            FolderNames folderName = FolderNames.Icons;
-            string subFolder = get_sub_folder(ownerId);
-            string alternateSubFolder = alternateOwnerId.HasValue ? get_sub_folder(alternateOwnerId.Value) : string.Empty;
+            DocFileInfo fi = new DocFileInfo() {
+                FileID = ownerId,
+                Extension = "jpg",
+                FolderName = FolderNames.Icons
+            };
 
-            string serverAddress = map_path(applicationId, folderName) + 
-                "\\" + subFolder + "\\" + ownerId.ToString() + ".jpg";
+            string retUrl = fi.exists(applicationId) ? fi.url() : string.Empty;
 
-            string alternatePath = !alternateOwnerId.HasValue ? string.Empty : map_path(applicationId, folderName) + 
-                "\\" + alternateSubFolder + "\\" + alternateOwnerId.ToString() + ".jpg";
+            if (string.IsNullOrEmpty(retUrl) && alternateOwnerId.HasValue)
+            {
+                fi.FileID = alternateOwnerId;
+                retUrl = fi.exists(applicationId) ? fi.url() : string.Empty;
+            }
 
-            subFolder = get_sub_folder(ownerId, true);
-            alternateSubFolder = alternateOwnerId.HasValue ? get_sub_folder(alternateOwnerId.Value, true) : string.Empty;
+            if (string.IsNullOrEmpty(retUrl) && defaultIcon != DefaultIconTypes.None)
+                retUrl = get_icon_url(applicationId, defaultIcon);
 
-            adr = File.Exists(serverAddress) ? 
-                get_client_path(applicationId, folderName) + "/" + subFolder + "/" + ownerId.ToString() + ".jpg" :
-                (!string.IsNullOrEmpty(alternatePath) && File.Exists(alternatePath) ?
-                get_client_path(applicationId, folderName) + "/" + alternateSubFolder + 
-                "/" + alternateOwnerId.Value.ToString() + ".jpg" :
-                (defaultIcon == DefaultIconTypes.None ? string.Empty : get_icon_url(applicationId, defaultIcon)));
-
-            return networkAddress ? adr.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : adr;
+            return networkAddress ? retUrl.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : retUrl;
         }
         
         public static string get_icon_url(Guid applicationId, Guid ownerId, string extension,
             bool highQuality = false, bool networkAddress = false)
         {
-            string adr = string.Empty;
-
             if (ownerId == Guid.Empty) return string.Empty;
 
             FolderNames folderName = highQuality ? FolderNames.HighQualityIcon : FolderNames.Icons;
 
-            string serverSubFolder = get_sub_folder(ownerId);
-            string clientSubFolder = get_sub_folder(ownerId, true);
+            DocFileInfo fi = new DocFileInfo()
+            {
+                FileID = ownerId,
+                Extension = "jpg",
+                FolderName = folderName
+            };
 
-            string serverAddress = map_path(applicationId, folderName) + 
-                "\\" + serverSubFolder + "\\" + ownerId.ToString() + ".jpg";
-
-            adr = File.Exists(serverAddress) ? 
-                get_client_path(applicationId, folderName) + "/" + clientSubFolder + "/" + ownerId.ToString() + ".jpg" :
+            string retUrl = fi.exists(applicationId) ? fi.url() :
                 (highQuality ? string.Empty : get_icon_url(applicationId, DefaultIconTypes.Extension, extension));
 
-            return networkAddress ? adr.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : adr;
+            return networkAddress ? retUrl.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : retUrl;
         }
         
         public static string get_icon_url(Guid applicationId, string fileExtention, bool networkAddress = false)
         {
-            string url = "images/extensions/" + fileExtention + ".png";
-            string adr = File.Exists(map_path(url)) ? "../../" + url : string.Empty;
+            string url = "~/images/extensions/" + fileExtention + ".png";
+            string adr = File.Exists(PublicMethods.map_path(url)) ? url.Replace("~", "../..") : string.Empty;
 
             return networkAddress ? adr.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : adr;
         }
         
         public static bool icon_exists(Guid applicationId, Guid ownerId)
         {
-            return File.Exists(map_path(applicationId, FolderNames.Icons) +
-                "\\" + get_sub_folder(ownerId) + "\\" + ownerId.ToString() + ".jpg");
+            if (ownerId == Guid.Empty) return false;
+
+            DocFileInfo fi = new DocFileInfo() {
+                OwnerID = ownerId,
+                Extension = "jpg",
+                FolderName = FolderNames.Icons
+            };
+
+            return fi.exists(applicationId);
         }
         
         public static string get_icon_json(Guid applicationId, Guid ownerId)
@@ -493,22 +384,19 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static string get_application_icon_url(Guid applicationId, bool highQuality = false, bool networkAddress = false)
         {
-            string adr = string.Empty;
-
             FolderNames folderName = highQuality ? FolderNames.HighQualityApplicationIcon : FolderNames.ApplicationIcons;
 
-            string serverSubFolder = get_sub_folder(applicationId);
-            string clientSubFolder = get_sub_folder(applicationId, true);
+            DocFileInfo fi = new DocFileInfo() {
+                OwnerID = applicationId,
+                Extension = "jpg",
+                FolderName = folderName
+            };
 
-            string serverAddress = map_path(applicationId, folderName) +
-                "\\" + serverSubFolder + "\\" + applicationId.ToString() + ".jpg";
+            string retUrl = fi.exists(applicationId) ? fi.url() : string.Empty;
 
-            adr = !File.Exists(serverAddress) ? string.Empty :
-                get_client_path(applicationId, folderName) + "/" + clientSubFolder + "/" + applicationId.ToString() + ".jpg";
+            if (string.IsNullOrEmpty(retUrl) && !highQuality) retUrl = "../../Images/RaaiVanLogo.png";
 
-            if (!highQuality && string.IsNullOrEmpty(adr)) adr = "../../Images/RaaiVanLogo.png";
-
-            return networkAddress ? adr.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : adr;
+            return networkAddress ? retUrl.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : retUrl;
         }
 
         public static string get_cover_photo_url(Guid? applicationId, 
@@ -520,43 +408,23 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             FolderNames folderName = highQuality ? FolderNames.HighQualityCoverPhoto : FolderNames.CoverPhoto;
 
-            string serverSubFolder = get_sub_folder(ownerId);
-            string clientSubFolder = get_sub_folder(ownerId, true);
+            DocFileInfo fi = new DocFileInfo() {
+                OwnerID = ownerId,
+                Extension = "jpg",
+                FolderName = folderName
+            };
 
-            string serverAddress = map_path(applicationId, folderName) +
-                "\\" + serverSubFolder + "\\" + ownerId.ToString() + ".jpg";
+            string retUrl = fi.exists(applicationId) ? fi.url() : string.Empty;
 
-            string address = !File.Exists(serverAddress) ? string.Empty :
-                get_client_path(applicationId, folderName) + "/" + clientSubFolder + "/" + ownerId.ToString() + ".jpg";
-
-            return networkAddress ? address.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : address;
+            return networkAddress ? retUrl.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : retUrl;
         }
-
+        
         public static string get_download_url(Guid applicationId, Guid fileId)
         {
             return PublicConsts.get_complete_url(applicationId, PublicConsts.FileDownload) +
                 "?timeStamp=" + DateTime.Now.Ticks.ToString() + "&FileID=" + fileId.ToString();
         }
-
-        public static void encrypt_file_if_needed(Guid? applicationId, DocFileInfo file, FolderNames? folderName = null)
-        {
-            FolderNames? fn = folderName.HasValue ? folderName : file.get_folder_name();
-            if (!fn.HasValue || (fn != FolderNames.TemporaryFiles && fn != FolderNames.Attachments &&
-                fn != FolderNames.WikiContent)) return;
-
-            if (!RaaiVanSettings.FileEncryption(applicationId) ||
-                ((file.Size.HasValue ? file.Size.Value : 0) / (1024 * 1024)) > 10) return;
-
-            string folderPath = !folderName.HasValue ? file.get_folder_address(applicationId) :
-                file.get_folder_address(applicationId, folderName.Value);
-            string fileName = file.get_file_name_with_extension();
-
-            string sourcePath = folderPath + "\\" + fileName;
-            string destPath = folderPath + "\\" + PublicConsts.EncryptedFileNamePrefix + fileName;
-
-            if (DocumentUtilities.encrypt_file_aes(sourcePath, destPath)) File.Delete(sourcePath);
-        }
-
+        
         private static byte[] _aes_encryption(byte[] input, bool decrypt, bool useTokenKey)
         {
             //static key & salt
@@ -603,30 +471,6 @@ namespace RaaiVan.Modules.GlobalUtilities
             return _aes_encryption(input, decrypt, RaaiVanSettings.USBToken);
         }
 
-        private static bool _aes_encryption_file(string input, string output, bool decrypt)
-        {
-            try
-            {
-                if (File.Exists(output)) return true;
-                else if (string.IsNullOrEmpty(input) || !File.Exists(input)) return false;
-
-                byte[] result = _aes_encryption(File.ReadAllBytes(input), decrypt);
-
-                if (result.Length > 0) File.WriteAllBytes(output, result);
-
-                return File.Exists(output);
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
-
-        public static bool encrypt_file_aes(string input, string output)
-        {
-            return _aes_encryption_file(input, output, false);
-        }
-
         public static byte[] encrypt_bytes_aes(byte[] input)
         {
             return _aes_encryption(input, decrypt: false);
@@ -635,17 +479,6 @@ namespace RaaiVan.Modules.GlobalUtilities
         public static byte[] encrypt_bytes_aes_native(byte[] input)
         {
             return _aes_encryption(input, decrypt: false, useTokenKey: false);
-        }
-
-        public static bool decrypt_file_aes(string input, string output)
-        {
-            return _aes_encryption_file(input, output, true);
-        }
-
-        public static byte[] decrypt_file_aes(string input)
-        {
-            return string.IsNullOrEmpty(input) || !File.Exists(input) ? new byte[0] :
-                _aes_encryption(File.ReadAllBytes(input), decrypt: true);
         }
 
         public static byte[] decrypt_bytes_aes(byte[] input)
@@ -662,7 +495,7 @@ namespace RaaiVan.Modules.GlobalUtilities
     public class DocFileInfo : ICloneable
     {
         public Guid? OwnerID;
-        public FileOwnerTypes OwnerType;
+        private FileOwnerTypes _OwnerType;
         public Guid? FileID;
         public string FileName;
         public string Extension;
@@ -670,11 +503,22 @@ namespace RaaiVan.Modules.GlobalUtilities
         public Guid? OwnerNodeID;
         public string OwnerNodeName;
         public string OwnerNodeType;
-        private FolderNames? _FolderName;
+        public FolderNames? FolderName;
         private bool? _Encrypted;
 
+        public FileOwnerTypes OwnerType
+        {
+            get { return _OwnerType; }
+
+            set
+            {
+                _OwnerType = value;
+                if(FolderName.HasValue) FolderName = get_folder_name(value);
+            }
+        }
+
         public DocFileInfo() {
-            _FolderName = null;
+            FolderName = null;
         }
 
         public object Clone()
@@ -686,10 +530,72 @@ namespace RaaiVan.Modules.GlobalUtilities
             return PublicMethods.get_mime_type_by_extension(Extension);
         }
 
-        public string stored_file_name {
-            get {
-                return !FileID.HasValue ? string.Empty : FileID.ToString() + (string.IsNullOrEmpty(Extension) ? "" : "." + Extension);
+        public string file_name_with_extension
+        {
+            get
+            {
+                List<FolderNames> nameItems = new[] { FolderNames.EmailTemplates, FolderNames.PDFImages }.ToList();
+
+                string fName = FileID.HasValue ? FileID.ToString() : 
+                    (nameItems.Any(n => FolderName == n) ? FileName : string.Empty);
+
+                return string.IsNullOrEmpty(fName) ? string.Empty :
+                    fName + (string.IsNullOrEmpty(Extension) ? string.Empty : "." + Extension);
             }
+        }
+
+        public string file_name_without_extension
+        {
+            get
+            {
+                List<FolderNames> nameItems = new[] { FolderNames.EmailTemplates, FolderNames.PDFImages }.ToList();
+                return FileID.HasValue ? FileID.ToString() : (nameItems.Any(n => FolderName == n) ? FileName : string.Empty);
+            }
+        }
+
+        public void refresh_folder_name() {
+            FolderName = get_folder_name(OwnerType);
+        }
+
+        public bool store(Guid? applicationId, byte[] fileContent, FolderNames? folderName = null)
+        {
+            try
+            {
+                FolderNames? fn = folderName.HasValue ? folderName : FolderName;
+
+                string folderPath = fn.HasValue ? get_folder_address(applicationId, fn.Value) : get_folder_address(applicationId);
+                if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+
+                //Check for Encryption
+                List<FolderNames> targetFolders =
+                    new[] { FolderNames.TemporaryFiles, FolderNames.Attachments, FolderNames.WikiContent }.ToList();
+
+                bool needsEncryption = fn.HasValue && targetFolders.Any(t => fn == t) &&
+                    RaaiVanSettings.FileEncryption(applicationId) &&
+                    ((Size.HasValue ? Size.Value : 0) / (1024 * 1024)) > 10;
+                //end of Check for Encryption
+
+                string address = fn.HasValue ? get_address(applicationId, fn.Value, encrypted: needsEncryption) : 
+                    get_address(applicationId, encrypted: needsEncryption);
+
+                if (needsEncryption) fileContent = DocumentUtilities.encrypt_bytes_aes(fileContent);
+
+                if (RaaiVanSettings.CephStorage.Enabled)
+                {
+                    //CephStorage.add_file(fn.Value, "", "");
+                }
+                else
+                {
+                    using (FileStream fs = new FileStream(address, FileMode.Create))
+                    using (BinaryWriter bw = new BinaryWriter(fs))
+                        bw.Write(fileContent);
+                }
+
+                _Encrypted = needsEncryption;
+
+                return true;
+            }
+            catch { return false; }
         }
 
         public void move(Guid? applicationId, FolderNames source, FolderNames destination, Guid? newGuidName = null)
@@ -698,7 +604,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 if (!FileID.HasValue) return;
 
-                set_folder_name(applicationId, source);
+                FolderName = source;
 
                 string sourceAddress = get_real_address(applicationId);
 
@@ -715,8 +621,22 @@ namespace RaaiVan.Modules.GlobalUtilities
         }
 
         public bool exists(Guid? applicationId) {
-            return RaaiVanSettings.CephStorage.Enabled ? CephStorage.file_exists(stored_file_name) :
+            return RaaiVanSettings.CephStorage.Enabled ? CephStorage.file_exists(file_name_with_extension) :
                 !string.IsNullOrEmpty(get_real_address(applicationId));
+        }
+
+        public int files_count_in_folder(Guid? applicationId)
+        {
+            try
+            {
+                string folderAddress = get_folder_address(applicationId);
+                return Directory.GetFiles(folderAddress).Length;
+            }
+            catch { return 0; }
+        }
+
+        public bool file_exists_in_folder(Guid? applicationId) {
+            return files_count_in_folder(applicationId) > 0;
         }
 
         public void delete(Guid? applicationId) {
@@ -728,39 +648,118 @@ namespace RaaiVan.Modules.GlobalUtilities
             catch { }
         }
 
-        public void set_folder_name(Guid? applicationId, FolderNames name) {
-            _FolderName = name;
-            get_real_address(applicationId); //to set the property _Encrypted
-        }
-
-        public FolderNames? get_folder_name() {
-            return _FolderName;
-        }
-
-        public bool is_encrypted(Guid? applicationId)
+        private bool is_encrypted(Guid? applicationId)
         {
-            if (!_Encrypted.HasValue) get_real_address(applicationId);
+            if (!_Encrypted.HasValue)
+            {
+                string normalAddress = get_address(applicationId, encrypted: false);
+                string encryptedAddress = get_address(applicationId, encrypted: true);
+
+                _Encrypted = !File.Exists(normalAddress) && File.Exists(encryptedAddress);
+            }
             return _Encrypted.HasValue && _Encrypted.Value;
         }
 
-        public string get_file_name_with_extension() {
-            return !FileID.HasValue ? string.Empty :
-                FileID.ToString() + (string.IsNullOrEmpty(Extension) ? string.Empty : "." + Extension);
+        private bool has_sub_folder(FolderNames folderName)
+        {
+            return !(folderName == FolderNames.EmailTemplates || folderName == FolderNames.Index ||
+                folderName == FolderNames.TemporaryFiles || folderName == FolderNames.Themes);
         }
 
-        public string get_folder_address(Guid? applicationId, FolderNames folderName)
+        private FolderNames get_folder_name(FileOwnerTypes ownerType)
+        {
+            switch (ownerType)
+            {
+                case FileOwnerTypes.Node:
+                case FileOwnerTypes.Wiki:
+                case FileOwnerTypes.Message:
+                case FileOwnerTypes.WorkFlow:
+                case FileOwnerTypes.FormElement:
+                    return FolderNames.Attachments;
+                case FileOwnerTypes.WikiContent:
+                    return FolderNames.WikiContent;
+                case FileOwnerTypes.PDFCover:
+                    return FolderNames.PDFCovers;
+                default:
+                    return FolderNames.TemporaryFiles;
+            }
+        }
+
+        private static string _get_folder_path(Guid? applicationId, FolderNames folderName)
+        {
+            bool isAppLogo = folderName == FolderNames.ApplicationIcons || folderName == FolderNames.HighQualityApplicationIcon;
+            bool isProfileImage = folderName == FolderNames.ProfileImages || folderName == FolderNames.HighQualityProfileImage;
+
+            if (isAppLogo || (RaaiVanSettings.SAASBasedMultiTenancy && isProfileImage)) applicationId = null;
+
+            string applicationPart = !applicationId.HasValue ? string.Empty : applicationId.Value.ToString() + "/";
+
+            switch (folderName)
+            {
+                case FolderNames.Attachments:
+                case FolderNames.WikiContent:
+                case FolderNames.Index:
+                case FolderNames.TemporaryFiles:
+                case FolderNames.Pictures:
+                case FolderNames.PDFImages:
+                case FolderNames.PDFCovers:
+                    return "App_Data/" + applicationPart + "Documents/" + folderName.ToString();
+                case FolderNames.Icons:
+                case FolderNames.ApplicationIcons:
+                case FolderNames.ProfileImages:
+                case FolderNames.CoverPhoto:
+                    return "Global_Documents/" + applicationPart + folderName.ToString();
+                case FolderNames.HighQualityIcon:
+                    return "Global_Documents/" + applicationPart + FolderNames.Icons.ToString() + "/" + "HighQuality";
+                case FolderNames.HighQualityApplicationIcon:
+                    return "Global_Documents/" + applicationPart + FolderNames.ApplicationIcons.ToString() + "/" + "HighQuality";
+                case FolderNames.HighQualityProfileImage:
+                    return "Global_Documents/" + applicationPart + FolderNames.ProfileImages.ToString() + "/" + "HighQuality";
+                case FolderNames.HighQualityCoverPhoto:
+                    return "Global_Documents/" + applicationPart + FolderNames.CoverPhoto.ToString() + "/" + "HighQuality";
+                case FolderNames.Themes:
+                    return "CSS/" + folderName.ToString();
+                case FolderNames.EmailTemplates:
+                    return "App_Data/" + applicationPart + folderName.ToString();
+                default:
+                    return string.Empty;
+            }
+        }
+
+        private string get_sub_folder(string guidName, bool clientPath = false)
+        {
+            return guidName[0].ToString() + guidName[1].ToString() + (clientPath ? "/" : "\\") + guidName[2].ToString();
+        }
+
+        private string get_sub_folder(Guid fileId, bool clientPath = false)
+        {
+            return get_sub_folder(fileId.ToString(), clientPath);
+        }
+
+        private string map_path(Guid? applicationId, FolderNames folderName, string dest = null)
+        {
+            return PublicMethods.map_path("~/" + _get_folder_path(applicationId, folderName)) +
+                (string.IsNullOrEmpty(dest) ? string.Empty : (dest[0] == '\\' ? string.Empty : "\\") + dest);
+        }
+
+        private string get_client_path(Guid? applicationId, FolderNames folderName, string dest = null)
+        {
+            return "../../" + _get_folder_path(applicationId, folderName) +
+                (string.IsNullOrEmpty(dest) ? string.Empty : (dest[0] == '/' ? string.Empty : "/") + dest);
+        }
+
+        private string get_folder_address(Guid? applicationId, FolderNames folderName)
         {
             if (!FileID.HasValue) return string.Empty;
 
-            string sub = !DocumentUtilities.has_sub_folder(folderName) ? string.Empty :
-                "\\" + DocumentUtilities.get_sub_folder(FileID.Value);
-            return DocumentUtilities.map_path(applicationId, folderName) + sub;
+            string sub = !has_sub_folder(folderName) ? string.Empty : "\\" + get_sub_folder(FileID.Value);
+            return map_path(applicationId, folderName) + sub;
         }
 
-        public string get_folder_address(Guid? applicationId)
+        private string get_folder_address(Guid? applicationId)
         {
-            return !FileID.HasValue || !_FolderName.HasValue ? string.Empty :
-                get_folder_address(applicationId, _FolderName.Value);
+            return !FileID.HasValue || !FolderName.HasValue ? string.Empty :
+                get_folder_address(applicationId, FolderName.Value);
         }
 
         private string get_real_address(Guid? applicationId)
@@ -771,41 +770,44 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             if (!FileID.HasValue || string.IsNullOrEmpty(folderPath)) return string.Empty;
 
-            string address = folderPath + "\\" + FileID.ToString() + 
-                (string.IsNullOrEmpty(Extension) ? string.Empty : "." + Extension);
-            string encryptedAddress = folderPath + "\\" + PublicConsts.EncryptedFileNamePrefix + FileID.ToString() +
-                (string.IsNullOrEmpty(Extension) ? string.Empty : "." + Extension);
-            string addressExtLess = folderPath + "\\" + FileID.ToString();
+            string address = get_address(applicationId, is_encrypted(applicationId));
+            string extLess = get_address(applicationId, is_encrypted(applicationId), ignoreExtension: true);
 
-            if (File.Exists(address)) return address;
-            else if (File.Exists(encryptedAddress))
-            {
-                _Encrypted = true;
-                return encryptedAddress;
-            }
-            else if (!string.IsNullOrEmpty(Extension) && File.Exists(addressExtLess)) return addressExtLess;
-            else return string.Empty;
+            return File.Exists(address) ? address : (File.Exists(extLess) ? extLess : string.Empty);
         }
 
-        public string get_address(Guid? applicationId, FolderNames folderName, bool? encrypted = null) {
-            return !FileID.HasValue ? string.Empty : get_folder_address(applicationId, folderName) + "\\" + 
-                ((!encrypted.HasValue ? is_encrypted(applicationId) : encrypted.Value) ? 
-                PublicConsts.EncryptedFileNamePrefix : "") + get_file_name_with_extension();
+        private string get_address(Guid? applicationId, FolderNames folderName, bool? encrypted = null, bool ignoreExtension = false) {
+            if (!FileID.HasValue) return string.Empty;
+
+            string encryptedPrefix = encrypted.HasValue && encrypted.Value ? PublicConsts.EncryptedFileNamePrefix : "";
+
+            return get_folder_address(applicationId, folderName) + "\\" +  encryptedPrefix + 
+                (ignoreExtension ? file_name_without_extension : file_name_with_extension);
         }
 
-        public string get_address(Guid? applicationId, bool? encrypted = null)
+        private string get_address(Guid? applicationId, bool? encrypted = null, bool ignoreExtension = false)
         {
-            return !_FolderName.HasValue ? string.Empty : get_address(applicationId, _FolderName.Value, encrypted);
+            return !FolderName.HasValue ? string.Empty : 
+                get_address(applicationId, FolderName.Value, encrypted: encrypted, ignoreExtension: ignoreExtension);
+        }
+
+        public static string index_folder_address(Guid? applicationId) {
+            return _get_folder_path(applicationId, FolderNames.Index);
+        }
+
+        public static string temporary_folder_address(Guid? applicationId)
+        {
+            return _get_folder_path(applicationId, FolderNames.TemporaryFiles);
         }
 
         public string get_client_address(Guid? applicationId) {
-            if (!FileID.HasValue || !_FolderName.HasValue) return string.Empty;
+            if (!FileID.HasValue || !FolderName.HasValue) return string.Empty;
 
-            string subForlder = !DocumentUtilities.has_sub_folder(_FolderName.Value) ? string.Empty :
-                "/" + DocumentUtilities.get_sub_folder(FileID.Value, true);
+            string subForlder = !has_sub_folder(FolderName.Value) ? string.Empty :
+                "/" + get_sub_folder(FileID.Value, true);
 
-            return DocumentUtilities.get_client_path(applicationId, _FolderName.Value) + 
-                subForlder + "/" + get_file_name_with_extension();
+            return get_client_path(applicationId, FolderName.Value) + 
+                subForlder + "/" + file_name_with_extension;
         }
 
         public bool readable(Guid applicationId)
@@ -824,12 +826,13 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             try
             {
-                if (RaaiVanSettings.CephStorage.Enabled) return CephStorage.get_file(stored_file_name);
+                if (RaaiVanSettings.CephStorage.Enabled) return CephStorage.get_file(file_name_with_extension);
 
                 fileAddress = get_real_address(applicationId);
 
                 if (string.IsNullOrEmpty(fileAddress)) return new byte[0];
-                else return is_encrypted(applicationId) ? DocumentUtilities.decrypt_file_aes(fileAddress) : File.ReadAllBytes(fileAddress);
+                else return is_encrypted(applicationId) ? 
+                        DocumentUtilities.decrypt_bytes_aes(File.ReadAllBytes(fileAddress)) : File.ReadAllBytes(fileAddress);
             }
             catch {
                 return new byte[0];
@@ -841,9 +844,15 @@ namespace RaaiVan.Modules.GlobalUtilities
             return toByteArray(applicationId, ref fileAddress);
         }
 
+        public string get_text_content(Guid? applicationId) {
+            byte[] content = toByteArray(applicationId);
+            return content == null || content.Length == 0 ? string.Empty :
+                System.Text.Encoding.UTF8.GetString(content);
+        }
+
         public string url() {
-            return RaaiVanSettings.CephStorage.Enabled ? CephStorage.get_download_url(stored_file_name) :
-                "../../download/" + FileID.ToString() + (_FolderName.HasValue ? "?Category=" + _FolderName.ToString() : string.Empty);
+            return RaaiVanSettings.CephStorage.Enabled ? CephStorage.get_download_url(file_name_with_extension) :
+                "../../download/" + FileID.ToString() + (FolderName.HasValue ? "?Category=" + FolderName.ToString() : string.Empty);
         }
 
         public string toJson(Guid? applicationId, bool icon = false) {

@@ -24,41 +24,59 @@ namespace RaaiVan.Web.API
         public void ProcessRequest(HttpContext context)
         {
             //Privacy Check: OK
-            paramsContainer = new ParamsContainer(context, nullTenantResponse: true);
-            if (!paramsContainer.ApplicationID.HasValue) return;
-
+            paramsContainer = new ParamsContainer(context, nullTenantResponse: false);
+            
             Guid fileId = string.IsNullOrEmpty(context.Request.Params["FileID"]) ?
                 Guid.Empty : Guid.Parse(context.Request.Params["FileID"]);
             if (fileId == Guid.Empty && !Guid.TryParse(context.Request.Params["ATTFID"], out fileId)) fileId = Guid.Empty;
 
             string category = PublicMethods.parse_string(context.Request.Params["Category"], false);
-            bool isPicture = category.ToLower() == FolderNames.Pictures.ToString().ToLower();
+            
             bool isTemporary = category.ToLower() == FolderNames.TemporaryFiles.ToString().ToLower();
             bool? addFooter = PublicMethods.parse_bool(context.Request.Params["Meta"]);
             Guid? coverId = PublicMethods.parse_guid(context.Request.Params["CoverID"]);
             string pdfPassword = PublicMethods.parse_string(context.Request.Params["PS"]);
 
-            /*
-            if (fileId == Guid.Empty || ((!isPicture || isTemporary) && !paramsContainer.IsAuthenticated))
-            {
-                send_empty_response();
-                return;
-            }
-            */
+            List<FolderNames> freeFolders = new[] {
+                FolderNames.ProfileImages,
+                FolderNames.HighQualityApplicationIcon,
+                FolderNames.CoverPhoto,
+                FolderNames.HighQualityCoverPhoto,
+                FolderNames.Icons,
+                FolderNames.HighQualityIcon,
+                FolderNames.ApplicationIcons,
+                FolderNames.HighQualityApplicationIcon,
+                FolderNames.Pictures
+            }.ToList();
 
-            if (isPicture) // && PrivacyController.check_access(paramsContainer.CurrentUserID, fileId))
-            {
-                DocFileInfo pic = new DocFileInfo() { FileID = fileId, Extension = "jpg", FileName = fileId.ToString() };
-                pic.set_folder_name(paramsContainer.Tenant.Id, FolderNames.Pictures);
+            bool isFreeFolder = !string.IsNullOrEmpty(category) && freeFolders.Any(f => f.ToString().ToLower() == category.ToLower());
+
+            if (isFreeFolder) {
+                FolderNames fn = freeFolders.Where(u => u.ToString().ToLower() == category.ToLower()).FirstOrDefault();
+
+                DocFileInfo pic =
+                    new DocFileInfo() { FileID = fileId, Extension = "jpg", FileName = fileId.ToString(), FolderName = fn };
 
                 send_file(pic, false);
             }
-            else if (isTemporary)
+
+            if (!paramsContainer.ApplicationID.HasValue)
+            {
+                paramsContainer.return_response(PublicConsts.NullTenantResponse);
+                return;
+            }
+
+            if (isTemporary)
             {
                 string ext = PublicMethods.parse_string(context.Request.Params["Extension"]);
 
-                DocFileInfo temp = new DocFileInfo() { FileID = fileId, Extension = ext, FileName = fileId.ToString() };
-                temp.set_folder_name(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles);
+                DocFileInfo temp = new DocFileInfo()
+                {
+                    FileID = fileId,
+                    Extension = ext,
+                    FileName = fileId.ToString(),
+                    FolderName = FolderNames.TemporaryFiles
+                };
 
                 send_file(temp, false);
             }
@@ -115,10 +133,9 @@ namespace RaaiVan.Web.API
 
                     return;
                 }
-                
-                FolderNames folderName = DocumentUtilities.get_folder_name(AttachFile.OwnerType);
-                AttachFile.set_folder_name(paramsContainer.Tenant.Id, folderName);
-                
+
+                AttachFile.refresh_folder_name();
+
                 string ext = AttachFile == null || string.IsNullOrEmpty(AttachFile.Extension) ? string.Empty :
                     AttachFile.Extension.ToLower();
                 bool isImage = ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "gif" || ext == "bmp";

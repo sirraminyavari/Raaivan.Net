@@ -5931,7 +5931,7 @@ namespace RaaiVan.Web.API
             {
                 if (!sheetNo.HasValue || sheetNo.Value <= 0) sheetNo = 1;
 
-                if (uploaded != null) uploaded.set_folder_name(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles);
+                if (uploaded != null) uploaded.FolderName = FolderNames.TemporaryFiles;
 
                 if (!uploaded.exists(paramsContainer.Tenant.Id))
                 {
@@ -7823,7 +7823,7 @@ namespace RaaiVan.Web.API
             {
                 PublicMethods.set_timeout(() => {
                     string res = string.Empty;
-                    logo.set_folder_name(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles);
+                    logo.FolderName = FolderNames.TemporaryFiles;
                     RVGraphics.create_icon(paramsContainer.Tenant.Id, nodeObject.NodeID.Value, IconType.Icon, logo, ref res);
                 }, 0);
             }

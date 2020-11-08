@@ -49,7 +49,7 @@ namespace RaaiVan.Web.API
                         responseText = "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
                     else
                     {
-                        files[0].set_folder_name(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles);
+                        files[0].FolderName = FolderNames.TemporaryFiles;
 
                         handle_imported_file(files[0], ref responseText);
                     }

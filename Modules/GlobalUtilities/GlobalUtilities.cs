@@ -1453,11 +1453,11 @@ namespace RaaiVan.Modules.GlobalUtilities
             catch { return false; }
         }
 
-        public static string map_path(string path)
+        public static string map_path(string path, bool localPath = false)
         {
             if (string.IsNullOrEmpty(path)) return string.Empty;
 
-            if (!(new string[] { "app_data", "global_documents" }).Any(x => path.ToLower().Contains(x)))
+            if (localPath || !(new string[] { "app_data", "global_documents" }).Any(x => path.ToLower().Contains(x)))
                 return System.Web.Hosting.HostingEnvironment.MapPath(path);
 
             path = path.Replace('/', '\\');
@@ -1702,6 +1702,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
+        /*
         //to be removed later
         private static bool __FoldersMoved = false;
         
@@ -1792,6 +1793,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
         //to be removed later
+        */
     }
 
     public static class ExcelUtilities

@@ -78,8 +78,8 @@ namespace RaaiVan.Modules.Documents
             catch { return 0; }
         }
 
-        public static int get_converted_pages_count(Guid applicationId, string destFolder) {
-            return !Directory.Exists(destFolder) ? 0 : Directory.GetFiles(destFolder).Length;
+        public static int get_converted_pages_count(Guid applicationId, DocFileInfo destFile) {
+            return destFile.files_count_in_folder(applicationId);
         }
 
         public static Bitmap get_image_magick(Guid applicationId, string pdfPath, int pageNum, ImageFormat imageFormat)
@@ -119,7 +119,7 @@ namespace RaaiVan.Modules.Documents
         }
 
         public static void pdf2image(Guid applicationId,
-            DocFileInfo pdf, string password, string destFolder, ImageFormat imageFormat, bool repair)
+            DocFileInfo pdf, string password, DocFileInfo destFile, ImageFormat imageFormat, bool repair)
         {
             //MagickNET.SetGhostscriptDirectory("[GhostScript DLL Dir]");
             //MagickNET.SetTempDirectory("[a temp dir]");
@@ -129,16 +129,14 @@ namespace RaaiVan.Modules.Documents
                 (!repair || PDF2ImageProcessing[pdf.FileID.Value])) return;
             else PDF2ImageProcessing[pdf.FileID.Value] = true;
 
-            int convertedCount = Directory.GetFiles(destFolder).Length;
-
-            if ((convertedCount > 0) && !repair) {
+            if (destFile.file_exists_in_folder(applicationId) && !repair) {
                 PDF2ImageProcessing[pdf.FileID.Value] = false;
                 return;
             }
 
             try
             {
-                string cacheDir = PublicMethods.map_path(PublicConsts.MagickCacheDirectory);
+                string cacheDir = PublicMethods.map_path(PublicConsts.MagickCacheDirectory, localPath: true);
                 if (!Directory.Exists(cacheDir)) Directory.CreateDirectory(cacheDir);
                 MagickAnyCPU.CacheDirectory = cacheDir;
             }
@@ -149,7 +147,7 @@ namespace RaaiVan.Modules.Documents
 
             try
             {
-                string tempDir = PublicMethods.map_path(PublicConsts.TempDirectory);
+                string tempDir = PublicMethods.map_path(PublicConsts.TempDirectory, localPath: true);
                 if (!Directory.Exists(tempDir)) Directory.CreateDirectory(tempDir);
                 MagickNET.SetTempDirectory(tempDir);
             }
@@ -178,11 +176,20 @@ namespace RaaiVan.Modules.Documents
                     foreach (MagickImage p in pages)
                     {
                         ++pageNum;
-                        string saveAddr = destFolder + "\\" + pageNum.ToString() + "." + imageFormat.ToString().ToLower();
 
-                        if (File.Exists(saveAddr)) continue;
+                        destFile.FileName = pageNum.ToString();
+                        destFile.Extension = imageFormat.ToString().ToLower();
 
-                        try { p.ToBitmap(imageFormat).Save(saveAddr, imageFormat); }
+                        if (destFile.exists(applicationId)) continue;
+
+                        try
+                        {
+                            using (MemoryStream stream = new MemoryStream())
+                            {
+                                p.ToBitmap(imageFormat).Save(stream, imageFormat);
+                                destFile.store(applicationId, stream.ToArray());
+                            }
+                        }
                         catch (Exception ex)
                         {
                             if (!errorLoged)

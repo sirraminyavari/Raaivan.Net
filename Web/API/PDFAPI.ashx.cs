@@ -65,32 +65,30 @@ namespace RaaiVan.Web.API
             if (!hasAccess)
                 paramsContainer.return_response("{\"ErrorText\":\"" + Messages.AccessDenied.ToString() + "\"}");
 
-            FolderNames folderName = isTemporary ? FolderNames.TemporaryFiles :
-                DocumentUtilities.get_folder_name(file.OwnerType);
-            file.set_folder_name(paramsContainer.Tenant.Id, folderName);
+            if (isTemporary) file.FolderName = FolderNames.TemporaryFiles;
+            else file.refresh_folder_name();
 
             if (!file.exists(paramsContainer.Tenant.Id)) _return_response(ref responseText);
 
-            string destFolder = DocumentUtilities.map_path(paramsContainer.Tenant.Id, FolderNames.PDFImages) +
-                "\\" + DocumentUtilities.get_sub_folder(file.FileID.ToString()) + "\\" + file.FileID.ToString();
+            DocFileInfo destFile = new DocFileInfo() { FileID = file.FileID, FolderName = FolderNames.PDFImages };
 
             switch (command)
             {
                 case "Convert2Image":
                     convert2image(file,
                         PublicMethods.parse_string(context.Request.Params["PS"]),
-                        destFolder, 
+                        destFile, 
                         PublicMethods.parse_bool(context.Request.Params["Repair"]), ref responseText);
                     _return_response(ref responseText);
                     return;
                 case "GetPagesCount":
                     get_pages_count(file,
                         PublicMethods.parse_string(context.Request.Params["PS"]),
-                        destFolder, ref responseText);
+                        destFile, ref responseText);
                     _return_response(ref responseText);
                     return;
                 case "GetPage":
-                    get_page(PublicMethods.parse_int(context.Request.Params["Page"], 1), destFolder);
+                    get_page(PublicMethods.parse_int(context.Request.Params["Page"], 1), destFile);
                     return;
             }
 
@@ -102,16 +100,14 @@ namespace RaaiVan.Web.API
             paramsContainer.return_response(responseText);
         }
 
-        protected void convert2image(DocFileInfo file, string password, string destFolder, bool? repair, ref string responseText)
+        protected void convert2image(DocFileInfo file, string password, DocFileInfo destFile, bool? repair, ref string responseText)
         {
-            if (!Directory.Exists(destFolder)) Directory.CreateDirectory(destFolder);
-
             bool? status = PDFUtil.pdf2image_isprocessing(file.FileID.Value);
 
             if ((!status.HasValue || !status.Value) && repair.HasValue && repair.Value)
             {
                 PublicMethods.set_timeout(() => {
-                    PDFUtil.pdf2image(paramsContainer.Tenant.Id, file, password, destFolder, ImageFormat.Png, true);
+                    PDFUtil.pdf2image(paramsContainer.Tenant.Id, file, password, destFile, ImageFormat.Png, true);
                 }, 0);
 
                 responseText = "{\"Status\":\"" + "Processing" + "\"}";
@@ -124,7 +120,7 @@ namespace RaaiVan.Web.API
             else
             {
                 PublicMethods.set_timeout(() => {
-                    PDFUtil.pdf2image(paramsContainer.Tenant.Id, file, password, destFolder, ImageFormat.Png, false);
+                    PDFUtil.pdf2image(paramsContainer.Tenant.Id, file, password, destFile, ImageFormat.Png, false);
                 }, 0);
 
                 responseText = "{\"Status\":\"" + "Processing" + "\"}";
@@ -134,12 +130,12 @@ namespace RaaiVan.Web.API
             }
         }
 
-        protected void get_pages_count(DocFileInfo file, string password, string destFolder, ref string responseText)
+        protected void get_pages_count(DocFileInfo file, string password, DocFileInfo destFile, ref string responseText)
         {
             bool invalidPassword = false;
 
             int count = PDFUtil.get_pages_count(paramsContainer.Tenant.Id, file, password, ref invalidPassword);
-            int convertedCount = count == 0 ? 0 : PDFUtil.get_converted_pages_count(paramsContainer.Tenant.Id, destFolder);
+            int convertedCount = count == 0 ? 0 : PDFUtil.get_converted_pages_count(paramsContainer.Tenant.Id, destFile);
 
             responseText = "{\"Count\":" + count.ToString() +
                 ",\"ConvertedCount\":" + convertedCount.ToString() +
@@ -147,7 +143,7 @@ namespace RaaiVan.Web.API
                 "}";
         }
 
-        protected void get_page(int? pageNumber, string folderAddress)
+        protected void get_page(int? pageNumber, DocFileInfo destFile)
         {
             if (!pageNumber.HasValue) pageNumber = 1;
 
@@ -155,18 +151,19 @@ namespace RaaiVan.Web.API
             {
                 ImageFormat imageFormat = ImageFormat.Png;
 
-                string fileAddr = folderAddress + "\\" + pageNumber.ToString() + "." + imageFormat.ToString().ToLower();
+                destFile.FileName = pageNumber.ToString();
+                destFile.Extension = imageFormat.ToString().ToLower();
 
-                if (!File.Exists(fileAddr)) fileAddr = PublicMethods.map_path(PublicConsts.NoPDFPage);
-
-                byte[] FileBytes = File.ReadAllBytes(fileAddr);
+                byte[] fileBytes = !destFile.exists(paramsContainer.ApplicationID) ?
+                    File.ReadAllBytes(PublicMethods.map_path(PublicConsts.NoPDFPage)) :
+                    destFile.toByteArray(paramsContainer.ApplicationID);
 
                 HttpContext.Current.Response.ContentType = "application/octet-stream";
                 HttpContext.Current.Response.AddHeader("Content-Disposition",
                     string.Format("attachment;filename=\"{0}\"",
                     pageNumber.ToString() + "." + imageFormat.ToString().ToLower()));
-                HttpContext.Current.Response.AddHeader("Content-Length", FileBytes.Length.ToString());
-                HttpContext.Current.Response.WriteFile(fileAddr);
+                HttpContext.Current.Response.AddHeader("Content-Length", fileBytes.Length.ToString());
+                HttpContext.Current.Response.BinaryWrite(fileBytes);
                 HttpContext.Current.Response.End();
             }
             catch { }

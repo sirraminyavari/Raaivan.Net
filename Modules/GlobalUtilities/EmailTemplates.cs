@@ -68,9 +68,13 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         private static string _get_email_template(Guid? applicationId, string templateType)
         {
-            string fileAddress = DocumentUtilities.map_path(applicationId, FolderNames.EmailTemplates) +
-                "\\" + templateType + ".txt";
-            return File.Exists(fileAddress) ? File.ReadAllText(fileAddress) :
+            DocFileInfo fi = new DocFileInfo() {
+                FileName = templateType,
+                Extension = "txt",
+                FolderName = FolderNames.EmailTemplates
+            };
+
+            return fi.exists(applicationId) ? fi.get_text_content(applicationId) :
                 (applicationId.HasValue ? _get_email_template(null, templateType) : string.Empty);
         }
 

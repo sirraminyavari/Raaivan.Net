@@ -49,26 +49,56 @@ namespace RaaiVan.Modules.GlobalUtilities
                 client.ListBuckets().Buckets.Select(b => b.BucketName).ToList();
         }
 
-        public static void add_file(string fileName, string filePath)
+        public static bool add_file(string fileName, byte[] content)
         {
             try
             {
                 AmazonS3Client client = get_client();
-                if (client == null) return;
+                if (client == null) return false;
 
-                TransferUtility utility = new TransferUtility(client);
-                //TransferUtilityUploadRequest request = new TransferUtilityUploadRequest();
+                using (MemoryStream stream = new MemoryStream(content)) {
+                    TransferUtilityUploadRequest request = new TransferUtilityUploadRequest()
+                    {
+                        BucketName = RaaiVanSettings.CephStorage.Bucket,
+                        Key = fileName,
+                        InputStream = stream,
+                        StorageClass = S3StorageClass.Standard,
+                        PartSize = 6291456 // 6 MB
+                        //CannedACL = S3CannedACL.Private
+                    };
 
-                //request.FilePath
+                    TransferUtility utility = new TransferUtility(client);
 
-                PutObjectRequest request = new PutObjectRequest();
-                request.BucketName = RaaiVanSettings.CephStorage.Bucket;
-                request.Key = fileName;
-                request.FilePath = filePath;
+                    utility.Upload(request);
+                }
 
-                PutObjectResponse response = client.PutObject(request);
+                return true;
             }
-            catch { }
+            catch { return false; }
+        }
+
+        public static bool folder_exists(string folderName)
+        {
+            try
+            {
+                AmazonS3Client client = get_client();
+                if (client == null) return false;
+
+                ListObjectsRequest request = new ListObjectsRequest();
+                request.BucketName = RaaiVanSettings.CephStorage.Bucket;
+                request.Prefix = folderName + "/";
+                request.MaxKeys = 1;
+
+                ListObjectsResponse response = client.ListObjects(request);
+
+                return response.S3Objects.Count > 0;
+            }
+
+            catch (AmazonS3Exception ex)
+            {
+                if (ex.StatusCode == System.Net.HttpStatusCode.NotFound) return false;
+                return false;
+            }
         }
 
         public static bool file_exists(string fileName)
