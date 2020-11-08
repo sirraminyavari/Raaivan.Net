@@ -685,7 +685,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        private static string _get_folder_path(Guid? applicationId, FolderNames folderName)
+        private static string _get_folder_path(Guid? applicationId, FolderNames folderName, bool cephMode = false)
         {
             bool isAppLogo = folderName == FolderNames.ApplicationIcons || folderName == FolderNames.HighQualityApplicationIcon;
             bool isProfileImage = folderName == FolderNames.ProfileImages || folderName == FolderNames.HighQualityProfileImage;
@@ -693,6 +693,8 @@ namespace RaaiVan.Modules.GlobalUtilities
             if (isAppLogo || (RaaiVanSettings.SAASBasedMultiTenancy && isProfileImage)) applicationId = null;
 
             string applicationPart = !applicationId.HasValue ? string.Empty : applicationId.Value.ToString() + "/";
+
+            string mainFolder = string.Empty, contentFolder = string.Empty;
 
             switch (folderName)
             {
@@ -703,27 +705,43 @@ namespace RaaiVan.Modules.GlobalUtilities
                 case FolderNames.Pictures:
                 case FolderNames.PDFImages:
                 case FolderNames.PDFCovers:
-                    return "App_Data/" + applicationPart + "Documents/" + folderName.ToString();
+                    mainFolder = "App_Data/";
+                    contentFolder = applicationPart + "Documents/" + folderName.ToString();
+                    break;
                 case FolderNames.Icons:
                 case FolderNames.ApplicationIcons:
                 case FolderNames.ProfileImages:
                 case FolderNames.CoverPhoto:
-                    return "Global_Documents/" + applicationPart + folderName.ToString();
+                    mainFolder = "Global_Documents/";
+                    contentFolder = applicationPart + folderName.ToString();
+                    break;
                 case FolderNames.HighQualityIcon:
-                    return "Global_Documents/" + applicationPart + FolderNames.Icons.ToString() + "/" + "HighQuality";
+                    mainFolder = "Global_Documents/";
+                    contentFolder = applicationPart + FolderNames.Icons.ToString() + "/" + "HighQuality";
+                    break;
                 case FolderNames.HighQualityApplicationIcon:
-                    return "Global_Documents/" + applicationPart + FolderNames.ApplicationIcons.ToString() + "/" + "HighQuality";
+                    mainFolder = "Global_Documents/";
+                    contentFolder = applicationPart + FolderNames.ApplicationIcons.ToString() + "/" + "HighQuality";
+                    break;
                 case FolderNames.HighQualityProfileImage:
-                    return "Global_Documents/" + applicationPart + FolderNames.ProfileImages.ToString() + "/" + "HighQuality";
+                    mainFolder = "Global_Documents/";
+                    contentFolder = applicationPart + FolderNames.ProfileImages.ToString() + "/" + "HighQuality";
+                    break;
                 case FolderNames.HighQualityCoverPhoto:
-                    return "Global_Documents/" + applicationPart + FolderNames.CoverPhoto.ToString() + "/" + "HighQuality";
+                    mainFolder = "Global_Documents/";
+                    contentFolder = applicationPart + FolderNames.CoverPhoto.ToString() + "/" + "HighQuality";
+                    break;
                 case FolderNames.Themes:
-                    return "CSS/" + folderName.ToString();
+                    mainFolder = "CSS/";
+                    contentFolder = folderName.ToString();
+                    break;
                 case FolderNames.EmailTemplates:
-                    return "App_Data/" + applicationPart + folderName.ToString();
-                default:
-                    return string.Empty;
+                    mainFolder = "App_Data/";
+                    contentFolder = applicationPart + folderName.ToString();
+                    break;
             }
+
+            return (cephMode ? "" : mainFolder) + contentFolder;
         }
 
         private string get_sub_folder(string guidName, bool clientPath = false)
@@ -736,10 +754,13 @@ namespace RaaiVan.Modules.GlobalUtilities
             return get_sub_folder(fileId.ToString(), clientPath);
         }
 
-        private string map_path(Guid? applicationId, FolderNames folderName, string dest = null)
+        private string map_path(Guid? applicationId, FolderNames folderName, string dest = null, bool cephMode = false)
         {
-            return PublicMethods.map_path("~/" + _get_folder_path(applicationId, folderName)) +
-                (string.IsNullOrEmpty(dest) ? string.Empty : (dest[0] == '\\' ? string.Empty : "\\") + dest);
+            dest = string.IsNullOrEmpty(dest) ? string.Empty : (dest[0] == '\\' ? string.Empty : "\\") + dest;
+
+            string folder = _get_folder_path(applicationId, folderName, cephMode: cephMode) + dest.Replace("\\", "/");
+
+            return cephMode ? folder : PublicMethods.map_path("~/" + folder);
         }
 
         private string get_client_path(Guid? applicationId, FolderNames folderName, string dest = null)
