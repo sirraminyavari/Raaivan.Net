@@ -65,7 +65,9 @@ namespace RaaiVan.Web.API
                             OwnerType = ownerType
                         };
 
-                        _attach_file_command(paramsContainer.ApplicationID, file, ref responseText);
+                        byte[] fileContent = new byte[0];
+
+                        _attach_file_command(paramsContainer.ApplicationID, file, ref responseText, ref fileContent);
                         _return_response(ref responseText);
                         return;
                     }
@@ -123,7 +125,10 @@ namespace RaaiVan.Web.API
 
                         if (ownerId != Guid.Empty) uploaded.OwnerID = ownerId;
 
-                        bool succeed = _attach_file_command(paramsContainer.ApplicationID, uploaded, ref responseText);
+                        byte[] fileContent = new byte[0];
+
+                        bool succeed = _attach_file_command(paramsContainer.ApplicationID,
+                            uploaded, ref responseText, ref fileContent, dontStore: true);
 
                         if (succeed)
                         {
@@ -135,8 +140,10 @@ namespace RaaiVan.Web.API
                             };
 
                             if (ownerId != Guid.Empty) destFile.OwnerID = ownerId;
-                            
-                            RVGraphics.make_thumbnail(paramsContainer.Tenant.Id, uploaded, destFile,
+
+                            byte[] destContent = new byte[0];
+
+                            RVGraphics.make_thumbnail(paramsContainer.Tenant.Id, fileContent, destFile, ref destContent,
                                 maxWidth, maxHeight, 0, 0, ref errorMessage, "jpg");
                             
                             if (string.IsNullOrEmpty(errorMessage))
@@ -216,16 +223,18 @@ namespace RaaiVan.Web.API
                             OwnerType = ownerType,
                             FolderName = FolderNames.TemporaryFiles
                         };
-                        
-                        bool succeed = _attach_file_command(applicationId, uploaded, ref responseText);
 
-                        if (!succeed) break;
+                        byte[] fileContent = new byte[0];
+
+                        bool succeed = _attach_file_command(applicationId, uploaded, ref responseText, ref fileContent, dontStore: true);
+
+                        if (!succeed || fileContent == null || fileContent.Length == 0) break;
 
                         if (iconType == IconType.ProfileImage && iconId == Guid.Empty) iconId = userId;
 
                         string errorMessage = string.Empty;
 
-                        succeed = RVGraphics.create_icon(applicationId, iconId, iconType, uploaded, ref errorMessage);
+                        succeed = RVGraphics.create_icon(applicationId, iconId, iconType, fileContent, ref errorMessage);
 
                         responseText = responseText.Replace("\"~[[MSG]]\"", errorMessage);
 
@@ -278,7 +287,7 @@ namespace RaaiVan.Web.API
                         int height = string.IsNullOrEmpty(context.Request.Params["Height"]) ? -1 :
                             (int)double.Parse(context.Request.Params["Height"]);
 
-                        RVGraphics.extract_thumbnail(applicationId, highQualityFile, file,
+                        RVGraphics.extract_thumbnail(applicationId, highQualityFile, highQualityFile.toByteArray(applicationId), file,
                             x, y, width, height, iconWidth, iconHeight, ref responseText);
 
                         break;
@@ -296,7 +305,8 @@ namespace RaaiVan.Web.API
             paramsContainer.return_response(ref responseText);
         }
 
-        protected bool _attach_file_command(Guid? applicationId, DocFileInfo fileInfo, ref string responseText)
+        protected bool _attach_file_command(Guid? applicationId, DocFileInfo fileInfo, 
+            ref string responseText, ref byte[] fileContent, bool dontStore = false)
         {
             HttpContext context = HttpContext.Current;
             string filename = context.Request.Headers["X-File-Name"];
@@ -327,8 +337,8 @@ namespace RaaiVan.Web.API
                 fileInfo.FolderName.Value : FolderNames.TemporaryFiles;
             
             bool result = filename == null ?
-                __ie_response(applicationId, context.Request.Files[0], fileInfo, ref responseText) :
-                __other_browsers_response(applicationId, context.Request.InputStream, fileInfo, ref responseText);
+                __ie_response(applicationId, context.Request.Files[0], fileInfo, ref responseText, ref fileContent, dontStore) :
+                __other_browsers_response(applicationId, context.Request.InputStream, fileInfo, ref responseText, ref fileContent, dontStore);
 
             if (applicationId.HasValue && paramsContainer.CurrentUserID.HasValue && 
                 fileInfo.OwnerID.HasValue && fileInfo.OwnerID != Guid.Empty && fileInfo.FileID != null)
@@ -347,7 +357,8 @@ namespace RaaiVan.Web.API
             return true;
         }
 
-        protected bool __ie_response(Guid? applicationId, HttpPostedFile uploadedFile, DocFileInfo fi, ref string responseText)
+        protected bool __ie_response(Guid? applicationId, HttpPostedFile uploadedFile, DocFileInfo fi, 
+            ref string responseText, ref byte[] fileContent, bool dontStore = false)
         {
             string filename = HttpUtility.UrlDecode(uploadedFile.FileName);
 
@@ -361,7 +372,10 @@ namespace RaaiVan.Web.API
                 fi.Size = uploadedFile.ContentLength;
 
                 using (BinaryReader reader = new BinaryReader(uploadedFile.InputStream))
-                    fi.store(applicationId, reader.ReadBytes(uploadedFile.ContentLength));
+                {
+                    fileContent = reader.ReadBytes(uploadedFile.ContentLength);
+                    if(!dontStore) fi.store(applicationId, fileContent);
+                }
 
                 responseText = "{\"success\":" + true.ToString().ToLower() +
                     ",\"AttachedFile\":" + fi.toJson(applicationId, true) +
@@ -379,7 +393,8 @@ namespace RaaiVan.Web.API
             return false;
         }
 
-        protected bool __other_browsers_response(Guid? applicationId, Stream inputStream, DocFileInfo fi, ref string responseText)
+        protected bool __other_browsers_response(Guid? applicationId, Stream inputStream, DocFileInfo fi, 
+            ref string responseText, ref byte[] fileContent, bool dontStore = false)
         {
             //This work for Firefox and Chrome.
             
@@ -389,7 +404,10 @@ namespace RaaiVan.Web.API
                     HttpContext.Current.Request.Files[0].InputStream : inputStream;
 
                 using (BinaryReader reader = new BinaryReader(st))
-                    fi.store(applicationId, reader.ReadBytes(Convert.ToInt32(st.Length)));
+                {
+                    fileContent = reader.ReadBytes(Convert.ToInt32(st.Length));
+                    if(!dontStore) fi.store(applicationId, fileContent);
+                }
 
                 responseText = "{\"success\":" + true.ToString().ToLower() + 
                     ",\"AttachedFile\":" + fi.toJson(applicationId, true) +

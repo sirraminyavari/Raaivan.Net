@@ -7824,7 +7824,8 @@ namespace RaaiVan.Web.API
                 PublicMethods.set_timeout(() => {
                     string res = string.Empty;
                     logo.FolderName = FolderNames.TemporaryFiles;
-                    RVGraphics.create_icon(paramsContainer.Tenant.Id, nodeObject.NodeID.Value, IconType.Icon, logo, ref res);
+                    RVGraphics.create_icon(paramsContainer.Tenant.Id, 
+                        nodeObject.NodeID.Value, IconType.Icon, logo.toByteArray(paramsContainer.ApplicationID), ref res);
                 }, 0);
             }
 

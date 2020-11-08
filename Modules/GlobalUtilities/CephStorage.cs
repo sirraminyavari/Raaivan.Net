@@ -77,28 +77,33 @@ namespace RaaiVan.Modules.GlobalUtilities
             catch { return false; }
         }
 
-        public static bool folder_exists(string folderName)
+        public static List<string> files(string folderName, int maxCount = 0)
         {
             try
             {
                 AmazonS3Client client = get_client();
-                if (client == null) return false;
+                if (client == null) return new List<string>();
 
                 ListObjectsRequest request = new ListObjectsRequest();
                 request.BucketName = RaaiVanSettings.CephStorage.Bucket;
                 request.Prefix = folderName + "/";
-                request.MaxKeys = 1;
+                request.MaxKeys = maxCount <= 0 ? 1000000 : maxCount;
 
                 ListObjectsResponse response = client.ListObjects(request);
-
-                return response.S3Objects.Count > 0;
+                
+                return response.S3Objects == null ? new List<string>() : response.S3Objects.Select(o => o.Key).ToList();
             }
 
             catch (AmazonS3Exception ex)
             {
-                if (ex.StatusCode == System.Net.HttpStatusCode.NotFound) return false;
-                return false;
+                bool notFound = ex.StatusCode == System.Net.HttpStatusCode.NotFound;
+                return new List<string>();
             }
+        }
+
+        public static bool folder_exists(string folderName)
+        {
+            return files(folderName, maxCount: 1).Count > 0;
         }
 
         public static bool file_exists(string fileName)
@@ -145,20 +150,43 @@ namespace RaaiVan.Modules.GlobalUtilities
             catch { return new byte[0]; }
         }
 
-        public static void delete_file(string fileName)
+        public static bool rename_file(string oldFileName, string newFileName)
         {
             try
             {
                 AmazonS3Client client = get_client();
-                if (client == null) return;
+                if (client == null) return false;
 
+                CopyObjectRequest request = new CopyObjectRequest();
+                request.SourceBucket = request.DestinationBucket = RaaiVanSettings.CephStorage.Bucket;
+                request.SourceKey = oldFileName;
+                request.DestinationKey = newFileName;
+
+                CopyObjectResponse response = client.CopyObject(request);
+                bool result = response.HttpStatusCode == System.Net.HttpStatusCode.OK;
+
+                if (result) delete_file(oldFileName);
+
+                return result;
+            }
+            catch { return false; }
+        }
+
+        public static bool delete_file(string fileName)
+        {
+            try
+            {
+                AmazonS3Client client = get_client();
+                if (client == null) return false;
+                
                 DeleteObjectRequest request = new DeleteObjectRequest();
                 request.BucketName = RaaiVanSettings.CephStorage.Bucket;
                 request.Key = fileName;
 
                 DeleteObjectResponse response = client.DeleteObject(request);
+                return response.HttpStatusCode == System.Net.HttpStatusCode.OK;
             }
-            catch { }
+            catch { return false; }
         }
 
         public static string get_download_url(string fileName, int expiresInMinutes = 60)

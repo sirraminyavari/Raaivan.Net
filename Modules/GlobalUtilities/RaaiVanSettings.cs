@@ -679,7 +679,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static bool FileEncryption(Guid? applicationId)
         {
-            return get_value(applicationId, RVSettingsItem.FileEncryption).ToLower() == "true" && !CephStorage.Enabled;
+            return get_value(applicationId, RVSettingsItem.FileEncryption).ToLower() == "true";
         }
 
         public static string GATrackingID(Guid? applicationId) //TrackingID for Google Analytics Account

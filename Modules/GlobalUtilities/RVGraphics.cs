@@ -173,19 +173,19 @@ namespace RaaiVan.Modules.GlobalUtilities
             return true;
         }
 
-        public static bool make_thumbnail(Guid? applicationId, DocFileInfo sourceFile, DocFileInfo destFile,
+        public static bool make_thumbnail(Guid? applicationId, byte[] sourceContent, DocFileInfo destFile, ref byte[] destContent,
             int width, int height, int minWidth, int minHeight, ref string errorMessage,
-            string forceExtension = null, bool stretch = false)
+            string forceExtension = null, bool stretch = false, bool dontStore = false)
         {
             if (!string.IsNullOrEmpty(forceExtension)) destFile.Extension = forceExtension;
 
-            if (!sourceFile.exists(applicationId)) return false;
+            if (sourceContent == null || sourceContent.Length == 0) return false;
 
             Image retImage = null;
 
             try
             {
-                using (MemoryStream stream = new MemoryStream(sourceFile.toByteArray(applicationId)))
+                using (MemoryStream stream = new MemoryStream(sourceContent))
                 using (Image img = Bitmap.FromStream(stream))
                 {
                     bool result = make_thumbnail(img, width, height, minWidth, minHeight,
@@ -207,7 +207,8 @@ namespace RaaiVan.Modules.GlobalUtilities
                         retImage.Dispose();
                         img.Dispose();
 
-                        destFile.store(applicationId, ms.ToArray());
+                        destContent = ms.ToArray();
+                        if(!dontStore) destFile.store(applicationId, destContent);
                     }
 
                     return true;
@@ -219,16 +220,16 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        public static bool extract_thumbnail(Guid? applicationId, DocFileInfo sourceFile, DocFileInfo destFile, int x, int y,
-            int width, int height, int thumbnailWidth, int thumbnailHeight, ref Image retImage, ref string message)
+        public static bool extract_thumbnail(DocFileInfo sourceFile, byte[] sourceContent, DocFileInfo destFile, 
+            int x, int y, int width, int height, int thumbnailWidth, int thumbnailHeight, ref Image retImage, ref string message)
         {
             try
             {
-                if (!sourceFile.exists(applicationId)) return false;
+                if (sourceContent == null || sourceContent.Length == 0) return false;
 
                 bool result = true;
 
-                using (MemoryStream stream = new MemoryStream(sourceFile.toByteArray(applicationId)))
+                using (MemoryStream stream = new MemoryStream(sourceContent))
                 using (Bitmap image = Bitmap.FromStream(stream) as Bitmap)
                 {
                     if (image.Width < thumbnailWidth || image.Height < thumbnailHeight)
@@ -261,8 +262,8 @@ namespace RaaiVan.Modules.GlobalUtilities
 
                     message = "{\"X\":" + x.ToString() + ",\"Y\":" + y.ToString() +
                         ",\"Width\":" + width.ToString() + ",\"Height\":" + height.ToString() +
-                        ",\"HighQualityImageURL\":\"" + sourceFile.get_client_address(applicationId) + "\"" +
-                        ",\"ImageURL\":\"" + destFile.get_client_address(applicationId) + "\"" +
+                        ",\"HighQualityImageURL\":\"" + sourceFile.url() + "\"" +
+                        ",\"ImageURL\":\"" + destFile.url() + "\"" +
                     "}";
 
                     Rectangle rect = new Rectangle(x, y, width, height);
@@ -283,33 +284,35 @@ namespace RaaiVan.Modules.GlobalUtilities
             catch { message = "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}"; return false; }
         }
 
-        public static bool extract_thumbnail(Guid? applicationId, DocFileInfo sourceFile, DocFileInfo destFile,
+        public static bool extract_thumbnail(Guid? applicationId, DocFileInfo sourceFile, byte[] sourceContent, DocFileInfo destFile,
             int x, int y, int width, int height, int thumbnailWidth, int thumbnailHeight, ref string message)
         {
             try
             {
-                if (!sourceFile.exists(applicationId)) return false;
+                if (sourceFile == null || sourceContent == null || sourceContent.Length == 0) return false;
 
                 destFile.Extension = "jpg";
 
                 if (!string.IsNullOrEmpty(sourceFile.Extension) && sourceFile.Extension != "jpg")
                 {
-                    using (MemoryStream stream = new MemoryStream(sourceFile.toByteArray(applicationId)))
+                    using (MemoryStream stream = new MemoryStream(sourceContent))
                     using (MemoryStream newSt = new MemoryStream())
                     using (Image img = Bitmap.FromStream(stream))
                     {
                         img.Save(newSt, ImageFormat.Jpeg);
                         img.Dispose();
 
-                        sourceFile.delete(applicationId);
+                        //sourceFile.delete(applicationId);
 
                         sourceFile.Extension = "jpg";
-                        sourceFile.store(applicationId, newSt.ToArray());
+                        sourceContent = newSt.ToArray();
+
+                        //sourceFile.store(applicationId, newSt.ToArray());
                     }
                 }
 
                 Image retImage = null;
-                if (extract_thumbnail(applicationId, sourceFile, destFile, x, y, width, height,
+                if (extract_thumbnail(sourceFile, sourceContent, destFile, x, y, width, height,
                     thumbnailWidth, thumbnailHeight, ref retImage, ref message))
                 {
                     using (MemoryStream st = new MemoryStream())
@@ -331,7 +334,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         }
 
         public static bool create_icon(Guid? applicationId, Guid iconId, IconType iconType,
-            DocFileInfo uploadedFile, ref string errorMessage)
+            byte[] fileContent, ref string errorMessage)
         {
             int width = 100, height = 100, highQualityWidth = 600, highQualityHeight = 600;
 
@@ -346,12 +349,15 @@ namespace RaaiVan.Modules.GlobalUtilities
             DocFileInfo highQualityFile = new DocFileInfo() { FileID = iconId, Extension = "jpg", FolderName = highQualityImageFolder };
             DocFileInfo file = new DocFileInfo() { FileID = iconId, Extension = "jpg", FolderName = imageFolder };
 
-            bool succeed = RVGraphics.make_thumbnail(applicationId,
-                uploadedFile, highQualityFile, highQualityWidth, highQualityHeight,
-                width, height, ref errorMessage, highQualityFile.Extension);
+            byte[] hqContent = new byte[0];
 
-            return succeed && RVGraphics.extract_thumbnail(applicationId, highQualityFile, file,
-                -1, -1, -1, -1, width, height, ref errorMessage);
+            bool succeed = RVGraphics.make_thumbnail(applicationId,
+                fileContent, highQualityFile, ref hqContent, highQualityWidth, highQualityHeight,
+                width, height, ref errorMessage, highQualityFile.Extension, dontStore: true);
+
+            return succeed && hqContent != null && hqContent.Length > 0 && 
+                RVGraphics.extract_thumbnail(applicationId, highQualityFile, hqContent, 
+                file, -1, -1, -1, -1, width, height, ref errorMessage);
         }
     }
 }
