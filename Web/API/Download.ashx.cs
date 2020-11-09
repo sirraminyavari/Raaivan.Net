@@ -39,7 +39,7 @@ namespace RaaiVan.Web.API
 
             List<FolderNames> freeFolders = new[] {
                 FolderNames.ProfileImages,
-                FolderNames.HighQualityApplicationIcon,
+                FolderNames.HighQualityProfileImage,
                 FolderNames.CoverPhoto,
                 FolderNames.HighQualityCoverPhoto,
                 FolderNames.Icons,

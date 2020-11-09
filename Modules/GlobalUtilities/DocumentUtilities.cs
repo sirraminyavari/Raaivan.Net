@@ -609,7 +609,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        private static string _get_folder_path(Guid? applicationId, FolderNames folderName, bool cephMode = false)
+        private static string _get_folder_path(Guid? applicationId, FolderNames folderName, ref bool isPublic, bool cephMode = false)
         {
             bool isAppLogo = folderName == FolderNames.ApplicationIcons || folderName == FolderNames.HighQualityApplicationIcon;
             bool isProfileImage = folderName == FolderNames.ProfileImages || folderName == FolderNames.HighQualityProfileImage;
@@ -619,6 +619,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             string applicationPart = !applicationId.HasValue ? string.Empty : applicationId.Value.ToString() + "/";
 
             string mainFolder = string.Empty, contentFolder = string.Empty;
+            isPublic = false;
 
             switch (folderName)
             {
@@ -638,26 +639,32 @@ namespace RaaiVan.Modules.GlobalUtilities
                 case FolderNames.CoverPhoto:
                     mainFolder = "Global_Documents/";
                     contentFolder = applicationPart + folderName.ToString();
+                    isPublic = true;
                     break;
                 case FolderNames.HighQualityIcon:
                     mainFolder = "Global_Documents/";
                     contentFolder = applicationPart + FolderNames.Icons.ToString() + "/" + "HighQuality";
+                    isPublic = true;
                     break;
                 case FolderNames.HighQualityApplicationIcon:
                     mainFolder = "Global_Documents/";
                     contentFolder = applicationPart + FolderNames.ApplicationIcons.ToString() + "/" + "HighQuality";
+                    isPublic = true;
                     break;
                 case FolderNames.HighQualityProfileImage:
                     mainFolder = "Global_Documents/";
                     contentFolder = applicationPart + FolderNames.ProfileImages.ToString() + "/" + "HighQuality";
+                    isPublic = true;
                     break;
                 case FolderNames.HighQualityCoverPhoto:
                     mainFolder = "Global_Documents/";
                     contentFolder = applicationPart + FolderNames.CoverPhoto.ToString() + "/" + "HighQuality";
+                    isPublic = true;
                     break;
                 case FolderNames.Themes:
                     mainFolder = "CSS/";
                     contentFolder = folderName.ToString();
+                    isPublic = true;
                     break;
                 case FolderNames.EmailTemplates:
                     mainFolder = "App_Data/";
@@ -675,22 +682,28 @@ namespace RaaiVan.Modules.GlobalUtilities
             return str[0].ToString() + str[1].ToString() + "\\" + str[2].ToString();
         }
 
-        private string map_path(Guid? applicationId, string dest = null)
+        private string map_path(Guid? applicationId, ref bool isPublic, string dest = null)
         {
             if (!FolderName.HasValue) return string.Empty;
 
             dest = string.IsNullOrEmpty(dest) ? string.Empty : (dest[0] == '\\' ? string.Empty : "\\") + dest;
 
-            string folder = _get_folder_path(applicationId, FolderName.Value, cephMode: CephMode) + dest.Replace("\\", "/");
+            string folder = _get_folder_path(applicationId, FolderName.Value, ref isPublic, cephMode: CephMode) + dest.Replace("\\", "/");
 
             return CephMode ? folder : PublicMethods.map_path("~/" + folder);
         }
 
-        private string get_folder_address(Guid? applicationId)
+        private string get_folder_address(Guid? applicationId, ref bool isPublic)
         {
             if (!FolderName.HasValue) return string.Empty;
             string sub = !has_sub_folder(FolderName.Value) ? string.Empty : "\\" + get_sub_folder();
-            return map_path(applicationId, dest: sub);
+            return map_path(applicationId, ref isPublic, dest: sub);
+        }
+
+        private string get_folder_address(Guid? applicationId)
+        {
+            bool isPublic = false;
+            return get_folder_address(applicationId, ref isPublic);
         }
 
         public static string index_folder_address(Guid? applicationId)
@@ -718,20 +731,26 @@ namespace RaaiVan.Modules.GlobalUtilities
             return CephMode ? CephStorage.folder_exists(get_folder_address(applicationId)) : files_count_in_folder(applicationId) > 0;
         }
 
-        private string get_address(Guid? applicationId, bool? encrypted = null, bool ignoreExtension = false) {
+        private string get_address(Guid? applicationId, ref bool isPublic, bool? encrypted = null, bool ignoreExtension = false) {
             if (!FileID.HasValue) return string.Empty;
 
             string encryptedPrefix = encrypted.HasValue && encrypted.Value ? PublicConsts.EncryptedFileNamePrefix : "";
 
-            return get_folder_address(applicationId) + "\\" +  encryptedPrefix + 
+            return get_folder_address(applicationId, ref isPublic) + (CephMode ? "/" : "\\") + encryptedPrefix +
                 (ignoreExtension ? file_name_without_extension : file_name_with_extension);
         }
 
-        private string get_real_address(Guid? applicationId)
+        private string get_address(Guid? applicationId, bool? encrypted = null, bool ignoreExtension = false)
+        {
+            bool isPublic = false;
+            return get_address(applicationId, ref isPublic, encrypted: encrypted, ignoreExtension: ignoreExtension);
+        }
+
+        private string get_real_address(Guid? applicationId, ref bool isPublic)
         {
             _Encrypted = false;
 
-            string folderPath = get_folder_address(applicationId);
+            string folderPath = get_folder_address(applicationId, ref isPublic);
 
             if (!FileID.HasValue || string.IsNullOrEmpty(folderPath)) return string.Empty;
 
@@ -742,6 +761,12 @@ namespace RaaiVan.Modules.GlobalUtilities
             if (CephMode) return CephStorage.file_exists(address) ? address : string.Empty;
             else return File.Exists(address) ? address :
                (!string.IsNullOrEmpty(extLess) && File.Exists(extLess) ? extLess : string.Empty);
+        }
+
+        private string get_real_address(Guid? applicationId)
+        {
+            bool isPublic = false;
+            return get_real_address(applicationId, ref isPublic);
         }
 
         public bool store(Guid? applicationId, byte[] fileContent)
@@ -759,11 +784,12 @@ namespace RaaiVan.Modules.GlobalUtilities
 
                 if (needsEncryption) fileContent = DocumentUtilities.encrypt_bytes_aes(fileContent);
 
-                string address = get_address(applicationId, encrypted: needsEncryption);
+                bool isPublic = false;
+                string address = get_address(applicationId, ref isPublic, encrypted: needsEncryption);
 
                 if (CephMode)
                 {
-                    if (!CephStorage.add_file(address, fileContent)) return false;
+                    if (!CephStorage.add_file(address, fileContent, isPublic)) return false;
                 }
                 else
                 {
@@ -801,8 +827,9 @@ namespace RaaiVan.Modules.GlobalUtilities
 
                 if (CephMode)
                 {
-                    string newAddress = get_address(applicationId, encrypted: is_encrypted(applicationId));
-                    return CephStorage.rename_file(sourceAddress, newAddress);
+                    bool isPublic = false;
+                    string newAddress = get_address(applicationId, ref isPublic, encrypted: is_encrypted(applicationId));
+                    return CephStorage.rename_file(sourceAddress, newAddress, isPublic);
                 }
                 else
                 {
@@ -867,8 +894,14 @@ namespace RaaiVan.Modules.GlobalUtilities
         }
 
         public string url() {
-            if (CephMode) return CephStorage.get_download_url(get_real_address(applicationId: null));
-            else return "../../download/" + FileID.ToString() + (FolderName.HasValue ? "?Category=" + FolderName.ToString() : string.Empty);
+            if (CephMode)
+            {
+                bool isPublic = false;
+                string realAddress = get_real_address(applicationId: null, ref isPublic);
+                return CephStorage.get_download_url(realAddress, isPublic);
+            }
+            else return "../../download/" + FileID.ToString() + 
+                    (FolderName.HasValue ? "?Category=" + FolderName.ToString() : string.Empty);
         }
 
         public string toJson(Guid? applicationId, bool icon = false) {

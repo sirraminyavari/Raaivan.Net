@@ -73,7 +73,7 @@
                                     Class: (circular ? "rv-circle" : "rv-border-radius-quarter") + " " +
                                         (params.ImageClass || " "),
                                     Style: "width:" + imageWidth + "px; height:" + imageHeight + "px; cursor:default;" + (params.ImageStyle || " "),
-                                    Attributes: [{ Name: "src", Value: (newUrl || imageUrl) + "?timeStamp=" + (new Date()).getTime() }],
+                                    Attributes: [{ Name: "src", Value: GlobalUtilities.add_timestamp(newUrl || imageUrl) }],
                                     Properties: [
                                         {
                                             Name: "onmouseover",
@@ -138,10 +138,10 @@
                 var showedDiv = GlobalUtilities.show(_div, { OnClose: function () { if (_imageCrop) delete _imageCrop; } });
 
                 var _imageCrop = null;
-
+                
                 var _create_crop_object = function () {
                     _imageCrop = new ImageCrop(_div, {
-                        ImageURL: highQualityImageUrl + "?timeStamp=" + (new Date().getTime()),
+                        ImageURL: GlobalUtilities.add_timestamp(highQualityImageUrl),
                         Dimensions: imageDimensions,
                         AspectRatio: aspectRatio,
                         OnSave: function (dimensions) {

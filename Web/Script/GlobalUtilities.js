@@ -1307,6 +1307,11 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
     is_url: function (str) { return /((([hH][tT][tT][pP][sS]?)|([fF][tT][pP])):\/\/[^\s<>]+)/g.test(str); },
 
+    add_timestamp: function (url) {
+        if (!url) return "";
+        return url + (url.indexOf("?") >= 0 ? "&" : "?") + "timeStamp=" + (new Date()).getTime()
+    },
+
     is_base64: function (str) {
         return (new RegExp("^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$", "g")).test(str);
     },

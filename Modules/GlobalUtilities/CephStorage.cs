@@ -49,7 +49,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                 client.ListBuckets().Buckets.Select(b => b.BucketName).ToList();
         }
 
-        public static bool add_file(string fileName, byte[] content)
+        public static bool add_file(string fileName, byte[] content, bool isPublic)
         {
             try
             {
@@ -63,9 +63,10 @@ namespace RaaiVan.Modules.GlobalUtilities
                         Key = fileName,
                         InputStream = stream,
                         StorageClass = S3StorageClass.Standard,
-                        PartSize = 6291456 // 6 MB
-                        //CannedACL = S3CannedACL.Private
+                        PartSize = 4194304 //4MB
                     };
+
+                    if (isPublic) request.CannedACL = S3CannedACL.PublicRead;
 
                     TransferUtility utility = new TransferUtility(client);
 
@@ -150,7 +151,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             catch { return new byte[0]; }
         }
 
-        public static bool rename_file(string oldFileName, string newFileName)
+        public static bool rename_file(string oldFileName, string newFileName, bool isPublic)
         {
             try
             {
@@ -161,6 +162,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                 request.SourceBucket = request.DestinationBucket = RaaiVanSettings.CephStorage.Bucket;
                 request.SourceKey = oldFileName;
                 request.DestinationKey = newFileName;
+                if (isPublic) request.CannedACL = S3CannedACL.PublicRead;
 
                 CopyObjectResponse response = client.CopyObject(request);
                 bool result = response.HttpStatusCode == System.Net.HttpStatusCode.OK;
@@ -189,14 +191,19 @@ namespace RaaiVan.Modules.GlobalUtilities
             catch { return false; }
         }
 
-        public static string get_download_url(string fileName, int expiresInMinutes = 60)
+        public static string get_download_url(string fileName, bool isPublic, int expiresInMinutes = 60 * 10)
         {
             try
             {
+                if (string.IsNullOrEmpty(fileName)) return string.Empty;
+
+                if (isPublic) return RaaiVanSettings.CephStorage.URL
+                        .Replace("://", "://" + RaaiVanSettings.CephStorage.Bucket + ".") + "/" + fileName;
+
                 AmazonS3Client client = get_client();
                 if (client == null) return string.Empty;
 
-                if (expiresInMinutes <= 0) expiresInMinutes = 60;
+                if (expiresInMinutes <= 0) expiresInMinutes = 60 * 10;
 
                 GetPreSignedUrlRequest request = new GetPreSignedUrlRequest();
                 request.BucketName = RaaiVanSettings.CephStorage.Bucket;
