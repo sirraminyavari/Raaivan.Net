@@ -62,6 +62,8 @@ StyleCopReport.xml
 # web.config & License file
 Web.config
 raaivan.license
+[Aa]pp_[Dd]ata/
+[Gg]lobal_[Dd]ocuments/
 
 # Files built by Visual Studio
 *_i.c
