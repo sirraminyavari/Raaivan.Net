@@ -375,7 +375,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             get
             {
-                return get_value(Guid.Empty, RVSettingsItem.DailyDatabaseBackup, "true").ToLower() == "true";
+                return get_value(Guid.Empty, RVSettingsItem.DailyDatabaseBackup, "true").ToLower() == "true" &&
+                    RaaiVanSettings.SAASBasedMultiTenancy;
             }
         }
 

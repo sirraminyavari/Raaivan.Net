@@ -20,7 +20,7 @@ namespace RaaiVan.Web.API
 
         private static void _initialize()
         {
-            if (_inited) return;
+            if (_inited || RaaiVanSettings.SAASBasedMultiTenancy) return;
             _inited = true;
 
             List<ITenant> tenants = RaaiVanSettings.Tenants;
@@ -114,6 +114,8 @@ namespace RaaiVan.Web.API
 
         public static void start(string jobName, int? interval = null, DateTime? startTime = null, DateTime? endTime = null)
         {
+            if (RaaiVanSettings.SAASBasedMultiTenancy) return;
+
             _initialize();
 
             RVJob trd = jobsDic.ContainsKey(jobName) && jobsDic[jobName] != null ? jobsDic[jobName] : null;
@@ -171,6 +173,8 @@ namespace RaaiVan.Web.API
 
         public static void run_jobs()
         {
+            if (RaaiVanSettings.SAASBasedMultiTenancy) return;
+
             _initialize();
 
             List<string> keys = new List<string>(jobsDic.Keys);
@@ -180,7 +184,7 @@ namespace RaaiVan.Web.API
 
         public static void stop(string jobName)
         {
-            if (!jobsDic.ContainsKey(jobName) || jobsDic[jobName] == null) return;
+            if (!jobsDic.ContainsKey(jobName) || jobsDic[jobName] == null || RaaiVanSettings.SAASBasedMultiTenancy) return;
 
             jobsDic[jobName].ThreadObject.Abort();
             jobsDic.Remove(jobName);
