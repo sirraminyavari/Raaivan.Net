@@ -884,7 +884,7 @@ namespace RaaiVan.Web.API
                 responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";
                 return;
             }
-
+            
             Dictionary<string, RVJob> threads = RVScheduler.get_list();
 
             responseText = "{\"Jobs\":[" +

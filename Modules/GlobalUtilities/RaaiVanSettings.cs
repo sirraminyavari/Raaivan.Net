@@ -102,7 +102,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         SystemEmailUseSSL,
         SystemEmailTimeout,
         SystemEmailSubject,
-        
+
         DefaultCNExtensions,
         PersonalPagePriorities,
 
@@ -153,7 +153,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         private static Dictionary<Guid, Dictionary<RVSettingsItem, string>> SettingsDic =
             new Dictionary<Guid, Dictionary<RVSettingsItem, string>>();
 
-        private static string get_value(Guid? applicationId, RVSettingsItem name, string defaultValue = "") {
+        private static string get_value(Guid? applicationId, RVSettingsItem name, string defaultValue = "")
+        {
             if (!applicationId.HasValue) applicationId = Guid.Empty;
 
             if (SettingsDic.ContainsKey(applicationId.Value) && SettingsDic[applicationId.Value].ContainsKey(name))
@@ -173,16 +174,21 @@ namespace RaaiVan.Modules.GlobalUtilities
             List<RVSettingsItem> theNames = names != null && names.Count > 0 ? names :
                 Enum.GetValues(typeof(RVSettingsItem)).Cast<RVSettingsItem>().ToList();
 
-            foreach (RVSettingsItem n in theNames) {
+            foreach (RVSettingsItem n in theNames)
+            {
                 if (!items.ContainsKey(n) || string.IsNullOrEmpty(items[n]))
-                    items[n] = ConfigurationManager.AppSettings[n.ToString()];
+                {
+                    string env = PublicMethods.get_environment_variable(n.ToString());
+                    items[n] = string.IsNullOrEmpty(env) ? ConfigurationManager.AppSettings[n.ToString()] : env;
+                }
             }
 
             foreach (RVSettingsItem n in items.Keys) save_value(applicationId, n, items[n]);
             return items;
         }
 
-        private static void save_value(Guid applicationId, RVSettingsItem name, string value) {
+        private static void save_value(Guid applicationId, RVSettingsItem name, string value)
+        {
             lock (SettingsDic)
             {
                 if (!SettingsDic.ContainsKey(applicationId))
@@ -193,10 +199,15 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static bool set_value(Guid applicationId, Dictionary<RVSettingsItem, string> items, Guid currentUserId)
         {
-            bool result = GlobalController.set_system_settings(applicationId, items, currentUserId);
-            if (!result) return false;
+            if (applicationId != Guid.Empty)
+            {
+                bool result = GlobalController.set_system_settings(applicationId, items, currentUserId);
+                if (!result) return false;
+            }
+
             foreach (RVSettingsItem itm in items.Keys)
                 save_value(applicationId, itm, items[itm]);
+
             return true;
         }
 
@@ -207,7 +218,8 @@ namespace RaaiVan.Modules.GlobalUtilities
             return set_value(applicationId, items, currentUserId);
         }
 
-        private static DateTime get_time(Guid applicationId, RVSettingsItem name, DateTime defaultValue) {
+        private static DateTime get_time(Guid applicationId, RVSettingsItem name, DateTime defaultValue)
+        {
             string val = get_value(applicationId, name);
             DateTime tm = defaultValue;
 
@@ -278,12 +290,14 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         private static string _StoragePath;
 
-        public static string StoragePath {
+        public static string StoragePath
+        {
             get
             {
-                if (string.IsNullOrEmpty(_StoragePath)) {
+                if (string.IsNullOrEmpty(_StoragePath))
+                {
                     string path = get_value(null, RVSettingsItem.StoragePath);
-                    if( string.IsNullOrEmpty(path)) path = System.Web.Hosting.HostingEnvironment.MapPath("~/");
+                    if (string.IsNullOrEmpty(path)) path = System.Web.Hosting.HostingEnvironment.MapPath("~/");
                     if (path[path.Length - 1] == '\\') path = path.Substring(0, path.Length - 1);
                     _StoragePath = path;
                 }
@@ -693,7 +707,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             return RaaiVanConfig.Modules.RealTime(applicationId) &&
                 get_value(Guid.Empty, RVSettingsItem.RealTime).ToLower() != "false";
         }
-        
+
         public static bool Explorer(Guid? applicationId)
         {
             return RaaiVanConfig.Modules.Explorer(applicationId) &&
@@ -721,29 +735,29 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 return get_value(applicationId, RVSettingsItem.SSOTicketVariableName);
             }
-            
+
             public static string LoginURL(Guid? applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.SSOLoginURL).Replace("[return_url]",
                     PublicConsts.get_complete_url(applicationId, PublicConsts.LoginPage));
             }
-            
+
             public static string ValidateURL(Guid? applicationId, string ticket)
             {
                 return get_value(applicationId, RVSettingsItem.SSOValidateURL).Replace("[return_url]",
                     PublicConsts.get_complete_url(applicationId, PublicConsts.LoginPage)).Replace("[ticket]", ticket);
             }
-            
+
             public static string XMLUserNameTag(Guid? applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.SSOXMLUserNameTag);
             }
-            
+
             public static string JSONUserNamePath(Guid? applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.SSOJSONUserNamePath);
             }
-            
+
             public static string InvalidTicketCode(Guid? applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.SSOInvalidTicketCode);
@@ -761,17 +775,17 @@ namespace RaaiVan.Modules.GlobalUtilities
                     areas.Where(u => u.StartsWith(pos)).LastOrDefault()).Split(':')
                     .Where(v => v != pos && !string.IsNullOrEmpty(v)).ToList();
             }
-            
+
             public static List<string> Left(Guid applicationId)
             {
                 return _GetArea(applicationId, "Left");
             }
-            
+
             public static List<string> Center(Guid applicationId)
             {
                 return _GetArea(applicationId, "Center");
             }
-            
+
             public static List<string> Right(Guid applicationId)
             {
                 return _GetArea(applicationId, "Right");
@@ -819,7 +833,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 return get_int(applicationId, RVSettingsItem.NotAvailablePreviousPasswordsCount, 0, 0);
             }
-            
+
             public static string UserNamePattern(Guid? applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.UserNamePattern).Trim();
@@ -841,17 +855,17 @@ namespace RaaiVan.Modules.GlobalUtilities
                 {
                     return get_value(applicationId, RVSettingsItem.PasswordPolicyUpperLower).ToLower() != "false";
                 }
-                
+
                 public static bool NonAlphabetic(Guid? applicationId)
                 {
                     return get_value(applicationId, RVSettingsItem.PasswordPolicyNonAlphabetic).ToLower() != "false";
                 }
-                
+
                 public static bool Number(Guid? applicationId)
                 {
                     return get_value(applicationId, RVSettingsItem.PasswordPolicyNumber).ToLower() != "false";
                 }
-                
+
                 public static bool NonAlphaNumeric(Guid? applicationId)
                 {
                     return get_value(applicationId, RVSettingsItem.PasswordPolicyNonAlphaNumeric).ToLower() != "false";
@@ -859,16 +873,17 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        public static class ReautheticationForSensitivePages {
+        public static class ReautheticationForSensitivePages
+        {
             public static bool SettingsAdmin(Guid applicationId)
             {
-                return !SSO.Enabled(applicationId) && 
+                return !SSO.Enabled(applicationId) &&
                     get_value(applicationId, RVSettingsItem.ReauthenticationForSettingsAdminPage).ToLower() == "true";
             }
 
             public static bool UsersAdmin(Guid applicationId)
             {
-                return !SSO.Enabled(applicationId) && 
+                return !SSO.Enabled(applicationId) &&
                     get_value(applicationId, RVSettingsItem.ReauthenticationForUsersAdminPage).ToLower() == "true";
             }
         }
@@ -879,12 +894,12 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 return get_int(applicationId, RVSettingsItem.MinAcceptableExpertiseReferralsCount, 1, null);
             }
-            
+
             public static int MinAcceptableExpertiseConfirmsPercentage(Guid applicationId)
             {
                 return get_int(applicationId, RVSettingsItem.MinAcceptableExpertiseConfirmsPercentage, 1, null);
             }
-            
+
             public static List<string> DefaultCNExtensions(Guid applicationId)
             {
                 string strExts = get_value(applicationId, RVSettingsItem.DefaultCNExtensions);
@@ -906,7 +921,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 return get_int(applicationId, RVSettingsItem.NotificationsSeenTimeout, 5000, 2000);
             }
-            
+
             public static int UpdateInterval(Guid? applicationId)
             {
                 return get_int(applicationId, RVSettingsItem.NotificationsUpdateInterval, 30000, 5000);
@@ -919,12 +934,12 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 return get_value(applicationId, RVSettingsItem.FileContents).ToLower() != "false";
             }
-            
+
             public static int ExtractionInterval(Guid applicationId)
             {
                 return get_int(applicationId, RVSettingsItem.FileContentExtractionInterval, 3600000, null);
             }
-            
+
             public static int BatchSize(Guid applicationId)
             {
                 return get_int(applicationId, RVSettingsItem.FileContentExtractionBatchSize, 10, null);
@@ -932,10 +947,10 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             public static DateTime StartTime(Guid applicationId)
             {
-                return get_time(applicationId, RVSettingsItem.FileContentExtractionStartTime, 
+                return get_time(applicationId, RVSettingsItem.FileContentExtractionStartTime,
                     new DateTime(2000, 1, 1, 0, 0, 0));
             }
-            
+
             public static DateTime EndTime(Guid applicationId)
             {
                 return get_time(applicationId, RVSettingsItem.FileContentExtractionEndTime,
@@ -949,32 +964,32 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 return get_value(applicationId, RVSettingsItem.Index).ToLower() != "false";
             }
-            
+
             public static bool Ram(Guid applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.IndexUpdateUseRam).ToLower() == "true";
             }
-            
+
             public static int Interval(Guid applicationId)
             {
                 return get_int(applicationId, RVSettingsItem.IndexUpdateInterval, 3600000, null);
             }
-            
+
             public static int BatchSize(Guid applicationId)
             {
                 return get_int(applicationId, RVSettingsItem.IndexUpdateBatchSize, 10, null);
             }
-            
+
             public static DateTime StartTime(Guid applicationId)
             {
                 return get_time(applicationId, RVSettingsItem.IndexUpdateStartTime, new DateTime(2000, 1, 1, 0, 0, 0));
             }
-            
+
             public static DateTime EndTime(Guid applicationId)
             {
                 return get_time(applicationId, RVSettingsItem.IndexUpdateEndTime, new DateTime(2000, 1, 1, 23, 59, 59));
             }
-            
+
             public static string[] Priorities(Guid applicationId)
             {
                 string val = get_value(applicationId, RVSettingsItem.IndexUpdatePriorities);
@@ -1012,7 +1027,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
                 return p.ToArray();
             }
-            
+
             public static bool CheckPermissions(Guid applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.CheckPermissionsForSearchResults).ToLower() == "true";
@@ -1053,22 +1068,22 @@ namespace RaaiVan.Modules.GlobalUtilities
                 return RaaiVanConfig.Modules.SMSEMailNotifier(applicationId) &&
                     get_value(applicationId, RVSettingsItem.EmailQueue).ToLower() == "true";
             }
-            
+
             public static int Interval(Guid applicationId)
             {
                 return get_int(applicationId, RVSettingsItem.EmailQueueInterval, 3600000, null);
             }
-            
+
             public static int BatchSize(Guid applicationId)
             {
                 return get_int(applicationId, RVSettingsItem.EmailQueueBatchSize, 100, 1);
             }
-            
+
             public static DateTime StartTime(Guid applicationId)
             {
                 return get_time(applicationId, RVSettingsItem.EmailQueueStartTime, new DateTime(2000, 1, 1, 0, 0, 0));
             }
-            
+
             public static DateTime EndTime(Guid applicationId)
             {
                 return get_time(applicationId, RVSettingsItem.EmailQueueEndTime, new DateTime(2000, 1, 1, 23, 59, 59));
@@ -1081,37 +1096,37 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 return get_value(applicationId, RVSettingsItem.SystemEmailAddress);
             }
-            
+
             public static string DisplayName(Guid? applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.SystemEmailDisplayName);
             }
-            
+
             public static string Password(Guid? applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.SystemEmailPassword);
             }
-            
+
             public static string SMTPAddress(Guid? applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.SystemEmailSMTPAddress);
             }
-            
+
             public static int SMTPPort(Guid? applicationId)
             {
                 return get_int(applicationId, RVSettingsItem.SystemEmailSMTPPort, 0, null);
             }
-            
+
             public static bool UseSSL(Guid? applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.SystemEmailUseSSL).ToLower() == "true";
             }
-            
+
             public static int Timeout(Guid? applicationId)
             {
                 return get_int(applicationId, RVSettingsItem.SystemEmailTimeout, 0, null);
             }
-            
+
             public static string EmailSubject(Guid? applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.SystemEmailSubject, "RaaiVan");
@@ -1126,17 +1141,17 @@ namespace RaaiVan.Modules.GlobalUtilities
                     !string.IsNullOrEmpty(Username(applicationId)) && !string.IsNullOrEmpty(Password(applicationId)) &&
                     get_value(applicationId, RVSettingsItem.Recommender).ToLower() != "false";
             }
-            
+
             public static string URL(Guid applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.RecommenderURL);
             }
-            
+
             public static string Username(Guid applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.RecommenderUsername);
             }
-            
+
             public static string Password(Guid applicationId)
             {
                 return get_value(applicationId, RVSettingsItem.RecommenderPassword);
