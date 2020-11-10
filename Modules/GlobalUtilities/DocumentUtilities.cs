@@ -313,6 +313,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             DocFileInfo fi = new DocFileInfo() {
                 FileID = ownerId,
+                OwnerID = ownerId,
                 Extension = "jpg",
                 FolderName = FolderNames.Icons
             };
@@ -341,6 +342,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             DocFileInfo fi = new DocFileInfo()
             {
                 FileID = ownerId,
+                OwnerID = ownerId,
                 Extension = "jpg",
                 FolderName = folderName
             };
@@ -364,6 +366,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             if (ownerId == Guid.Empty) return false;
 
             DocFileInfo fi = new DocFileInfo() {
+                FileID = ownerId,
                 OwnerID = ownerId,
                 Extension = "jpg",
                 FolderName = FolderNames.Icons
@@ -388,6 +391,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             FolderNames folderName = highQuality ? FolderNames.HighQualityApplicationIcon : FolderNames.ApplicationIcons;
 
             DocFileInfo fi = new DocFileInfo() {
+                FileID = applicationId,
                 OwnerID = applicationId,
                 Extension = "jpg",
                 FolderName = folderName
@@ -410,6 +414,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             FolderNames folderName = highQuality ? FolderNames.HighQualityCoverPhoto : FolderNames.CoverPhoto;
 
             DocFileInfo fi = new DocFileInfo() {
+                FileID = ownerId,
                 OwnerID = ownerId,
                 Extension = "jpg",
                 FolderName = folderName

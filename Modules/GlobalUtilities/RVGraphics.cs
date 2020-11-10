@@ -353,7 +353,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             bool succeed = RVGraphics.make_thumbnail(applicationId,
                 fileContent, highQualityFile, ref hqContent, highQualityWidth, highQualityHeight,
-                width, height, ref errorMessage, highQualityFile.Extension, dontStore: true);
+                width, height, ref errorMessage, highQualityFile.Extension, dontStore: false);
 
             return succeed && hqContent != null && hqContent.Length > 0 && 
                 RVGraphics.extract_thumbnail(applicationId, highQualityFile, hqContent, 

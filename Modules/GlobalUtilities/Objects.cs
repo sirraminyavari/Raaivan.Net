@@ -17,16 +17,18 @@ namespace RaaiVan.Modules.GlobalUtilities
         public string Description;
         public Guid? CreatorUserID;
 
-        public Tenant toTenant() {
+        public Tenant toTenant()
+        {
             return !ApplicationID.HasValue ? null : new Tenant(ApplicationID.Value, Name, string.Empty, string.Empty);
         }
 
-        public string toJson(Guid? currentUserId = null, bool icon = false, bool highQualityIcon = false) {
-            string iconUrl = !icon || !ApplicationID.HasValue ? string.Empty : 
+        public string toJson(Guid? currentUserId = null, bool icon = false, bool highQualityIcon = false)
+        {
+            string iconUrl = !icon || !ApplicationID.HasValue ? string.Empty :
                 DocumentUtilities.get_application_icon_url(ApplicationID.Value);
             string highQualityIconUrl = !highQualityIcon || !ApplicationID.HasValue ? string.Empty :
                 DocumentUtilities.get_application_icon_url(ApplicationID.Value, highQuality: true);
-            
+
             return "{\"ApplicationID\":\"" + (!ApplicationID.HasValue ? string.Empty : ApplicationID.ToString()) + "\"" +
                 ",\"Title\":\"" + Base64.encode(string.IsNullOrEmpty(Title) ? Name : Title) + "\"" +
                 ",\"Description\":\"" + Base64.encode(Description) + "\"" +
