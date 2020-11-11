@@ -30,18 +30,21 @@ namespace RaaiVan.Modules.GlobalUtilities
                 System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
                 sw.Start();
 
-                List<EmailQueueItem> items = GlobalController.get_email_queue_items(trd.TenantID.Value, 
-                    RaaiVanSettings.EmailQueue.BatchSize(trd.TenantID.Value));
-                List<long> succeedIds = new List<long>();
-                foreach (EmailQueueItem itm in items)
-                    if(PublicMethods.send_email(trd.TenantID.Value, itm.Email, itm.Title, itm.EmailBody)) succeedIds.Add(itm.ID.Value);
-                GlobalController.archive_email_queue_items(trd.TenantID.Value, succeedIds);
+                send_emails(trd.TenantID.Value, RaaiVanSettings.EmailQueue.BatchSize(trd.TenantID.Value));
 
                 trd.LastActivityDate = DateTime.Now;
 
                 sw.Stop();
                 trd.LastActivityDuration = sw.ElapsedMilliseconds;
             }
+        }
+
+        public static void send_emails(Guid applicationId, int batchSize) {
+            List<EmailQueueItem> items = GlobalController.get_email_queue_items(applicationId, batchSize);
+            List<long> succeedIds = new List<long>();
+            foreach (EmailQueueItem itm in items)
+                if (PublicMethods.send_email(applicationId, itm.Email, itm.Title, itm.EmailBody)) succeedIds.Add(itm.ID.Value);
+            GlobalController.archive_email_queue_items(applicationId, succeedIds);
         }
     }
 }

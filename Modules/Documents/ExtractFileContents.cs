@@ -56,7 +56,7 @@ namespace RaaiVan.Modules.Documents
         /// 3. Taiin e yek file az DB ke mantnash estekhraj nashode ast.
         /// 4. Estekhraj e matn e file.
         /// 5. Zakhire ye matn e estekhraj shode dar DB (movaffagh ya Na movaffagh)
-        private static void ExtractOneDocument(Guid applicationId, ref bool notExist)
+        public static void ExtractOneDocument(Guid applicationId, ref bool notExist)
         {
             //Taiin e yek file az DB ke mantnash estekhraj nashode ast.
             DocFileInfo file = DocumentsController.get_not_extracted_files(applicationId,

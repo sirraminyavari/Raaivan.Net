@@ -151,7 +151,7 @@ namespace RaaiVan.Web.API
                     trd.ThreadObject.Start(trd);
                     break;
                 case "RemoveTemporaryFiles":
-                    trd.ThreadObject = new Thread((new DocsAPI()).remove_temporary_files);
+                    trd.ThreadObject = new Thread((new DocsAPI()).start_remove_temporary_files);
                     trd.ThreadObject.Start(trd);
                     break;
                 default:

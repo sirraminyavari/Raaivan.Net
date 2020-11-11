@@ -751,8 +751,7 @@ namespace RaaiVan.Modules.Search
                 {
                     //Aya Index ha dar RAM ham zakhire shavand
                     bool inRam = RaaiVanSettings.IndexUpdate.Ram(trd.TenantID.Value);
-                    List<SearchDoc> updateSdList;
-
+                    
                     //tartibe index kardane Search Doc ha cheghoone bashad
                     for (int i = 0; i < RaaiVanSettings.IndexUpdate.Priorities(trd.TenantID.Value).Length; i++)
                     {
@@ -760,26 +759,7 @@ namespace RaaiVan.Modules.Search
                         if (!Enum.TryParse(RaaiVanSettings.IndexUpdate.Priorities(trd.TenantID.Value)[i], out type))
                             type = SearchDocType.All;
 
-                        //Update Tags Before Index Update: Because tagextraction uses IndexLastUpdateDate field
-                        if (type == SearchDocType.Node) CNController.update_form_and_wiki_tags(trd.TenantID.Value,
-                            RaaiVanSettings.IndexUpdate.BatchSize(trd.TenantID.Value));
-
-                        updateSdList = SearchController.get_index_queue_items(trd.TenantID.Value,
-                            RaaiVanSettings.IndexUpdate.BatchSize(trd.TenantID.Value), type);
-
-                        List<SearchDoc> deletedSdList = updateSdList.Where(u => u.Deleted == true).ToList();
-                        List<Guid> IDs = updateSdList.Select(u => u.ID).ToList();
-
-                        foreach (SearchDoc sd in deletedSdList)
-                            updateSdList.Remove(sd);
-
-                        SearchUtilities.remove_docs(trd.TenantID.Value, deletedSdList);
-
-                        Thread.Sleep(20000);
-
-                        SearchUtilities.update_index(trd.TenantID.Value, updateSdList);
-
-                        SearchController.set_index_last_update_date(trd.TenantID.Value, type, IDs);
+                        update_index(trd.TenantID.Value, type, RaaiVanSettings.IndexUpdate.BatchSize(trd.TenantID.Value), 20000);
 
                         Thread.Sleep(20000);
                     }
@@ -794,6 +774,26 @@ namespace RaaiVan.Modules.Search
                 sw.Stop();
                 trd.LastActivityDuration = sw.ElapsedMilliseconds;
             }
+        }
+
+        public static void update_index(Guid applicationId, SearchDocType type, int batchSize, int sleepInterval = 20000) {
+            //Update Tags Before Index Update: Because tagextraction uses IndexLastUpdateDate field
+            if (type == SearchDocType.Node) CNController.update_form_and_wiki_tags(applicationId, batchSize);
+
+            List<SearchDoc> updateSdList = SearchController.get_index_queue_items(applicationId, batchSize, type);
+
+            List<SearchDoc> deletedSdList = updateSdList.Where(u => u.Deleted == true).ToList();
+            List<Guid> IDs = updateSdList.Select(u => u.ID).ToList();
+
+            deletedSdList.ForEach(sd => updateSdList.Remove(sd));
+
+            SearchUtilities.remove_docs(applicationId, deletedSdList);
+
+            if(!RaaiVanSettings.Solr.Enabled) Thread.Sleep(sleepInterval);
+
+            SearchUtilities.update_index(applicationId, updateSdList);
+
+            SearchController.set_index_last_update_date(applicationId, type, IDs);
         }
     }
 }

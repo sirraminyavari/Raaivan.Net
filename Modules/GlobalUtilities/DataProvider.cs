@@ -15,7 +15,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             return "[dbo]." + "[RV_" + name + "]"; //'[dbo].' is database owner and 'CN_' is module qualifier
         }
 
-        private static void _parse_applications(ref IDataReader reader, ref List<Application> retItems)
+        private static void _parse_applications(ref IDataReader reader, ref List<Application> retItems, ref int totalCount)
         {
             while (reader.Read())
             {
@@ -23,6 +23,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                 {
                     Application app = new Application();
 
+                    if (!string.IsNullOrEmpty(reader["TotalCount"].ToString())) totalCount = int.Parse(reader["TotalCount"].ToString());
                     if (!string.IsNullOrEmpty(reader["ApplicationID"].ToString())) app.ApplicationID = (Guid)reader["ApplicationID"];
                     if (!string.IsNullOrEmpty(reader["ApplicationName"].ToString())) app.Name = (string)reader["ApplicationName"];
                     if (!string.IsNullOrEmpty(reader["Title"].ToString())) app.Title = (string)reader["Title"];
@@ -279,13 +280,13 @@ namespace RaaiVan.Modules.GlobalUtilities
             finally { con.Close(); }
         }
 
-        public static List<Application> GetApplications()
+        public static List<Application> GetApplications(int? count, int? lowerBoundary, ref int totalCount)
         {
             try
             {
                 List<Application> ret = new List<Application>();
-                IDataReader reader = ProviderUtil.execute_reader(GetFullyQualifiedName("GetApplications"));
-                _parse_applications(ref reader, ref ret);
+                IDataReader reader = ProviderUtil.execute_reader(GetFullyQualifiedName("GetApplications"), count, lowerBoundary);
+                _parse_applications(ref reader, ref ret, ref totalCount);
                 return ret;
             }
             catch (Exception ex) { return new List<Application>(); }
@@ -297,7 +298,8 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 List<Application> ret = new List<Application>();
                 IDataReader reader = ProviderUtil.execute_reader(GetFullyQualifiedName("GetUserApplications"), userId, isCreator, archive);
-                _parse_applications(ref reader, ref ret);
+                int totalCount = 0;
+                _parse_applications(ref reader, ref ret, ref totalCount);
                 return ret;
             }
             catch (Exception ex) { return new List<Application>(); }

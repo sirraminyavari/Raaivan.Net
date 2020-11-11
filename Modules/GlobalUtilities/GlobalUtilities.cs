@@ -1670,7 +1670,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             catch { return false; }
         }
 
-        public static void set_timeout(Action action, int delay) {
+        public static void set_timeout(Action action, int delay = 0) {
             Thread th = new Thread(() =>
             {
                 if (delay > 0) Thread.Sleep(delay);

@@ -1419,7 +1419,7 @@ namespace RaaiVan.Web.API
         }
 
         //Jobs
-        protected void _remove_temporary_files(Guid applicationId)
+        public void remove_temporary_files(Guid applicationId)
         {
             List<string> files = new List<string>();
             string tempDir = string.Empty;
@@ -1445,7 +1445,7 @@ namespace RaaiVan.Web.API
             }
         }
 
-        public void remove_temporary_files(object rvThread)
+        public void start_remove_temporary_files(object rvThread)
         {
             RVJob trd = (RVJob)rvThread;
 
@@ -1464,7 +1464,7 @@ namespace RaaiVan.Web.API
                 System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
                 sw.Start();
 
-                _remove_temporary_files(trd.TenantID.Value);
+                remove_temporary_files(trd.TenantID.Value);
 
                 trd.LastActivityDate = DateTime.Now;
 

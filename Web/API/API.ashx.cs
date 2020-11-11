@@ -11,6 +11,7 @@ using RaaiVan.Modules.Jobs;
 using RaaiVan.Modules.Documents;
 using RaaiVan.Modules.Privacy;
 using RaaiVan.Modules.Log;
+using RaaiVan.Modules.Search;
 
 namespace RaaiVan.Web.API
 {
@@ -32,7 +33,7 @@ namespace RaaiVan.Web.API
             string responseText = string.Empty;
             
             Guid userId = Guid.Empty;
-
+            
             if (command != "authenticate") check_ticket(ref userId);
             
             switch (command)
@@ -95,6 +96,10 @@ namespace RaaiVan.Web.API
                         PublicMethods.parse_int(context.Request.Params["LowerBoundary"]), ref responseText);
                     return_response(responseText);
                     break;
+                case "get_all_applications":
+
+                    return_response(responseText);
+                    break;
                 default:
                     return_response(CustomAPI.handle_request(paramsContainer.Tenant.Id, userId, command, context.Request));
                     break;
@@ -142,7 +147,7 @@ namespace RaaiVan.Web.API
                 
                 responseText = "{\"Result\":\"ok\"" + 
                     ",\"Ticket\":\"" + ticket + "\"" + 
-                    ",\"AccessToken\":\"" + AccessTokenList.new_token(ticket) + "\"" +
+                    ",\"AccessToken\":\"" + RestAPI.new_token(ticket) + "\"" +
                     "}";
             }
             else
@@ -639,8 +644,6 @@ namespace RaaiVan.Web.API
                 }
             });
 
-            
-            
             responseText = "{" + 
                 (nodeIds.Count > 0 ? string.Empty : "\"TotalCount\":" + totalCount.ToString() + ",") + 
                 "\"Nodes\":[" + string.Join(",", nodes.Select(
@@ -677,6 +680,76 @@ namespace RaaiVan.Web.API
                         "}"
                     )) + "]" + 
                 "}";
+        }
+
+        protected void get_all_applications(int? count, int? lowerBoundary, ref string responseText)
+        {
+            int totalCount = 0;
+
+            List<Application> apps = GlobalController.get_applications(count, lowerBoundary, ref totalCount);
+
+            responseText = "{\"TotalCount\":" + totalCount.ToString() + 
+                ",\"Applications\":[" + string.Join(",", apps.Select(a => a.toJson())) + "]" +
+                "}";
+        }
+
+        protected void run_job(Guid? appId, Dictionary<string, object> options, ref string responseText) {
+            //Privacy Check: OK
+            if (!paramsContainer.GBEdit) return;
+
+            string name = PublicMethods.get_dic_value(options, "name");
+            string schedulerUser = RaaiVanSettings.SchedulerUsername;
+            
+            if (!appId.HasValue || appId == Guid.Empty || options == null || string.IsNullOrEmpty(name) || 
+                string.IsNullOrEmpty(schedulerUser)) return;
+
+            //Check permissions
+            User scheduler = UsersController.get_user(null, paramsContainer.CurrentUserID.Value);
+            if (scheduler == null || string.IsNullOrEmpty(scheduler.UserName) || 
+                scheduler.UserName.ToLower() != schedulerUser.ToLower()) return;
+            //end of Check permissions
+
+            switch (((string)options["name"]).ToLower())
+            {
+                case "extract_file_contents":
+                    {
+                        int count = 0;
+                        int.TryParse(PublicMethods.get_dic_value(options, "count"), out count);
+
+                        for (int i = 0; i < Math.Min(50, Math.Max(count, 1)); i++)
+                        {
+                            bool notExists = false;
+                            ExtractFileContents.ExtractOneDocument(appId.Value, ref notExists);
+                            if (notExists) break;
+                        }
+                    }
+                    break;
+                case "index_update":
+                    {
+                        SearchDocType type = SearchDocType.All;
+                        if (!Enum.TryParse<SearchDocType>(PublicMethods.get_dic_value(options, "type"), out type))
+                            type = SearchDocType.All;
+
+                        int batchSize = 0;
+                        int.TryParse(PublicMethods.get_dic_value(options, "batch_size"), out batchSize);
+
+                        SearchUtilities.update_index(appId.Value, type, batchSize);
+                    }
+                    break;
+                case "send_emails":
+                    {
+                        int batchSize = 0;
+                        int.TryParse(PublicMethods.get_dic_value(options, "batch_size"), out batchSize);
+
+                        EmailQueue.send_emails(appId.Value, batchSize);
+                    }
+                    break;
+                case "remove_temporary_files":
+                    (new DocsAPI()).remove_temporary_files(appId.Value);
+                    break;
+            }
+
+            responseText = "{\"result\":\"ok\"}";
         }
         
         public bool IsReusable

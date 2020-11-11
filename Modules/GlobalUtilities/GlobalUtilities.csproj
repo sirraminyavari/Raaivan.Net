@@ -245,7 +245,6 @@
     <Compile Include="ProviderUtil.cs" />
     <Compile Include="RaaiVanSettings.cs" />
     <Compile Include="Recaptcha.cs" />
-    <Compile Include="Rest.cs" />
     <Compile Include="RVLang.cs" />
     <Compile Include="SMSSender.cs" />
     <Compile Include="USBToken.cs" />

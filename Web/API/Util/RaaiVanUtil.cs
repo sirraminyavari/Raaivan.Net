@@ -81,24 +81,13 @@ namespace RaaiVan.Web.API
             return (AccessTokenList)context.Session[_SessionVariableName];
         }
 
-        private static SortedList<string, AccessTokenList> APITokens = new SortedList<string, AccessTokenList>();
-
-        private static AccessTokenList _get_token_list(string ticket, bool create = false)
-        {
-            if (string.IsNullOrEmpty(ticket)) return null;
-
-            if (!APITokens.ContainsKey(ticket))
-                APITokens.Add(ticket, new AccessTokenList());
-            return APITokens[ticket];
-        }
-
         private static string _get_client_token(HttpContext context)
         {
             return string.IsNullOrEmpty(context.Request.Params[_ClientTokenVariableName]) ? string.Empty :
                 context.Request.Params[_ClientTokenVariableName].Replace(' ', '+');
         }
 
-        private static string _new_token(AccessTokenList lst)
+        public static string new_token(AccessTokenList lst)
         {
             if (lst == null) return string.Empty;
 
@@ -111,18 +100,13 @@ namespace RaaiVan.Web.API
 
         public static string new_token(HttpContext context)
         {
-            return _new_token(_get_token_list(context, true));
-        }
-
-        public static string new_token(string ticket)
-        {
-            return _new_token(_get_token_list(ticket, true));
+            return new_token(_get_token_list(context, true));
         }
 
         public static string refresh_token(HttpContext context, string ticket = null)
         {
             AccessTokenList lst = string.IsNullOrEmpty(ticket) ? 
-                _get_token_list(context) : _get_token_list(ticket);
+                _get_token_list(context) : RestAPI.get_token_list(ticket);
             if (lst == null) return string.Empty;
 
             lst.clear_expired_tokens();
@@ -134,7 +118,7 @@ namespace RaaiVan.Web.API
 
             if (!lst._Tokens[curToken].Expired && !lst._Tokens[curToken].Expiring) lst._Tokens[curToken].Use();
 
-            return string.IsNullOrEmpty(ticket) ? new_token(context) : new_token(ticket);
+            return string.IsNullOrEmpty(ticket) ? new_token(context) : RestAPI.new_token(ticket);
         }
 
         public static bool check_token(HttpContext context, string ticket = null)
@@ -787,7 +771,8 @@ namespace RaaiVan.Web.API
 
         public ITenant Tenant { get; private set; }
 
-        public Guid? ApplicationID {
+        public Guid? ApplicationID
+        {
             get { return Tenant == null ? null : (Guid?)Tenant.Id; }
         }
 
@@ -798,6 +783,8 @@ namespace RaaiVan.Web.API
         {
             get
             {
+                if (RaaiVanSettings.SAASBasedMultiTenancy) return false;
+
                 if (_is_replay_attack.HasValue) return _is_replay_attack.Value;
 
                 string hash = PublicMethods.sha1(_Context.Request.Path + "?" + _Context.Request.Params.ToString());

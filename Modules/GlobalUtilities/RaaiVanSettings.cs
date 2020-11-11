@@ -25,6 +25,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         CephURL,
         CephBucket,
 
+        RedisHosts,
+
         ServiceUnavailable,
         IgnoreReturnURLOnLogin,
         DefaultPrivacy,
@@ -141,6 +143,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         EmailQueueBatchSize,
         EmailQueueStartTime,
         EmailQueueEndTime,
+
+        SchedulerUsername,
 
         Recommender,
         RecommenderURL,
@@ -341,6 +345,11 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 get { return get_value(null, RVSettingsItem.CephBucket); }
             }
+        }
+
+        public static string RedisHosts
+        {
+            get { return get_value(null, RVSettingsItem.RedisHosts); }
         }
 
         public static string RaaiVanURL(Guid? applicationId)
@@ -1131,6 +1140,11 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 return get_value(applicationId, RVSettingsItem.SystemEmailSubject, "RaaiVan");
             }
+        }
+
+        public static string SchedulerUsername
+        {
+            get { return get_value(null, RVSettingsItem.SchedulerUsername); }
         }
 
         public static class Recommender
