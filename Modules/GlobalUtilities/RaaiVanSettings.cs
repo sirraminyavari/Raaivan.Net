@@ -281,8 +281,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
                     try
                     {
-                        string address =
-                            PublicMethods.map_path("~/" + get_value(applicationId, RVSettingsItem.OrganizationLogo));
+                        string address = PublicMethods.map_path("~/" + get_value(applicationId, RVSettingsItem.OrganizationLogo));
                         if (File.Exists(address)) _Logo[applicationId] = System.Drawing.Image.FromFile(address);
                     }
                     catch { }

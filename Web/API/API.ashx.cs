@@ -97,7 +97,8 @@ namespace RaaiVan.Web.API
                     return_response(responseText);
                     break;
                 case "get_all_applications":
-
+                    run_job(PublicMethods.parse_guid(context.Request.Params["ApplicationID"]),
+                        PublicMethods.fromJSON(PublicMethods.parse_string(context.Request.Params["Options"])), ref responseText);
                     return_response(responseText);
                     break;
                 default:

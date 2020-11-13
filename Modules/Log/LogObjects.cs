@@ -720,33 +720,6 @@ namespace RaaiVan.Modules.Log
         private static Dictionary<Action, LogLevel> Dic = new Dictionary<Action, LogLevel>();
         private static bool _Inited = false;
 
-        public static void create_file_dic_to_be_removed()
-        {
-            init();
-
-            Array arr = Enum.GetValues(typeof(Action));
-
-            List<string> newItems = new List<string>();
-
-            foreach (Action acn in arr)
-                if (acn != Action.None && !Dic.ContainsKey(acn)) newItems.Add(acn.ToString());
-
-            string content = string.Join("", newItems.Select(u => "Dic[Action." + u + "] = LogLevel.None;\n"));
-
-            System.IO.File.WriteAllText(PublicMethods.map_path("~/LogActions_" + 
-                PublicMethods.get_random_number(4).ToString() + ".txt"), content);
-        }
-
-        public static void create_file_db_to_be_removed()
-        {
-            init();
-            
-            string content = string.Join(",", Dic.Keys.Select(u => "\n(N'" + u + "', N'" + Dic[u] + "')"));
-
-            System.IO.File.WriteAllText(PublicMethods.map_path("~/LogActions_DB_" +
-                PublicMethods.get_random_number(4).ToString() + ".txt"), content);
-        }
-
         private static void init() {
             if (_Inited) return;
             else _Inited = true;

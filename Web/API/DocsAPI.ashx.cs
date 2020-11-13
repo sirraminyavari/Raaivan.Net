@@ -1427,7 +1427,9 @@ namespace RaaiVan.Web.API
             try
             {
                 tempDir = DocFileInfo.temporary_folder_address(applicationId);
-                if (Directory.Exists(tempDir)) files = Directory.GetFiles(tempDir).Take(100).ToList();
+
+                if (Directory.Exists(tempDir) && !RaaiVanSettings.CephStorage.Enabled)
+                    files = Directory.GetFiles(tempDir).Take(100).ToList();
 
                 tempDir = PublicMethods.map_path(PublicConsts.TempDirectory);
                 if (Directory.Exists(tempDir)) files.AddRange(Directory.GetFiles(tempDir).Take(100).ToList());
@@ -1442,6 +1444,12 @@ namespace RaaiVan.Web.API
                     if ((fi.CreationTimeUtc.Ticks - DateTime.UtcNow.AddHours(-6).Ticks) < 0) fi.Delete();
                 }
                 catch { }
+            }
+
+            if (RaaiVanSettings.CephStorage.Enabled) {
+                CephStorage.files(DocFileInfo.temporary_folder_address(applicationId))
+                    .Where(f => f.Value.Ticks - DateTime.UtcNow.AddHours(-6).Ticks < 0).Take(100).Select(f => f.Key).ToList()
+                    .ForEach(f => CephStorage.delete_file(f));
             }
         }
 

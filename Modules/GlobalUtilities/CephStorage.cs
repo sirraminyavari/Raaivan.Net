@@ -78,27 +78,28 @@ namespace RaaiVan.Modules.GlobalUtilities
             catch { return false; }
         }
 
-        public static List<string> files(string folderName, int maxCount = 0)
+        public static List<KeyValuePair<string, DateTime>> files(string folderName, int maxCount = 0)
         {
             try
             {
                 AmazonS3Client client = get_client();
-                if (client == null) return new List<string>();
+                if (client == null) return new List<KeyValuePair<string, DateTime>>();
 
                 ListObjectsRequest request = new ListObjectsRequest();
                 request.BucketName = RaaiVanSettings.CephStorage.Bucket;
                 request.Prefix = folderName + "/";
-                request.MaxKeys = maxCount <= 0 ? 1000000 : maxCount;
+                request.MaxKeys = maxCount <= 0 ? 2000 : maxCount;
 
                 ListObjectsResponse response = client.ListObjects(request);
                 
-                return response.S3Objects == null ? new List<string>() : response.S3Objects.Select(o => o.Key).ToList();
+                return response.S3Objects == null ? new List<KeyValuePair<string, DateTime>>() : 
+                    response.S3Objects.Select(o => new KeyValuePair<string, DateTime>(o.Key, o.LastModified)).ToList();
             }
 
             catch (AmazonS3Exception ex)
             {
                 bool notFound = ex.StatusCode == System.Net.HttpStatusCode.NotFound;
-                return new List<string>();
+                return new List<KeyValuePair<string, DateTime>>();
             }
         }
 
