@@ -149,7 +149,7 @@ namespace RaaiVan.Web.API
 
                 send_file(AttachFile, !isImage, addPDFCover: true,
                     addPDFFooter: addFooter.HasValue && addFooter.Value,
-                    pdfCover: pdfCover == null ? null : pdfCover.toByteArray(paramsContainer.Tenant.Id),
+                    pdfCover: pdfCover == null ? null : pdfCover.toByteArray(paramsContainer.ApplicationID),
                     pdfPassword: pdfPassword);
             }
         }
@@ -157,7 +157,7 @@ namespace RaaiVan.Web.API
         protected void send_file(DocFileInfo file, bool logNeeded, 
             bool addPDFCover = false, bool addPDFFooter = false, byte[] pdfCover = null, string pdfPassword = null)
         {
-            byte[] fileContent = file.toByteArray(paramsContainer.Tenant.Id);
+            byte[] fileContent = file.toByteArray(paramsContainer.ApplicationID);
 
             if (fileContent.Length == 0) {
                 send_empty_response();

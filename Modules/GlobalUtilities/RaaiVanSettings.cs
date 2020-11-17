@@ -182,7 +182,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 if (!items.ContainsKey(n) || string.IsNullOrEmpty(items[n]))
                 {
-                    string env = PublicMethods.get_environment_variable(n.ToString());
+                    string env = PublicMethods.get_environment_variable("rv_" + n.ToString());
                     items[n] = string.IsNullOrEmpty(env) ? ConfigurationManager.AppSettings[n.ToString()] : env;
                 }
             }

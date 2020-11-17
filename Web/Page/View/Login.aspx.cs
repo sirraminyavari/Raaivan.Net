@@ -23,7 +23,7 @@ namespace RaaiVan.Web.Page.View
             paramsContainer = new ParamsContainer(HttpContext.Current, nullTenantResponse: !RaaiVanSettings.SAASBasedMultiTenancy);
 
             Page.Title = RaaiVanSettings.SystemTitle(paramsContainer.ApplicationID);
-
+            
             //Modules.Search.SolrAPI.search(Guid.Parse("7ff4729b-9e51-4fa5-a5ea-c5ef29169042"), "v* u*", 10, 1);
 
             /*

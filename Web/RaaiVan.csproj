@@ -1958,6 +1958,7 @@
       <DependentUpon>WikiAPI.ashx</DependentUpon>
     </Compile>
     <Compile Include="App_Code\DosAttackModule.cs" />
+    <Compile Include="App_Code\RedisSessionStateProviderSettings.cs" />
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
