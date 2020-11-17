@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  raaivan:
+    image: ${DOCKER_REGISTRY-}raaivan
+    build:
+      context: .\Web
+      dockerfile: Dockerfile
