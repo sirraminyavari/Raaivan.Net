@@ -24,32 +24,6 @@ namespace RaaiVan.Web.Page.View
 
             Page.Title = RaaiVanSettings.SystemTitle(paramsContainer.ApplicationID);
             
-            //Modules.Search.SolrAPI.search(Guid.Parse("7ff4729b-9e51-4fa5-a5ea-c5ef29169042"), "v* u*", 10, 1);
-
-            /*
-            List<Guid> appIds = new List<Guid>() {
-                Guid.Parse("7FF4729B-9E51-4FA5-A5EA-C5EF29169042"),
-                Guid.Parse("B90A2052-0DDD-45BB-BF7B-FD37AC7B461D"),
-                Guid.Parse("B384BE76-3311-4B57-8A97-99BC36843810"),
-                Guid.Parse("7E296B61-4761-46DB-9558-8D96292F9B66")
-            };
-
-            Modules.Search.SolrAPI.add(appIds[PublicMethods.get_random_number(0, 3)],
-                new List<Modules.Search.SearchDoc>(){ new Modules.Search.SearchDoc() {
-                ID = Guid.NewGuid(),
-                Type = "experience",
-                TypeID = Guid.NewGuid(),
-                AdditionalID = PublicMethods.random_string(10),
-                Title = PublicMethods.random_string(5) + " " + PublicMethods.random_string(5) + " " + PublicMethods.random_string(5),
-                Description = "desc desc",
-                Content = "con con",
-                FileContent = "fl fl",
-                Deleted = false,
-                SearchDocType = Modules.Search.SearchDocType.Node,
-                Tags = "ramin, gesi"
-            } });
-            */
-            
             try
             {
                 if (!RaaiVanSettings.SAASBasedMultiTenancy && !paramsContainer.ApplicationID.HasValue)
