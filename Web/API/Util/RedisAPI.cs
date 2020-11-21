@@ -30,15 +30,14 @@ namespace RaaiVan.Web.API
             get { return init(); }
         }
 
-        public static void set_value<T>(string key, T value)
+        public static bool set_value<T>(string key, T value)
         {
             IDatabase db = get_database();
 
-            if (db != null && value != null && value.GetType().IsSerializable && !string.IsNullOrEmpty(key))
-            {
-                string str = JsonConvert.SerializeObject(value);
-                if (!string.IsNullOrEmpty(str)) db.StringSet(key, str);
-            }
+            if (db == null || value == null || !value.GetType().IsSerializable || string.IsNullOrEmpty(key)) return false;
+
+            string str = JsonConvert.SerializeObject(value);
+            return !string.IsNullOrEmpty(str) && db.StringSet(key, str);
         }
 
         public static void set_value(string key, string value)

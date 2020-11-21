@@ -896,7 +896,7 @@ namespace RaaiVan.Web.API
             //end of Init RequestParams
 
             string ticket = _Ticket = !Modules.RaaiVanConfig.Modules.RestAPI(ApplicationID) ? 
-                string.Empty : PublicMethods.parse_string(context.Request.Params["Ticket"], false);
+                string.Empty : PublicMethods.parse_string(request_param("Ticket"), false);
 
             bool isStateLess = !string.IsNullOrEmpty(ticket) && (CurrentUserID = RestAPI.get_user_id(ticket)).HasValue;
 

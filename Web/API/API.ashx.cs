@@ -41,7 +41,8 @@ namespace RaaiVan.Web.API
             
             Guid userId = Guid.Empty;
             
-            if (command != "authenticate") check_ticket(ref userId);
+            if (command != "authenticate")
+                check_ticket(ref userId, PublicMethods.parse_string(paramsContainer.request_param("ticket"), false));
             
             switch (command)
             {
@@ -117,7 +118,8 @@ namespace RaaiVan.Web.API
 
             Guid userId = Guid.Empty;
 
-            if (command != "authenticate") check_ticket(ref userId);
+            if (command != "authenticate")
+                check_ticket(ref userId, PublicMethods.parse_string(paramsContainer.request_param("ticket"), false));
 
             switch (command)
             {
@@ -152,10 +154,9 @@ namespace RaaiVan.Web.API
             HttpContext.Current.Response.Close();
         }
 
-        protected void check_ticket(ref Guid userId)
+        protected void check_ticket(ref Guid userId, string ticket)
         {
-            string tkt = PublicMethods.parse_string(HttpContext.Current.Request.Params["ticket"], false);
-            Guid? uId = RestAPI.get_user_id(tkt);
+            Guid? uId = RestAPI.get_user_id(ticket);
 
             if (!uId.HasValue) return_response(PublicConsts.InvalidTicketResponse);
             else userId = uId.Value;
@@ -178,7 +179,7 @@ namespace RaaiVan.Web.API
 
                 if (string.IsNullOrEmpty(ticket) && userId.HasValue)
                 {
-                    ticket = UserUtilities.generate_password(20).Replace('/', '_').Replace('+', '~').Replace('=', '|');
+                    ticket = PublicMethods.random_string();
                     RestAPI.new_ticket(ticket, userId.Value);
                 }
                 
@@ -722,7 +723,7 @@ namespace RaaiVan.Web.API
         private bool is_scheduler_user() {
             string schedulerUser = RaaiVanSettings.SchedulerUsername;
 
-            if (!paramsContainer.GBEdit || string.IsNullOrEmpty(schedulerUser)) return false;
+            if (!paramsContainer.CurrentUserID.HasValue || string.IsNullOrEmpty(schedulerUser)) return false;
 
             User scheduler = UsersController.get_user(null, paramsContainer.CurrentUserID.Value);
 
@@ -733,7 +734,7 @@ namespace RaaiVan.Web.API
         protected void get_all_applications(int? count, int? lowerBoundary, ref string responseText)
         {
             //Privacy Check: OK
-            if (!paramsContainer.GBEdit || !is_scheduler_user()) return;
+            if (!paramsContainer.CurrentUserID.HasValue || !is_scheduler_user()) return;
 
             int totalCount = 0;
 

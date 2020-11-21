@@ -33,8 +33,10 @@ namespace RaaiVan.Web.API
 
         public static Guid? get_user_id(string ticket)
         {
-            if (string.IsNullOrEmpty(ticket) || !_Tickets.ContainsKey(ticket)) return null;
-            else return RedisAPI.Enabled ? RedisAPI.get_value<Guid?>(ticket) : _Tickets[ticket];
+            if (string.IsNullOrEmpty(ticket)) return null;
+
+            return RedisAPI.Enabled ? RedisAPI.get_value<Guid?>(ticket) :
+                (!_Tickets.ContainsKey(ticket) ? (Guid?)null : _Tickets[ticket]);
         }
 
         public static string get_ticket(Guid userId)
@@ -68,7 +70,7 @@ namespace RaaiVan.Web.API
             AccessTokenList lst = get_token_list(ticket);
             string token = AccessTokenList.new_token(lst);
 
-            if (RedisAPI.Enabled) RedisAPI.set_value<AccessTokenList>(ticket, lst);
+            if (RedisAPI.Enabled) RedisAPI.set_value<AccessTokenList>(get_redis_token_key(ticket), lst);
 
             return token;
         }
