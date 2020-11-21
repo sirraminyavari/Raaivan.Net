@@ -37,7 +37,7 @@ namespace RaaiVan.Web.API
             if (db != null && value != null && value.GetType().IsSerializable && !string.IsNullOrEmpty(key))
             {
                 string str = JsonConvert.SerializeObject(value);
-                if(!string.IsNullOrEmpty(str)) db.StringSet(key, str);
+                if (!string.IsNullOrEmpty(str)) db.StringSet(key, str);
             }
         }
 
@@ -50,9 +50,10 @@ namespace RaaiVan.Web.API
         {
             IDatabase db = get_database();
 
-            if (db != null && !string.IsNullOrEmpty(key)) {
+            if (db != null && !string.IsNullOrEmpty(key))
+            {
                 RedisValue value = db.StringGet(key);
-                
+
                 if (!value.IsNullOrEmpty)
                     return JsonConvert.DeserializeObject<T>(value);
             }
@@ -65,7 +66,8 @@ namespace RaaiVan.Web.API
             return get_value<string>(key);
         }
 
-        public static bool remove_key(string key) {
+        public static bool remove_key(string key)
+        {
             IDatabase db = get_database();
             return db != null && !string.IsNullOrEmpty(key) && db.KeyDelete(new RedisKey(key));
         }

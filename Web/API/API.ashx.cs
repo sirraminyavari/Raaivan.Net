@@ -97,6 +97,11 @@ namespace RaaiVan.Web.API
                     return_response(responseText);
                     break;
                 case "get_all_applications":
+                    get_all_applications(PublicMethods.parse_int(context.Request.Params["Count"]),
+                        PublicMethods.parse_int(context.Request.Params["LowerBoundary"]),
+                        ref responseText);
+                    break;
+                case "run_job":
                     run_job(PublicMethods.parse_guid(context.Request.Params["ApplicationID"]),
                         PublicMethods.fromJSON(PublicMethods.parse_string(context.Request.Params["Options"])), ref responseText);
                     return_response(responseText);
@@ -683,8 +688,22 @@ namespace RaaiVan.Web.API
                 "}";
         }
 
+        private bool is_scheduler_user() {
+            string schedulerUser = RaaiVanSettings.SchedulerUsername;
+
+            if (!paramsContainer.GBEdit || string.IsNullOrEmpty(schedulerUser)) return false;
+
+            User scheduler = UsersController.get_user(null, paramsContainer.CurrentUserID.Value);
+
+            return scheduler != null && !string.IsNullOrEmpty(scheduler.UserName) &&
+                scheduler.UserName.ToLower() == schedulerUser.ToLower();
+        }
+
         protected void get_all_applications(int? count, int? lowerBoundary, ref string responseText)
         {
+            //Privacy Check: OK
+            if (!paramsContainer.GBEdit || !is_scheduler_user()) return;
+
             int totalCount = 0;
 
             List<Application> apps = GlobalController.get_applications(count, lowerBoundary, ref totalCount);
@@ -696,19 +715,11 @@ namespace RaaiVan.Web.API
 
         protected void run_job(Guid? appId, Dictionary<string, object> options, ref string responseText) {
             //Privacy Check: OK
-            if (!paramsContainer.GBEdit) return;
+            if (!paramsContainer.GBEdit || !is_scheduler_user()) return;
 
             string name = PublicMethods.get_dic_value(options, "name");
-            string schedulerUser = RaaiVanSettings.SchedulerUsername;
             
-            if (!appId.HasValue || appId == Guid.Empty || options == null || string.IsNullOrEmpty(name) || 
-                string.IsNullOrEmpty(schedulerUser)) return;
-
-            //Check permissions
-            User scheduler = UsersController.get_user(null, paramsContainer.CurrentUserID.Value);
-            if (scheduler == null || string.IsNullOrEmpty(scheduler.UserName) || 
-                scheduler.UserName.ToLower() != schedulerUser.ToLower()) return;
-            //end of Check permissions
+            if (!appId.HasValue || appId == Guid.Empty || options == null || string.IsNullOrEmpty(name)) return;
 
             switch (((string)options["name"]).ToLower())
             {
