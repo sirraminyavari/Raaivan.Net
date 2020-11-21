@@ -24,8 +24,15 @@ namespace RaaiVan.Web.API
 
         public void ProcessRequest(HttpContext context)
         {
-            paramsContainer = new ParamsContainer(context, nullTenantResponse: true);
-            if (!paramsContainer.ApplicationID.HasValue) return;
+            paramsContainer = new ParamsContainer(context, nullTenantResponse: false);
+
+            if (ProcessTenantIndependentRequest(context)) return;
+
+            if (!paramsContainer.ApplicationID.HasValue)
+            {
+                paramsContainer.return_response(PublicConsts.NullTenantResponse);
+                return;
+            }
 
             string command = PublicMethods.parse_string(context.Request.Params["command"], false);
             if (!string.IsNullOrEmpty(command)) command = command.ToLower();
@@ -38,11 +45,6 @@ namespace RaaiVan.Web.API
             
             switch (command)
             {
-                case "authenticate":
-                    authenticate(PublicMethods.parse_string(context.Request.Params["username"], false),
-                        PublicMethods.parse_string(context.Request.Params["password"], false), ref responseText);
-                    return_response(responseText);
-                    break;
                 case "getdeletedstates":
                     get_deleted_states(PublicMethods.parse_int(context.Request.Params["count"]),
                         PublicMethods.parse_long(context.Request.Params["startfrom"]), ref responseText);
@@ -96,20 +98,49 @@ namespace RaaiVan.Web.API
                         PublicMethods.parse_int(context.Request.Params["LowerBoundary"]), ref responseText);
                     return_response(responseText);
                     break;
-                case "get_all_applications":
-                    get_all_applications(PublicMethods.parse_int(context.Request.Params["Count"]),
-                        PublicMethods.parse_int(context.Request.Params["LowerBoundary"]),
-                        ref responseText);
-                    break;
-                case "run_job":
-                    run_job(PublicMethods.parse_guid(context.Request.Params["ApplicationID"]),
-                        PublicMethods.fromJSON(PublicMethods.parse_string(context.Request.Params["Options"])), ref responseText);
-                    return_response(responseText);
-                    break;
                 default:
                     return_response(CustomAPI.handle_request(paramsContainer.Tenant.Id, userId, command, context.Request));
                     break;
             }
+        }
+
+        public bool ProcessTenantIndependentRequest(HttpContext context)
+        {
+            if (!RaaiVanSettings.SAASBasedMultiTenancy && !paramsContainer.ApplicationID.HasValue)
+            {
+                paramsContainer.return_response(PublicConsts.NullTenantResponse);
+                return true;
+            }
+
+            string responseText = string.Empty;
+            string command = PublicMethods.parse_string(context.Request.Params["Command"], false);
+
+            Guid userId = Guid.Empty;
+
+            if (command != "authenticate") check_ticket(ref userId);
+
+            switch (command)
+            {
+                case "authenticate":
+                    authenticate(PublicMethods.parse_string(paramsContainer.request_param("username"), false),
+                        PublicMethods.parse_string(paramsContainer.request_param("password"), false), ref responseText);
+                    break;
+                case "get_all_applications":
+                    get_all_applications(PublicMethods.parse_int(paramsContainer.request_param("Count")),
+                        PublicMethods.parse_int(paramsContainer.request_param("LowerBoundary")),
+                        ref responseText);
+                    break;
+                case "run_job":
+                    run_job(PublicMethods.parse_guid(paramsContainer.request_param("ApplicationID")),
+                        PublicMethods.fromJSON(PublicMethods.parse_string(paramsContainer.request_param("Options"), decode: false)),
+                        ref responseText);
+                    break;
+            }
+            
+            if (!string.IsNullOrEmpty(responseText))
+                paramsContainer.return_response(ref responseText);
+
+            return !string.IsNullOrEmpty(responseText);
         }
 
         protected void return_response(string responseText)
@@ -142,7 +173,7 @@ namespace RaaiVan.Web.API
             
             if (success)
             {
-                Guid? userId = UsersController.get_user_id(paramsContainer.Tenant.Id, username);
+                Guid? userId = UsersController.get_user_id(paramsContainer.ApplicationID, username);
                 string ticket = !userId.HasValue ? null : RestAPI.get_ticket(userId.Value);
 
                 if (string.IsNullOrEmpty(ticket) && userId.HasValue)

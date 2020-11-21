@@ -769,6 +769,8 @@ namespace RaaiVan.Web.API
             new SortedList<string, bool>(RaaiVanSettings.ReplayAttackQueueLength);
         private static Queue<string> LastRequestsQueue = new Queue<string>(RaaiVanSettings.ReplayAttackQueueLength);
 
+        private Dictionary<string, string> RequestParams;
+
         public ITenant Tenant { get; private set; }
 
         public Guid? ApplicationID
@@ -854,6 +856,7 @@ namespace RaaiVan.Web.API
             _Ticket = null;
             IsAuthenticated = false;
             Tenant = null;
+            RequestParams = new Dictionary<string, string>();
         }
 
         public ParamsContainer(HttpContext context, bool nullTenantResponse = false)
@@ -873,6 +876,24 @@ namespace RaaiVan.Web.API
                 return;
             }
             //end of basic checks
+
+            //Init RequestParams
+            try
+            {
+                RequestParams = new Dictionary<string, string>();
+
+                MemoryStream memstream = new MemoryStream();
+                context.Request.InputStream.CopyTo(memstream);
+                memstream.Position = 0;
+                using (StreamReader reader = new StreamReader(memstream))
+                {
+                    Dictionary<string, object> tmpDic = PublicMethods.fromJSON(reader.ReadToEnd());
+                    if (tmpDic != null) tmpDic.Keys.Where(key => tmpDic[key] != null).ToList()
+                            .ForEach(key => RequestParams[key.ToLower()] = tmpDic[key].ToString());
+                }
+            }
+            catch { }
+            //end of Init RequestParams
 
             string ticket = _Ticket = !Modules.RaaiVanConfig.Modules.RestAPI(ApplicationID) ? 
                 string.Empty : PublicMethods.parse_string(context.Request.Params["Ticket"], false);
@@ -911,6 +932,13 @@ namespace RaaiVan.Web.API
                 
                 RaaiVanUtil.still_logged_in(ApplicationID, CurrentUserID.Value, context, hasActivity);
             }
+        }
+
+        public string request_param(string name) {
+            if (string.IsNullOrEmpty(name)) return null;
+            else if (RequestParams != null && RequestParams.ContainsKey(name.ToLower())) return RequestParams[name.ToLower()];
+            else if (_Context != null) return _Context.Request.Params[name];
+            else return null;
         }
 
         protected void _save_log(Modules.Log.Action action)
