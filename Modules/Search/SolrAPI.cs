@@ -218,7 +218,18 @@ namespace RaaiVan.Modules.Search
             if (Inited || !RaaiVanSettings.Solr.Enabled) return;
             Inited = true;
 
-            try { SolrNet.Startup.Init<SolrDoc>(SOLR_CONNECTION_STRING); }
+            try
+            {
+                SolrConnection conn = new SolrConnection(SOLR_CONNECTION_STRING);
+
+                if (!string.IsNullOrEmpty(RaaiVanSettings.Solr.Username) && !string.IsNullOrEmpty(RaaiVanSettings.Solr.Password))
+                {
+                    conn.HttpWebRequestFactory = new HttpWebAdapters.BasicAuthHttpWebRequestFactory(
+                        RaaiVanSettings.Solr.Username, RaaiVanSettings.Solr.Password);
+                }
+
+                SolrNet.Startup.Init<SolrDoc>(conn);
+            }
             catch (Exception ex)
             {
                 LogController.save_error_log(null, null, "SolrConnection", ex, ModuleIdentifier.SRCH);

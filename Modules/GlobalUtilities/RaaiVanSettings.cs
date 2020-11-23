@@ -137,6 +137,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         Solr,
         SolrURL,
         SolrCollectionName,
+        SolrUsername,
+        SolrPassword,
 
         EmailQueue,
         EmailQueueInterval,
@@ -1066,6 +1068,16 @@ namespace RaaiVan.Modules.GlobalUtilities
             public static string CollectionName
             {
                 get { return get_value(null, RVSettingsItem.SolrCollectionName); }
+            }
+
+            public static string Username
+            {
+                get { return get_value(null, RVSettingsItem.SolrUsername); }
+            }
+
+            public static string Password
+            {
+                get { return get_value(null, RVSettingsItem.SolrPassword); }
             }
         }
 

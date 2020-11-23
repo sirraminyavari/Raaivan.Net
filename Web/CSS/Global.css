@@ -46,7 +46,7 @@ blockquote
 
 pre > code
 {
-    width:600px;
+    width:100% !important;
     max-height:500px;
     min-height:20px;
     display:block;
