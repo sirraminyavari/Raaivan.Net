@@ -724,7 +724,7 @@ namespace RaaiVan.Web.API
             string schedulerUser = RaaiVanSettings.SchedulerUsername;
 
             if (!paramsContainer.CurrentUserID.HasValue || string.IsNullOrEmpty(schedulerUser)) return false;
-            SolrAPI
+            
             User scheduler = UsersController.get_user(null, paramsContainer.CurrentUserID.Value);
 
             return scheduler != null && !string.IsNullOrEmpty(scheduler.UserName) &&

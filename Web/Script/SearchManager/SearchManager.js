@@ -1119,16 +1119,16 @@
                             Childs: [{
                                 Type: "div", Style: "width:9rem;",
                                 Childs: [
-                                    {
+                                    (!type ? null : {
                                         Type: "div", Class: "rv-air-button-base rv-air-button-black rv-border-radius-quarter",
-                                        Style: "font-size:0.6rem; margin-bottom:0.4rem; cursor:default;",
+                                        Style: "font-size:0.6rem; margin:0.2rem 0; cursor:default;",
                                         Childs: [{ Type: "text", TextValue: type }]
-                                    },
-                                    {
+                                    }),
+                                    (!additionalId ? null : {
                                         Type: "div", Class: "rv-air-button-base rv-air-button-black rv-border-radius-quarter Ellipsis",
-                                        Style: "font-size:0.6rem; cursor:default;",
+                                        Style: "font-size:0.6rem; margin:0.2rem 0; cursor:default;",
                                         Childs: [{ Type: "text", TextValue: additionalId }]
-                                    }
+                                    })
                                 ]
                             }]
                         }
