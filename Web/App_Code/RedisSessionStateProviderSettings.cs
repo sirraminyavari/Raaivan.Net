@@ -10,7 +10,8 @@ namespace RaaiVan.Web
     {
         public static string getConnectionString()
         {
-            return RaaiVanSettings.RedisHosts;
+            return RaaiVanSettings.Redis.Hosts + 
+                (string.IsNullOrEmpty(RaaiVanSettings.Redis.Password) ? string.Empty : ",password=" + RaaiVanSettings.Redis.Password);
         }
     }
 }

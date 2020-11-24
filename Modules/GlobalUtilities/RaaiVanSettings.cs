@@ -26,6 +26,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         CephBucket,
 
         RedisHosts,
+        RedisPassword,
 
         ServiceUnavailable,
         IgnoreReturnURLOnLogin,
@@ -348,9 +349,16 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        public static string RedisHosts
-        {
-            get { return get_value(null, RVSettingsItem.RedisHosts); }
+        public class Redis {
+            public static string Hosts
+            {
+                get { return get_value(null, RVSettingsItem.RedisHosts); }
+            }
+
+            public static string Password
+            {
+                get { return get_value(null, RVSettingsItem.RedisPassword); }
+            }
         }
 
         public static string RaaiVanURL(Guid? applicationId)

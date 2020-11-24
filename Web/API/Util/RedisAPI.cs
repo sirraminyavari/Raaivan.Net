@@ -15,7 +15,9 @@ namespace RaaiVan.Web.API
 
         private static bool init()
         {
-            string hosts = RaaiVanSettings.RedisHosts.Trim();
+            string hosts = RaaiVanSettings.Redis.Hosts.Trim();
+            ConfigurationOptions options = ConfigurationOptions.Parse(hosts);
+            if (!string.IsNullOrEmpty(RaaiVanSettings.Redis.Password)) options.Password = RaaiVanSettings.Redis.Password;
             if (!string.IsNullOrEmpty(hosts) && Redis == null) Redis = ConnectionMultiplexer.Connect(hosts);
             return Redis != null;
         }
