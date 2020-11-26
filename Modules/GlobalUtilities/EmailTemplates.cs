@@ -50,6 +50,8 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static void Initialize(Guid? applicationId)
         {
+            if (RaaiVanSettings.SAASBasedMultiTenancy) applicationId = null;
+
             if (Initialized.ContainsKey(!applicationId.HasValue ? Guid.Empty : applicationId.Value)) return;
             else Initialized[!applicationId.HasValue ? Guid.Empty : applicationId.Value] = true;
 
@@ -68,6 +70,8 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         private static string _get_email_template(Guid? applicationId, string templateType)
         {
+            if (RaaiVanSettings.SAASBasedMultiTenancy) applicationId = null;
+
             DocFileInfo fi = new DocFileInfo() {
                 FileName = templateType,
                 Extension = "txt",
@@ -80,6 +84,8 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static string inject_into_master(Guid? applicationId, string template)
         {
+            if (RaaiVanSettings.SAASBasedMultiTenancy) applicationId = null;
+
             string retStr = string.Empty;
 
             if (string.IsNullOrEmpty(template)) return retStr;
@@ -101,6 +107,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         public static string get_email_template(Guid? applicationId,
             EmailTemplateType templateType, Dictionary<string, string> dic)
         {
+            if (RaaiVanSettings.SAASBasedMultiTenancy) applicationId = null;
+
             Initialize(applicationId);
             if (dic == null) dic = new Dictionary<string, string>();
 
@@ -114,6 +122,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         public static string get_email_template(Guid? applicationId,
             string templateName, bool intoMaster, Dictionary<string, string> dic)
         {
+            if (RaaiVanSettings.SAASBasedMultiTenancy) applicationId = null;
+
             Initialize(applicationId);
 
             templateName = templateName.ToLower();
@@ -134,6 +144,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         public static string get_email_subject_template(Guid? applicationId,
             EmailTemplateType templateType, Dictionary<string, string> dic)
         {
+            if (RaaiVanSettings.SAASBasedMultiTenancy) applicationId = null;
+
             Initialize(applicationId);
             if (dic == null) dic = new Dictionary<string, string>();
 

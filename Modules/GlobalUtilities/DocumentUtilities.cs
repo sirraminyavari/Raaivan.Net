@@ -737,12 +737,13 @@ namespace RaaiVan.Modules.GlobalUtilities
         }
 
         private string get_address(Guid? applicationId, ref bool isPublic, bool? encrypted = null, bool ignoreExtension = false) {
-            if (!FileID.HasValue) return string.Empty;
+            string fileName = ignoreExtension ? file_name_without_extension : file_name_with_extension;
+
+            if (string.IsNullOrEmpty(fileName)) return string.Empty;
 
             string encryptedPrefix = encrypted.HasValue && encrypted.Value ? PublicConsts.EncryptedFileNamePrefix : "";
 
-            return get_folder_address(applicationId, ref isPublic) + (CephMode ? "/" : "\\") + encryptedPrefix +
-                (ignoreExtension ? file_name_without_extension : file_name_with_extension);
+            return get_folder_address(applicationId, ref isPublic) + (CephMode ? "/" : "\\") + encryptedPrefix + fileName;
         }
 
         private string get_address(Guid? applicationId, bool? encrypted = null, bool ignoreExtension = false)
@@ -757,9 +758,12 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             string folderPath = get_folder_address(applicationId, ref isPublic);
 
-            if (!FileID.HasValue || string.IsNullOrEmpty(folderPath)) return string.Empty;
+            if (string.IsNullOrEmpty(folderPath)) return string.Empty;
 
             string address = get_address(applicationId, encrypted: is_encrypted(applicationId));
+
+            if (string.IsNullOrEmpty(address)) return string.Empty;
+
             string extLess = CephMode ? string.Empty :
                 get_address(applicationId, encrypted: is_encrypted(applicationId), ignoreExtension: true);
 

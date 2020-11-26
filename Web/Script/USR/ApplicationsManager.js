@@ -321,6 +321,8 @@
                 showedFaces = showedFaces.concat([{ Type: "add" }]).filter(u => !!u);
 
             showedFaces.forEach((u, ind) => {
+                var fullname = GlobalUtilities.trim((Base64.decode(u.FirstName) || " ") + " " + (Base64.decode(u.LastName) || " "));
+
                 GlobalUtilities.create_nested_elements([{
                     Type: "div", Class: "rv-hover-zindex",
                     Style: "flex:0 0 auto; margin-" + RV_Float + ":-" + overSize + "rem;",
@@ -328,7 +330,7 @@
                         Type: "middle",
                         Childs: [
                             (u.Type == "add" ? null : {
-                                Type: "img", Class: "rv-circle SoftBorder",
+                                Type: "img", Class: "rv-circle SoftBorder", Tooltip: fullname,
                                 Style: "width:" + imgSize + "rem; height:" + imgSize + "rem; border-color:white; border-width:2px;",
                                 Attributes: [{ Name: "src", Value: u.ImageURL || u.ProfileImageURL }],
                                 Properties: [{ Name: "onclick", Value: function (e) { e.stopPropagation(); that.show_members(item, isArchive); } }]
