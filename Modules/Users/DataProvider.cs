@@ -1171,8 +1171,10 @@ namespace RaaiVan.Modules.Users
             }
         }
 
-        public static User GetSystemUser(Guid applicationId)
+        public static User GetSystemUser(Guid? applicationId)
         {
+            if (RaaiVanSettings.SAASBasedMultiTenancy) applicationId = null;
+
             string spName = GetFullyQualifiedName("GetSystemUser");
 
             try

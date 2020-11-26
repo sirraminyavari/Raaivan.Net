@@ -69,15 +69,18 @@ namespace RaaiVan.Modules.Users
     public static class UserUtilities
     {
         private static Dictionary<Guid, User> _SystemUsers = new Dictionary<Guid, User>();
-        public static User SystemUser(Guid applicationId)
+        public static User SystemUser(Guid? applicationId)
         {
+            if (RaaiVanSettings.SAASBasedMultiTenancy) applicationId = null;
+
             try
             {
-                if (_SystemUsers.ContainsKey(applicationId)) return _SystemUsers[applicationId];
+                if (_SystemUsers.ContainsKey(!applicationId.HasValue ? Guid.Empty : applicationId.Value))
+                    return _SystemUsers[!applicationId.HasValue ? Guid.Empty : applicationId.Value];
                 else
                 {
                     User su = UsersController.get_system_user(applicationId);
-                    if (su != null) _SystemUsers[applicationId] = su;
+                    if (su != null) _SystemUsers[!applicationId.HasValue ? Guid.Empty : applicationId.Value] = su;
                     return su;
                 }
             }

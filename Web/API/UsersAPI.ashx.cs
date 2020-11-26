@@ -649,7 +649,7 @@ namespace RaaiVan.Web.API
                 responseText = "{\"ErrorText\":\"" + Messages.AccessDenied.ToString() + "\"}";
                 return;
             }
-
+            
             if (!count.HasValue || count.Value <= 0) count = 20;
 
             long totalCount = 0;
@@ -754,7 +754,7 @@ namespace RaaiVan.Web.API
             //Privacy Check: OK
             if (!RaaiVanSettings.UserSignUp(paramsContainer.ApplicationID) &&
                 !RaaiVanSettings.SignUpViaInvitation(paramsContainer.ApplicationID)) return;
-
+            
             if (invitationId.HasValue && 
                 !UsersController.get_invitation_application_id(invitationId.Value, checkIfNotUsed: true).HasValue) {
                 responseText = "{\"ErrorText\":\"" + Messages.TheInvitationHasBeenUsed + "\"}";

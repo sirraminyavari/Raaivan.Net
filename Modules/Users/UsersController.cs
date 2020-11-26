@@ -214,7 +214,7 @@ namespace RaaiVan.Modules.Users
             return lst;
         }
 
-        public static User get_system_user(Guid applicationId)
+        public static User get_system_user(Guid? applicationId)
         {
             return DataProvider.GetSystemUser(applicationId);
         }
