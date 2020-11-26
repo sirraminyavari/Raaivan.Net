@@ -564,14 +564,15 @@ namespace RaaiVan.Modules.GlobalUtilities
 
                             if (string.IsNullOrEmpty(protocol)) protocol = "http";
 
-                            _Tenants.Add(new Tenant(tenantId, name, domain, protocol));
+                            _Tenants.Add(new Tenant(tenantId, name, string.Empty, domain, protocol));
                         }
                     }
 
                     if (_Tenants.Count == 0)
                     {
                         List<Application> lst = GlobalController.get_applications();
-                        if (lst.Count == 1) _Tenants.Add(new Tenant(lst[0].ApplicationID.Value, lst[0].Name, string.Empty, string.Empty));
+                        if (lst.Count == 1) _Tenants.Add(new Tenant(lst[0].ApplicationID.Value, 
+                            lst[0].Name, lst[0].Title, string.Empty, string.Empty));
                     }
 
                     if (_Tenants.Count > GlobalSettings.MaxTenantsCount) _Tenants = new List<ITenant>();

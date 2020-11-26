@@ -870,6 +870,8 @@ namespace RaaiVan.Web.API
                 return;
             }
 
+            Application ap = GlobalController.get_user_application(paramsContainer.CurrentUserID.Value, applicationId.Value);
+
             if (UsersController.email_exists(applicationId.Value, email))
             {
                 responseText = "{\"ErrorText\":\"" + Messages.ThisEmailBelongsToAnExistingUser + "\"}";
@@ -888,7 +890,7 @@ namespace RaaiVan.Web.API
             DateTime now = DateTime.Now;
             string gDate = now.Month.ToString() + "/" + now.Day.ToString() + "/" + now.Year.ToString();
             string pDate = PublicMethods.get_local_date(now);
-
+            
             dic.Add("SenderUserName", currentUser.UserName);
             dic.Add("SenderFirstName", currentUser.FirstName);
             dic.Add("SenderLastName", currentUser.LastName);
@@ -903,6 +905,7 @@ namespace RaaiVan.Web.API
             dic.Add("InvitedEmailBase64", Base64.encode(email));
             dic.Add("InvitationID", invitationId.ToString());
             dic.Add("MessageText", messageText);
+            dic.Add("TeamName", ap == null || string.IsNullOrEmpty(ap.Title) ? string.Empty : ap.Title);
 
             string emailBody = EmailTemplates.get_email_template(applicationId, EmailTemplateType.InviteUser, dic);
             string emailSubject = EmailTemplates.get_email_subject_template(applicationId, EmailTemplateType.InviteUser, dic);

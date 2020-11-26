@@ -19,7 +19,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public Tenant toTenant()
         {
-            return !ApplicationID.HasValue ? null : new Tenant(ApplicationID.Value, Name, string.Empty, string.Empty);
+            return !ApplicationID.HasValue ? null : new Tenant(ApplicationID.Value, Name, Title, string.Empty, string.Empty);
         }
 
         public string toJson(Guid? currentUserId = null, bool icon = false, bool highQualityIcon = false)

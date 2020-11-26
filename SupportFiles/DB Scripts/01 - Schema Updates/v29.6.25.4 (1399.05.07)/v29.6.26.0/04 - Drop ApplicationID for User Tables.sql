@@ -31,15 +31,6 @@ DROP COLUMN [ApplicationID]
 GO
 
 
-ALTER TABLE [dbo].[USR_EmailAddresses]
-DROP COLUMN [ApplicationID]
-GO
-
-
-ALTER TABLE [dbo].[USR_PhoneNumbers]
-DROP COLUMN [ApplicationID]
-GO
-
 
 ALTER TABLE [dbo].[USR_EmailContacts]
 DROP CONSTRAINT [FK_USR_EmailContacts_aspnet_Applications]

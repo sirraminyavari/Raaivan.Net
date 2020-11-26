@@ -413,7 +413,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static string LanguageSessionVariableName = "rv_lang";
 
-        public static string ApplicationIDSessionVariableName = "rv_lang";
+        public static string ApplicationIDSessionVariableName = "rv_active_app";
     }
 
     public static class PublicMethods

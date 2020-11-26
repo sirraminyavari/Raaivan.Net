@@ -111,19 +111,6 @@ namespace RaaiVan.Modules.GlobalUtilities
                 get_email_template(null, templateType, dic) : retStr;
         }
 
-        public static string get_email_subject_template(Guid? applicationId,
-            EmailTemplateType templateType, Dictionary<string, string> dic)
-        {
-            Initialize(applicationId);
-            if (dic == null) dic = new Dictionary<string, string>();
-
-            string retStr = Expressions.replace(TemplateSubjects.get_value(applicationId, templateType.ToString()), 
-                ref dic, Expressions.Patterns.AutoTag);
-
-            return string.IsNullOrEmpty(retStr) && applicationId.HasValue ?
-                get_email_subject_template(null, templateType, dic) : retStr;
-        }
-
         public static string get_email_template(Guid? applicationId,
             string templateName, bool intoMaster, Dictionary<string, string> dic)
         {
@@ -142,6 +129,19 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             return string.IsNullOrEmpty(retStr) && applicationId.HasValue ?
                 get_email_template(null, templateName, intoMaster, dic) : retStr;
+        }
+
+        public static string get_email_subject_template(Guid? applicationId,
+            EmailTemplateType templateType, Dictionary<string, string> dic)
+        {
+            Initialize(applicationId);
+            if (dic == null) dic = new Dictionary<string, string>();
+
+            string retStr = Expressions.replace(TemplateSubjects.get_value(applicationId, templateType.ToString()), 
+                ref dic, Expressions.Patterns.AutoTag);
+
+            return string.IsNullOrEmpty(retStr) && applicationId.HasValue ?
+                get_email_subject_template(null, templateType, dic) : retStr;
         }
     }
 }

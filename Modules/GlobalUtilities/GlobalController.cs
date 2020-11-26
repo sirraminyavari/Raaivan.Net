@@ -35,6 +35,11 @@ namespace RaaiVan.Modules.GlobalUtilities
             return DataProvider.GetUserApplications(userId, isCreator, archive);
         }
 
+        public static Application get_user_application(Guid userId, Guid applicationId)
+        {
+            return get_user_applications(userId).Where(a => a.ApplicationID == applicationId).FirstOrDefault();
+        }
+
         public static bool add_or_modify_application(Guid applicationId, 
             string name, string title, string description, Guid? currentUserId)
         {

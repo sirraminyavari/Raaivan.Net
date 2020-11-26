@@ -636,7 +636,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                 case FolderNames.PDFImages:
                 case FolderNames.PDFCovers:
                     mainFolder = "App_Data/";
-                    contentFolder = applicationPart + "Documents/" + folderName.ToString();
+                    contentFolder = applicationPart + (cephMode ? string.Empty : "Documents/") + folderName.ToString();
                     break;
                 case FolderNames.Icons:
                 case FolderNames.ApplicationIcons:
@@ -677,7 +677,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                     break;
             }
 
-            return (cephMode ? "" : mainFolder) + contentFolder;
+            return (cephMode ? string.Empty : mainFolder) + contentFolder;
         }
 
         private string get_sub_folder()
