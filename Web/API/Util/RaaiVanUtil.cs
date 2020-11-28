@@ -1173,6 +1173,17 @@ namespace RaaiVan.Web.API
         {
             _Sub = sub;
         }
+
+        public string toJson(bool content, bool sub)
+        {
+            return "{\"Name\":\"" + Base64.encode(Name) + "\"" +
+                ",\"Module\":\"" + (string.IsNullOrEmpty(Module) ? string.Empty : Module) + "\"" +
+                (!content || string.IsNullOrEmpty(Content) ? string.Empty : ",\"Content\":\"" + Base64.encode(Content) + "\"") +
+                (!sub || Sub == null || Sub.Count == 0 ? string.Empty :
+                    ",\"Sub\":[" + string.Join(",", Sub.Select(u => u.toJson(content, sub))) + "]"
+                ) +
+                "}";
+        }
     }
 
     public class RaaiVanHelp
@@ -1220,6 +1231,20 @@ namespace RaaiVan.Web.API
                 /* && (new Regex("^\\d+")).IsMatch(dir.Name) && !(new Regex("^0+[\\s-]")).IsMatch(dir.Name); */
         }
 
+        private static string resolve_entry_name(string lang, string folderPath)
+        {
+            folderPath = folderPath.ToLower();
+
+            string prefix = ("help\\" + lang).ToLower();
+
+            return string.Join("_", folderPath.Substring(folderPath.IndexOf(prefix) + prefix.Length)
+                .Split('\\').Where(p => !string.IsNullOrEmpty(p) && p != "sub").Select(p =>
+                {
+                    int ind = p.IndexOf('-');
+                    return ind <= 0 ? p : p.Substring(0, ind).Trim();
+                }));
+        }
+
         private static HelpIndexEntry create_index_entry(string lang, DirectoryInfo dir)
         {
             lang = lang.ToLower();
@@ -1243,7 +1268,7 @@ namespace RaaiVan.Web.API
 
             HelpIndexEntry ret = new HelpIndexEntry()
             {
-                Name = indexEntryName,
+                Name = resolve_entry_name(lang, dir.FullName),
                 Module = module,
                 SequenceNumber = sequenceNumber > 0 ? sequenceNumber : 0
             };

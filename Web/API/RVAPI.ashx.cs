@@ -1117,20 +1117,6 @@ namespace RaaiVan.Web.API
                 "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
         }
 
-        protected string _get_help_index_entry_json(HelpIndexEntry entry, bool content, bool sub)
-        {
-            return "{\"Name\":\"" + Base64.encode(entry.Name) + "\"" +
-                ",\"Module\":\"" + (string.IsNullOrEmpty(entry.Module) ? string.Empty : entry.Module) + "\"" +
-                (!content || string.IsNullOrEmpty(entry.Content) ? string.Empty :
-                    ",\"Content\":\"" + Base64.encode(entry.Content) + "\""
-                ) +
-                (!sub || entry.Sub == null || entry.Sub.Count == 0 ? string.Empty :
-                    ",\"Sub\":[" + ProviderUtil.list_to_string<string>(
-                        entry.Sub.Select(u => _get_help_index_entry_json(u, content, sub)).ToList()) + "]"
-                ) +
-                "}";
-        }
-
         protected void get_help_index(ref string responseText)
         {
             //Privacy Check: OK
@@ -1138,8 +1124,7 @@ namespace RaaiVan.Web.API
             List<HelpIndexEntry> index = RaaiVanHelp.help_index("fa");
             if (index == null) index = new List<HelpIndexEntry>();
 
-            responseText = "{\"Index\":[" + ProviderUtil.list_to_string<string>(index.Select(
-                u => _get_help_index_entry_json(u, false, true)).ToList()) + "]}";
+            responseText = "{\"Index\":[" + string.Join(",", index.Select(u => u.toJson(false, true))) + "]}";
         }
 
         protected void get_help_index_entry(string name, ref string responseText)
@@ -1148,7 +1133,7 @@ namespace RaaiVan.Web.API
 
             HelpIndexEntry entry = RaaiVanHelp.index_entry("fa", name);
 
-            responseText = "{\"Entry\":" + (entry == null ? "null" : _get_help_index_entry_json(entry, true, false)) + "}";
+            responseText = "{\"Entry\":" + (entry == null ? "null" : entry.toJson(true, false)) + "}";
         }
 
         protected void get_help_media_files(ref string responseText)

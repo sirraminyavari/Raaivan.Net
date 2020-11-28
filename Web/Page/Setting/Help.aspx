@@ -193,7 +193,7 @@
                         btn.Saving = true;
 
                         var newData = editor.get_data();
-
+                        
                         RVAPI.SaveHelpIndexEntry({
                             Lang: "fa", Path: Base64.encode(item.Path),
                             Content: Base64.encode(newData), ParseResults: true,
@@ -233,14 +233,12 @@
                 set_paths: function (path, arr) {
                     var that = this;
 
-                    for (var i = 0, lnt = (arr || []).length; i < lnt; ++i) {
+                    (arr || []).forEach(itm => {
                         var folderPath = (path ? path + "/" : "") +
-                            /*((i + 1) > 9 ? "" : "0") + (i + 1) + " - " +*/
-                            arr[i].Name + (arr[i].ModuleIdentifier ? " - " + arr[i].ModuleIdentifier : "");
-                        arr[i].Path = folderPath + "/" + arr[i].Name + ".rvhlp";
-
-                        if ((arr[i].Sub || []).length > 0) that.set_paths(folderPath + "/sub", arr[i].Sub);
-                    }
+                            itm.PureName + (itm.ModuleIdentifier ? " - " + itm.ModuleIdentifier : "");
+                        itm.Path = folderPath + "/" + itm.PureName + ".rvhlp";
+                        if ((itm.Sub || []).length > 0) that.set_paths(folderPath + "/sub", itm.Sub);
+                    });
                 },
 
                 _title: function (name) {

@@ -28,9 +28,9 @@
             
             if (entryName) return that._get_sub_architecture(entryName, { IncludeParent: true });
 
-            var _add_entry = function (name, entry, arr) {
+            var _add_entry = function (pureName, name, entry, arr) {
                 if (!name || (name[0] == "_")) return;
-                var obj = { Name: name };
+                var obj = { PureName: pureName, Name: name };
                 arr.push(obj);
                 if (GlobalUtilities.get_type(entry) != "json") return;
                 if (entry._module) obj.ModuleIdentifier = entry._module;
@@ -39,13 +39,13 @@
                 for (var e in entry) {
                     if (e[0] != "_") {
                         obj.Sub = obj.Sub || [];
-                        _add_entry(name + "_" + e, entry[e], obj.Sub);
+                        _add_entry(e, name + "_" + e, entry[e], obj.Sub);
                     }
                 }
             };
 
             for (var e in RVDic.HLP)
-                _add_entry(e, RVDic.HLP[e], retArr);
+                _add_entry(e, e, RVDic.HLP[e], retArr);
 
             return retArr;
         },
