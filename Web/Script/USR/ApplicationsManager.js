@@ -346,11 +346,11 @@
                     }]
                 }], elems["members"]);
             });
-
+            
             if (item.UsersCount - showedUsersCount) {
                 elems["otherMembers"].style.display = "flex";
 
-                var facesTitle = RVDic.AndNOthers.replace("[n]", item.UsersCount - showedFaces.length);
+                var facesTitle = RVDic.AndNOthers.replace("[n]", item.UsersCount - showedUsersCount);
 
                 GlobalUtilities.create_nested_elements([{
                     Type: "div", Class: "rv-link SoftTextShadow", Style: "font-size:0.7rem;",

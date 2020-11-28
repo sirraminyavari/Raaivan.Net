@@ -184,8 +184,9 @@
 
                 GlobalUtilities.block(sendButton);
                 _sending = true;
-
+                
                 UsersAPI.InviteUser({
+                    ApplicationID: (that.Objects.Application || {}).ApplicationID,
                     InvitationID: invitationId, Email: Base64.encode(GlobalUtilities.secure_string(email)),
                     FullName: Base64.encode(GlobalUtilities.secure_string(nameInput.value)),
                     MessageText: Base64.encode(GlobalUtilities.secure_string(bodyInput.value)),
