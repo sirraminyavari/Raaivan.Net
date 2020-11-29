@@ -2335,6 +2335,7 @@
       <DependentUpon>Dockerfile</DependentUpon>
     </None>
     <Content Include="libman.json" />
+    <None Include="Properties\PublishProfiles\arvan_reg.pubxml" />
     <None Include="Properties\PublishProfiles\Default - AnyCPU.pubxml" />
     <None Include="Properties\PublishProfiles\Default - x64.pubxml" />
     <Content Include="Script\DataTables\Persian.json" />
