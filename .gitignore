@@ -60,7 +60,7 @@ artifacts/
 StyleCopReport.xml
 
 # web.config & License file
-Web.config
+# Web.config
 raaivan.license
 [Aa]pp_[Dd]ata/
 [Gg]lobal_[Dd]ocuments/
