@@ -22,7 +22,7 @@ namespace RaaiVan.Web.API
         public static void new_ticket(string ticket, Guid userId)
         {
             if (string.IsNullOrEmpty(ticket)) return;
-
+            
             if (RedisAPI.Enabled)
             {
                 RedisAPI.set_value<Guid?>(ticket, userId);

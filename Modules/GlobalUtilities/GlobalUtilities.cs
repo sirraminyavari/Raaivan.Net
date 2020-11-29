@@ -683,7 +683,8 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static string get_environment_variable(string variable, string defaultValue = "")
         {
-            return Environment.GetEnvironmentVariable(variable, EnvironmentVariableTarget.Machine) ?? defaultValue;
+            return Environment.GetEnvironmentVariable(variable, EnvironmentVariableTarget.Machine) ?? 
+                (Environment.GetEnvironmentVariable(variable, EnvironmentVariableTarget.User) ?? defaultValue);
         }
 
         public static bool is_system_admin(Guid? applicationId, Guid userId, bool ignoreAuthentication = false)
