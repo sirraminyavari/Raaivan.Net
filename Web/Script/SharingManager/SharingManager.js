@@ -161,7 +161,7 @@
             //Active-Deactive SendButton
             var set_btn_active = function () {
                 if (!!GlobalUtilities.trim(textArea.get_data()))
-                    jQuery(elems["sendButton"]).css({ 'opacity': 1, 'cursor': 'hand' });
+                    jQuery(elems["sendButton"]).css({ 'opacity': 1, 'cursor': 'pointer' });
                 else jQuery(elems["sendButton"]).css({ 'opacity': 0.5, 'cursor': 'not-allowed' });
             };
 
@@ -308,7 +308,7 @@
             //Active-Deactive SendButton
             var set_btn_active = function () {
                 if (!!GlobalUtilities.trim(newComment.get_data()))
-                    jQuery(elems["sendButton"]).css({ 'opacity': 1, 'cursor': 'hand' });
+                    jQuery(elems["sendButton"]).css({ 'opacity': 1, 'cursor': 'pointer' });
                 else jQuery(elems["sendButton"]).css({ 'opacity': 0.5, 'cursor': 'not-allowed' });
             };
 

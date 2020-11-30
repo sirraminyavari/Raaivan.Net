@@ -1,6 +1,30 @@
 ﻿(function () {
     if (window.SearchManager) return;
 
+    var xx = {
+        "success": true,
+        "AttachedFile": {
+            "FileID": "5cadc531-eeb6-45fa-9dc9-58c3bb0c5610",
+            "FileName": "KDMp",
+            "OwnerID": "",
+            "Extension": "anBn",
+            "MIME": "image/jpeg",
+            "Size": 254304,
+            "Downloadable": false,
+            "IconURL": "../../images/extensions/jpg.png"
+        },
+        "name": "5cadc531-eeb6-45fa-9dc9-58c3bb0c5610.jpg",
+        "url": "",
+        "Message": {
+            "X": 60,
+            "Y": 0,
+            "Width": 480,
+            "Height": 480,
+            "HighQualityImageURL": "https://rvtest.s3.ir-thr-at1.arvanstorage.com/08c72552-4f2c-473f-b3b0-c2dacf8cd6a9/Icons/HighQuality/5c/a/5cadc531-eeb6-45fa-9dc9-58c3bb0c5610.jpg",
+            "ImageURL": "https://rvtest.s3.ir-thr-at1.arvanstorage.com/08c72552-4f2c-473f-b3b0-c2dacf8cd6a9/Icons/5c/a/5cadc531-eeb6-45fa-9dc9-58c3bb0c5610.jpg"
+        }
+    };
+
     window.SearchManager = function (containerDiv, params) {
         this.ContainerDiv = typeof (containerDiv) == "object" ? containerDiv : document.getElementById(containerDiv);
         if (!this.ContainerDiv) return;

@@ -234,9 +234,12 @@ namespace RaaiVan.Web.API
 
                         string errorMessage = string.Empty;
 
-                        succeed = RVGraphics.create_icon(applicationId, iconId, iconType, fileContent, ref errorMessage);
+                        IconMeta meta = null;
 
-                        responseText = responseText.Replace("\"~[[MSG]]\"", errorMessage);
+                        succeed = RVGraphics.create_icon(applicationId, iconId, iconType, fileContent, ref errorMessage, ref meta);
+
+                        if(succeed && meta != null) responseText = responseText.Replace("\"~[[MSG]]\"", meta.toJson(applicationId));
+                        else responseText = responseText.Replace("\"~[[MSG]]\"", errorMessage);
 
                         try
                         {
@@ -287,8 +290,10 @@ namespace RaaiVan.Web.API
                         int height = string.IsNullOrEmpty(context.Request.Params["Height"]) ? -1 :
                             (int)double.Parse(context.Request.Params["Height"]);
 
+                        IconMeta meta = null;
+
                         RVGraphics.extract_thumbnail(applicationId, highQualityFile, highQualityFile.toByteArray(applicationId), file,
-                            x, y, width, height, iconWidth, iconHeight, ref responseText);
+                            x, y, width, height, iconWidth, iconHeight, ref responseText, ref meta);
 
                         break;
                     }
@@ -380,7 +385,7 @@ namespace RaaiVan.Web.API
                 responseText = "{\"success\":" + true.ToString().ToLower() +
                     ",\"AttachedFile\":" + fi.toJson(applicationId, true) +
                     ",\"name\":\"" + fi.file_name_with_extension + "\"" +
-                    ",\"url\":\"" + fi.url() + "\"" +
+                    ",\"url\":\"" + fi.url(applicationId) + "\"" +
                     ",\"Message\":\"~[[MSG]]\"}";
             }
             catch (Exception)
@@ -412,7 +417,7 @@ namespace RaaiVan.Web.API
                 responseText = "{\"success\":" + true.ToString().ToLower() + 
                     ",\"AttachedFile\":" + fi.toJson(applicationId, true) +
                     ",\"name\":\"" + fi.file_name_with_extension + "\"" +
-                    ",\"url\":\"" + fi.url() + "\"" +
+                    ",\"url\":\"" + fi.url(applicationId) + "\"" +
                     ",\"Message\":\"~[[MSG]]\"}";
 
             }

@@ -75,7 +75,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
                 return true;
             }
-            catch { return false; }
+            catch(Exception ex) { return false; }
         }
 
         public static List<KeyValuePair<string, DateTime>> files(string folderName, int maxCount = 0)

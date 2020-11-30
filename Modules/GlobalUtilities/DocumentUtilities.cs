@@ -220,7 +220,8 @@ namespace RaaiVan.Modules.GlobalUtilities
                 FolderName = folderName
             };
 
-            string address = !fi.exists(applicationId) ? (highQuality ? string.Empty : "../../Images/unknown.jpg") : fi.url();
+            string address = !fi.exists(applicationId) ? 
+                (highQuality ? string.Empty : "../../Images/unknown.jpg") : fi.url(applicationId);
 
             return networkAddress ? address.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : address;
         }
@@ -318,12 +319,12 @@ namespace RaaiVan.Modules.GlobalUtilities
                 FolderName = FolderNames.Icons
             };
 
-            string retUrl = fi.exists(applicationId) ? fi.url() : string.Empty;
+            string retUrl = fi.exists(applicationId) ? fi.url(applicationId) : string.Empty;
 
             if (string.IsNullOrEmpty(retUrl) && alternateOwnerId.HasValue)
             {
                 fi.FileID = alternateOwnerId;
-                retUrl = fi.exists(applicationId) ? fi.url() : string.Empty;
+                retUrl = fi.exists(applicationId) ? fi.url(applicationId) : string.Empty;
             }
 
             if (string.IsNullOrEmpty(retUrl) && defaultIcon != DefaultIconTypes.None)
@@ -347,7 +348,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                 FolderName = folderName
             };
 
-            string retUrl = fi.exists(applicationId) ? fi.url() :
+            string retUrl = fi.exists(applicationId) ? fi.url(applicationId) :
                 (highQuality ? string.Empty : get_icon_url(applicationId, DefaultIconTypes.Extension, extension));
 
             return networkAddress ? retUrl.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : retUrl;
@@ -397,7 +398,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                 FolderName = folderName
             };
 
-            string retUrl = fi.exists(applicationId) ? fi.url() : string.Empty;
+            string retUrl = fi.exists(applicationId) ? fi.url(applicationId) : string.Empty;
 
             if (string.IsNullOrEmpty(retUrl) && !highQuality) retUrl = "../../Images/RaaiVanLogo.png";
 
@@ -420,7 +421,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                 FolderName = folderName
             };
 
-            string retUrl = fi.exists(applicationId) ? fi.url() : string.Empty;
+            string retUrl = fi.exists(applicationId) ? fi.url(applicationId) : string.Empty;
 
             return networkAddress ? retUrl.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : retUrl;
         }
@@ -902,11 +903,11 @@ namespace RaaiVan.Modules.GlobalUtilities
             return content == null || content.Length == 0 ? string.Empty : Encoding.UTF8.GetString(content);
         }
 
-        public string url() {
+        public string url(Guid? applicationId) {
             if (CephMode)
             {
                 bool isPublic = false;
-                string realAddress = get_real_address(applicationId: null, ref isPublic);
+                string realAddress = get_real_address(applicationId, ref isPublic);
                 return CephStorage.get_download_url(realAddress, isPublic);
             }
             else return "../../download/" + FileID.ToString() + 

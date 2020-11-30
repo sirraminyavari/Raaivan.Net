@@ -7,6 +7,27 @@ using System.IO;
 
 namespace RaaiVan.Modules.GlobalUtilities
 {
+    public class IconMeta
+    {
+        public int X;
+        public int Y;
+        public int Width;
+        public int Height;
+        public DocFileInfo Icon;
+        public DocFileInfo HighQualityIcon;
+
+        public string toJson(Guid? applicationId)
+        {
+            return "{\"X\":" + X.ToString() + 
+                ",\"Y\":" + Y.ToString() +
+                ",\"Width\":" + Width.ToString() + 
+                ",\"Height\":" + Height.ToString() +
+                ",\"HighQualityImageURL\":\"" + (HighQualityIcon == null ? string.Empty : HighQualityIcon.url(applicationId)) + "\"" +
+                ",\"ImageURL\":\"" + (Icon == null ? string.Empty : Icon.url(applicationId)) + "\"" +
+                "}";
+        }
+    }
+
     public class RVGraphics
     {
         public static Color get_color(string strColor)
@@ -220,8 +241,9 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        public static bool extract_thumbnail(DocFileInfo sourceFile, byte[] sourceContent, DocFileInfo destFile, 
-            int x, int y, int width, int height, int thumbnailWidth, int thumbnailHeight, ref Image retImage, ref string message)
+        public static bool extract_thumbnail(Guid? applicationId, DocFileInfo sourceFile, byte[] sourceContent,
+            DocFileInfo destFile, int x, int y, int width, int height, int thumbnailWidth, int thumbnailHeight,
+            ref Image retImage, ref string message, ref IconMeta meta)
         {
             try
             {
@@ -260,11 +282,16 @@ namespace RaaiVan.Modules.GlobalUtilities
                         y = (image.Height - height) / 2;
                     }
 
-                    message = "{\"X\":" + x.ToString() + ",\"Y\":" + y.ToString() +
-                        ",\"Width\":" + width.ToString() + ",\"Height\":" + height.ToString() +
-                        ",\"HighQualityImageURL\":\"" + sourceFile.url() + "\"" +
-                        ",\"ImageURL\":\"" + destFile.url() + "\"" +
-                    "}";
+                    meta = new IconMeta() {
+                        X = x,
+                        Y = y,
+                        Width = width,
+                        Height = height,
+                        Icon = destFile,
+                        HighQualityIcon = sourceFile
+                    };
+
+                    message = meta.toJson(applicationId);
 
                     Rectangle rect = new Rectangle(x, y, width, height);
 
@@ -284,8 +311,9 @@ namespace RaaiVan.Modules.GlobalUtilities
             catch { message = "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}"; return false; }
         }
 
-        public static bool extract_thumbnail(Guid? applicationId, DocFileInfo sourceFile, byte[] sourceContent, DocFileInfo destFile,
-            int x, int y, int width, int height, int thumbnailWidth, int thumbnailHeight, ref string message)
+        public static bool extract_thumbnail(Guid? applicationId, DocFileInfo sourceFile, byte[] sourceContent, 
+            DocFileInfo destFile, int x, int y, int width, int height, int thumbnailWidth, int thumbnailHeight, 
+            ref string message, ref IconMeta meta)
         {
             try
             {
@@ -312,8 +340,8 @@ namespace RaaiVan.Modules.GlobalUtilities
                 }
 
                 Image retImage = null;
-                if (extract_thumbnail(sourceFile, sourceContent, destFile, x, y, width, height,
-                    thumbnailWidth, thumbnailHeight, ref retImage, ref message))
+                if (extract_thumbnail(applicationId, sourceFile, sourceContent, destFile, x, y, width, height,
+                    thumbnailWidth, thumbnailHeight, ref retImage, ref message, ref meta))
                 {
                     using (MemoryStream st = new MemoryStream())
                     {
@@ -334,7 +362,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         }
 
         public static bool create_icon(Guid? applicationId, Guid iconId, IconType iconType,
-            byte[] fileContent, ref string errorMessage)
+            byte[] fileContent, ref string errorMessage, ref IconMeta meta)
         {
             int width = 100, height = 100, highQualityWidth = 600, highQualityHeight = 600;
 
@@ -357,7 +385,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             return succeed && hqContent != null && hqContent.Length > 0 && 
                 RVGraphics.extract_thumbnail(applicationId, highQualityFile, hqContent, 
-                file, -1, -1, -1, -1, width, height, ref errorMessage);
+                file, -1, -1, -1, -1, width, height, ref errorMessage, ref meta);
         }
     }
 }

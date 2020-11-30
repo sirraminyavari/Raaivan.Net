@@ -7822,10 +7822,12 @@ namespace RaaiVan.Web.API
             if (result && logo != null)
             {
                 PublicMethods.set_timeout(() => {
+                    IconMeta meta = null;
+
                     string res = string.Empty;
                     logo.FolderName = FolderNames.TemporaryFiles;
                     RVGraphics.create_icon(paramsContainer.Tenant.Id, 
-                        nodeObject.NodeID.Value, IconType.Icon, logo.toByteArray(paramsContainer.ApplicationID), ref res);
+                        nodeObject.NodeID.Value, IconType.Icon, logo.toByteArray(paramsContainer.ApplicationID), ref res, ref meta);
                 }, 0);
             }
 
