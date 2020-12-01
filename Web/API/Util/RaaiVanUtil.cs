@@ -549,14 +549,7 @@ namespace RaaiVan.Web.API
                 }
             }
 
-            if (RaaiVanSettings.SAASBasedMultiTenancy) {
-                Guid? invAppId = !invitationId.HasValue ? null : 
-                    UsersController.get_invitation_application_id(invitationId.Value, checkIfNotUsed: true);
-                if (invAppId.HasValue) GlobalController.add_user_to_application(invAppId.Value, userId);
-
-                List<Application> apps = GlobalController.get_user_applications(userId);
-                if (apps != null && apps.Count == 1) PublicMethods.set_current_application(apps[0]);
-            }
+            init_user_application(invitationId, userId);
         }
 
         public static void logout(Guid? applicationId)
@@ -592,6 +585,20 @@ namespace RaaiVan.Web.API
             }
             
             logged_out(userId);
+        }
+
+        public static void init_user_application(Guid? invitationId, Guid userId) {
+            if (RaaiVanSettings.SAASBasedMultiTenancy)
+            {
+                Guid? invAppId = !invitationId.HasValue ? null :
+                    UsersController.get_invitation_application_id(invitationId.Value, checkIfNotUsed: true);
+                if (invAppId.HasValue) GlobalController.add_user_to_application(invAppId.Value, userId);
+
+                List<Application> apps = GlobalController.get_user_applications(userId);
+                if (apps != null && apps.Count == 1) PublicMethods.set_current_application(apps[0]);
+                else if (apps != null && invAppId.HasValue && apps.Any(a => a.ApplicationID == invAppId))
+                    PublicMethods.set_current_application(apps.Where(a => a.ApplicationID == invAppId).FirstOrDefault());
+            }
         }
 
         public static bool check_users_count_lisence(Guid applicationId)

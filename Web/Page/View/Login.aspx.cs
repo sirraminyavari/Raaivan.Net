@@ -55,7 +55,12 @@ namespace RaaiVan.Web.Page.View
                 string authCookie = string.Empty;
 
                 if (RaaiVanUtil.is_authenticated(paramsContainer.ApplicationID, HttpContext.Current))
+                {
+                    Guid? invitationId = PublicMethods.parse_guid(Request.Params["inv"]);
+                    RaaiVanUtil.init_user_application(invitationId, paramsContainer.CurrentUserID.Value);
+
                     Response.Redirect(PublicConsts.HomePage);
+                }
                 else if ((!local.HasValue || !local.Value) && RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) &&
                     !(loggedIn = sso_login(ref loginErrorMessage, ref userId, ref authCookie))) disableLogin = true;
                 
