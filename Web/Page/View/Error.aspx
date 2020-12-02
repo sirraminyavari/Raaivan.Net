@@ -13,7 +13,6 @@
     <link rel="shortcut icon" href="../../Images/RaaiVanFav.ico" />
 
     <link rel="stylesheet" type="text/css" href="../../Script/jQuery/Tooltip/style.css" />
-    <link rel="stylesheet" type="text/css" href="../../CSS/Global.css"/>
     <link rel="stylesheet" type="text/css" href="../../Fonts/font-awesome.css"/>
     <link rel="stylesheet" type="text/css" href="../../Script/Foundation/foundation.css"/>
     <link rel="stylesheet" type="text/css" href="../../CSS/foundation-fix.css"/>

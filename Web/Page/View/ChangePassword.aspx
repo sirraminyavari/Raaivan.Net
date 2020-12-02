@@ -12,7 +12,6 @@
 
     <link rel="shortcut icon" href="../../Images/RaaiVanFav.ico" />
 
-    <link rel="stylesheet" href="../../CSS/Global.css" />
     <link rel="stylesheet" href="../../Script/Foundation/foundation.css" />
     <link rel="stylesheet" href="../../CSS/foundation-fix.css" />
 

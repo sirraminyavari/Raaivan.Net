@@ -386,6 +386,12 @@ namespace RaaiVan.Web.API
                 case "GetThemes":
                     get_themes(ref responseText);
                     break;
+                case "Theme":
+                case "theme":
+                    string themeContent = ThemeUtil.get_theme(paramsContainer.ApplicationID,
+                        PublicMethods.parse_string(context.Request.Params["Name"], decode: false));
+                    paramsContainer.file_response(themeContent, "thm.css", contentType: "text/css", isAttachment: false);
+                    return true;
             }
 
             if (!string.IsNullOrEmpty(responseText))

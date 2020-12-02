@@ -1950,6 +1950,7 @@
     <Compile Include="API\UsersAPI.ashx.cs">
       <DependentUpon>UsersAPI.ashx</DependentUpon>
     </Compile>
+    <Compile Include="API\Util\ThemeUtil.cs" />
     <Compile Include="API\Util\VerificationCode.cs" />
     <Compile Include="API\WFAPI.ashx.cs">
       <DependentUpon>WFAPI.ashx</DependentUpon>
@@ -2335,6 +2336,10 @@
       <DependentUpon>Dockerfile</DependentUpon>
     </None>
     <Content Include="libman.json" />
+    <Content Include="Fonts\woff2\IRANSansWeb_Bold.woff2" />
+    <Content Include="Fonts\woff2\IRANSansWeb_Light.woff2" />
+    <Content Include="Fonts\woff2\IRANSansWeb_Medium.woff2" />
+    <Content Include="Fonts\woff2\IRANSansWeb_UltraLight.woff2" />
     <None Include="Properties\PublishProfiles\Default - AnyCPU.pubxml" />
     <None Include="Properties\PublishProfiles\Default - x64.pubxml" />
     <Content Include="Script\DataTables\Persian.json" />

@@ -541,10 +541,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             get
             {
-                List<FolderNames> nameItems = new[] { FolderNames.EmailTemplates, FolderNames.PDFImages }.ToList();
-
-                string fName = FileID.HasValue ? FileID.ToString() : 
-                    (nameItems.Any(n => FolderName == n) ? FileName : string.Empty);
+                string fName = file_name_without_extension;
 
                 return string.IsNullOrEmpty(fName) ? string.Empty :
                     fName + (string.IsNullOrEmpty(Extension) ? string.Empty : "." + Extension);
@@ -555,7 +552,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             get
             {
-                List<FolderNames> nameItems = new[] { FolderNames.EmailTemplates, FolderNames.PDFImages }.ToList();
+                List<FolderNames> nameItems = new[] { FolderNames.EmailTemplates, FolderNames.PDFImages, FolderNames.Themes }.ToList();
                 return FileID.HasValue ? FileID.ToString() : (nameItems.Any(n => FolderName == n) ? FileName : string.Empty);
             }
         }

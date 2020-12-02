@@ -239,28 +239,13 @@ namespace RaaiVan.Web.API
                 if (!string.IsNullOrEmpty(pdfPassword)) fileContent = PDFUtil.set_password(fileContent, pdfPassword);
             }
 
-            HttpContext context = HttpContext.Current;
-
-            //Stream the File from Server
-            context.Response.ContentType = "application/octet-stream";
-            context.Response.AddHeader("Content-Disposition", string.Format("attachment;filename=\"{0}\"", file.FileName +
-                (string.IsNullOrEmpty(file.Extension) ? string.Empty : "." + file.Extension)));
-            context.Response.AddHeader("Content-Length", fileContent.Length.ToString());
-
-            context.Response.BinaryWrite(fileContent);
-
-            context.Response.End();
+            paramsContainer.file_response(fileContent,
+                file.FileName + (string.IsNullOrEmpty(file.Extension) ? string.Empty : "." + file.Extension));
         }
 
         protected void send_empty_response()
         {
-            HttpContext context = HttpContext.Current;
-
-            context.Response.Clear();
-            context.Response.BufferOutput = true;
-            context.Response.Write("فایل یافت نشد");
-            context.Response.End();
-            context.Response.Close();
+            paramsContainer.return_response("FileNotFound");
         }
         
         public bool IsReusable

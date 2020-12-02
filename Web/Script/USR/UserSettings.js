@@ -152,7 +152,7 @@
 
                                         var curThmUrl = RVAPI.ThemeURL({ Name: window.RVGlobal.Theme || "Default" });
                                         var newThmUrl = RVAPI.ThemeURL({ Name: thm.Name });
-
+                                        
                                         DynamicFileUtilities.replace_css(curThmUrl, newThmUrl);
 
                                         window.RVGlobal.Theme = thm.Name;

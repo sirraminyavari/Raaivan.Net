@@ -225,22 +225,25 @@ namespace RaaiVan.Modules.GlobalUtilities
             Tag,
             AutoTag,
             AdditionalID,
-            HTMLTag
+            HTMLTag,
+            CSSVariable
             //Free = @"(~)\[\[([\w\|\\\/\^\$\u0621-\u064A\u0660-\u0669\u0671-\u06D3\u06F0-\u06F9\s]+)\]\]"
         }
 
         private static string _get_pattern(Patterns pattern)
         {
-            switch (pattern.ToString().ToLower())
+            switch (pattern)
             {
-                case "tag":
+                case Patterns.Tag:
                     return @"(@)\[\[([a-zA-Z\d\-_]+):([\w\s\.\-]+):([0-9a-zA-Z\+\/\=]+)(:([0-9a-zA-Z\+\/\=]*))?\]\]";
-                case "autotag":
+                case Patterns.AutoTag:
                     return @"(~)\[\[([:\-\w]+)\]\]";
-                case "additionalid":
+                case Patterns.AdditionalID:
                     return @"^([A-Za-z0-9_\-\/]|(~\[\[(((RND|(NCountS?(PY|GY)?))\d?)|[PG](Year|YearS|Month|Day)|(FormField:[A-Za-z0-9\-]{36})|(AreaID)|(FVersionID)|(PVersionID)|(VersionCounter))\]\]))+$";
-                case "htmltag":
+                case Patterns.HTMLTag:
                     return @"<.*?>";
+                case Patterns.CSSVariable:
+                    return @"--[a-zA-Z0-9\-]*:.*;";
                 default:
                     return string.Empty;
             }
@@ -256,6 +259,15 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             string patt = _get_pattern(pattern);
             return string.IsNullOrEmpty(patt) ? (MatchCollection)null : (new Regex(patt)).Matches(input);
+        }
+
+        public static List<string> get_matches_string(string input, Patterns pattern)
+        {
+            MatchCollection col = get_matches(input, pattern);
+            List<string> ret = new List<string>();
+            if (col != null)
+                for (int i = 0; i < col.Count; i++) ret.Add(col[i].Value);
+            return ret;
         }
 
         public static List<string> get_existing_tags(string input, Patterns pattern)
@@ -388,6 +400,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         public static string MagickCacheDirectory = "~/app_data/magick_cache";
         public static string EncryptedFileNamePrefix = "e_";
         public static string LicenseFilePath = "~/raaivan.license";
+        public static string GlobalCSS = "~/CSS/Global.css";
 
         public static string NotAuthenticatedResponse = "{\"NotAuthenticated\":" + true.ToString().ToLower() + "}";
         public static string NullTenantResponse = "{\"NoApplicationFound\":" + true.ToString().ToLower() + "}";
@@ -1328,11 +1341,11 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             if (string.IsNullOrEmpty(theme) || !RaaiVanSettings.Themes.Any(t => t.ToLower().IndexOf(theme.ToLower()) >= 0))
                 theme = RaaiVanSettings.DefaultTheme(applicationId);
-
+            
             pg.Header.Controls.Add(new LiteralControl("<link type='text/css' rel='stylesheet' " +
-                "href='" + pg.ResolveClientUrl("~/CSS/Themes/" + theme + ".css?timeStamp=" + 
+                "href='" + pg.ResolveClientUrl("~/api/rv/theme?name=" + theme + "&timeStamp=" + 
                 DateTime.Now.Millisecond.ToString()) + "' />"));
-
+            
             pg.Header.Controls.Add(new LiteralControl("<link type='text/css' rel='stylesheet' " +
                 "href='" + pg.ResolveClientUrl("~/CSS/" + RaaiVanSettings.DefaultDirection(applicationId) + ".css") + "' />"));
 

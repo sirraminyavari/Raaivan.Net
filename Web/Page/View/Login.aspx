@@ -17,7 +17,6 @@
     <link rel="stylesheet" type="text/css" href="../../Script/jQuery/TextNTags/jquery-textntags.css" />
     <link rel="stylesheet" type="text/css" href="../../Script/jQuery/Tooltip/style.css" />
     <link rel="Stylesheet" type="text/css" href="../../Script/jQuery/nanoScroller/nanoscroller.css" />
-    <link rel="stylesheet" type="text/css" href="../../CSS/Global.css"/>
     <link rel="stylesheet" type="text/css" href="../../Fonts/font-awesome.css"/>
     <link rel="stylesheet" type="text/css" href="../../Script/Foundation/foundation.css"/>
     <link rel="stylesheet" type="text/css" href="../../CSS/foundation-fix.css"/>

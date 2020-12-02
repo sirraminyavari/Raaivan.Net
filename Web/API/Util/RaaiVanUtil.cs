@@ -1117,11 +1117,38 @@ namespace RaaiVan.Web.API
             _Context.Response.AddHeader("Content-Disposition", "attachment; filename=" + fileName.Replace(' ', '_'));
             _Context.Response.AddHeader("Content-Length", byteArray.Length.ToString());
 
+            _Context.Response.BinaryWrite(byteArray);
+
+            /*
             using (MemoryStream memoryStream = new MemoryStream(byteArray))
             {
                 memoryStream.WriteTo(_Context.Response.OutputStream);
                 memoryStream.Close();
             }
+            */
+
+            try
+            {
+                _Context.Response.Flush();
+                _Context.Response.End();
+            }
+            catch (Exception ex)
+            {
+                string strEx = ex.ToString();
+            }
+        }
+
+        public void file_response(string content, string fileName, string contentType = null, bool isAttachment = true)
+        {
+            _Context.Response.Clear();
+            _Context.Response.ClearContent();
+            _Context.Response.ClearHeaders();
+            _Context.Response.Buffer = true;
+            _Context.Response.ContentType = string.IsNullOrEmpty(contentType) ? "application/octet-stream" : contentType;
+            if(isAttachment) _Context.Response.AddHeader("Content-Disposition", "attachment; filename=" + fileName.Replace(' ', '_'));
+            _Context.Response.AddHeader("Content-Length", content.Length.ToString());
+
+            _Context.Response.Write(content);
 
             try
             {

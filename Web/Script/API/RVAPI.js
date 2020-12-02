@@ -20,7 +20,7 @@
         send_post_request(url, queryString, callback, null, null, null, true);
     },
 
-    ThemeURL: function (params) { return "../../CSS/Themes/" + (params || {}).Name + ".css"; },
+    ThemeURL: function (params) { return "../../api/rv/theme?name=" + (params || {}).Name + "&timeStamp=" + new Date().getTime(); },
 
     HelpPageURL: function () { return "../../helpme"; },
 

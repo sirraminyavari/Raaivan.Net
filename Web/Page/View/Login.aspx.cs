@@ -53,7 +53,7 @@ namespace RaaiVan.Web.Page.View
                 Guid? userId = null;
 
                 string authCookie = string.Empty;
-
+                
                 if (RaaiVanUtil.is_authenticated(paramsContainer.ApplicationID, HttpContext.Current))
                 {
                     Guid? invitationId = PublicMethods.parse_guid(Request.Params["inv"]);

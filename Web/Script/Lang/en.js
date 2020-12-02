@@ -1250,6 +1250,7 @@
             ErrorInAddingNodeCreators: "خطا در افزودن دارندگان مالکیت معنوی",
             ErrorInCommunicationWithServer: "خطا در برقراری ارتباط با سرور",
             FileAttachmentFailed: "خطا در ضمیمه کردن فایل ها",
+            FileNotFound: "file not found",
             FillNecessaryFieldsOfTheForm: "لطفا فیلدهای ضروی فرم را تکمیل فرمایید",
             FillYourFirstAndLastName: "برای اینکه بتوانید به صفحات مختلف سامانه مراجعه کنید، لازم است تا ابتدا نام و نام خانوادگی خود را ذخیره کنید",
             FormInstanceInitializationFailed: "خطا در ایجاد فرم جدید",
