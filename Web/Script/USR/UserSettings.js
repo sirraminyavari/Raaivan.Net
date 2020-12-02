@@ -161,7 +161,6 @@
 
                                         for (var i = 0; i < chks.length; ++i)
                                             chks[i].style.display = (String(chks[i].themeName).toLowerCase() == String(thm.Name).toLowerCase() ? "block" : "none");
-
                                     }
                                 });
                             }

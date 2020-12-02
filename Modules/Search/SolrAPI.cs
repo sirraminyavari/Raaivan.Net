@@ -175,7 +175,7 @@ namespace RaaiVan.Modules.Search
                         terms.AddRange(QueryTerms.parse(x));
                     else
                     {
-                        if (!isQuote && !(new[] { "?", "*" }).Any(c => x.IndexOf(c) >= 0)) x += "~";
+                        if (!isQuote && !(new[] { "?", "*" }).Any(c => x.IndexOf(c) >= 0)) x += "~1";
                         else if (isQuote) x += "^";
 
                         terms.Add(x);
