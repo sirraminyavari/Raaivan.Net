@@ -1,5 +1,0 @@
-USE [EKM_App]
-GO
-
-DROP FULLTEXT INDEX ON [dbo].[CN_Nodes] 
-GO
