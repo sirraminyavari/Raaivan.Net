@@ -35,6 +35,15 @@ namespace RaaiVan.Web
             };
             //end of Ignore SSL certificate check for web requests
 
+            app.Map("/ui", spa => {
+                spa.Use((context, next) => {
+                    context.Request.Path = new PathString("/ui/index.html");
+                    return next();
+                });
+
+                spa.UseStaticFiles();
+            });
+
             ConfigureAuth(app);
         }
 
