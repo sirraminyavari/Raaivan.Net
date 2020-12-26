@@ -29,7 +29,7 @@ namespace RaaiVan.Web.Page.View
                 if (!RaaiVanSettings.SAASBasedMultiTenancy && !paramsContainer.ApplicationID.HasValue)
                 {
                     PublicMethods.set_page_headers(paramsContainer.ApplicationID, Page, false);
-                    initialJson.Value = PublicConsts.NullTenantResponse;
+                    PublicMethods.set_rv_global(Page, PublicMethods.fromJSON(PublicConsts.NullTenantResponse));
                     return;
                 }
 
@@ -76,7 +76,7 @@ namespace RaaiVan.Web.Page.View
                 string ssoLoginUrl = !RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) ? string.Empty :
                     Modules.Jobs.SSO.get_login_url(paramsContainer.ApplicationID);
 
-                initialJson.Value = "{\"SysID\":\"" + (isValid ? string.Empty : PublicMethods.get_sys_id()) + "\"" +
+                string rvGlobal = "{\"SysID\":\"" + (isValid ? string.Empty : PublicMethods.get_sys_id()) + "\"" +
                     ",\"SystemTitle\":\"" + Base64.encode(RaaiVanSettings.SystemTitle(paramsContainer.ApplicationID)) + "\"" +
                     ",\"SystemName\":\"" + Base64.encode(RaaiVanSettings.SystemName(paramsContainer.ApplicationID)) + "\"" +
                     ",\"SSOLoginURL\":\"" + Base64.encode(ssoLoginUrl) + "\"" +
@@ -99,17 +99,20 @@ namespace RaaiVan.Web.Page.View
                     foreach (string str in info)
                     {
                         string result = get_info_json(str);
-                        if (!string.IsNullOrEmpty(result)) initialJson.Value += ", " + result;
+                        if (!string.IsNullOrEmpty(result)) rvGlobal += ", " + result;
                     }
                 }
 
-                initialJson.Value += "}";
+                rvGlobal += "}";
+
+                PublicMethods.set_rv_global(Page, PublicMethods.fromJSON(rvGlobal));
             }
             catch (Exception ex)
             {
                 LogController.save_error_log(paramsContainer.ApplicationID, null, "LoginPage_Load", ex, ModuleIdentifier.RV);
 
-                initialJson.Value = "{\"Error\":\"" + Base64.encode(PublicMethods.get_exception(ex)) + "\"}";
+                PublicMethods.set_rv_global(Page,
+                    PublicMethods.fromJSON("{\"Error\":\"" + Base64.encode(PublicMethods.get_exception(ex)) + "\"}"));
             }
         }
 

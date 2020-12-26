@@ -18,6 +18,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         OrganizationLogo,
 
         FavIconName,
+        LogoURL,
+        LogoMiniURL,
 
         StoragePath,
 
@@ -299,6 +301,16 @@ namespace RaaiVan.Modules.GlobalUtilities
         public static string FavIconName
         {
             get { return get_value(null, RVSettingsItem.FavIconName, "RaaiVanFav"); }
+        }
+
+        public static string LogoURL
+        {
+            get { return get_value(null, RVSettingsItem.LogoURL, "../../Images/RaaiVanLogo.png"); }
+        }
+
+        public static string LogoMiniURL
+        {
+            get { return get_value(null, RVSettingsItem.LogoMiniURL, "../../Images/RaaiVan-Mini.png"); }
         }
 
         private static string _StoragePath;

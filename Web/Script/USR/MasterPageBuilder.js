@@ -707,12 +707,11 @@
                 return;
             }
 
-            var _div = that.__LoginDialog.Showed = GlobalUtilities.create_nested_elements([
-                {
-                    Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1",
-                    Style: "margin:0rem auto; padding:1rem; background-color:rgba(0,0,0,0.5);", Name: "_div"
-                }
-            ])["_div"];
+            var _div = that.__LoginDialog.Showed = GlobalUtilities.create_nested_elements([{
+                Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1", Name: "_div",
+                Style: "margin:0rem auto; padding:1rem; background-color:" +
+                    (RVGlobal.SAASBasedMultiTenancy ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)") + ";"
+            }])["_div"];
 
             GlobalUtilities.loading(_div);
             GlobalUtilities.show(_div);

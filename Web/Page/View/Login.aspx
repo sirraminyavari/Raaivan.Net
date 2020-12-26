@@ -52,15 +52,13 @@
 <body class="Direction TextAlign" style="font-family:IRANSans;">
     <script type="text/javascript" src="../../Script/USR/LoginControl.js<% = "?rnd=" + DateTime.Now.Millisecond.ToString() %>"></script>
 
-    <form id="idFrmMain" runat="server">
-        <asp:HiddenField ID="initialJson" runat="server" ClientIDMode="Static" />
-    </form>
+    <form id="idFrmMain" runat="server"> </form>
 
     <div id="mainContent" class="small-12 medium-12 large-12" 
         style="background-repeat:no-repeat; background-attachment:fixed; background-position:center; background-size:cover; 
                height:100vh; display:flex; flex-flow:column; align-items:center; justify-content:center; position:relative;">
         <div style="width:100%;">
-            <div class="small-12 medium-8 large-6 rv-border-radius-1" 
+            <div id="loginContainer" class="small-12 medium-8 large-6 rv-border-radius-1" 
                 style="padding:1rem 5rem; background-color:rgba(0,0,0,0.7); margin:0 auto;">
                 <div id="loginArea" class="small-12 medium-12 large-12"></div>
             </div>
@@ -101,15 +99,13 @@
                 GlobalUtilities.scroll_into_view(firstPage, { Offset: 0 });
             };
 
-            var result = window.RVGlobal = JSON.parse(document.getElementById("initialJson").value);
+            if (RVGlobal.LoggedIn) {
+                var msg = RVGlobal.LoginMessage ? Base64.decode(RVGlobal.LoginMessage) : null;
 
-            if (result.LoggedIn) {
-                var msg = result.LoginMessage ? Base64.decode(result.LoginMessage) : null;
-
-                GlobalUtilities.set_auth_cookie(result.AuthCookie);
+                GlobalUtilities.set_auth_cookie(RVGlobal.AuthCookie);
                 
-                if (msg || ((result.LastLogins || []).length > 0))
-                    (new LoginControl()).show_last_logins(msg, result.LastLogins, function () { window.location.href = "../../home"; });
+                if (msg || ((RVGlobal.LastLogins || []).length > 0))
+                    (new LoginControl()).show_last_logins(msg, RVGlobal.LastLogins, function () { window.location.href = "../../home"; });
                 else window.location.href = "../../home";
 
                 return;
@@ -119,7 +115,7 @@
             
             if ((window.RVGlobal || {}).NoApplicationFound) return alert(RVDic.MSG.NoApplicationFound);
             
-            if (result.SysID) {
+            if (RVGlobal.SysID) {
                 var sysElems = GlobalUtilities.create_nested_elements([{
                     Type: "div", Class: "small-10, medium-8 large-6 rv-border-radius-1 SoftBackgroundColor",
                     Style: "margin:0 auto; padding:1rem;", Name: "container",
@@ -145,14 +141,14 @@
                     ]
                 }]);
 
-                sysElems["sysId"].innerHTML = result.SysID;
+                sysElems["sysId"].innerHTML = RVGlobal.SysID;
 
                 var sysShowed = GlobalUtilities.show(sysElems["container"]);
             }
 
             GlobalUtilities.cheadget("sudoku", "gesi", "ramin", "fliptext", "instaprofile");
 
-            var loginPageModel = result.LoginPageModel || "";
+            var loginPageModel = RVGlobal.LoginPageModel || "";
             
             if (loginPageModel) {
                 var _jsFileName = "lp_" + loginPageModel;
@@ -169,8 +165,9 @@
                 }
             }
 
-            var ssoUrl = Base64.decode((window.RVGlobal || {}).SSOLoginURL);
-            
+            document.getElementById("loginContainer").style.backgroundColor =
+                RVGlobal.SAASBasedMultiTenancy ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)";
+
             new LoginControl("loginArea", {
                 ReloadAfterLogin: false, ContainerClass: false, IgnoreSSO: true, InitialFocus: false,
                 ReturnURL: (window.RVGlobal || {}).ReturnURL ? Base64.decode(window.RVGlobal.ReturnURL) : null,

@@ -796,6 +796,9 @@
     <Content Include="Images\Checkbox-Unchecked.png" />
     <Content Include="Images\Checked.png" />
     <Content Include="Images\Clean.png" />
+    <Content Include="Images\CliqMind-Mini.png" />
+    <Content Include="Images\cliqmind.ico" />
+    <Content Include="Images\CliqMindLogo.png" />
     <Content Include="Images\ColCount.png" />
     <Content Include="Images\Content.png" />
     <Content Include="Images\Cover-Front-Simple.png" />

@@ -63,7 +63,7 @@ namespace RaaiVan.Web.Page.View
                 ",\"Notifications\":{\"SeenTimeout\":" + RaaiVanSettings.Notifications.SeenTimeout(paramsContainer.ApplicationID).ToString() +
                 ",\"UpdateInterval\":" + RaaiVanSettings.Notifications.UpdateInterval(paramsContainer.ApplicationID).ToString() + "}}";
 
-            PublicMethods.set_rv_global(Page, rvGlobal);
+            PublicMethods.set_rv_global(Page, PublicMethods.fromJSON(rvGlobal));
         }
     }
 }

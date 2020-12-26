@@ -31,7 +31,7 @@ namespace RaaiVan.Web.Page.Master
                     else
                     {
                         PublicMethods.set_page_headers(paramsContainer.ApplicationID, Page, false);
-                        PublicMethods.set_rv_global(Page, PublicConsts.NullTenantResponse);
+                        PublicMethods.set_rv_global(Page, PublicMethods.fromJSON(PublicConsts.NullTenantResponse));
                         return;
                     }
                 }
@@ -90,7 +90,7 @@ namespace RaaiVan.Web.Page.Master
 
                 string lastVersionSeen = !isAuthenticated || !paramsContainer.ApplicationID.HasValue ? string.Empty :
                     GlobalController.get_variable(paramsContainer.ApplicationID.Value, currentUserId.ToString() + "_LastVersionSeen");
-                
+
                 string rvGlobal = "{\"ApplicationID\":" + (!paramsContainer.ApplicationID.HasValue ? "null" : "\"" + paramsContainer.ApplicationID.ToString() + "\"") + 
                     ",\"UserID\":\"" + (userId.HasValue ? userId.ToString() : (isAuthenticated ? currentUserId.ToString() : string.Empty)) + "\"" +
                     ",\"CurrentUserID\":\"" + (isAuthenticated ? currentUserId.ToString() : string.Empty) + "\"" +
@@ -118,10 +118,9 @@ namespace RaaiVan.Web.Page.Master
                     ",\"SSOLoginURL\":\"" + (!RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) ? string.Empty :
                         RaaiVanSettings.SSO.LoginURL(paramsContainer.ApplicationID)) + "\"" +
                     ",\"SSOLoginTitle\":\"" + Base64.encode(RaaiVanSettings.SSO.LoginTitle(paramsContainer.ApplicationID)) + "\"" +
-                    ",\"SAASBasedMultiTenancy\":" + RaaiVanSettings.SAASBasedMultiTenancy.ToString().ToLower() +
                     "}";
 
-                PublicMethods.set_rv_global(Page, rvGlobal);
+                PublicMethods.set_rv_global(Page, PublicMethods.fromJSON(rvGlobal));
             }
             catch (Exception ex)
             {

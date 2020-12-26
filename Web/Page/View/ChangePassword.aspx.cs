@@ -29,7 +29,7 @@ namespace RaaiVan.Web.Page.View
                     paramsContainer.redirect_to_login_page();
                     return;
                 }
-
+                
                 string reason = string.Empty;
                 bool passwordChangeNeeded = RaaiVanUtil.password_change_needed(HttpContext.Current, ref reason);
 

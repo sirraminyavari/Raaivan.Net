@@ -696,8 +696,11 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static string get_environment_variable(string variable, string defaultValue = "")
         {
-            return Environment.GetEnvironmentVariable(variable, EnvironmentVariableTarget.Machine) ?? 
+            string ret = Environment.GetEnvironmentVariable(variable, EnvironmentVariableTarget.Machine) ??
                 (Environment.GetEnvironmentVariable(variable, EnvironmentVariableTarget.User) ?? defaultValue);
+
+            return string.IsNullOrEmpty(ret) ? ret : 
+                (ret.ToLower().EndsWith("_base64") ? Base64.decode(ret.Substring(0, ret.Length - 7)) : ret);
         }
 
         public static bool is_system_admin(Guid? applicationId, Guid userId, bool ignoreAuthentication = false)
@@ -1392,9 +1395,16 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        public static void set_rv_global(Page pg, string value)
+        public static void set_rv_global(Page pg, Dictionary<string, object> data)
         {
-            pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript'>" + "window.RVGlobal = " + value + ";</script>"));
+            if (data == null) data = new Dictionary<string, object>();
+
+            data.Add("LogoURL", RaaiVanSettings.LogoURL);
+            data.Add("LogoMiniURL", RaaiVanSettings.LogoMiniURL);
+            data.Add("SAASBasedMultiTenancy", RaaiVanSettings.SAASBasedMultiTenancy);
+
+            pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript'>" + 
+                "window.RVGlobal = " + PublicMethods.toJSON(data) + ";</script>"));
         }
 
         public static bool is_email(string emailAddress)

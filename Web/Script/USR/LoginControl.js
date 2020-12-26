@@ -116,16 +116,17 @@
             }
             
             var ssoUrl = that.Options.IgnoreSSO ? "" : Base64.decode((window.RVGlobal || {}).SSOLoginURL);
+            var isSaaS = RVGlobal.SAASBasedMultiTenancy;
 
             var elems = GlobalUtilities.create_nested_elements([
                 {
                     Type: "div", Class: "small-12 medium-12 large-12", Style: "text-align:center; margin-bottom:1rem;",
                     Childs: [{
-                        Type: "img",
-                        Attributes: [{ Name: "src", Value: GlobalUtilities.icon("RaaiVan-Mini.png") }]
+                        Type: "img", Style: "max-width:50%;",
+                        Attributes: [{ Name: "src", Value: isSaaS ? RVGlobal.LogoURL : RVGlobal.LogoMiniURL }]
                     }]
                 },
-                (!(window.RVGlobal || {}).SystemTitle ? null : {
+                (!(window.RVGlobal || {}).SystemTitle || isSaaS ? null : {
                     Type: "div", Class: "small-12 medium-12 large-12 rv-text-shadow",
                     Style: "text-align:center; color:white; font-size:1.4rem; font-weight:500;",
                     Childs: [{ Type: "text", TextValue: Base64.decode(window.RVGlobal.SystemTitle) }]
@@ -228,8 +229,8 @@
                             Childs: [
                                 {
                                     Type: "div", Name: "_signupArea", Class: "small-12 medium-5 large-5 SoftTextShadow",
-                                    Style: "margin:1rem auto 0 auto; color:white; cursor:pointer; text-align:center;" +
-                                        (enableSignUp ? "" : "display:none;"),
+                                    Style: "margin:1rem auto 0 auto; cursor:pointer; text-align:center;" +
+                                        (isSaaS ? "" : "color:white;") + (enableSignUp ? "" : "display:none;"),
                                     Properties: [{ Name: "onclick", Value: function () { that.show_signup_form(); } }],
                                     Childs: [{ Type: "text", TextValue: (window.RVDic || {}).SignUp || "SignUp" }]
                                 },
@@ -239,8 +240,8 @@
                                 },
                                 {
                                     Type: "div", Class: "small-12 medium-5 large-5 SoftTextShadow",
-                                    Style: "margin:1rem auto 0 auto; color:white; cursor:pointer; text-align:center;" +
-                                        (signupable ? "" : "display:none;"),
+                                    Style: "margin:1rem auto 0 auto; cursor:pointer; text-align:center;" +
+                                        (isSaaS ? "" : "color:white;") + (signupable ? "" : "display:none;"),
                                     Properties: [{ Name: "onclick", Value: function () { that.show_forget_password_form(); } }],
                                     Childs: [{ Type: "text", TextValue: RVDic.ForgotMyPassword }]
                                 }
