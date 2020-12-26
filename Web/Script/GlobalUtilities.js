@@ -80,7 +80,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
     },
 
     random_str: function (length) {
-        var str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_";
+        var str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
         if ((GlobalUtilities.get_type(length) != "number") || (length <= 0)) length = 10;
         var ret = "";
         for (var i = 0; i < length; ++i)
@@ -917,12 +917,14 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
     sortable: function (container, options) {
         options = options || {};
-
+        
         GlobalUtilities.load_files(["jQuery/jquery.dad.js"], {
             OnLoad: function () {
                 jQuery(container).dad({
-                    exchangeable: false,
-                    placeholderTarget: '.' + (options.DraggableClass || 'draggable'),
+                    exchangeable: !!options.Exchangeable,
+                    targetFilters: options.Filters,
+                    draggable: '.' + (options.DraggableClass || 'draggable'),
+                    placeholderTarget: options.PlaceholderTarget ? '.' + options.PlaceholderTarget : null,
                     placeholderTemplate: '<div class="rv-border-radius-half SoftBorder" ' +
                         'style="border-width:3px; border-style:dashed; border-color:rgb(230,230,230);"></div>'
                 });
@@ -2002,12 +2004,14 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
         if (!width && !height) width = 3;
 
+        var margin = params.MiniMode ? 2 : 4;
+
         if (width && !height) {
-            height = "calc(" + (width / 2) + "rem + 4px)";
+            height = "calc(" + (width / 2) + "rem + " + margin + "px)";
             width = width + "rem";
         }
         else if (!width && height) {
-            width = "calc(" + (height * 2) + "rem - 8px)";
+            width = "calc(" + (height * 2) + "rem - " + (margin * 2) + "px)";
             height = height + "rem";
         }
 
@@ -2018,10 +2022,13 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
                 Childs: [
                     {
                         Type: "input", Class: "rv-switch-input", Name: "chb",
-                        Attributes: [{ Name: "type", Value: "checkbox" }],
+                        Attributes: [
+                            { Name: "type", Value: "checkbox" },
+                            (!params.Checked ? null : { Name: "checked", Value: true })
+                        ],
                         Properties: [!params.OnChange ? null : { Name: "onchange", Value: function () { params.OnChange.call(this); } }]
                     },
-                    { Type: "span", Class: "rv-switch-slider rv-switch-round" }
+                    { Type: "span", Class: "rv-switch-slider rv-switch-round " + (!params.MiniMode ? "" : "rv-switch-slider-mini") }
                 ]
             }]
         }], element);
@@ -2730,6 +2737,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
     },
 
     add_to_recent_items: function (id, jsonValue, idKey) {
+        return;
         if (!id || !jsonValue) return;
         var arr = GlobalUtilities.get_local_storage("recents", id);
         if (GlobalUtilities.get_type(arr) != "array") arr = [];
@@ -2740,6 +2748,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
     },
 
     get_recent_items: function (id, count) {
+        return [];
         var arr = GlobalUtilities.get_local_storage("recents", id);
         return (GlobalUtilities.get_type(arr) == "array" ? arr : []).filter(function (itm, ind) {
             return !isNaN(count) && (count > 0) ? ind < count : true;

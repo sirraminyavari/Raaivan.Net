@@ -159,7 +159,7 @@
                     });
                 }
 
-                if (params.OnLoad) params.OnLoad(params.LoadParams);
+                if (params.OnLoad) params.OnLoad.call(that, params.LoadParams);
             } //end of init
 
             GlobalUtilities.load_files([

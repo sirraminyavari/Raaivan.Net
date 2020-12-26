@@ -17,6 +17,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         OrganizationName,
         OrganizationLogo,
 
+        FavIconName,
+
         StoragePath,
 
         CephStorage,
@@ -292,6 +294,11 @@ namespace RaaiVan.Modules.GlobalUtilities
 
                 return _Logo.ContainsKey(applicationId) ? _Logo[applicationId] : null;
             }
+        }
+
+        public static string FavIconName
+        {
+            get { return get_value(null, RVSettingsItem.FavIconName, "RaaiVanFav"); }
         }
 
         private static string _StoragePath;

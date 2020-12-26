@@ -11,8 +11,6 @@
 
     <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />
 
-    <link rel="shortcut icon" href="../../Images/RaaiVanFav.ico" />
-
     <link type="text/css" href="../../Script/JIT/base.css" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../Script/jQuery/Tooltip/style.css" />

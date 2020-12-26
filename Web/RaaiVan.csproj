@@ -363,7 +363,6 @@
     <Content Include="Audio\notify.wav" />
     <Content Include="bin\Hid_Dll.dll" />
     <Content Include="bin\System.IO.FileSystem.Primitives.dll" />
-    <Content Include="bin\System.Runtime.dll" />
     <Content Include="CSS\foundation-fix.css" />
     <Content Include="CSS\pdf.css" />
     <Content Include="CSS\theme-template.css" />
@@ -1044,6 +1043,20 @@
     <Content Include="Images\Star-White.png" />
     <Content Include="Images\star.png" />
     <Content Include="Images\StarOff.png" />
+    <Content Include="Images\svg\at-sign.svg" />
+    <Content Include="Images\svg\checkbox.svg" />
+    <Content Include="Images\svg\date.svg" />
+    <Content Include="Images\svg\divider.svg" />
+    <Content Include="Images\svg\file-upload.svg" />
+    <Content Include="Images\svg\form.svg" />
+    <Content Include="Images\svg\multilevel.svg" />
+    <Content Include="Images\svg\numeric.svg" />
+    <Content Include="Images\svg\radio-button.svg" />
+    <Content Include="Images\svg\table.svg" />
+    <Content Include="Images\svg\text-area.svg" />
+    <Content Include="Images\svg\textbox.svg" />
+    <Content Include="Images\svg\toggle-on-off.svg" />
+    <Content Include="Images\svg\user.svg" />
     <Content Include="Images\Sync-Over.png" />
     <Content Include="Images\Sync.png" />
     <Content Include="Images\Sync12.png" />
@@ -1122,6 +1135,7 @@
     <Content Include="CSS\KendoRTLRepair.css" />
     <Content Include="Script\AdvancedListViewer-v1\NewAdvancedListViewer.js" />
     <Content Include="Script\CN\RelatedNodesViewer.js" />
+    <Content Include="Script\FormsManager\FormElementsManager.js" />
     <Content Include="Script\jQuery\jquery.dad.js" />
     <Content Include="Script\LoginPage\lp_modern_29_1.js" />
     <Content Include="Script\Reports\ReportOptions\CN_RelatedNodesCountReport.js" />
@@ -1566,7 +1580,7 @@
     <Content Include="Script\Dropzone\css\basic.css" />
     <Content Include="Script\Dropzone\css\dropzone.css" />
     <Content Include="Script\Dropzone\dropzone.js" />
-    <Content Include="Script\FormsManager\FormElementsManager.js" />
+    <Content Include="Script\FormsManager\FormElementsManager___.js" />
     <Content Include="Script\FormsManager\FormElementsSelect.js" />
     <Content Include="Script\FormsManager\FormElementTypes.js" />
     <Content Include="Script\FormsManager\FormOwner.js" />

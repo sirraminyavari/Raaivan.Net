@@ -482,13 +482,11 @@
                 var placeholderInput = elems["placeholderInput"];
 
                 var _add_option = function (name, title) {
-                    GlobalUtilities.create_nested_elements([
-                        {
-                            Type: "option",
-                            Properties: [{ Name: "theName", Value: name }],
-                            Childs: [{ Type: "text", TextValue: title }]
-                        }
-                    ], elems["patternNameSelect"]);
+                    GlobalUtilities.create_nested_elements([{
+                        Type: "option",
+                        Properties: [{ Name: "theName", Value: name }],
+                        Childs: [{ Type: "text", TextValue: title }]
+                    }], elems["patternNameSelect"]);
                 };
 
                 _add_option(null, RVDic.PatternSelect + "...");

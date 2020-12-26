@@ -322,7 +322,7 @@
             that.Objects.TitleAutosuggest = GlobalUtilities.append_autosuggest(elems["titleArea"], {
                 InputClass: "rv-input",
                 InputStyle: "width:100%;",
-                InnerTitle: RVDic.Title,
+                InnerTitle: RVDic.Title + (that.Objects.Service.TypeName ? " " + Base64.decode(that.Objects.Service.TypeName) : ""),
                 SelectOptions: false,
                 AjaxDataSource: CNAPI.GetNodesDataSource({ NodeTypeID: that.Objects.Service.NodeTypeID }),
                 ResponseParser: function (responseText) {

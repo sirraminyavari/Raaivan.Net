@@ -1341,7 +1341,10 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             if (string.IsNullOrEmpty(theme) || !RaaiVanSettings.Themes.Any(t => t.ToLower().IndexOf(theme.ToLower()) >= 0))
                 theme = RaaiVanSettings.DefaultTheme(applicationId);
-            
+
+            pg.Header.Controls.Add(new LiteralControl(
+                "<link rel='shortcut icon' href='../../Images/" + RaaiVanSettings.FavIconName + ".ico' />"));
+
             pg.Header.Controls.Add(new LiteralControl("<link type='text/css' rel='stylesheet' " +
                 "href='" + pg.ResolveClientUrl("~/api/rv/theme?name=" + theme + "&timeStamp=" + 
                 DateTime.Now.Millisecond.ToString()) + "' />"));

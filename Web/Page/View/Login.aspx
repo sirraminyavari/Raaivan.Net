@@ -12,8 +12,6 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=0.7" />
 
-    <link rel="shortcut icon" href="../../Images/RaaiVanFav.ico" />
-
     <link rel="stylesheet" type="text/css" href="../../Script/jQuery/TextNTags/jquery-textntags.css" />
     <link rel="stylesheet" type="text/css" href="../../Script/jQuery/Tooltip/style.css" />
     <link rel="Stylesheet" type="text/css" href="../../Script/jQuery/nanoScroller/nanoscroller.css" />

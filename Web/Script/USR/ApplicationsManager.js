@@ -71,6 +71,7 @@
 
             GlobalUtilities.sortable(elems["items"], {
                 DraggableClass: "draggable",
+                PlaceholderTarget: "draggable",
                 OnDrop: function (e, targetElement) { that.save_order(); }
             });
 

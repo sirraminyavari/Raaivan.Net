@@ -5421,7 +5421,7 @@ namespace RaaiVan.Web.API
                             ",\"FirstName\":\"" + Base64.encode(ni.Creator.FirstName) + "\"" +
                             ",\"LastName\":\"" + Base64.encode(ni.Creator.LastName) + "\"" +
                             ",\"ProfileImageURL\":\"" + DocumentUtilities.get_personal_image_address(
-                                paramsContainer.Tenant.Id, ni.Creator.UserID.Value) + "\"" +
+                                paramsContainer.ApplicationID, ni.Creator.UserID.Value) + "\"" +
                         "}"
                     ) +
                     ",\"LikesCount\":" + (ni.LikesCount.HasValue ? ni.LikesCount.Value : 0).ToString() +

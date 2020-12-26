@@ -90,7 +90,7 @@ namespace RaaiVan.Web.Page.Master
 
                 string lastVersionSeen = !isAuthenticated || !paramsContainer.ApplicationID.HasValue ? string.Empty :
                     GlobalController.get_variable(paramsContainer.ApplicationID.Value, currentUserId.ToString() + "_LastVersionSeen");
-
+                
                 string rvGlobal = "{\"ApplicationID\":" + (!paramsContainer.ApplicationID.HasValue ? "null" : "\"" + paramsContainer.ApplicationID.ToString() + "\"") + 
                     ",\"UserID\":\"" + (userId.HasValue ? userId.ToString() : (isAuthenticated ? currentUserId.ToString() : string.Empty)) + "\"" +
                     ",\"CurrentUserID\":\"" + (isAuthenticated ? currentUserId.ToString() : string.Empty) + "\"" +

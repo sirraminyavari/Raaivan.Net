@@ -501,8 +501,8 @@
                                 if (that.Options.SelectMode) done(nodes);
                                 else {
                                     CNAPI.GetNodeInfo({
-                                        NodeIDs: nodeIds.join("|"), Description: true, Creator: true, LikesCount: true,
-                                        VisitsCount: true, ParseResults: true,
+                                        NodeIDs: nodeIds.join("|"), Description: true, Creator: true,
+                                        LikesCount: false, VisitsCount: false, ParseResults: true,
                                         ResponseHandler: function (nodesInfo) {
                                             var retNodes = [];
 
@@ -521,20 +521,15 @@
                     },
                     ItemBuilder: function (container, item, params) {
                         var nodeId = item.NodeID;
-                        var additionalId = Base64.decode(item.AdditionalID);
-                        
+
                         var nodeIcon = item.IconURL;
                         var nodePageUrl = CNAPI.NodePageURL({ NodeID: nodeId });
                         var name = Base64.decode(item.Name);
                         var description = GlobalUtilities.get_text_begining(Base64.decode(item.Description), 200, "...");
-                        var likesCount = item.LikesCount;
-                        var viewsCount = item.VisitsCount;
                         var status = item.Status ? RVDic.CN[item.Status] : (item.WFState ? Base64.decode(item.WFState) : "");
                         var hasCreator = !!(item.Creator || {}).UserName && !item.HideCreators &&
                             (!item.Status || (item.Status == "Accepted"));
                         
-                        var userId = (item.Creator || {}).UserID;
-                        var userProfileUrl = RVAPI.UserPageURL({ UserID: userId });
                         var fullName = Base64.decode((item.Creator || {}).FirstName) + " " + Base64.decode((item.Creator || {}).LastName);
 
                         var showNodeType = ((that.Objects.NodeTypeIDs || []).length != 1) ||
@@ -544,10 +539,9 @@
                             Type: "div", Name: "itemContainer",
                             Class: "small-12 medium-12 large-12 rv-bg-color-white-softer " +
                                 "rv-border-radius-quarter SoftShadow SoftBorder",
-                            Style: "padding:0.4rem; margin-bottom:0.5rem; position:relative; border-color:rgb(230,230,230);" +
-                                (that.Options.SelectMode ? "cursor:pointer;" +
-                                    (!that.Options.MultiSelect ? "" : "padding-" + RV_Float + ":2rem;") :
-                                    "padding-" + RV_Float + ":3.5rem; min-height:3.15rem;"),
+                            Style: "display:flex; flex-flow:row; padding:0.4rem; margin-bottom:0.5rem; position:relative;" +
+                                "border-color:rgb(230,230,230);" +
+                                (that.Options.SelectMode ? "cursor:pointer;" : "min-height:3.15rem;"),
                             Properties: !that.Options.SelectMode || !that.Options.OnSelect ? null : [{
                                 Name: "onclick",
                                 Value: function () {
@@ -559,102 +553,98 @@
                             }],
                             Childs: [
                                 (!that.Options.SelectMode || !that.Options.MultiSelect ? null : {
-                                    Type: "div",
-                                    Style: "position:absolute; top:0.3rem;" + RV_Float + ":0.3rem;",
+                                    Type: "div", Style: "flex:0 0 auto; padding-" + RV_RevFloat + ":0.5rem;",
                                     Childs: [{ Type: "checkbox", Params: { Width: 18, Height: 18 }, Name: "selectedChb" }]
                                 }),
                                 (that.Options.SelectMode ? null : {
                                     Type: "div",
-                                    Style: "position:absolute; top:0.3rem;" + RV_Float + ":0.3rem; width:2.5rem;",
+                                    Style: "display:flex; flex-flow:column; flex:0 0 auto; align-items:center; justify-content:center; width:4rem;",
                                     Childs: [
                                         {
                                             Type: "img", Class: "rv-border-radius-quarter",
-                                            Style: "width:2.5rem; height:2.5rem;",
+                                            Style: "width:2.5rem; height:2.5rem; margin:0.1rem 0;",
                                             Attributes: [{ Name: "src", Value: nodeIcon }]
-                                        }
+                                        },
+                                        (!item.CreationDate ? null : {
+                                            Type: "div", Class: "rv-border-radius-quarter",
+                                            Style: "margin:0.1rem 0; font-size:0.6rem; color:gray;",
+                                            Childs: [{ Type: "text", TextValue: item.CreationDate }]
+                                        })
                                     ]
                                 }),
                                 {
-                                    Type: "div", Class: "small-12 medium-12 large-12",
-                                    Link: that.Options.SelectMode ? null : nodePageUrl,
+                                    Type: "div", Style: "flex:1 1 auto;",
                                     Childs: [
                                         {
-                                            Type: "div",
-                                            Style: "display:inline-block; direction:" + (GlobalUtilities.textdirection(name) || '') + ";",
-                                            Childs: [{
-                                                Type: "a", Class: "rv-link",
-                                                Attributes: [{ Name: "href", Value: nodePageUrl }],
-                                                Properties: [{ Name: "onclick", Value: function (e) { e.stopPropagation(); } }],
-                                                Childs: [{ Type: "text", TextValue: name }]
-                                            }]
+                                            Type: "div", Style: "small-12 medium-12 large-12",
+                                            Link: that.Options.SelectMode ? null : nodePageUrl,
+                                            Childs: [
+                                                {
+                                                    Type: "div",
+                                                    Style: "display:inline-block; direction:" + (GlobalUtilities.textdirection(name) || '') + ";",
+                                                    Childs: [{
+                                                        Type: "a", Class: "rv-link",
+                                                        Attributes: [{ Name: "href", Value: nodePageUrl }],
+                                                        Properties: [{ Name: "onclick", Value: function (e) { e.stopPropagation(); } }],
+                                                        Childs: [{ Type: "text", TextValue: name }]
+                                                    }]
+                                                },
+                                                (!showNodeType ? null : {
+                                                    Type: "div", Class: "rv-air-button rv-border-radius-quarter",
+                                                    Style: "margin-" + RV_Float + ":0.5rem; padding:0.1rem 0.5rem;" +
+                                                        "font-size:0.6rem; display:inline-block;",
+                                                    Link: RVAPI.ClassesPageURL({ NodeTypeID: item.NodeTypeID }),
+                                                    Childs: [{ Type: "text", TextValue: Base64.decode(item.NodeType) }]
+                                                })
+                                            ]
                                         },
-                                        (!additionalId ? null : {
-                                            Type: "div", Class: "rv-air-button-base rv-air-button-black rv-border-radius-quarter",
-                                            Style: "display:inline-block; font-size:0.6rem; padding:0.1rem 0.3rem;" +
-                                                "margin-" + RV_Float + ":0.5rem;",
-                                            Childs: [{ Type: "text", TextValue: additionalId }]
+                                        (that.Options.SelectMode ? null : {
+                                            Type: "div", Class: "small-12 medium-12 large-12", Name: "description",
+                                            Style: "font-size:0.7rem; color:rgb(150,150,150); margin-top:0.2rem;" +
+                                                "direction:" + GlobalUtilities.textdirection(description) || '' + ";" +
+                                                (!description ? "display:none;" : ""),
+                                            Childs: [{ Type: "text", TextValue: description }]
                                         }),
-                                        (!showNodeType ? null : {
-                                            Type: "div", Class: "rv-air-button rv-border-radius-quarter",
-                                            Style: "margin-" + RV_Float + ":0.5rem; padding:0.1rem 0.5rem;" +
-                                                "font-size:0.6rem; display:inline-block;",
-                                            Link: RVAPI.ClassesPageURL({ NodeTypeID: item.NodeTypeID }),
-                                            Childs: [{ Type: "text", TextValue: Base64.decode(item.NodeType) }]
+                                        (that.Options.SelectMode ? null : {
+                                            Type: "div", Class: "small-12 medium-12 large-12",
+                                            Style: "font-size:0.6rem; color:gray;",
+                                            Childs: [
+                                                {
+                                                    Type: "div", Class: "rv-border-radius-quarter",
+                                                    Style: "display:" + (status ? "inline-block" : "none") + ";" +
+                                                        "margin-" + RV_Float + ":0.5rem; padding:0.1rem 0.5rem;" +
+                                                        "margin-top:0.5rem; background-color:white;",
+                                                    Childs: [{ Type: "text", TextValue: status }]
+                                                }
+                                            ]
                                         })
                                     ]
                                 },
-                                (that.Options.SelectMode ? null : {
-                                    Type: "div", Class: "small-12 medium-12 large-12", Name: "description",
-                                    Style: "font-size:0.7rem; color:rgb(150,150,150); margin-top:0.2rem;" +
-                                        "direction:" + GlobalUtilities.textdirection(description) || '' + ";" +
-                                        (!description ? "display:none;" : ""),
-                                    Childs: [{ Type: "text", TextValue: description }]
-                                }),
-                                (that.Options.SelectMode ? null : {
-                                    Type: "div", Class: "small-12 medium-12 large-12",
-                                    Style: "font-size:0.6rem; color:gray;",
+                                {
+                                    Type: "div", Class: "RevDirection RevTextAlign",
+                                    Style: "flex:0 0 auto; display:flex; flex-flow:column;",
                                     Childs: [
                                         {
-                                            Type: "div", Class: "rv-border-radius-quarter", Link: userProfileUrl,
-                                            Style: "margin-" + RV_RevFloat + ":0.5rem; margin-top:0.5rem;" +
-                                                "padding:0.1rem 0.5rem; background-color:white;" +
-                                                (hasCreator ? "display:inline-block;" : "display:none;"),
+                                            Type: "div", Style: "display:flex; flex-flow:row; align-items:center; justify-content:center;",
                                             Childs: [
-                                                {
-                                                    Type: "i", Class: "fa fa-user", Style: "margin-" + RV_RevFloat + ":0.3rem;",
-                                                    Attributes: [{ Name: "aria-hidden", Value: true }]
-                                                },
-                                                { Type: "text", TextValue: fullName }
+                                                (!hasCreator ? null : {
+                                                    Type: "div", Style: "flex:0 0 auto; padding-" + RV_Float + ":0.5rem;",
+                                                    Childs: [{
+                                                        Type: "img", Class: "rv-circle", Style: "width:1.5rem; height:1.5rem;",
+                                                        Tooltip: fullName, Link: RVAPI.UserPageURL({ UserID: (item.Creator || {}).UserID }),
+                                                        Attributes: [{ Name: "src", Value: item.Creator.ProfileImageURL }]
+                                                    }]
+                                                }),
+                                                (!item.AdditionalID ? null : {
+                                                    Type: "div", Class: "rv-circle SoftBackgroundColor WarmColor",
+                                                    Style: "flex:0 0 auto; padding:0.2rem 1rem 0 1rem; font-size:0.7rem;" +
+                                                        "min-width:5rem; text-align:center;",
+                                                    Childs: [{ Type: "text", TextValue: Base64.decode(item.AdditionalID) }]
+                                                })
                                             ]
-                                        },
-                                        {
-                                            Type: "div", Class: "rv-border-radius-quarter",
-                                            Style: "display:inline-block; padding:0.1rem 0.5rem;" +
-                                                "margin-top:0.5rem; background-color:white;",
-                                            Childs: [{ Type: "text", TextValue: RVDic.CN.Get_LikesCount({ Count: likesCount }) }]
-                                        },
-                                        {
-                                            Type: "div", Class: "rv-border-radius-quarter",
-                                            Style: "display:inline-block; margin-" + RV_Float + ":0.5rem;" +
-                                                "padding:0.1rem 0.5rem; background-color:white; margin-top:0.5rem;",
-                                            Childs: [{ Type: "text", TextValue: RVDic.CN.Get_VisitsCount({ Count: viewsCount }) }]
-                                        },
-                                        {
-                                            Type: "div", Class: "rv-border-radius-quarter",
-                                            Style: "display:" + (item.CreationDate ? "inline-block" : "none") + ";" +
-                                                "margin-" + RV_Float + ":0.5rem; padding:0.1rem 0.5rem;" +
-                                                "margin-top:0.5rem; background-color:white;",
-                                            Childs: [{ Type: "text", TextValue: item.CreationDate }]
-                                        },
-                                        {
-                                            Type: "div", Class: "rv-border-radius-quarter",
-                                            Style: "display:" + (status ? "inline-block" : "none") + ";" +
-                                                "margin-" + RV_Float + ":0.5rem; padding:0.1rem 0.5rem;" +
-                                                "margin-top:0.5rem; background-color:white;",
-                                            Childs: [{ Type: "text", TextValue: status }]
                                         }
                                     ]
-                                })
+                                }
                             ]
                         }], container);
 
