@@ -817,13 +817,13 @@ namespace RaaiVan.Web.API
 
             string confirmationEmailBody = EmailTemplates.get_email_template(paramsContainer.ApplicationID,
                 EmailTemplateType.CreateAccount, dic);
-
-            confirmationEmailBody = Expressions.replace(confirmationEmailBody, ref dic, Expressions.Patterns.AutoTag);
+            string emailSubject = EmailTemplates.get_email_subject_template(paramsContainer.ApplicationID,
+                EmailTemplateType.CreateAccount, dic);
 
             string errorMessage = string.Empty;
 
-            bool result = UsersController.create_temporary_user(paramsContainer.ApplicationID,
-                newUser, false, confirmationEmailBody, null, activationCode, invitationId, ref errorMessage);
+            bool result = UsersController.create_temporary_user(paramsContainer.ApplicationID, newUser, false, 
+                emailSubject, confirmationEmailBody, null, activationCode, invitationId, ref errorMessage);
 
             responseText = result ? "{\"Succeed\":\"" + Messages.YourUserAccountCreatedSuccessfully + "\"}" :
                 "{\"ErrorText\":\"" + (string.IsNullOrEmpty(errorMessage) ? Messages.OperationFailed.ToString() : errorMessage) + "\"}";
@@ -1100,9 +1100,12 @@ namespace RaaiVan.Web.API
             dic.Add("GNow", gDate);
             dic.Add("PNow", pDate);
 
+            string emailSubject = EmailTemplates.get_email_subject_template(paramsContainer.ApplicationID, 
+                EmailTemplateType.PasswordReset, dic);
+            string emailBody = EmailTemplates.get_email_template(paramsContainer.ApplicationID, EmailTemplateType.PasswordReset, dic);
+
             bool result = !string.IsNullOrEmpty(email) &&
-                UsersController.set_pass_reset_ticket(paramsContainer.ApplicationID, userId.Value, ticket, email,
-                EmailTemplates.get_email_template(paramsContainer.ApplicationID, EmailTemplateType.PasswordReset, dic));
+                UsersController.set_pass_reset_ticket(paramsContainer.ApplicationID, userId.Value, ticket, email, emailSubject, emailBody);
 
             responseText = result ? "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}" :
                 "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";

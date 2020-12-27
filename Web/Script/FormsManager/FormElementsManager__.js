@@ -31,32 +31,6 @@
             Options: {}
         };
 
-        this.Options = {
-            CssClass: {
-                TypesContainer: "r" + GlobalUtilities.random_str(10),
-                ElementsContainer: "r" + GlobalUtilities.random_str(10),
-                Elements: "r" + GlobalUtilities.random_str(10),
-                Placeholder: "r" + GlobalUtilities.random_str(10),
-                DraggableItem: "r" + GlobalUtilities.random_str(10),
-                Draggable: "r" + GlobalUtilities.random_str(10)
-            },
-            Icons: {
-                Text: "textbox",
-                Paragraph: "text-area",
-                Date: "date",
-                Select: "radio-button",
-                Checkbox: "checkbox",
-                Binary: "toggle-on-off",
-                File: "file-upload",
-                Separator: "divider",
-                User: "user",
-                Node: "at-sign",
-                Form: "table",
-                MultiLevel: "multilevel",
-                Numeric: "numeric"
-            }
-        };
-
         var that = this;
 
         GlobalUtilities.block(that.ContainerDiv);
@@ -74,7 +48,7 @@
             var that = this;
 
             var elemTypes = [];
-            
+
             var _add_type = function (_eType, _title) {
                 elemTypes.push({
                     Type: "option", Attributes: (_eType ? [{ Name: "title", Value: _eType }] : []),
@@ -84,24 +58,9 @@
                 if (_eType && (FormElementTypes[_eType] || {}).edit) that.Objects.Options[_eType] = FormElementTypes[_eType].edit(null, { Type: _eType });
             }
 
-            //_add_type(null, RVDic.OfType + "...");
-            //for (var tp in FormElementTypes) _add_type(tp, tp);
-            for (var tp in FormElementTypes) {
-                elemTypes.push({
-                    ID: tp,
-                    Name: tp,
-                    Title: RVDic.FG.ElementTypes[tp] || RVDic[tp] || tp,
-                    Icon: that.icon(tp)
-                });
-
-                if (tp == "Text") {
-                    elemTypes.push({
-                        ID: "Paragraph", Name: "Text", Title: RVDic.Paragraph,
-                        Icon: that.icon("Paragraph")
-                    });
-                }
-            }
-
+            _add_type(null, RVDic.OfType + "...");
+            for (var tp in FormElementTypes) _add_type(tp, tp);
+            
             var elems = GlobalUtilities.create_nested_elements([
                 { Type: "div", Class: "small-12 medium-12 large-12", Name: "nameArea" },
                 { Type: "div", Class: "small-12 medium-12 large-12", Name: "descriptionArea" },
@@ -123,33 +82,6 @@
                     ]
                 },
                 { Type: "hr", Class: "small-12 medium-12 large-12", Style: "margin-top:0.5rem;" },
-                {
-                    Type: "div", Style: "display:flex; flex-flow:row;",
-                    Childs: [
-                        {
-                            Type: "div", Class: "rv-border-radius-quarter SurroundingShadow",
-                            Style: "flex:0 0 auto; padding:0.5rem; background-color:white;" +
-                                "margin-" + RV_RevFloat + ":1rem; min-width:12rem;",
-                            Childs: [
-                                {
-                                    Type: "div", Class: "WarmColor",
-                                    Style: "text-align:center; font-weight:bold; margin-bottom:1rem;",
-                                    Childs: [{ Type: "text", TextValue: RVDic.FieldTypes }]
-                                },
-                                {
-                                    Type: "div", Name: "typesContainer",
-                                    Class: "rv-trim-vertical-margins " + that.Options.CssClass.TypesContainer
-                                }
-                            ]
-                        },
-                        {
-                            Type: "div", Name: "elementsContainer",
-                            Class: "rv-border-radius-quarter rv-trim-vertical-margins SurroundingShadow " +
-                                that.Options.CssClass.ElementsContainer,
-                            Style: "flex:1 1 auto; padding:1rem; background-color:rgb(250,250,250);"
-                        }
-                    ]
-                },
                 { Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:0.5rem;", Name: "elementsArea" },
                 { Type: "hr", Class: "small-12 medium-12 large-12", Style: "margin-top:0.5rem;" },
                 { Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:0.5rem;", Name: "newElementTitle" },
@@ -172,7 +104,12 @@
                     Childs: [
                         {
                             Type: "div", Class: "small-6 medium-6 large-6",
-                            Childs: [{ Type: "select", Class: "rv-input", Name: "elementTypeSelect", Style: "width:20rem;" }]
+                            Childs: [
+                                {
+                                    Type: "select", Class: "rv-input", Name: "elementTypeSelect", Style: "width:20rem;",
+                                    Childs: elemTypes
+                                }
+                            ]
                         },
                         {
                             Type: "div", Class: "small-6 medium-6 large-6 RevTextAlign RevDirection",
@@ -196,69 +133,12 @@
             that.Interface.DescriptionArea = elems["descriptionArea"];
             that.Interface.PreviewButton = elems["previewButton"];
             that.Interface.SortButton = elems["sortButton"];
-            that.Interface.ElementsArea = elems["elementsContainer"];
+            that.Interface.ElementsArea = elems["elementsArea"];
             that.Interface.NewElementTitleArea = elems["newElementTitle"];
             that.Interface.NewElementNameInput = elems["elementNameInput"];
             that.Interface.NewElementHelpArea = elems["helpContainer"];
             that.Interface.ElementTypeSelect = elems["elementTypeSelect"];
             that.Interface.AddElementButton = elems["addElementButton"];
-
-            var rebuild_types = function () {
-                elems["typesContainer"].innerHTML = "";
-
-                GlobalUtilities.create_nested_elements(elemTypes.map(options => {
-                    return {
-                        Type: "div", Class: that.Options.CssClass.DraggableItem, Style: "margin-top:0.5rem;",
-                        Properties: [{ Name: "TPData", Value: options }],
-                        Childs: [{
-                            Type: "div",
-                            Class: "rv-border-radius-quarter " + that.Options.CssClass.Draggable + " " +
-                                that.Options.CssClass.Placeholder,
-                            Style: "display:flex; flex-flow:row; cursor:all-scroll;",
-                            Childs: [
-                                {
-                                    Type: "div",
-                                    Class: "rv-border-radius-quarter WarmBackgroundColor rv-ignore-" + RV_RevFloat.toLowerCase() + "-radius",
-                                    Style: "flex:0 0 auto; display:flex; align-items:center; justify-content:center;" +
-                                        "width:2.5rem; padding:0.5rem;",
-                                    Childs: [{
-                                        Type: "img", Style: "width:1.2rem; height:1.2rem; fill:white;",
-                                        Attributes: [{ Name: "src", Value: GlobalUtilities.icon(options.Icon) }]
-                                    }]
-                                },
-                                {
-                                    Type: "div",
-                                    Class: "rv-border-radius-quarter SoftBackgroundColor rv-ignore-" + RV_Float.toLowerCase() + "-radius",
-                                    Style: "flex:1 1 auto; display:flex; align-items:center; justify-content:center;" +
-                                        "padding:0.3rem 1rem; font-size:0.8rem;",
-                                    Childs: [{ Type: "text", TextValue: options.Title }]
-                                }
-                            ]
-                        }]
-                    };
-                }), elems["typesContainer"]);
-            };
-
-            rebuild_types();
-
-            setTimeout(() => {
-                GlobalUtilities.sortable("." + that.Options.CssClass.TypesContainer + ", ." + that.Options.CssClass.ElementsContainer, {
-                    Exchangeable: true,
-                    Filters: [{ draggable: that.Options.CssClass.DraggableItem, droppable: that.Options.CssClass.ElementsContainer }],
-                    DraggableClass: that.Options.CssClass.Draggable,
-                    PlaceholderTarget: that.Options.CssClass.Placeholder,
-                    OnDrop: function (e, targetElement) {
-                        if (targetElement.parentNode != elems["elementsContainer"]) return;
-
-                        rebuild_types();
-
-                        that.add_element(targetElement, {
-                            Type: targetElement.TPData.Name,
-                            IsTextInput: targetElement.TPData.ID == "Text"
-                        });
-                    }
-                });
-            }, 2000);
 
             var optionsArea = elems["optionsArea"];
 
@@ -280,19 +160,6 @@
             }
 
             that.initialize();
-        },
-
-        new_element_container: function () {
-            var that = this;
-
-            return GlobalUtilities.create_nested_elements([{
-                Type: "div", Class: that.Options.CssClass.DraggableItem, Style: "margin-top:0.5rem;", Name: "_div"
-            }])["_div"];
-        },
-
-        icon: function (iconName) {
-            var that = this;
-            return !that.Options.Icons[iconName] ? "" : "svg/" + that.Options.Icons[iconName] + ".svg"
         },
 
         initialize: function () {
@@ -324,7 +191,7 @@
                     var elements = result.Elements || [];
 
                     for (var i = 0, lnt = elements.length; i < lnt; ++i)
-                        that.add_element(that.new_element_container(), elements[i]);
+                        that.add_element(elements[i]);
 
                     GlobalUtilities.unblock(that.ContainerDiv);
                 }
@@ -367,7 +234,7 @@
                         if (result.ErrorText)
                             alert(RVDic.MSG[result.ErrorText] || result.ErrorText, { Timeout: 10000 });
                         else if (result.Succeed) {
-                            that.add_element(that.new_element_container(), result.Element);
+                            that.add_element(result.Element);
 
                             that.Objects.NewElementTitle.set_data("");
                             that.Interface.NewElementNameInput.value = "";
@@ -618,12 +485,10 @@
             return -1;
         },
 
-        add_element: function (container, params) {
-            var that = this;
+        add_element: function (params) {
             params = params || {};
 
-            container.innerHTML = "";
-            container.style.marginTop = "1rem";
+            var that = this;
 
             params.Title = Base64.decode(params.Title);
             params.Name = Base64.decode(params.Name);
@@ -634,32 +499,47 @@
             var name = params.Name;
             var help = params.Help;
             var type = params.Type;
-            var info = JSON.parse(Base64.decode(params.Info) || "{}") || {};
+            var info = JSON.parse(Base64.decode(params.Info) || "{}");
             var weight = params.Weight;
             var sequenceNumber = +params.SequenceNumber;
             if (isNaN(sequenceNumber)) sequenceNumber = 0;
-            
+
             var necessary = params.Necessary === true;
             var uniqueValue = params.UniqueValue === true;
 
             var hasUniqueCheckbox = (type == "Text") || (type == "Numeric");
-            var isParagraph = (type == "Text") && !params.IsTextInput &&
-                !info.UseSimpleEditor && !info.PatternName && !info.Pattern;
-            
-            var typeName = isParagraph ? RVDic.Paragraph : (RVDic.FG.ElementTypes[type] || RVDic.FG.ElementTypes.Text);
-            var iconUrl = that.icon(isParagraph ? "Paragraph" : type);
-            
+
             var _create_checkbox = function (p) {
                 p = p || {};
 
+                var theId = "r" + GlobalUtilities.random_str(10);
+                var processing = false;
+                
                 return {
                     Type: "div", Class: "rv-border-radius-quarter rv-bg-color-white-softer SoftShadow",
-                    Style: "padding:0rem 0.3rem;",
+                    Style: "display:" + (p.Hide ? "none" : "inline-block") + "; padding:0rem 0.3rem;" +
+                        "cursor:pointer; margin-" + RV_Float + ":0.5rem;",
+                    Properties: [{
+                        Name: "onclick", Value: function () {
+                            if (processing) return;
+                            processing = true;
+                            var curVal = _el[theId].Checked;
+                            p.Action(!curVal, function () { processing = false; _el[theId][curVal ? "uncheck" : "check"]({ StopOnChange: true }); });
+                        }
+                    }],
                     Childs: [
                         {
-                            Type: "switch", Name: "r" + GlobalUtilities.random_str(10),
-                            Style: "flex:0 0 auto; margin-" + RV_RevFloat + ":0.5rem;", 
-                            Params: { Height: 1, MiniMode: true, Checked: p.Value }
+                            Type: "checkbox", Name: theId,
+                            Style: "width:0.8rem; height:0.8rem; cursor:pointer; margin-" + RV_RevFloat + ":0.3rem;",
+                            Params: {
+                                Checked: p.Value, Width: 14, Height: 14,
+                                OnClick: function (e, done) {
+                                    e.preventDefault();
+                                    if (processing) return;
+                                    processing = true;
+                                    p.Action(!this.Checked, function () { processing = false; done(true); });
+                                }
+                            }
                         },
                         {
                             Type: "div", Style: "display:inline-block; font-size:0.6rem;",
@@ -669,167 +549,120 @@
                 };
             };
 
-            var elems = GlobalUtilities.create_nested_elements([{
-                Type: "div", Name: "elementDiv",
-                Class: "rv-border-radius-quarter rv-bg-color-trans-white SoftBorder " + that.Options.CssClass.Placeholder,
-                Style: "display:flex; flex-flow:row; border-color:rgb(240,240,240); background-color:white;", 
-                Childs: [
-                    {
-                        Type: "div", Name: "sideColor",
-                        Class: "rv-border-radius-quarter rv-ignore-" + RV_RevFloat.toLowerCase() + "-radius SoftBackgroundColor",
-                        Style: "flex:0 0 auto; padding-" + RV_Float + ":0.3rem;"
-                    },
-                    {
-                        Type: "div", Class: "rv-color-soft-warm " + that.Options.CssClass.Draggable,
-                        Style: "flex:0 0 auto; display:flex; align-items:center; justify-content:center;" +
-                            "cursor:all-scroll; padding:0 0.5rem;",
-                        Properties: [{
-                            Name: "onclick", Value: function (e) {
-                                e.stopPropagation();
-                                if (elems["settings"].style.display != "none") elementDiv.Deactive();
-                                else elementDiv.Activate(true);
-                            }
-                        }],
-                        Childs: [1, 2].map(() => {
-                            return {
-                                Type: "i", Class: "fa fa-ellipsis-v", Style: "margin:0 1px;",
-                                Attributes: [{ Name: "aria-hidden", Value: true }]
-                            };
-                        })
-                    },
-                    {
-                        Type: "div", Style: "flex:1 1 auto; padding-" + RV_Float + ":0;",
-                        Childs: [
-                            {
-                                Type: "div", Class: "small-12 medium-12 large-12",
-                                Style: "display:flex; flex-flow:row;",
-                                Childs: [
-                                    {
-                                        Type: "div", Style: "flex:1 1 auto;",
-                                        Childs: [{
-                                            Type: "div", Class: "small-12 medium-12 large-12", Name: "titleEditArea",
-                                            Style: "padding:1rem; padding-" + RV_Float + ":0;"
-                                        }]
-                                    },
-                                    {
-                                        Type: "div", Style: "flex:0 0 auto;",
-                                        Childs: [{
-                                            Type: "div", Tooltip: typeName,
-                                            Class: "rv-border-radius-quarter WarmBackgroundColor " +
-                                                "rv-ignore-top-" + RV_Float.toLowerCase() + "-radius " +
-                                                "rv-ignore-bottom-" + RV_RevFloat.toLowerCase() + "-radius",
-                                            Style: "flex:0 0 auto; display:flex; align-items:center;" +
-                                                "justify-content:center; padding:0.3rem 0.5rem; opacity:0.8;",
-                                            Childs: [{
-                                                Type: "img", Style: "width:0.8rem; height:0.8rem;",
-                                                Attributes: [{ Name: "src", Value: GlobalUtilities.icon(iconUrl) }]
-                                            }]
-                                        }]
+            var _el = GlobalUtilities.create_nested_elements([
+                {
+                    Type: "div", Class: "small-12 medium-12 large-12 rv-border-radius-quarter rv-bg-color-trans-white",
+                    Style: "margin-bottom:1rem; padding:0.3rem;", Name: "elementDiv",
+                    Childs: [
+                        {
+                            Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-bottom:0.3rem;",
+                            Childs: [
+                                {
+                                    Type: "div", Style: "display:inline-block; width:1.5rem;",
+                                    Childs: [
+                                        {
+                                            Type: "i", Class: "fa fa-times fa-lg rv-icon-button",
+                                            Tooltip: RVDic.Remove, Name: "removeButton",
+                                            Attributes: [{ Name: "aria-hidden", Value: true }]
+                                        }
+                                    ]
+                                },
+                                {
+                                    Type: "div", Style: "display:inline-block; width:2rem;",
+                                    Childs: [
+                                        {
+                                            Type: "i", Class: "fa fa-pencil fa-lg rv-icon-button",
+                                            Tooltip: RVDic.Edit, Name: "editButton",
+                                            Attributes: [{ Name: "aria-hidden", Value: true }]
+                                        }
+                                    ]
+                                },
+                                {
+                                    Type: "div",
+                                    Style: "display:inline-block; font-weight:bold; font-size:0.7rem;",
+                                    Childs: [{ Type: "text", TextValue: "(" + (RVDic.FG.ElementTypes[type] || RVDic.FG.ElementTypes.Text) + ")" }]
+                                },
+                                _create_checkbox({
+                                    Value: necessary, Hide: type == "Separator", Title: RVDic.Necessity,
+                                    Action: function (value, done) {
+                                        FGAPI.SetFormElementNecessity({
+                                            ElementID: elementId, Necessary: value, ParseResults: true,
+                                            ResponseHandler: function (result) { if (!result.ErrorText) done(); }
+                                        });
                                     }
-                                ]
-                            },
-                            {
-                                Type: "div", Class: "small-12 medium-12 large-12", Name: "settings",
-                                Style: "display:none; padding:1rem; padding-top:0; padding-" + RV_Float + ":0;" + 
-                                    "padding-" + RV_RevFloat + ":2.8rem;",
-                                Childs: [
-                                    {
-                                        Type: "div",
-                                        Style: "display:flex; flex-flow:row; align-items:center; justify-content:center; margin-bottom:1rem;",
-                                        Childs: [
-                                            {
-                                                Type: "div", Class: "rv-flat-label",
-                                                Style: "flex:0 0 auto; padding-" + RV_RevFloat + ":0.5rem;",
-                                                Childs: [{ Type: "text", TextValue: RVDic.ID + ":" }]
-                                            },
-                                            {
-                                                Type: "div", Style: "flex:1 1 auto;",
-                                                Childs: [{
-                                                    Type: "div", Class: "small-12 medium-8 large-4", Style: "text-align:left; direction:ltr;",
-                                                    Childs: [{
-                                                        Type: "input", Class: "rv-input-simple rv-placeholder-align-left",
-                                                        Style: "width:100%; font-size:0.7rem;", Name: "nameInput", InnerTitle: "e.g. field_id"
-                                                    }]
-                                                }]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-bottom:0.3rem;",
-                                        Childs: [
-                                            (type == "Separator" ? null : _create_checkbox({
-                                                Value: necessary, Title: RVDic.Necessity,
-                                                Action: function (value, done) {
-                                                    FGAPI.SetFormElementNecessity({
-                                                        ElementID: elementId, Necessary: value, ParseResults: true,
-                                                        ResponseHandler: function (result) { if (!result.ErrorText) done(); }
-                                                    });
-                                                }
-                                            })),
-                                            (!hasUniqueCheckbox ? null : _create_checkbox({
-                                                Value: uniqueValue, Title: RVDic.UniqueValue,
-                                                Action: function (value, done) {
-                                                    FGAPI.SetFormElementUniqueness({
-                                                        ElementID: elementId, Value: value, ParseResults: true,
-                                                        ResponseHandler: function (result) { if (!result.ErrorText) done(); }
-                                                    });
-                                                }
-                                            })),
-                                            {
-                                                Type: "div", Class: "rv-air-button rv-border-radius-quarter", Name: "privacyButton",
-                                                Style: "display:inline-block; font-weight:bold; font-size:0.6rem; margin-" + RV_Float + ":1rem;",
-                                                Childs: [
-                                                    { Type: "i", Class: "fa fa-key", Style: "margin-" + RV_RevFloat + ":0.4rem;" },
-                                                    { Type: "text", TextValue: RVDic.Privacy }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    { Type: "div", Class: "small-12 medium-12 large-12", Name: "helpEditArea", Style: "margin-top:0.5rem;" },
-                                    { Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:0.5rem;", Name: "optionsEdit" },
-                                    {
-                                        Type: "div", Class: "small-12 medium-12 large-12",
-                                        Style: "display:flex; flex-flow:row; margin-top:0.5rem;",
-                                        Childs: [
-                                            { Type: "div", Style: "flex:1 1 auto;" },
-                                            {
-                                                Type: "div", Name: "removeButton",
-                                                Style: "flex:0 0 auto; color:red; cursor:pointer; font-size:0.7rem;",
-                                                Childs: [
-                                                    { Type: "i", Class: "fa fa-trash fa-lg", Style: "margin-" + RV_RevFloat + ":0.3rem;" },
-                                                    { Type: "text", TextValue: RVDic.Remove }
-                                                ]
-                                            }
-                                        ]
+                                }),
+                                _create_checkbox({
+                                    Value: uniqueValue, Hide: !hasUniqueCheckbox, Title: RVDic.UniqueValue,
+                                    Action: function (value, done) {
+                                        FGAPI.SetFormElementUniqueness({
+                                            ElementID: elementId, Value: value, ParseResults: true,
+                                            ResponseHandler: function (result) { if (!result.ErrorText) done(); }
+                                        });
                                     }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }], container);
+                                }),
+                                {
+                                    Type: "div", Class: "rv-air-button rv-border-radius-quarter", Name: "privacyButton",
+                                    Style: "display:inline-block; font-weight:bold; font-size:0.6rem; margin-" + RV_Float + ":1rem;",
+                                    Childs: [
+                                        { Type: "i", Class: "fa fa-key", Style: "margin-" + RV_RevFloat + ":0.4rem;" },
+                                        { Type: "text", TextValue: RVDic.Privacy }
+                                    ]
+                                }
+                            ]
+                        },
+                        { Type: "div", Class: "small-12 medium-12 large-12", Name: "titleArea" },
+                        { Type: "div", Class: "small-12 medium-12 large-12", Style: "display:none;", Name: "titleEditArea" },
+                        { Type: "div", Class: "small-12 medium-12 large-12", Name: "nameArea", Style: "margin-top:0.5rem;" },
+                        {
+                            Type: "div", Class: "small-12 medium-12 large-12",
+                            Style: "margin-top:0.5rem; display:none;", Name: "nameEditArea",
+                            Childs: [
+                                {
+                                    Type: "input", Class: "rv-input", InnerTitle: RVDic.Name, Tooltip: RVDic.Name,
+                                    Style: "width:100%;", Name: "nameInput"
+                                }
+                            ]
+                        },
+                        { Type: "div", Class: "small-12 medium-12 large-12", Name: "helpArea", Style: "margin-top:0.5rem;" },
+                        { Type: "div", Class: "small-12 medium-12 large-12", Name: "helpEditArea", Style: "margin-top:0.5rem; display:none;" },
+                        {
+                            Type: "div", Class: "small-12 medium-12 large-12", Name: "optionsView",
+                            Style: "font-size:0.7rem; margin-top:0.5rem; margin-" + RV_Float + ":1rem;"
+                        },
+                        {
+                            Type: "div", Class: "small-12 medium-12 large-12",
+                            Style: "margin-top:0.5rem; display:none;", Name: "optionsEdit"
+                        }
+                    ]
+                }
+            ], this.Interface.ElementsArea);
 
-            if (!container.parentNode) that.Interface.ElementsArea.appendChild(container);
-
-            var elementDiv = elems["elementDiv"];
+            var elementDiv = _el["elementDiv"];
 
             elementDiv.ElementObject = params;
 
-            var removeButton = elems["removeButton"];
-            var editButton = elems["editButton"];
-            var titleEditArea = elems["titleEditArea"];
-            var helpEditArea = elems["helpEditArea"];
-            var optionsEditArea = elems["optionsEdit"];
+            var removeButton = _el["removeButton"];
+            var editButton = _el["editButton"];
+            var titleArea = _el["titleArea"];
+            var titleEditArea = _el["titleEditArea"];
+            var nameArea = _el["nameArea"];
+            var nameEditArea = _el["nameEditArea"];
+            var helpArea = _el["helpArea"];
+            var helpEditArea = _el["helpEditArea"];
+            var optionsViewArea = _el["optionsView"];
+            var optionsEditArea = _el["optionsEdit"];
 
             //if (type == "Separator") nameArea.style.display = nameEditArea.style.display = "none";
 
+            var optionsView = (FormElementTypes[type] || {}).view ? FormElementTypes[type].view({ Info: info, Weight: weight }) : null;
             var optionsEdit = (FormElementTypes[type] || {}).edit ? FormElementTypes[type].edit(info, params) : null;
+            if (optionsView) optionsViewArea.appendChild(optionsView.Container);
             if (optionsEdit) optionsEditArea.appendChild(optionsEdit.Container);
 
             var element = {
                 ElementID: elementId, Type: type, Title: title, Name: name, Help: help,
                 SequenceNumber: sequenceNumber, Info: info, ContainerDiv: elementDiv,
-                TitleInput: null, NameInput: elems["nameInput"], HelpInput: null, SelectOptionsContainer: null
+                TitleInput: null, NameInput: _el["nameInput"], HelpInput: null, SelectOptionsContainer: null
             };
 
             this.Objects.Elements.push(element);
@@ -837,52 +670,72 @@
             element.TitleInput = new AdvancedTextArea({
                 ContainerDiv: titleEditArea, DefaultText: RVDic.FieldTitle + "...",
                 QueryTemplate: "RelatedThings",
-                ItemTemplate: { ItemsTitle: "Items", ID: "ItemID", Name: "Name", Type: "Type", ImageURL: "ImageURL" },
-                OnLoad: function () { this.set_data(title); }
+                ItemTemplate: { ItemsTitle: "Items", ID: "ItemID", Name: "Name", Type: "Type", ImageURL: "ImageURL" }
             });
 
             element.HelpInput = new AdvancedTextArea({
                 ContainerDiv: helpEditArea, DefaultText: RVDic.Help + "...",
                 QueryTemplate: "RelatedThings",
-                ItemTemplate: { ItemsTitle: "Items", ID: "ItemID", Name: "Name", Type: "Type", ImageURL: "ImageURL" },
-                OnLoad: function () { this.set_data(help); }
+                ItemTemplate: { ItemsTitle: "Items", ID: "ItemID", Name: "Name", Type: "Type", ImageURL: "ImageURL" }
             });
 
-            element.NameInput.value = name;
+            var _set_data = function () {
+                var ttl = GlobalUtilities.get_text_begining(element.Title, 3000, "", { RichText: false });
 
-            elementDiv.Activate = function (collapseOthers) {
-                jQuery(elementDiv).css({ 'border-color': 'rgb(200,200,200)' });
-                elems["sideColor"].classList.remove("SoftBackgroundColor");
-                elems["sideColor"].classList.add("WarmBackgroundColor");
-                if (elems["settings"].style.display == "none") jQuery(elems["settings"]).animate({ height: 'toggle' });
+                titleArea.innerHTML = "";
+                GlobalUtilities.append_markup_text(titleArea, ttl);
+                element.TitleInput.set_data(element.Title);
 
-                if (collapseOthers) {
-                    [].forEach.call(that.Interface.ElementsArea.getElementsByClassName(that.Options.CssClass.Placeholder), function (obj) {
-                        if ((obj != elementDiv) && obj.Deactive) obj.Deactive();
-                    });
-                }
+                nameArea.innerHTML = RVDic.Name + ": " + (element.Name || RVDic.NotSet);
+                element.NameInput.value = element.Name;
+
+                helpArea.innerHTML = "";
+                GlobalUtilities.append_markup_text(helpArea, RVDic.Help + ": " + element.Help);
+                element.HelpInput.set_data(element.Help)
+
+                if (optionsEdit && optionsEdit.Set) optionsEdit.Set(info, weight);
+                if (optionsView && optionsView.Set) optionsView.Set({ Info: info, Weight: weight });
             };
 
-            elementDiv.Deactive = function () {
-                jQuery(elementDiv).css({ 'border-color': 'rgb(240,240,240)' });
-                elems["sideColor"].classList.remove("WarmBackgroundColor");
-                elems["sideColor"].classList.add("SoftBackgroundColor");
-                if (elems["settings"].style.display != "none") jQuery(elems["settings"]).animate({ height: 'toggle' });
-            };
-
-            elementDiv.onclick = function () { elementDiv.Activate(true); };
-
-            if (optionsEdit && optionsEdit.Set) optionsEdit.Set(info, weight);
+            _set_data();
 
             removeButton.onclick = function () {
                 if (removeButton.__Removing === true) return;
 
                 GlobalUtilities.confirm(RVDic.Confirms.DoYouWantToRemoveTheField, function (result) {
-                    if (result) jQuery(container).animate({ height: 'toggle' }, 500, function () { jQuery(container).remove(); });
+                    if (!result) return;
+
+                    removeButton.__Removing = true;
+
+                    FGAPI.RemoveFormElement({
+                        ElementID: elementId, ParseResults: true,
+                        ResponseHandler: function (result) {
+                            if (result.ErrorText) alert(RVDic.MSG[result.ErrorText] || result.ErrorText);
+                            else that.remove_element(elementId);
+
+                            removeButton.__Removing = false;
+                        }
+                    });
                 });
             };
 
             var _on_edit = function () {
+                var set_things = function () {
+                    titleEditArea.style.display = nameEditArea.style.display = helpEditArea.style.display =
+                        editButton.__Editing ? "block" : "none";
+                    optionsEditArea.style.display = editButton.__Editing ? "block" : "none";
+                    titleArea.style.display = nameArea.style.display = helpArea.style.display = editButton.__Editing ? "none" : "block";
+                    optionsViewArea.style.display = editButton.__Editing ? "none" : "block";
+
+                    //if (type == "Separator") nameArea.style.display = nameEditArea.style.display = "none";
+
+                    _set_data();
+
+                    editButton.setAttribute("class",
+                        "fa " + (editButton.__Editing ? "fa-floppy-o" : "fa-pencil") + " fa-lg rv-icon-button");
+                    GlobalUtilities.append_tooltip(editButton, editButton.__Editing ? RVDic.Save : RVDic.Edit);
+                };
+
                 if (editButton.__Editing === true) {
                     var newTitle = GlobalUtilities.trim(element.TitleInput.get_data());
                     var newName = GlobalUtilities.trim(element.NameInput.value);
@@ -919,16 +772,20 @@
                 }
             } //end of _on_edit
 
-            var privacyButton = elems["privacyButton"];
+            editButton.onclick = _on_edit;
+
+            var privacyButton = _el["privacyButton"];
             var showed = null;
 
             privacyButton.onclick = function () {
                 if (privacyButton.__Div) return (showed = GlobalUtilities.show(privacyButton.__Div));
 
-                var _div = GlobalUtilities.create_nested_elements([{
-                    Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1 SoftBackgroundColor",
-                    Style: "margin:0rem auto; padding:1rem;", Name: "container"
-                }])["container"];
+                var _div = GlobalUtilities.create_nested_elements([
+                    {
+                        Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1 SoftBackgroundColor",
+                        Style: "margin:0rem auto; padding:1rem;", Name: "container"
+                    }
+                ])["container"];
 
                 privacyButton.__Div = _div;
 
@@ -948,25 +805,6 @@
                         });
                     }
                 });
-            };
-
-            container.GetData = function (encode) {
-                var newTitle = GlobalUtilities.trim(element.TitleInput.get_data());
-                var newName = GlobalUtilities.trim(element.NameInput.value);
-                var newHelp = GlobalUtilities.trim(element.HelpInput.get_data());
-                var newInfo = optionsEdit && optionsEdit.Get ? optionsEdit.Get() : null;
-                var newWeight = optionsEdit && optionsEdit.Weight ? optionsEdit.Weight() : null;
-
-                if (!newTitle || (newInfo === false)) return false;
-
-                return {
-                    ElementID: elementId,
-                    Title: encode ? Base64.encode(newTitle) : newTitle,
-                    Name: encode ? Base64.encode(newName) : newName,
-                    Help: encode ? Base64.encode(newHelp) : newHelp,
-                    Info: Base64.encode(JSON.stringify(newInfo)),
-                    Weight: newWeight
-                };
             };
 
 

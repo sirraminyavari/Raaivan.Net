@@ -27,7 +27,7 @@ namespace RaaiVan.Web.API
 
         public AccessToken()
         {
-            Token = UserUtilities.generate_password(20).Replace('+', '_');
+            Token = PublicMethods.random_string(20).Replace('+', '_');
             _ExpiresAt = null;
             _Expired = false;
         }
@@ -94,8 +94,13 @@ namespace RaaiVan.Web.API
             lst.clear_expired_tokens();
 
             AccessToken token = new AccessToken();
-            lst._Tokens.Add(token.Token, token);
-            return token.Token;
+
+            if (lst._Tokens.ContainsKey(token.Token)) return string.Empty;
+            else
+            {
+                lst._Tokens.Add(token.Token, token);
+                return token.Token;
+            }
         }
 
         public static string new_token(HttpContext context)

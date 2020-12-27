@@ -164,15 +164,15 @@ namespace RaaiVan.Modules.Users
             return Convert.ToBase64String(inArray);
         }
 
+        private static Random _RND = new Random((int)DateTime.Now.Ticks);
+
         public static string generate_password(int length = 12)
         {
             string refStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_@^*$!";
 
-            Random rnd = new Random((int)DateTime.Now.Ticks);
-
             string password = string.Empty;
             for (int i = 0; i < length; ++i)
-                password += refStr[rnd.Next(0, refStr.Length - 1)];
+                password += refStr[_RND.Next(0, refStr.Length - 1)];
 
             return password;
         }
