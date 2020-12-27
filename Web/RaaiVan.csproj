@@ -1893,6 +1893,10 @@
     <Content Include="Services\CoreNetwork.asmx" />
     <Content Include="Services\Knowledge.asmx" />
     <Content Include="Global.asax" />
+    <Content Include="ui\1.js" />
+    <Content Include="ui\build\static\3.js" />
+    <Content Include="ui\build\index.html" />
+    <Content Include="ui\script\2.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

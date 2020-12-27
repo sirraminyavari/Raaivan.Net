@@ -37,7 +37,7 @@ namespace RaaiVan.Web
 
             app.Map("/ui", spa => {
                 spa.Use((context, next) => {
-                    context.Request.Path = new PathString("/ui/index.html");
+                    context.Request.Path = new PathString("/ui/build/index.html");
                     return next();
                 });
 
