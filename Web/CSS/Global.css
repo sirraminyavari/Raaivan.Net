@@ -656,6 +656,18 @@ pre > code
     background-color: rgba(26, 115, 232, 0.9);
 }
 
+.rv-air-button-warm-blue {
+    background-color: rgba(43, 56, 143, 0.8);
+}
+
+.rv-air-button-warm-blue:hover {
+    background-color: rgba(43, 56, 143, 0.9);
+}
+
+.rv-air-button-warm-blue:active {
+    background-color: rgba(43, 56, 143, 1);
+}
+
 .rv-white-button {
     text-align: center;
     cursor: pointer;

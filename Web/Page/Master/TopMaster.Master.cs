@@ -39,7 +39,7 @@ namespace RaaiVan.Web.Page.Master
                 if (string.IsNullOrEmpty(Request.Params["iamadmin"]) && RaaiVanSettings.ServiceUnavailable)
                     Response.Redirect(PublicConsts.ServiceUnavailablePage);
                 
-                bool isAuthenticated = RaaiVanUtil.is_authenticated(paramsContainer.ApplicationID, HttpContext.Current);
+                bool isAuthenticated = paramsContainer.IsAuthenticated;
 
                 string reason = string.Empty;
                 if (isAuthenticated && RaaiVanUtil.password_change_needed(HttpContext.Current, ref reason))
@@ -72,21 +72,11 @@ namespace RaaiVan.Web.Page.Master
 
                 string theme = isAuthenticated && RaaiVanSettings.EnableThemes(paramsContainer.ApplicationID) ?
                     UsersController.get_theme(paramsContainer.ApplicationID, currentUserId) : string.Empty;
-
-                PublicMethods.set_page_headers(paramsContainer.ApplicationID, Page, isAuthenticated, theme);
+                
+                PublicMethods.set_page_headers(paramsContainer.ApplicationID, Page, isAuthenticated);
 
                 Guid? userId = PublicMethods.parse_guid(Request.Params["UserID"]);
                 if (!userId.HasValue) userId = PublicMethods.parse_guid(Request.Params["uid"]);
-
-                string imageUrl = DocumentUtilities.get_personal_image_address(paramsContainer.ApplicationID, currentUserId);
-
-                string strCurrentUser = currentUserId == Guid.Empty ? "{\"ImageURL\":\"" + imageUrl + "\"}" :
-                    "{\"UserID\":\"" + currentUserId.ToString() + "\"" +
-                    ",\"FirstName\":\"" + Base64.encode(_user.FirstName) + "\"" +
-                    ",\"LastName\":\"" + Base64.encode(_user.LastName) + "\"" +
-                    ",\"UserName\":\"" + Base64.encode(_user.UserName) + "\"" +
-                    ",\"ImageURL\":\"" + imageUrl + "\"" +
-                    "}";
 
                 string lastVersionSeen = !isAuthenticated || !paramsContainer.ApplicationID.HasValue ? string.Empty :
                     GlobalController.get_variable(paramsContainer.ApplicationID.Value, currentUserId.ToString() + "_LastVersionSeen");
@@ -94,7 +84,7 @@ namespace RaaiVan.Web.Page.Master
                 string rvGlobal = "{\"ApplicationID\":" + (!paramsContainer.ApplicationID.HasValue ? "null" : "\"" + paramsContainer.ApplicationID.ToString() + "\"") + 
                     ",\"UserID\":\"" + (userId.HasValue ? userId.ToString() : (isAuthenticated ? currentUserId.ToString() : string.Empty)) + "\"" +
                     ",\"CurrentUserID\":\"" + (isAuthenticated ? currentUserId.ToString() : string.Empty) + "\"" +
-                    ",\"CurrentUser\":" + strCurrentUser +
+                    ",\"CurrentUser\":" + _user.toJson(paramsContainer.ApplicationID, profileImageUrl: true) +
                     ",\"AccessToken\":\"" + AccessTokenList.new_token(HttpContext.Current) + "\"" +
                     ",\"IsSystemAdmin\":" + (isAuthenticated &&
                         PublicMethods.is_system_admin(paramsContainer.ApplicationID, currentUserId)).ToString().ToLower() +

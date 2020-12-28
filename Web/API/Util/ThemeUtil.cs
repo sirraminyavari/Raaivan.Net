@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using RaaiVan.Modules.GlobalUtilities;
+using RaaiVan.Modules.Users;
 
 namespace RaaiVan.Web
 {
@@ -41,7 +42,7 @@ namespace RaaiVan.Web
                         vars[pair[0].Trim()] = pair[1].Trim();
                 });
 
-            ThemeContent[name] = vars;
+            if (!PublicMethods.is_dev()) ThemeContent[name] = vars;
 
             return vars;
         }
@@ -50,10 +51,16 @@ namespace RaaiVan.Web
         {
             if (!string.IsNullOrEmpty(TemplateContent)) return TemplateContent;
 
-            string path = PublicMethods.map_path(PublicConsts.GlobalCSS);
-            if (File.Exists(path)) TemplateContent = File.ReadAllText(path);
+            string content = string.Empty;
 
-            return TemplateContent;
+            string path = PublicMethods.map_path(PublicConsts.GlobalCSS);
+            if (File.Exists(path))
+            {
+                content = File.ReadAllText(path);
+                if (!PublicMethods.is_dev()) TemplateContent = content;
+            }
+
+            return content;
         }
 
         public static string get_theme(Guid? applicationId, string name)
@@ -68,6 +75,23 @@ namespace RaaiVan.Web
             });
 
             return template;
+        }
+
+        public static string theme_name(Guid? applicationId, Guid? userId, HttpContext context)
+        {
+            string theme = userId.HasValue && RaaiVanSettings.EnableThemes(applicationId) ?
+                UsersController.get_theme(applicationId, userId.Value) : string.Empty;
+
+            if (!userId.HasValue)
+            {
+                theme = context.Request.Cookies["ck_theme"] == null ? string.Empty : context.Request.Cookies["ck_theme"].Value;
+                if (!string.IsNullOrEmpty(theme)) theme = theme.Split(',')[0];
+            }
+
+            if (string.IsNullOrEmpty(theme) || !RaaiVanSettings.Themes.Any(t => t.ToLower().IndexOf(theme.ToLower()) >= 0))
+                theme = RaaiVanSettings.DefaultTheme(applicationId);
+
+            return theme;
         }
     }
 }

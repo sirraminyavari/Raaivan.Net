@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web;
 using System.Web.Security;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Xml;
 using System.IO;
 using RaaiVan.Modules.GlobalUtilities;
@@ -161,8 +160,7 @@ namespace RaaiVan.Web.API
             string _currentPath = Path.GetFileName(Page.Request.FilePath);
 
             //if (_currentPath != System.IO.Path.GetFileName(PublicConsts.UserProfilePage) && (user == null ||
-            if (_currentPath.ToLower() != "profile.aspx" && (user == null ||
-                string.IsNullOrEmpty(user.FirstName) || string.IsNullOrEmpty(user.LastName)))
+            if (_currentPath.ToLower() != "profile.aspx" && (user == null || !user.profileCompleted()))
                 Page.Response.Redirect(PublicConsts.ProfilePage + "?Tab=Resume");
         }
         
@@ -590,6 +588,81 @@ namespace RaaiVan.Web.API
             }
             
             logged_out(userId);
+        }
+
+        protected static bool sso_auto_redirect(ParamsContainer paramsContainer, string loginUrl, bool skipRedirect)
+        {
+            if (RaaiVanSettings.SSO.AutoRedirect(paramsContainer.ApplicationID))
+            {
+                if (!skipRedirect) paramsContainer.redirect(loginUrl);
+                return true;
+            }
+            else return false;
+        }
+
+        public static bool sso_login(ParamsContainer paramsContainer, bool skipRedirect,
+            ref string errorMessage, ref Guid? userId, ref string authCookie, ref bool shouldRedirect)
+        {
+            if (paramsContainer.Tenant != null &&
+                !RaaiVanUtil.pre_login_check(paramsContainer.ApplicationID.Value, ref errorMessage)) return false;
+
+            string loginUrl = Modules.Jobs.SSO.get_login_url(paramsContainer.ApplicationID);
+
+            if (string.IsNullOrEmpty(loginUrl)) return false;
+
+            string ticket = Modules.Jobs.SSO.get_ticket(paramsContainer.ApplicationID, HttpContext.Current);
+
+            string username = string.Empty;
+
+            if (string.IsNullOrEmpty(ticket) ||
+                !Modules.Jobs.SSO.validate_ticket(paramsContainer.ApplicationID, HttpContext.Current, ticket, ref username))
+                return (shouldRedirect = sso_auto_redirect(paramsContainer, loginUrl, skipRedirect));
+
+            if (!string.IsNullOrEmpty(username))
+            {
+                userId = UsersController.get_user_id(paramsContainer.ApplicationID, username);
+
+                if (!userId.HasValue && !RaaiVanUtil.new_user(paramsContainer.ApplicationID, username, username, false))
+                {
+                    errorMessage = Modules.GlobalUtilities.Messages.UserCreationFailed.ToString();
+                    return false;
+                }
+                else if (!userId.HasValue)
+                    userId = UsersController.get_user_id(paramsContainer.ApplicationID, username);
+
+                if (userId.HasValue)
+                {
+                    RaaiVanUtil.logged_in(paramsContainer.ApplicationID, HttpContext.Current, userId.Value, false, false, ref authCookie);
+
+                    //Save Log
+                    try
+                    {
+                        LogController.save_log(paramsContainer.ApplicationID, new Log()
+                        {
+                            UserID = userId,
+                            Date = DateTime.Now,
+                            HostAddress = PublicMethods.get_client_ip(HttpContext.Current),
+                            HostName = PublicMethods.get_client_host_name(HttpContext.Current),
+                            Action = Modules.Log.Action.Login,
+                            SubjectID = userId,
+                            ModuleIdentifier = ModuleIdentifier.USR
+                        });
+                    }
+                    catch { }
+                    //end of Save Log
+
+                    return true;
+                }
+                else
+                {
+                    errorMessage = Modules.GlobalUtilities.Messages.RetrievingUserFailed.ToString();
+                    return false;
+                }
+            }
+
+            errorMessage = Modules.GlobalUtilities.Messages.LoginFailed.ToString();
+
+            return false;
         }
 
         public static void init_user_application(Guid? invitationId, Guid userId) {
@@ -1176,6 +1249,11 @@ namespace RaaiVan.Web.API
             if (string.IsNullOrEmpty(path)) FormsAuthentication.RedirectToLoginPage();
             else FormsAuthentication.RedirectToLoginPage("ReturnUrl=" + HttpUtility.UrlEncode(path));
             */
+        }
+
+        public void redirect(string url)
+        {
+            if (_Context != null) _Context.Response.Redirect(url);
         }
     }
 

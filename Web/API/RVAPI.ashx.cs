@@ -219,6 +219,18 @@ namespace RaaiVan.Web.API
 
             switch (command)
             {
+                case "GetGlobalParams":
+                case "global_params":
+                    {
+                        bool? set = PublicMethods.parse_bool(context.Request.Params["Set"]);
+
+                        Dictionary<string, object> data = get_rv_global(paramsContainer,
+                            PublicMethods.parse_bool(context.Request.Params["LoginInfo"]),
+                            PublicMethods.parse_guid(context.Request.Params["InvitationID"]));
+
+                        responseText = (set.HasValue && set.Value ? "window.RVGlobal = " : string.Empty) + PublicMethods.toJSON(data);
+                    }
+                    break;
                 case "GetApplications":
                     get_appliations(PublicMethods.parse_bool(context.Request.Params["Archive"]), ref responseText);
                     break;
@@ -388,10 +400,16 @@ namespace RaaiVan.Web.API
                     break;
                 case "Theme":
                 case "theme":
-                    string themeContent = ThemeUtil.get_theme(paramsContainer.ApplicationID,
-                        PublicMethods.parse_string(context.Request.Params["Name"], decode: false));
-                    paramsContainer.file_response(themeContent, "thm.css", contentType: "text/css", isAttachment: false);
-                    return true;
+                    {
+                        string name = PublicMethods.parse_string(context.Request.Params["Name"], decode: false);
+                        if (string.IsNullOrEmpty(name))
+                            name = ThemeUtil.theme_name(paramsContainer.ApplicationID, paramsContainer.CurrentUserID, context);
+
+                        string themeContent = ThemeUtil.get_theme(paramsContainer.ApplicationID, name);
+
+                        paramsContainer.file_response(themeContent, "thm.css", contentType: "text/css", isAttachment: false);
+                        return true;
+                    }
             }
 
             if (!string.IsNullOrEmpty(responseText))
@@ -419,8 +437,7 @@ namespace RaaiVan.Web.API
 
         public static string get_last_logins(Guid? applicationId, Guid? userId)
         {
-            if (RaaiVanSettings.InformLastLogins(applicationId) <= 0 || !userId.HasValue || userId == Guid.Empty)
-                return string.Empty;
+            if (RaaiVanSettings.InformLastLogins(applicationId) <= 0 || !userId.HasValue || userId == Guid.Empty) return "[]";
 
             List<Log> logs = LogController.get_logs(applicationId, new List<Guid>() { userId.Value },
                 new List<Modules.Log.Action>() { Modules.Log.Action.Login, Modules.Log.Action.Login_Failed },
@@ -428,13 +445,127 @@ namespace RaaiVan.Web.API
 
             if (logs.Count > 0) logs.RemoveAt(0);
 
-            return logs.Count <= 0 ? string.Empty :
-                "[" + ProviderUtil.list_to_string<string>(logs.Select(
+            return logs.Count <= 0 ? "[]" :
+                "[" + string.Join(",", logs.Select(
                     u => "{\"Action\":\"" + u.Action.ToString() + "\"" +
                     ",\"Date\":\"" + PublicMethods.get_local_date(u.Date.Value, true) + "\"" +
                     ",\"HostAddress\":\"" + u.HostAddress + "\"" +
                     ",\"HostName\":\"" + u.HostName + "\"" +
-                    "}").ToList()) + "]";
+                    "}")) + 
+                "]";
+        }
+
+        public static Dictionary<string, object> get_rv_global(ParamsContainer paramsContainer, bool? loginInfo, 
+            Guid? invitationId) {
+            Dictionary<string, object> response = new Dictionary<string, object>();
+
+            bool isAuthenticated = RaaiVanUtil.is_authenticated(paramsContainer.ApplicationID, HttpContext.Current);
+
+            if (!PublicMethods.check_sys_id())
+                response["SysID"] = PublicMethods.get_sys_id();
+
+            response["SAASBasedMultiTenancy"] = RaaiVanSettings.SAASBasedMultiTenancy;
+            response["LogoURL"] = RaaiVanSettings.LogoURL;
+            response["LogoMiniURL"] = RaaiVanSettings.LogoMiniURL;
+
+            //UserID
+            //SSOTicket
+            
+            if (paramsContainer.ApplicationID.HasValue)
+                response["ApplicationID"] = paramsContainer.ApplicationID.ToString();
+
+            response["IsAuthenticated"] = isAuthenticated;
+
+            if (isAuthenticated)
+            {
+                User currentUser = UsersController.get_user(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value);
+
+                if (currentUser == null)
+                {
+                    UsersController.set_first_and_last_name(paramsContainer.ApplicationID,
+                        paramsContainer.CurrentUserID.Value, string.Empty, string.Empty);
+                    currentUser = new User() { UserID = paramsContainer.CurrentUserID, FirstName = string.Empty, LastName = string.Empty };
+                }
+
+                response["CurrentUserID"] = paramsContainer.CurrentUserID.ToString();
+                response["CurrentUser"] = PublicMethods.fromJSON(currentUser.toJson(paramsContainer.ApplicationID, profileImageUrl: true));
+                response["IsSystemAdmin"] = PublicMethods.is_system_admin(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value);
+            }
+
+            response["AccessToken"] = AccessTokenList.new_token(HttpContext.Current);
+            response["SystemVersion"] = PublicMethods.SystemVersion;
+            response["ShowSystemVersion"] = RaaiVanSettings.ShowSystemVersion(paramsContainer.ApplicationID);
+            response["UserSignUp"] = RaaiVanSettings.UserSignUp(paramsContainer.ApplicationID);
+            response["EnableThemes"] = RaaiVanSettings.EnableThemes(paramsContainer.ApplicationID);
+            response["Theme"] = isAuthenticated && RaaiVanSettings.EnableThemes(paramsContainer.ApplicationID) ?
+                UsersController.get_theme(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value) : string.Empty;
+            response["BackgroundColor"] = RaaiVanSettings.BackgroundColor(paramsContainer.ApplicationID);
+            response["ColorfulBubbles"] = RaaiVanSettings.ColorfulBubbles(paramsContainer.ApplicationID);
+            response["SystemName"] = Base64.encode(RaaiVanSettings.SystemName(paramsContainer.ApplicationID));
+            response["SystemTitle"] = Base64.encode(RaaiVanSettings.SystemTitle(paramsContainer.ApplicationID));
+            response["Modules"] = PublicMethods.fromJSON(ConfigUtilities.get_modules_json(paramsContainer.ApplicationID));
+            response["Notifications"] = PublicMethods.fromJSON("{" + 
+                "\"SeenTimeout\":" + RaaiVanSettings.Notifications.SeenTimeout(paramsContainer.ApplicationID).ToString() +
+                ",\"UpdateInterval\":" + RaaiVanSettings.Notifications.UpdateInterval(paramsContainer.ApplicationID).ToString() + "}");
+            response["SSOLoginURL"] = (!RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) ? string.Empty :
+                Base64.encode(RaaiVanSettings.SSO.LoginURL(paramsContainer.ApplicationID)));
+            response["SSOLoginTitle"] = Base64.encode(RaaiVanSettings.SSO.LoginTitle(paramsContainer.ApplicationID));
+
+            string reason = string.Empty;
+            response["PasswordChangeNeeded"] = RaaiVanUtil.password_change_needed(HttpContext.Current, ref reason);
+            response["PasswordChangeReason"] = reason;
+
+            if (loginInfo.HasValue && loginInfo.Value)
+            {
+                bool disableLogin = false;
+                string loginErrorMessage = string.Empty;
+                bool loggedIn = false;
+                string authCookie = string.Empty;
+                Guid? userId = null;
+                bool shouldRedirect = false;
+
+                if (!isAuthenticated && RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) &&
+                    !(loggedIn = RaaiVanUtil.sso_login(paramsContainer, true, 
+                    ref loginErrorMessage, ref userId, ref authCookie, ref shouldRedirect))) disableLogin = true;
+                
+                response["LoginPageModel"] = RaaiVanSettings.LoginPageModel(paramsContainer.ApplicationID);
+                response["LoggedIn"] = loggedIn;
+                response["DisableLogin"] = disableLogin;
+                response["LoginErrorMessage"] = loginErrorMessage;
+                response["NeedsSSORedirect"] = shouldRedirect;
+
+                if (!string.IsNullOrEmpty(authCookie))
+                    response["AuthCookie"] = authCookie;
+
+                if (loggedIn)
+                {
+                    response["LoginMessage"] =
+                        Base64.encode(RVAPI.get_login_message(paramsContainer.ApplicationID, userId));
+
+                    response["LastLogins"] = 
+                        PublicMethods.fromJSON(RVAPI.get_last_logins(paramsContainer.ApplicationID, userId));
+                }
+
+                //login page info
+                string[] info = null;
+                if (!string.IsNullOrEmpty(RaaiVanSettings.LoginPageInfo(paramsContainer.ApplicationID)))
+                    info = RaaiVanSettings.LoginPageInfo(paramsContainer.ApplicationID).Split('|');
+
+                if (info != null)
+                {
+                    foreach (string str in info)
+                    {
+                        Dictionary<string, object> dt = PublicMethods.fromJSON(
+                            "{" + Page.View.Login.get_info_json(paramsContainer, str) + "}");
+
+                        if (dt != null)
+                            foreach (string key in dt.Keys) response[key] = dt[key];
+                    }
+                }
+                //end of login page info
+            }
+
+            return response;
         }
 
         public void get_appliations(bool? archive, ref string responseText)

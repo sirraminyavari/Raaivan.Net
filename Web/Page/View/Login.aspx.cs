@@ -53,7 +53,8 @@ namespace RaaiVan.Web.Page.View
                 Guid? userId = null;
 
                 string authCookie = string.Empty;
-                
+                bool shouldRedirect = false;
+
                 if (RaaiVanUtil.is_authenticated(paramsContainer.ApplicationID, HttpContext.Current))
                 {
                     Guid? invitationId = PublicMethods.parse_guid(Request.Params["inv"]);
@@ -62,7 +63,10 @@ namespace RaaiVan.Web.Page.View
                     Response.Redirect(PublicConsts.HomePage);
                 }
                 else if ((!local.HasValue || !local.Value) && RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) &&
-                    !(loggedIn = sso_login(ref loginErrorMessage, ref userId, ref authCookie))) disableLogin = true;
+                    !(loggedIn = RaaiVanUtil.sso_login(paramsContainer, false, ref loginErrorMessage, ref userId, ref authCookie, ref shouldRedirect)))
+                {
+                    disableLogin = true;
+                }
                 
                 PublicMethods.set_page_headers(paramsContainer.ApplicationID, Page, false);
 
@@ -72,14 +76,12 @@ namespace RaaiVan.Web.Page.View
 
                 string strLoginMessage = !loggedIn ? string.Empty : RVAPI.get_login_message(paramsContainer.ApplicationID, userId);
                 string strLastLogins = !loggedIn ? string.Empty : RVAPI.get_last_logins(paramsContainer.ApplicationID, userId);
-                
-                string ssoLoginUrl = !RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) ? string.Empty :
-                    Modules.Jobs.SSO.get_login_url(paramsContainer.ApplicationID);
 
                 string rvGlobal = "{\"SysID\":\"" + (isValid ? string.Empty : PublicMethods.get_sys_id()) + "\"" +
                     ",\"SystemTitle\":\"" + Base64.encode(RaaiVanSettings.SystemTitle(paramsContainer.ApplicationID)) + "\"" +
                     ",\"SystemName\":\"" + Base64.encode(RaaiVanSettings.SystemName(paramsContainer.ApplicationID)) + "\"" +
-                    ",\"SSOLoginURL\":\"" + Base64.encode(ssoLoginUrl) + "\"" +
+                    ",\"SSOLoginURL\":\"" + (!RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) ? string.Empty :
+                        Base64.encode(Modules.Jobs.SSO.get_login_url(paramsContainer.ApplicationID))) + "\"" +
                     ",\"SSOLoginTitle\":\"" + Base64.encode(RaaiVanSettings.SSO.LoginTitle(paramsContainer.ApplicationID)) + "\"" +
                     ",\"ReturnURL\":\"" + Base64.encode(returnUrl) + "\"" +
                     ",\"SystemVersion\":\"" + PublicMethods.SystemVersion + "\"" +
@@ -98,7 +100,7 @@ namespace RaaiVan.Web.Page.View
                 {
                     foreach (string str in info)
                     {
-                        string result = get_info_json(str);
+                        string result = get_info_json(paramsContainer, str);
                         if (!string.IsNullOrEmpty(result)) rvGlobal += ", " + result;
                     }
                 }
@@ -116,82 +118,7 @@ namespace RaaiVan.Web.Page.View
             }
         }
 
-        protected bool sso_auto_redirect(string loginUrl)
-        {
-            if (RaaiVanSettings.SSO.AutoRedirect(paramsContainer.ApplicationID))
-            {
-                Response.Redirect(loginUrl);
-                return true;
-            }
-            else return false;
-        }
-
-        protected bool sso_login(ref string errorMessage, ref Guid? userId, ref string authCookie)
-        {
-            if (paramsContainer.Tenant != null && 
-                !RaaiVanUtil.pre_login_check(paramsContainer.ApplicationID.Value, ref errorMessage)) return false;
-
-            string loginUrl = Modules.Jobs.SSO.get_login_url(paramsContainer.ApplicationID);
-            
-            if (string.IsNullOrEmpty(loginUrl)) return false;
-
-            string ticket = Modules.Jobs.SSO.get_ticket(paramsContainer.ApplicationID, HttpContext.Current);
-
-            if (string.IsNullOrEmpty(ticket)) return sso_auto_redirect(loginUrl);
-
-            string username = string.Empty;
-
-            if (!Modules.Jobs.SSO.validate_ticket(paramsContainer.ApplicationID, HttpContext.Current, ticket, ref username))
-                return sso_auto_redirect(Modules.Jobs.SSO.get_login_url(paramsContainer.ApplicationID));
-
-            if (!string.IsNullOrEmpty(username))
-            {
-                userId = UsersController.get_user_id(paramsContainer.ApplicationID, username);
-
-                if (!userId.HasValue && !RaaiVanUtil.new_user(paramsContainer.ApplicationID, username, username, false))
-                {
-                    errorMessage = Modules.GlobalUtilities.Messages.UserCreationFailed.ToString();
-                    return false;
-                }
-                else if (!userId.HasValue)
-                    userId = UsersController.get_user_id(paramsContainer.ApplicationID, username);
-
-                if (userId.HasValue)
-                {
-                    RaaiVanUtil.logged_in(paramsContainer.ApplicationID, HttpContext.Current, userId.Value, false, false, ref authCookie);
-
-                    //Save Log
-                    try
-                    {
-                        LogController.save_log(paramsContainer.ApplicationID, new Log()
-                        {
-                            UserID = userId,
-                            Date = DateTime.Now,
-                            HostAddress = PublicMethods.get_client_ip(HttpContext.Current),
-                            HostName = PublicMethods.get_client_host_name(HttpContext.Current),
-                            Action = Modules.Log.Action.Login,
-                            SubjectID = userId,
-                            ModuleIdentifier = ModuleIdentifier.USR
-                        });
-                    }
-                    catch { }
-                    //end of Save Log
-
-                    return true;
-                }
-                else
-                {
-                    errorMessage = Modules.GlobalUtilities.Messages.RetrievingUserFailed.ToString();
-                    return false;
-                }
-            }
-
-            errorMessage = Modules.GlobalUtilities.Messages.LoginFailed.ToString();
-
-            return false;
-        }
-
-        protected string get_info_json(string info)
+        public static string get_info_json(ParamsContainer paramsContainer, string info)
         {
             if (!paramsContainer.ApplicationID.HasValue) return string.Empty;
 
@@ -204,7 +131,7 @@ namespace RaaiVan.Web.Page.View
                 Guid nodeTypeId = Guid.Empty;
                 if (!Guid.TryParse(strs[1], out workflowId)) return string.Empty;
                 if (!Guid.TryParse(strs[2], out nodeTypeId)) return string.Empty;
-                return "\"" + strs[0] + "\":" + get_service_abstract(workflowId, nodeTypeId);
+                return "\"" + strs[0] + "\":" + get_service_abstract(paramsContainer, workflowId, nodeTypeId);
             }
             else if (info.ToLower().Contains("modern_28_1"))
             {
@@ -264,11 +191,11 @@ namespace RaaiVan.Web.Page.View
             return string.Empty;
         }
 
-        protected string get_service_abstract(Guid workflowId, Guid nodeTypeId)
+        private static string get_service_abstract(ParamsContainer paramsContainer, Guid workflowId, Guid nodeTypeId)
         {
             string result = string.Empty;
 
-            new WFAPI() { paramsContainer = this.paramsContainer }
+            new WFAPI() { paramsContainer = paramsContainer }
                 .get_service_abstract(nodeTypeId, workflowId, null, "NoTag", true, ref result);
 
             return result;

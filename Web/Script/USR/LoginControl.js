@@ -1,16 +1,18 @@
 ﻿(function () {
     if (window.LoginControl) return;
 
+    var INPUT_BG_COLOR = (window.RVGlobal || {}).SAASBasedMultiTenancy ? "rgba(216,216,216,1)" : "rgba(84,89,95,0.82)";
+
     var stl = document.createElement("style");
     stl.setAttribute("type", "text/css");
-    stl.innerHTML = ".login-input:-webkit-autofill, .login-input:-webkit-autofill:hover, .login-input:-webkit-autofill:focus { -webkit-text-fill-color: white; -webkit-box-shadow: 0 0 0px 1000px rgba(84,89,95,0.82) inset; transition: background-color 5000s ease-in-out 0s; }";
+    stl.innerHTML = ".login-input:-webkit-autofill, .login-input:-webkit-autofill:hover, .login-input:-webkit-autofill:focus { -webkit-text-fill-color: white; -webkit-box-shadow: 0 0 0px 1000px " + INPUT_BG_COLOR + " inset; transition: background-color 5000s ease-in-out 0s; }";
     document.head.appendChild(stl);
 
     window.LoginControl = function (containerDiv, params) {
         this.ContainerDiv = typeof (containerDiv) == "object" ? containerDiv : document.getElementById(containerDiv);
         if (!this.ContainerDiv) return;
         params = params || {};
-
+        
         this.Interface = {
             UserName: null,
             Password: null,
@@ -114,9 +116,11 @@
                     Childs: [{ Type: "text", TextValue: domains[i].Text }]
                 });
             }
-            
+
             var ssoUrl = that.Options.IgnoreSSO ? "" : Base64.decode((window.RVGlobal || {}).SSOLoginURL);
             var isSaaS = RVGlobal.SAASBasedMultiTenancy;
+
+            var buttonClass = isSaaS ? "rv-air-button-warm-blue" : "rv-air-button-green";
 
             var elems = GlobalUtilities.create_nested_elements([
                 {
@@ -149,43 +153,34 @@
                                         (hasMultipleDomains ? "" : "display:none;"),
                                     Childs: [{
                                         Type: "select", Class: "rv-input", Name: "domainSelect",
-                                        Style: "width:100%; height:3rem; color:white; border-width:0; background-color:rgba(84,89,95,0.82);",
+                                        Style: "width:100%; height:3rem; color:white; border-width:0; background-color:" + INPUT_BG_COLOR + ";",
                                         Childs: domainOptions
                                     }]
                                 },
                                 {
                                     Type: "div", Class: "small-12 medium-12 large-12",
                                     Childs: [
-                                        {
-                                            Type: "animated_input", Name: "usernameInput", Style: "margin-bottom:1rem;",
+                                        { Name: "usernameInput", Placeholder: RVDic.UserName, MarginBottom: 1 },
+                                        { Name: "passwordInput", Placeholder: RVDic.Password, Type: "password" }
+                                    ].map(btn => {
+                                        return {
+                                            Type: "animated_input", Name: btn.Name,
+                                            Style: (btn.MarginBottom ? "margin-bottom:" + btn.MarginBottom + "rem;" : ""),
                                             Params: {
-                                                Placeholder: RVDic.UserName,
-                                                BackgroundColor: "rgba(84,89,95,0.82)",
+                                                Type: btn.Type,
+                                                Placeholder: btn.Placeholder,
+                                                BackgroundColor: INPUT_BG_COLOR,
                                                 Class: "login-input",
-                                                Style: "color:white; border-width:0; height:3.5rem;",
+                                                Style: "border-width:0; height:3.5rem; color:" + (isSaaS ? "black" : "white") + ";",
                                                 PlaceholderStyle: {
                                                     BackgroundColor: { Active: "transparent" },
-                                                    Color: { Default: "rgb(200,200,200)", Active: "white" },
+                                                    Color: isSaaS ? { Default: "rgb(150,150,150)", Active: "rgb(100,100,100)" } :
+                                                        { Default: "rgb(200,200,200)", Active: "white" },
                                                     FontSize: { Default: "1.2rem", Active: "0.9rem" }
                                                 }
                                             }
-                                        },
-                                        {
-                                            Type: "animated_input", Name: "passwordInput", 
-                                            Params: {
-                                                Type: "password",
-                                                Placeholder: RVDic.Password,
-                                                BackgroundColor: "rgba(84,89,95,0.82)",
-                                                Class: "login-input",
-                                                Style: "color:white; border-width:0; height:3.5rem;",
-                                                PlaceholderStyle: {
-                                                    BackgroundColor: { Active: "transparent" },
-                                                    Color: { Default: "rgb(200,200,200)", Active: "white" },
-                                                    FontSize: { Default: "1.2rem", Active: "0.9rem" }
-                                                }
-                                            }
-                                        }
-                                    ]
+                                        };
+                                    })
                                 }
                             ]
                         },
@@ -202,7 +197,8 @@
                                         {
                                             Type: "div", Name: "loginButton", 
                                             Class: "small-12 medium-12 large-12 " +
-                                                (ssoUrl ? "rv-air-button-base rv-air-button-black" : "rv-border-radius-quarter  rv-air-button-base rv-air-button-green"),
+                                                (ssoUrl ? "rv-air-button-base rv-air-button-black" :
+                                                    "rv-border-radius-quarter rv-air-button-base " + buttonClass),
                                             Style: "padding:0.4rem; color:white; height:100%;" +
                                                 "display:flex; align-items:center; justify-content:center;",
                                             Childs: [{ Type: "text", TextValue: RVDic.Login }]
@@ -214,7 +210,7 @@
                                     Childs: [
                                         {
                                             Type: "div", Name: "ssoLoginButton",
-                                            Class: "small-12 medium-12 large-12 rv-air-button-base rv-air-button-green",
+                                            Class: "small-12 medium-12 large-12 rv-air-button-base " + buttonClass,
                                             Style: "padding:0.4rem; height:100%; color:white;" +
                                                 "display:flex; align-items:center; justify-content:center;",
                                             Properties: [{ Name: "onclick", Value: function () { window.location.href = ssoUrl; } }],

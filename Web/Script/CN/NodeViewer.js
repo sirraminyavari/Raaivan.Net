@@ -439,7 +439,7 @@
                 that.show_related_nodes(elems["relations"], elems["relationItems"], params);
 
                 if (that.Objects.IsAuthenticated) {
-                    that.show_similar_nodes(elems["similarNodes"], params);
+                    if (false) that.show_similar_nodes(elems["similarNodes"], params);
                     if (!that.Options.HideContributors) that.show_knowledgable_users(elems["knowledgableUsers"], params);
                 }
 

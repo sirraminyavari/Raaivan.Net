@@ -23,6 +23,7 @@ using Microsoft.Owin;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
 using RaaiVan.Modules.RaaiVanConfig;
+using System.Web.Hosting;
 
 namespace RaaiVan.Modules.GlobalUtilities
 {
@@ -694,6 +695,10 @@ namespace RaaiVan.Modules.GlobalUtilities
         private static SortedList<Guid, Dictionary<Guid, bool>> _SystemAdmins = 
             new SortedList<Guid, Dictionary<Guid, bool>>();
 
+        public static bool is_dev() {
+            return HostingEnvironment.IsDevelopmentEnvironment;
+        }
+
         public static string get_environment_variable(string variable, string defaultValue = "")
         {
             string ret = Environment.GetEnvironmentVariable(variable, EnvironmentVariableTarget.Machine) ??
@@ -1331,25 +1336,13 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        public static void set_page_headers(Guid? applicationId, Page pg, bool isAuthenticated, string userTheme = null)
+        public static void set_page_headers(Guid? applicationId, Page pg, bool isAuthenticated)
         {
-            string theme = isAuthenticated && RaaiVanSettings.EnableThemes(applicationId) && !string.IsNullOrEmpty(userTheme) ? 
-                userTheme : string.Empty;
-
-            if (!isAuthenticated)
-            {
-                theme = pg.Request.Cookies["ck_theme"] == null ? string.Empty : pg.Request.Cookies["ck_theme"].Value;
-                if (!string.IsNullOrEmpty(theme)) theme = theme.Split(',')[0];
-            }
-
-            if (string.IsNullOrEmpty(theme) || !RaaiVanSettings.Themes.Any(t => t.ToLower().IndexOf(theme.ToLower()) >= 0))
-                theme = RaaiVanSettings.DefaultTheme(applicationId);
-
             pg.Header.Controls.Add(new LiteralControl(
                 "<link rel='shortcut icon' href='../../Images/" + RaaiVanSettings.FavIconName + ".ico' />"));
 
             pg.Header.Controls.Add(new LiteralControl("<link type='text/css' rel='stylesheet' " +
-                "href='" + pg.ResolveClientUrl("~/api/rv/theme?name=" + theme + "&timeStamp=" + 
+                "href='" + pg.ResolveClientUrl("~/api/rv/theme?timeStamp=" + 
                 DateTime.Now.Millisecond.ToString()) + "' />"));
             
             pg.Header.Controls.Add(new LiteralControl("<link type='text/css' rel='stylesheet' " +
@@ -1364,13 +1357,13 @@ namespace RaaiVan.Modules.GlobalUtilities
                 DateTime.Now.Millisecond.ToString()) + "'></script>"));
 
             pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript'>" +
-                    "window.IsAuthenticated = " + isAuthenticated.ToString().ToLower() + ";</script>"));
-
+                "window.IsAuthenticated = " + isAuthenticated.ToString().ToLower() + ";</script>"));
+            
             if (RaaiVanSettings.RealTime(applicationId) && isAuthenticated)
             {
                 pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
                     pg.ResolveClientUrl("~/Script/jQuery/jquery.signalr.js") + "'></script>"));
-
+                
                 pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
                     pg.ResolveClientUrl("~/signalr/hubs") + "'></script>"));
                 //pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +

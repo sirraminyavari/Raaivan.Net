@@ -342,16 +342,25 @@ namespace RaaiVan.Modules.Users
             }
         }
 
+        public bool profileCompleted() {
+            return UserID.HasValue && UserID != Guid.Empty && !string.IsNullOrEmpty(FirstName) && !string.IsNullOrEmpty(LastName);
+        }
+
         public string toJson(Guid? applicationId = null, bool profileImageUrl = false)
         {
+            string imageUrl = !profileImageUrl ? string.Empty :
+                DocumentUtilities.get_personal_image_address(applicationId, UserID.HasValue ? UserID.Value : Guid.Empty);
+
             return "{\"UserID\":\"" + (UserID.HasValue ? UserID.ToString() : string.Empty) + "\"" +
                 ",\"UserName\":\"" + Base64.encode(UserName) + "\"" +
                 ",\"FirstName\":\"" + Base64.encode(FirstName) + "\"" +
                 ",\"LastName\":\"" + Base64.encode(LastName) + "\"" +
+                ",\"IncompleteProfile\":" + (!profileCompleted()).ToString().ToLower() +
                 (string.IsNullOrEmpty(JobTitle) ? string.Empty : ",\"JobTitle\":\"" + Base64.encode(JobTitle) + "\"") +
-                (!profileImageUrl || !UserID.HasValue || !applicationId.HasValue ? string.Empty :
-                    ",\"ProfileImageURL\":\"" +
-                        DocumentUtilities.get_personal_image_address(applicationId.Value, UserID.Value) + "\"") +
+                (string.IsNullOrEmpty(imageUrl) ? string.Empty :
+                    ",\"ProfileImageURL\":\"" + imageUrl + "\"" +
+                    ",\"ImageURL\":\"" + imageUrl + "\""
+                ) +
                 "}";
         }
     }

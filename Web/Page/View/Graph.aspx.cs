@@ -53,7 +53,7 @@ namespace RaaiVan.Web.Page.View
 
                 string theme = isAuthenticated && RaaiVanSettings.EnableThemes(paramsContainer.Tenant.Id) ?
                     UsersController.get_theme(paramsContainer.Tenant.Id, currentUserId) : string.Empty;
-                PublicMethods.set_page_headers(paramsContainer.Tenant.Id, Page, isAuthenticated, theme);
+                PublicMethods.set_page_headers(paramsContainer.Tenant.Id, Page, isAuthenticated);
 
                 if (string.IsNullOrEmpty(Request.Params["iamadmin"]) && RaaiVanSettings.ServiceUnavailable)
                     Response.Redirect(PublicConsts.ServiceUnavailablePage);
@@ -73,20 +73,9 @@ namespace RaaiVan.Web.Page.View
                 Guid? userId = PublicMethods.parse_guid(Request.Params["UserID"]);
                 if (!userId.HasValue) userId = PublicMethods.parse_guid(Request.Params["uid"]);
 
-                string imageUrl =
-                    DocumentUtilities.get_personal_image_address(paramsContainer.ApplicationID, currentUserId);
-
-                string strCurrentUser = currentUserId == Guid.Empty ? "{\"ImageURL\":\"" + imageUrl + "\"}" :
-                    "{\"UserID\":\"" + currentUserId.ToString() + "\"" +
-                    ",\"FirstName\":\"" + Base64.encode(_user.FirstName) + "\"" +
-                    ",\"LastName\":\"" + Base64.encode(_user.LastName) + "\"" +
-                    ",\"UserName\":\"" + Base64.encode(_user.UserName) + "\"" +
-                    ",\"ImageURL\":\"" + imageUrl + "\"" +
-                    "}";
-
                 string rvGlobal = "{\"UserID\":\"" + (userId.HasValue ? userId.ToString() : (isAuthenticated ? currentUserId.ToString() : string.Empty)) + "\"" +
                     ",\"CurrentUserID\":\"" + (isAuthenticated ? currentUserId.ToString() : string.Empty) + "\"" +
-                    ",\"CurrentUser\":" + strCurrentUser +
+                    ",\"CurrentUser\":" + _user.toJson(paramsContainer.ApplicationID, profileImageUrl: true) +
                     ",\"AccessToken\":\"" + AccessTokenList.new_token(HttpContext.Current) + "\"" +
                     ",\"IsSystemAdmin\":" + (isAuthenticated &&
                         PublicMethods.is_system_admin(paramsContainer.Tenant.Id, currentUserId)).ToString().ToLower() +
