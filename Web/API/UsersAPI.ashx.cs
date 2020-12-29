@@ -824,7 +824,7 @@ namespace RaaiVan.Web.API
 
             bool result = UsersController.create_temporary_user(paramsContainer.ApplicationID, newUser, false, 
                 emailSubject, confirmationEmailBody, null, activationCode, invitationId, ref errorMessage);
-
+            
             responseText = result ? "{\"Succeed\":\"" + Messages.YourUserAccountCreatedSuccessfully + "\"}" :
                 "{\"ErrorText\":\"" + (string.IsNullOrEmpty(errorMessage) ? Messages.OperationFailed.ToString() : errorMessage) + "\"}";
         }

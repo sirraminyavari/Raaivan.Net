@@ -23,7 +23,7 @@ namespace RaaiVan.Web.Page.View
             paramsContainer = new ParamsContainer(HttpContext.Current, nullTenantResponse: !RaaiVanSettings.SAASBasedMultiTenancy);
 
             Page.Title = RaaiVanSettings.SystemTitle(paramsContainer.ApplicationID);
-            
+
             try
             {
                 if (!RaaiVanSettings.SAASBasedMultiTenancy && !paramsContainer.ApplicationID.HasValue)

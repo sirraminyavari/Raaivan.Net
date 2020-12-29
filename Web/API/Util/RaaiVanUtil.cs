@@ -1123,14 +1123,15 @@ namespace RaaiVan.Web.API
 
                 _Context.Response.ContentType = "text/json";
                 _Context.Response.BufferOutput = true;
-                _Context.Response.Write(responseText);
-
-                _Context.Response.AppendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-                _Context.Response.AppendHeader("Pragma", "no-cache");
-                _Context.Response.AppendHeader("Expires", "0");
-
+                
                 try
                 {
+                    _Context.Response.AppendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+                    _Context.Response.AppendHeader("Pragma", "no-cache");
+                    _Context.Response.AppendHeader("Expires", "0");
+
+                    _Context.Response.Write(responseText);
+
                     _Context.Response.Flush(); // Sends all currently buffered output to the client.
                     _Context.Response.SuppressContent = true;  // Gets or sets a value indicating whether to send HTTP content to the client.
                     _Context.ApplicationInstance.CompleteRequest(); // Causes ASP.NET to bypass all events and filtering in the HTTP pipeline chain of execution and directly execute the EndRequest event.

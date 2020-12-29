@@ -1631,7 +1631,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        public static string upload_file(Guid applicationId, string url, string fileAddress)
+        public static string upload_file(string url, string fileAddress)
         {
             using (WebClient client = new WebClient())
             {
