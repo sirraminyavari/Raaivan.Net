@@ -93,6 +93,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             List<DocFileInfo> retList = new List<DocFileInfo>();
 
+            if (string.IsNullOrEmpty(strFiles)) return retList;
+
             Dictionary<string, object> dic = PublicMethods.fromJSON("{\"Items\":" + Base64.decode(strFiles) + "}");
 
             if (!dic.ContainsKey("Items")) return retList;

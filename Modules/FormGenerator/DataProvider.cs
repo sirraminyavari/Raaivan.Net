@@ -776,6 +776,76 @@ namespace RaaiVan.Modules.FormGenerator
             }
         }
 
+        public static bool SaveFormElements(Guid applicationId, Guid formId, List<FormElement> elements, Guid currentUserId)
+        {
+            SqlConnection con = new SqlConnection(ProviderUtil.ConnectionString);
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = con;
+
+            //Elements
+            DataTable elementsTable = new DataTable();
+            elementsTable.Columns.Add("ElementID", typeof(Guid));
+            elementsTable.Columns.Add("InstanceID", typeof(Guid));
+            elementsTable.Columns.Add("RefElementID", typeof(Guid));
+            elementsTable.Columns.Add("Title", typeof(string));
+            elementsTable.Columns.Add("Name", typeof(string));
+            elementsTable.Columns.Add("SequenceNumber", typeof(int));
+            elementsTable.Columns.Add("Necessary", typeof(bool));
+            elementsTable.Columns.Add("UniqueValue", typeof(bool));
+            elementsTable.Columns.Add("Type", typeof(string));
+            elementsTable.Columns.Add("Help", typeof(string));
+            elementsTable.Columns.Add("Info", typeof(string));
+            elementsTable.Columns.Add("Weight", typeof(double));
+            elementsTable.Columns.Add("TextValue", typeof(string));
+            elementsTable.Columns.Add("FloatValue", typeof(double));
+            elementsTable.Columns.Add("BitValue", typeof(bool));
+            elementsTable.Columns.Add("DateValue", typeof(DateTime));
+
+            int seq = 1;
+
+            foreach (FormElement _elem in elements)
+            {
+                string strType = null;
+                if (_elem.Type.HasValue) strType = _elem.Type.Value.ToString();
+
+                _elem.SequenceNumber = seq++;
+
+                elementsTable.Rows.Add(_elem.ElementID, _elem.FormInstanceID, _elem.RefElementID,
+                    PublicMethods.verify_string(_elem.Title), _elem.Name, _elem.SequenceNumber, _elem.Necessary,
+                    _elem.UniqueValue, strType, PublicMethods.verify_string(_elem.Help), _elem.Info, _elem.Weight,
+                    PublicMethods.verify_string(_elem.TextValue), _elem.FloatValue, _elem.BitValue, _elem.DateValue);
+            }
+
+            SqlParameter elementsParam = new SqlParameter("@Elements", SqlDbType.Structured);
+            elementsParam.TypeName = "[dbo].[FormElementTableType]";
+            elementsParam.Value = elementsTable;
+            //end of Elements
+
+            cmd.Parameters.AddWithValue("@ApplicationID", applicationId);
+            cmd.Parameters.AddWithValue("@FormID", formId);
+            cmd.Parameters.Add(elementsParam);
+            cmd.Parameters.AddWithValue("@CurrentUserID", currentUserId);
+            cmd.Parameters.AddWithValue("@Now", DateTime.Now);
+
+            string spName = GetFullyQualifiedName("SaveFormElements");
+
+            string sep = ", ";
+            string arguments = "@ApplicationID" + sep + "@FormID" + sep + "@Elements" + sep + "@CurrentUserID" + sep + "@Now";
+            cmd.CommandText = ("EXEC" + " " + spName + " " + arguments);
+
+            con.Open();
+            try
+            {
+                return ProviderUtil.succeed((IDataReader)cmd.ExecuteReader());
+            }
+            catch (Exception ex)
+            {
+                LogController.save_error_log(applicationId, null, spName, ex, ModuleIdentifier.FG);
+                return false;
+            }
+            finally { con.Close(); }
+        }
+
         public static void GetFormElements(Guid applicationId, ref List<FormElement> retElements, 
             Guid? formId, Guid? ownerId, FormElementTypes? type)
         {
@@ -1026,9 +1096,14 @@ namespace RaaiVan.Modules.FormGenerator
             elementsTable.Columns.Add("InstanceID", typeof(Guid));
             elementsTable.Columns.Add("RefElementID", typeof(Guid));
             elementsTable.Columns.Add("Title", typeof(string));
+            elementsTable.Columns.Add("Name", typeof(string));
             elementsTable.Columns.Add("SequenceNumber", typeof(int));
+            elementsTable.Columns.Add("Necessary", typeof(bool));
+            elementsTable.Columns.Add("UniqueValue", typeof(bool));
             elementsTable.Columns.Add("Type", typeof(string));
+            elementsTable.Columns.Add("Help", typeof(string));
             elementsTable.Columns.Add("Info", typeof(string));
+            elementsTable.Columns.Add("Weight", typeof(double));
             elementsTable.Columns.Add("TextValue", typeof(string));
             elementsTable.Columns.Add("FloatValue", typeof(double));
             elementsTable.Columns.Add("BitValue", typeof(bool));
@@ -1040,7 +1115,8 @@ namespace RaaiVan.Modules.FormGenerator
                 if (_elem.Type.HasValue) strType = _elem.Type.Value.ToString();
 
                 elementsTable.Rows.Add(_elem.ElementID, _elem.FormInstanceID, _elem.RefElementID,
-                    PublicMethods.verify_string(_elem.Title), _elem.SequenceNumber, strType, _elem.Info,
+                    PublicMethods.verify_string(_elem.Title), _elem.Name, _elem.SequenceNumber, _elem.Necessary,
+                    _elem.UniqueValue, strType, PublicMethods.verify_string(_elem.Help), _elem.Info, _elem.Weight,
                     PublicMethods.verify_string(_elem.TextValue), _elem.FloatValue, _elem.BitValue, _elem.DateValue);
             }
 

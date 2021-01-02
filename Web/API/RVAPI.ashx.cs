@@ -228,7 +228,11 @@ namespace RaaiVan.Web.API
                             PublicMethods.parse_bool(context.Request.Params["LoginInfo"]),
                             PublicMethods.parse_guid(context.Request.Params["InvitationID"]));
 
-                        responseText = (set.HasValue && set.Value ? "window.RVGlobal = " : string.Empty) + PublicMethods.toJSON(data);
+                        if (set.HasValue && set.Value) {
+                            responseText = "window.RVGlobal = " + PublicMethods.toJSON(data) + ";" +
+                                "window.IsAuthenticated = " + paramsContainer.IsAuthenticated.ToString().ToLower();
+                        }
+                        else responseText = PublicMethods.toJSON(data);
                     }
                     break;
                 case "GetApplications":
@@ -442,7 +446,7 @@ namespace RaaiVan.Web.API
             List<Log> logs = LogController.get_logs(applicationId, new List<Guid>() { userId.Value },
                 new List<Modules.Log.Action>() { Modules.Log.Action.Login, Modules.Log.Action.Login_Failed },
                 null, null, null, RaaiVanSettings.InformLastLogins(applicationId) + 1);
-
+            
             if (logs.Count > 0) logs.RemoveAt(0);
 
             return logs.Count <= 0 ? "[]" :
@@ -461,6 +465,20 @@ namespace RaaiVan.Web.API
 
             bool isAuthenticated = RaaiVanUtil.is_authenticated(paramsContainer.ApplicationID, HttpContext.Current);
 
+            //Updatable Items
+            if (paramsContainer.ApplicationID.HasValue)
+                response["ApplicationID"] = paramsContainer.ApplicationID.ToString();
+
+            response["IsAuthenticated"] = isAuthenticated;
+            response["AccessToken"] = AccessTokenList.new_token(HttpContext.Current);
+            response["Theme"] = isAuthenticated && RaaiVanSettings.EnableThemes(paramsContainer.ApplicationID) ?
+                UsersController.get_theme(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value) : string.Empty;
+
+            string reason = string.Empty;
+            response["PasswordChangeNeeded"] = RaaiVanUtil.password_change_needed(HttpContext.Current, ref reason);
+            response["PasswordChangeReason"] = reason;
+            //end of Updatable Items
+
             if (!PublicMethods.check_sys_id())
                 response["SysID"] = PublicMethods.get_sys_id();
 
@@ -470,11 +488,6 @@ namespace RaaiVan.Web.API
 
             //UserID
             //SSOTicket
-            
-            if (paramsContainer.ApplicationID.HasValue)
-                response["ApplicationID"] = paramsContainer.ApplicationID.ToString();
-
-            response["IsAuthenticated"] = isAuthenticated;
 
             if (isAuthenticated)
             {
@@ -492,13 +505,10 @@ namespace RaaiVan.Web.API
                 response["IsSystemAdmin"] = PublicMethods.is_system_admin(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value);
             }
 
-            response["AccessToken"] = AccessTokenList.new_token(HttpContext.Current);
             response["SystemVersion"] = PublicMethods.SystemVersion;
             response["ShowSystemVersion"] = RaaiVanSettings.ShowSystemVersion(paramsContainer.ApplicationID);
             response["UserSignUp"] = RaaiVanSettings.UserSignUp(paramsContainer.ApplicationID);
             response["EnableThemes"] = RaaiVanSettings.EnableThemes(paramsContainer.ApplicationID);
-            response["Theme"] = isAuthenticated && RaaiVanSettings.EnableThemes(paramsContainer.ApplicationID) ?
-                UsersController.get_theme(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value) : string.Empty;
             response["BackgroundColor"] = RaaiVanSettings.BackgroundColor(paramsContainer.ApplicationID);
             response["ColorfulBubbles"] = RaaiVanSettings.ColorfulBubbles(paramsContainer.ApplicationID);
             response["SystemName"] = Base64.encode(RaaiVanSettings.SystemName(paramsContainer.ApplicationID));
@@ -510,10 +520,6 @@ namespace RaaiVan.Web.API
             response["SSOLoginURL"] = (!RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) ? string.Empty :
                 Base64.encode(RaaiVanSettings.SSO.LoginURL(paramsContainer.ApplicationID)));
             response["SSOLoginTitle"] = Base64.encode(RaaiVanSettings.SSO.LoginTitle(paramsContainer.ApplicationID));
-
-            string reason = string.Empty;
-            response["PasswordChangeNeeded"] = RaaiVanUtil.password_change_needed(HttpContext.Current, ref reason);
-            response["PasswordChangeReason"] = reason;
 
             if (loginInfo.HasValue && loginInfo.Value)
             {

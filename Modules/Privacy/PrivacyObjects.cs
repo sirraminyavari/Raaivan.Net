@@ -123,7 +123,7 @@ namespace RaaiVan.Modules.Privacy
                 ",\"NodeType\":\"" + Base64.encode(NodeType) + "\"" +
                 ",\"AdditionalID\":\"" + Base64.encode(AdditionalID) + "\"" +
                 ",\"Allow\":" + (!Allow.HasValue ? "null" : Allow.Value.ToString().ToLower()) +
-                ",\"ExpirationDate\":" + (!ExpirationDate.HasValue ? "null" : "\"" + ExpirationDate.Value.ToString() + "\"") +
+                ",\"ExpirationDate\":" + (!ExpirationDate.HasValue ? "null" : "\"" + ExpirationDate.Value.ToString("yyyy-MM-dd") + "\"") +
                 ",\"ExpirationDate_Locale\":" + (!ExpirationDate.HasValue ? "null" : 
                     "\"" + PublicMethods.get_local_date(ExpirationDate.Value) + "\"") +
                 ",\"PermissionType\":" + (PermissionType == PermissionType.None ? "null" : "\"" + PermissionType.ToString() + "\"") +
@@ -176,30 +176,23 @@ namespace RaaiVan.Modules.Privacy
         {
             Privacy obj = new Privacy();
 
-            if (json.ContainsKey("CalculateHierarchy") && json["CalculateHierarchy"] != null)
-                obj.CalculateHierarchy = PublicMethods.parse_bool(json["CalculateHierarchy"].ToString());
-            if (json.ContainsKey("ConfidentialityID") && json["ConfidentialityID"] != null)
-                obj.Confidentiality.ID = PublicMethods.parse_guid(json["ConfidentialityID"].ToString());
+            obj.CalculateHierarchy = PublicMethods.parse_bool(PublicMethods.get_dic_value(json, "CalculateHierarchy"));
 
-            if (json.ContainsKey("Audience") && json["Audience"].GetType() == typeof(ArrayList))
+            Dictionary<string, object> conf = PublicMethods.get_dic_value<Dictionary<string, object>>(json, "Confidentiality");
+            obj.Confidentiality.ID = PublicMethods.parse_guid(PublicMethods.get_dic_value(conf, "ID"));
+
+            foreach (object a in PublicMethods.get_dic_value<ArrayList>(json, "Audience", defaultValue: new ArrayList()))
             {
-                foreach (object a in (ArrayList)json["Audience"])
-                {
-                    if (a.GetType() != typeof(Dictionary<string, object>)) continue;
-                    Audience o = Modules.Privacy.Audience.fromJson((Dictionary<string, object>)a);
-                    if (o != null) obj.Audience.Add(o);
-                }
+                if (a.GetType() != typeof(Dictionary<string, object>)) continue;
+                Audience o = Modules.Privacy.Audience.fromJson((Dictionary<string, object>)a);
+                if (o != null) obj.Audience.Add(o);
             }
 
-            if (json.ContainsKey("DefaultPermissions") && json["DefaultPermissions"] != null && 
-                json["DefaultPermissions"].GetType() == typeof(ArrayList))
+            foreach (object d in PublicMethods.get_dic_value<ArrayList>(json, "DefaultPermissions", defaultValue: new ArrayList()))
             {
-                foreach (object d in (ArrayList)json["DefaultPermissions"])
-                {
-                    if (d.GetType() != typeof(Dictionary<string, object>)) continue;
-                    DefaultPermission o = DefaultPermission.fromJson((Dictionary<string, object>)d);
-                    if (o != null) obj.DefaultPermissions.Add(o);
-                }
+                if (d.GetType() != typeof(Dictionary<string, object>)) continue;
+                DefaultPermission o = DefaultPermission.fromJson((Dictionary<string, object>)d);
+                if (o != null) obj.DefaultPermissions.Add(o);
             }
 
             return obj.CalculateHierarchy.HasValue || obj.Confidentiality.ID.HasValue ||

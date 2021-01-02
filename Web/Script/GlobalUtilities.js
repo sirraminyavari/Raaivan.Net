@@ -276,6 +276,13 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         return value;
     },
 
+    shake: function (div, options) {
+        if (!(div || {}).classList) return;
+        options = options || {};
+        div.classList.add("rv-shake");
+        setTimeout(() => { div.classList.remove("rv-shake"); }, options.Duration || 1000);
+    },
+
     request_param: function (paramName) {
         if (paramName = (new RegExp('[?&]' + encodeURIComponent(paramName) + '=([^&]*)')).exec(location.search))
             return decodeURIComponent(paramName[1]);
@@ -892,12 +899,11 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
                 return;
             }
 
-            _div = GlobalUtilities.create_nested_elements([
-                {
-                    Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1",
-                    Style: "margin:0rem auto; padding:1rem; background-color:rgba(0,0,0,0.5);", Name: "_div"
-                }
-            ])["_div"];
+            _div = GlobalUtilities.create_nested_elements([{
+                Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1", Name: "_div",
+                Style: "margin:0rem auto; padding:1rem; background-color:" +
+                    (RVGlobal.SAASBasedMultiTenancy ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)") + ";"
+            }])["_div"];
 
             GlobalUtilities.loading(_div);
             showedDiv = GlobalUtilities.show(_div);
@@ -2869,18 +2875,20 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         if (!element) return;
         params = params || {};
 
-        var elems = GlobalUtilities.create_nested_elements([
-            {
-                Type: "div", Name: "container",
-                Style: (GlobalUtilities.get_type(params.Style) == "string" ? params.Style : "margin:0.5rem auto;"),
-                Childs: [
-                    {
-                        Type: "div", Style: "text-align:center;",
-                        Childs: [{ Type: "img", Attributes: [{ Name: "src", Value: GlobalUtilities.icon("loading_progress_bar.gif") }] }]
-                    }
-                ]
-            }
-        ], element);
+        var isSaaS = (window.RVGlobal || {}).SAASBasedMultiTenancy;
+        var iconName = isSaaS ? "loading-cliqmind.gif" : "loading_progress_bar.gif";
+        
+        var elems = GlobalUtilities.create_nested_elements([{
+            Type: "div", Name: "container",
+            Style: (GlobalUtilities.get_type(params.Style) == "string" ? params.Style : "margin:0.5rem auto;"),
+            Childs: [{
+                Type: "div", Style: "text-align:center;",
+                Childs: [{
+                    Type: "img", Style: (isSaaS ? "max-width:60px;" : ""),
+                    Attributes: [{ Name: "src", Value: GlobalUtilities.icon(iconName) }]
+                }]
+            }]
+        }], element);
 
         return { Destroy: function () { jQuery(elems["container"]).remove(); } };
     },

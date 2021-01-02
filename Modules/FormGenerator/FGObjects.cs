@@ -48,42 +48,34 @@ namespace RaaiVan.Modules.FormGenerator
                 {
                     FormElement newElement = new FormElement()
                     {
-                        ElementID = !elem.ContainsKey("ElementID") ? null :
-                            PublicMethods.parse_guid((string)elem["ElementID"]),
-                        FormInstanceID = !elem.ContainsKey("InstanceID") ? null :
-                            PublicMethods.parse_guid((string)elem["InstanceID"]),
-                        Title = !elem.ContainsKey("Title") ? null : Base64.decode((string)elem["Title"]),
-                        Filled = elem.ContainsKey("Filled") && 
-                            PublicMethods.parse_bool(elem["Filled"].ToString(), false).Value,
-                        SequenceNumber = -1,
-                        Info = !elem.ContainsKey("Info") ? null : Base64.decode((string)elem["Info"])
+                        ElementID = PublicMethods.parse_guid(PublicMethods.get_dic_value(elem, "ElementID")),
+                        RefElementID = PublicMethods.parse_guid(PublicMethods.get_dic_value(elem, "RefElementID")),
+                        FormInstanceID = PublicMethods.parse_guid(PublicMethods.get_dic_value(elem, "InstanceID")),
+                        Title = PublicMethods.parse_string(PublicMethods.get_dic_value(elem, "Title"), defaultValue: null),
+                        Name = PublicMethods.get_dic_value(elem, "Name", defaultValue: null),
+                        Filled = PublicMethods.parse_bool(PublicMethods.get_dic_value(elem, "Filled"), defaultValue: false),
+                        SequenceNumber = PublicMethods.parse_int(PublicMethods.get_dic_value(elem, "SequenceNumber"), defaultValue: -1),
+                        Necessary = PublicMethods.parse_bool(PublicMethods.get_dic_value(elem, "Necessary")),
+                        UniqueValue = PublicMethods.parse_bool(PublicMethods.get_dic_value(elem, "UniqueValue")),
+                        Help = PublicMethods.parse_string(PublicMethods.get_dic_value(elem, "Help"), defaultValue: null),
+                        Info = PublicMethods.parse_string(PublicMethods.get_dic_value(elem, "Info"), defaultValue: null),
+                        Weight = PublicMethods.parse_double(PublicMethods.get_dic_value(elem, "Weight")),
+                        TextValue = PublicMethods.parse_string(PublicMethods.get_dic_value(elem, "TextValue"), defaultValue: null),
+                        FloatValue = PublicMethods.parse_double(PublicMethods.get_dic_value(elem, "FloatValue")),
+                        BitValue = PublicMethods.parse_bool(PublicMethods.get_dic_value(elem, "BitValue")),
+                        DateValue = PublicMethods.parse_date(PublicMethods.get_dic_value(elem, "DateValue")),
+                        AttachedFiles = DocumentUtilities.get_files_info(PublicMethods.get_dic_value(elem, "Files"))
                     };
 
-                    if (elem.ContainsKey("RefElementID") && !string.IsNullOrEmpty(elem["RefElementID"].ToString()))
-                        newElement.RefElementID = PublicMethods.parse_guid((string)elem["RefElementID"]);
-                    if (elem.ContainsKey("SequenceNumber") && !string.IsNullOrEmpty(elem["SequenceNumber"].ToString()))
-                        newElement.SequenceNumber = PublicMethods.parse_int(elem["SequenceNumber"].ToString(), -1);
-                    if (elem.ContainsKey("Name") && !string.IsNullOrEmpty(elem["Name"].ToString()))
-                        newElement.Name = elem["Name"].ToString();
+                    if (newElement.Type == FormElementTypes.Separator) newElement.Necessary = null;
+                    if (newElement.Type != FormElementTypes.Text && newElement.Type != FormElementTypes.Numeric)
+                        newElement.UniqueValue = null;
 
-                    string textValue = !elem.ContainsKey("TextValue") ? null : Base64.decode((string)elem["TextValue"]);
-                    if (!string.IsNullOrEmpty(textValue)) newElement.TextValue = textValue;
-                    if (elem.ContainsKey("FloatValue") && !string.IsNullOrEmpty(elem["FloatValue"].ToString()))
-                        newElement.FloatValue = PublicMethods.parse_double(elem["FloatValue"].ToString());
-                    if (elem.ContainsKey("BitValue") && !string.IsNullOrEmpty(elem["BitValue"].ToString()))
-                        newElement.BitValue = PublicMethods.parse_bool(elem["BitValue"].ToString());
-                    if (elem.ContainsKey("DateValue"))
-                        newElement.DateValue = PublicMethods.parse_date((string)elem["DateValue"]);
-                    if (elem.ContainsKey("Files") && !string.IsNullOrEmpty(elem["Files"].ToString()))
-                        newElement.AttachedFiles = DocumentUtilities.get_files_info((string)elem["Files"]);
+                    FormElementTypes fet = FormElementTypes.Text;
+                    if (Enum.TryParse<FormElementTypes>(PublicMethods.get_dic_value(elem, "Type"), out fet))
+                        newElement.Type = fet;
 
-                    if (elem.ContainsKey("Type"))
-                    {
-                        try { newElement.Type = (FormElementTypes)Enum.Parse(typeof(FormElementTypes), (string)elem["Type"]); }
-                        catch { newElement.Type = null; }
-                    }
-
-                    if (elem.ContainsKey("GuidItems") && elem["GuidItems"].GetType() == typeof(ArrayList))
+                    if (elem.ContainsKey("GuidItems") && elem["GuidItems"] != null && elem["GuidItems"].GetType() == typeof(ArrayList))
                     {
                         SelectedGuidItemType tp = SelectedGuidItemType.None;
                         if (newElement.Type == FormElementTypes.Node) tp = SelectedGuidItemType.Node;

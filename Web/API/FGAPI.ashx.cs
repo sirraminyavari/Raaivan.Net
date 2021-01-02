@@ -35,7 +35,7 @@ namespace RaaiVan.Web.API
 
             string searchText = PublicMethods.parse_string(context.Request.Params["SearchText"]);
             if (string.IsNullOrEmpty(searchText)) searchText = PublicMethods.parse_string(context.Request.Params["text"]);
-
+            
             switch (command)
             {
                 case "CreateForm":
@@ -76,7 +76,7 @@ namespace RaaiVan.Web.API
                 case "AddFormElement":
                     FormElementTypes type = new FormElementTypes();
                     if (!Enum.TryParse<FormElementTypes>(context.Request.Params["Type"], out type)) type = FormElementTypes.Text;
-
+                    
                     add_form_element(PublicMethods.parse_guid(context.Request.Params["FormID"]),
                         PublicMethods.parse_string(context.Request.Params["Title"]),
                         PublicMethods.parse_string(context.Request.Params["Name"]),
@@ -110,6 +110,11 @@ namespace RaaiVan.Web.API
                     return;
                 case "RemoveFormElement":
                     remove_form_element(PublicMethods.parse_guid(context.Request.Params["ElementID"]), ref responseText);
+                    _return_response(ref responseText);
+                    return;
+                case "SaveFormElements":
+                    save_form_elements(PublicMethods.parse_guid(context.Request.Params["FormID"]),
+                        FGUtilities.get_form_elements(context.Request.Params["Elements"]), ref responseText);
                     _return_response(ref responseText);
                     return;
                 case "GetFormElements":
@@ -954,6 +959,50 @@ namespace RaaiVan.Web.API
                     HostName = PublicMethods.get_client_host_name(HttpContext.Current),
                     Action = Modules.Log.Action.RemoveFormElement,
                     SubjectID = elementId,
+                    ModuleIdentifier = ModuleIdentifier.FG
+                });
+            }
+            //end of Save Log
+        }
+
+        protected void save_form_elements(Guid? formId, List<FormElement> elements, ref string responseText)
+        {
+            //Privacy Check: OK
+            if (!paramsContainer.GBEdit) return;
+
+            if (!formId.HasValue ||
+                !AuthorizationManager.has_right(AccessRoleName.ManageForms, paramsContainer.CurrentUserID))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
+                if (formId.HasValue) _save_error_log(Modules.Log.Action.SaveFormElements_PermissionFailed, formId);
+                return;
+            }
+
+            if (elements == null) elements = new List<FormElement>();
+
+            elements.Where(e => !e.ElementID.HasValue).ToList().ForEach(e => e.ElementID = Guid.NewGuid());
+
+            elements = elements.Where(e => e.Type.HasValue && !string.IsNullOrEmpty(e.Title)).ToList();
+            
+            bool result = FGController.save_form_elements(paramsContainer.Tenant.Id,
+                formId.Value, elements, paramsContainer.CurrentUserID.Value);
+
+            responseText = !result ? "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}" :
+                "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" + 
+                ",\"Elements:[" + string.Join(",", elements.Select(e => e.toJson(paramsContainer.Tenant.Id))) + "]" +
+                "}";
+
+            //Save Log
+            if (result)
+            {
+                LogController.save_log(paramsContainer.Tenant.Id, new Log()
+                {
+                    UserID = paramsContainer.CurrentUserID.Value,
+                    Date = DateTime.Now,
+                    HostAddress = PublicMethods.get_client_ip(HttpContext.Current),
+                    HostName = PublicMethods.get_client_host_name(HttpContext.Current),
+                    Action = Modules.Log.Action.SaveFormElements,
+                    SubjectID = formId,
                     ModuleIdentifier = ModuleIdentifier.FG
                 });
             }

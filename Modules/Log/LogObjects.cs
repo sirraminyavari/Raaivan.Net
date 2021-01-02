@@ -269,6 +269,8 @@ namespace RaaiVan.Modules.Log
         SetFormElementUniqueness_PermissionFailed,
         RemoveFormElement,
         RemoveFormElement_PermissionFailed,
+        SaveFormElements,
+        SaveFormElements_PermissionFailed,
         CreateFormInstance,
         RemoveFormInstance,
         RemoveOwnerFormInstances,

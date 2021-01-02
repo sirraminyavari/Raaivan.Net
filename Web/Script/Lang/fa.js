@@ -740,6 +740,7 @@
         TwoStepAuthentication: "احراز هویت دو مرحله ای",
         Type: "نوع",
         UncheckAll: "همه را از حالت انتخاب خارج کن",
+        Undo: "بازگردانی",
         Unfriend: "لغو همکاری",
         UniqueValue: "مقدار یکتا",
         University: "دانشگاه",

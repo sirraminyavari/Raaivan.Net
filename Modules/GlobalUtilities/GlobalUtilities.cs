@@ -899,11 +899,34 @@ namespace RaaiVan.Modules.GlobalUtilities
             return decode ? Base64.decode(input.ToString()) : input.ToString();
         }
 
+        public static T parse_enum<T>(string input, T defaultValue) where T : struct
+        {
+            try
+            {
+                T itm;
+                if (Enum.TryParse<T>(input, out itm)) return itm;
+                else return defaultValue;
+            }
+            catch { return defaultValue; }
+        }
+
         public static string get_dic_value(Dictionary<string, object> dic, string key, string defaultValue = null) {
             if (dic == null || string.IsNullOrEmpty(key) || !dic.ContainsKey(key) || dic[key] == null) return defaultValue;
             else return dic[key].ToString();
         }
-        
+
+        public static T get_dic_value<T>(Dictionary<string, object> dic, string key)
+        {
+            if (dic == null || string.IsNullOrEmpty(key) || !dic.ContainsKey(key) ||
+                dic[key] == null || dic[key].GetType() != typeof(T)) return default(T);
+            else return (T)dic[key];
+        }
+
+        public static T get_dic_value<T>(Dictionary<string, object> dic, string key, T defaultValue) {
+            T ret = get_dic_value<T>(dic, key);
+            return ret == null ? defaultValue : ret;
+        }
+
         private static Random _RND = new Random((int)DateTime.Now.Ticks);
 
         public static int get_random_number(int min, int max)

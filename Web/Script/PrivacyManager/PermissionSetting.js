@@ -16,7 +16,8 @@
         this.Objects = {
             ObjectID: params.ObjectID,
             SelectedItems: [],
-            RolesDic: {}
+            RolesDic: {},
+            PrivacyData: null
         };
 
         this.Options = GlobalUtilities.extend({
@@ -25,7 +26,8 @@
             PermissionTypes: [],
             PermissionTypesWithDefaultValue: ["Create", "View", "ViewAbstract", "ViewRelatedItems", "Download"],
             OnInit: null,
-            OnSave: null
+            OnSave: null,
+            DontSave: false
         }, params.Options || {});
 
         var that = this;
@@ -55,7 +57,10 @@
                     PrivacyAPI.GetAudience({
                         ObjectID: that.Objects.ObjectID, ObjectType: that.Options.ObjectType, ParseResults: true,
                         ResponseHandler: function (results) {
+                            if ((results || {}).Items) that.Objects.PrivacyData = results.Items;
+
                             that.initialize(results);
+
                             if (that.Options.OnInit) that.Options.OnInit();
                         }
                     });
@@ -80,14 +85,12 @@
             var singleDefaultPermission = (that.Options.PermissionTypesWithDefaultValue || []).length == 1;
 
             var _add_option = function (slct, p) {
-                GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "option",
-                        Attributes: [{ Name: "title", Value: p.ID }],
-                        Properties: [{ Name: "TheName", Value: !p.ID ? null : p.Title }],
-                        Childs: [{ Type: "text", TextValue: p.Title }]
-                    }
-                ], slct);
+                GlobalUtilities.create_nested_elements([{
+                    Type: "option",
+                    Attributes: [{ Name: "title", Value: p.ID }],
+                    Properties: [{ Name: "TheName", Value: !p.ID ? null : p.Title }],
+                    Childs: [{ Type: "text", TextValue: p.Title }]
+                }], slct);
             };
 
             var privacyElems = GlobalUtilities.create_nested_elements([
@@ -118,7 +121,7 @@
                 },
                 {
                     Type: "div", Name: "hierarchyArea",
-                    Class: "small-12 medium-12 large-12 rv-border-radius-quarter rv-bg-color-trans-white", 
+                    Class: "small-12 medium-12 large-12 rv-border-radius-quarter rv-bg-color-trans-white",
                     Style: "position:relative; margin-bottom:1rem; padding:0.3rem;" +
                         "padding-" + RV_Float + ":2.2rem; min-height:1.9rem; cursor:pointer;",
                     Properties: [{ Name: "onclick", Value: function () { privacyElems["hierarchyCheckbox"][privacyElems["hierarchyCheckbox"].Checked ? "uncheck" : "check"]({ StopOnChange: true }); } }],
@@ -171,11 +174,11 @@
                     Type: "div", Class: "small-10 medium-7 large-4 rv-air-button rv-circle",
                     Style: "margin:1.5rem auto 0rem auto;", Name: "saveButton",
                     Childs: [
-                        {
+                        (that.Options.DontSave ? null : {
                             Type: "i", Class: "fa fa-save fa-lg", Style: "margin-" + RV_RevFloat + ":0.5rem;",
                             Attributes: [{ Name: "aria-hidden", Value: true }]
-                        },
-                        { Type: "text", TextValue: RVDic.Save }
+                        }),
+                        { Type: "text", TextValue: that.Options.DontSave ? RVDic.Confirm : RVDic.Save }
                     ]
                 }
             ], that.ContainerDiv);
@@ -216,38 +219,36 @@
 
                 if (singleDefaultPermission) ttl = RVDic.PRVC.SelectDefaultPermissionN.replace("[n]", "'" + ttl + "'");
 
-                var dpElems = GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div", Class: cls, Style: "padding:0.3rem;", Name: "container",
-                        Childs: [
-                            {
-                                Type: "div",
-                                Class: "small-12 medium-12 large-12 rv-border-radius-quarter rv-bg-color-white-softer SoftShadow",
-                                Style: "position:relative; padding:0.3rem; padding-" + RV_Float + ":2rem; cursor:pointer;",
-                                Properties: [{
-                                    Name: "onclick", Value: function () {
-                                        var curVal = dpElems["chb"].Checked;
-                                        var nextFunc = curVal === true ? "uncheck" : (curVal === false ? "clear" : "check");
-                                        dpElems["chb"][nextFunc]({ StopOnChange: true });
-                                    }
-                                }],
-                                Childs: [
-                                    {
-                                        Type: "div", Style: "position:absolute; top:0rem; bottom:0rem;" + RV_Float + ":0.3rem;",
+                var dpElems = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: cls, Style: "padding:0.3rem;", Name: "container",
+                    Childs: [
+                        {
+                            Type: "div",
+                            Class: "small-12 medium-12 large-12 rv-border-radius-quarter rv-bg-color-white-softer SoftShadow",
+                            Style: "position:relative; padding:0.3rem; padding-" + RV_Float + ":2rem; cursor:pointer;",
+                            Properties: [{
+                                Name: "onclick", Value: function () {
+                                    var curVal = dpElems["chb"].Checked;
+                                    var nextFunc = curVal === true ? "uncheck" : (curVal === false ? "clear" : "check");
+                                    dpElems["chb"][nextFunc]({ StopOnChange: true });
+                                }
+                            }],
+                            Childs: [
+                                {
+                                    Type: "div", Style: "position:absolute; top:0rem; bottom:0rem;" + RV_Float + ":0.3rem;",
+                                    Childs: [{
+                                        Type: "middle",
                                         Childs: [{
-                                            Type: "middle",
-                                            Childs: [{
-                                                Type: "checkbox", Name: "chb", Style: "width:1rem; height:1rem; cursor:pointer;",
-                                                Params: { ThreeState: true, Checked: isSelected }
-                                            }]
+                                            Type: "checkbox", Name: "chb", Style: "width:1rem; height:1rem; cursor:pointer;",
+                                            Params: { ThreeState: true, Checked: isSelected }
                                         }]
-                                    },
-                                    { Type: "text", TextValue: ttl }
-                                ]
-                            }
-                        ]
-                    }
-                ], that.Interface.DefaultPermissions);
+                                    }]
+                                },
+                                { Type: "text", TextValue: ttl }
+                            ]
+                        }
+                    ]
+                }], that.Interface.DefaultPermissions);
 
                 dpElems["container"].Get = function () {
                     var theVal = dpElems["chb"].Checked === true ? "Public" :
@@ -284,8 +285,10 @@
                 var data = {};
 
                 data[that.Objects.ObjectID] = {
-                    ConfidentialityID: confidentialityId,
-                    ConfidentialityTitle: Base64.encode(confidentialityTitle),
+                    Confidentiality: {
+                        ID: confidentialityId,
+                        Title: Base64.encode(confidentialityTitle)
+                    },
                     CalculateHierarchy: calculateHierarchy,
                     Audience: [],
                     DefaultPermissions: []
@@ -309,6 +312,12 @@
                     });
                 });
 
+                if (that.Options.DontSave) {
+                    that.Objects.PrivacyData = data;
+                    if (that.Options.OnSave) that.Options.OnSave(data);
+                    return;
+                }
+                console.log(data);
                 that.processing(true);
 
                 PrivacyAPI.SetAudience({
@@ -662,6 +671,10 @@
             var that = this;
             if (GlobalUtilities.get_type(value) == "boolean") that.__PROCESSING = value;
             else return !!that.__PROCESSING;
+        },
+
+        get_data: function () {
+            return this.Objects.PrivacyData;
         }
     }
 })();

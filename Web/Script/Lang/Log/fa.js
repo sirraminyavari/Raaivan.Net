@@ -227,6 +227,8 @@
             SetFormElementUniqueness_PermissionFailed: "عدم دسترسی: تعیین وضعیت غیر تکراری بودن فیلد فرم",
             RemoveFormElement: "حذف فیلد فرم",
             RemoveFormElement_PermissionFailed: "عدم دسترسی: حذف فیلد فرم",
+            SaveFormElements: "ذخیره کردن فیلدهای فرم در فرم ساز",
+            SaveFormElements_PermissionFailed: "عدم دسترسی: ذخیره کردن فیلدهای فرم در فرم ساز",
             CreateFormInstance: "ایجاد نمونه جدید از فرم",
             RemoveFormInstance: "حذف نمونه فرم",
             RemoveOwnerFormInstances: "حذف همه نمونه فرم ها",

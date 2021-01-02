@@ -20,7 +20,7 @@
             var showWorkFlow = initialJson.ShowWorkFlow === true;
             var showKnowledgeOptions = initialJson.ShowKnowledgeOptions === true;
             var hideContributors = initialJson.HideContributors === true;
-
+            
             if (initialJson.AccessDenied) return new NodeAccessDeniedResponse("nodeView", initialJson);
             
             GlobalUtilities.loading("nodeView");

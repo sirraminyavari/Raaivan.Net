@@ -63,19 +63,18 @@
                         else {
                             var dialogName = "USBTOKENNOTCONNECTEDTODEVIDE";
 
-                            window[dialogName] = window[dialogName] || GlobalUtilities.create_nested_elements([
-                                {
-                                    Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1 SoftBackgroundColor",
-                                    Style: "margin:0rem auto; padding:1rem; text-align:center;", Name: "_div",
-                                    Childs: [{ Type: "text", TextValue: ((window.RVDic || {}).MSG || {}).USBTokenNotFound || msg }]
-                                }
-                            ])["_div"];
+                            window[dialogName] = window[dialogName] || GlobalUtilities.create_nested_elements([{
+                                Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1 SoftBackgroundColor",
+                                Style: "margin:0rem auto; padding:1rem; text-align:center;", Name: "_div",
+                                Childs: [{ Type: "text", TextValue: ((window.RVDic || {}).MSG || {}).USBTokenNotFound || msg }]
+                            }])["_div"];
 
                             GlobalUtilities.show(window[dialogName], { Stick: true });
                         }
                     }
                     else if (j.NotAuthenticated === true) {
                         window.IsAuthenticated = false;
+                        if (window.RVGlobal) window.RVGlobal.IsAuthenticated = false;
                         if (window.GlobalUtilities) GlobalUtilities.login_dialog();
                     }
                     else if (j.NoApplicationFound)

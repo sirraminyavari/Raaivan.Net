@@ -417,62 +417,60 @@
             },
 
             edit: function () {
-                var elems = GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12", Name: "container",
-                        Childs: [
-                            {
-                                Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:0.5rem;",
-                                Childs: [
-                                    {
-                                        Type: "div", Style: "display:inline-block;",
-                                        Childs: [{ Type: "checkbox", Name: "useSimpleEditor" }]
-                                    },
-                                    {
-                                        Type: "div", Style: "display:inline-block; margin-" + RV_Float + ":0.5rem;",
-                                        Childs: [{ Type: "text", TextValue: RVDic.FG.UseSimpleEditor }]
-                                    }
-                                ]
-                            },
-                            {
-                                Type: "div", Class: "small-12 medium-12 large-12 row", Style: "margin:0rem;",
-                                Childs: [
-                                    {
-                                        Type: "div", Class: "small-6 medium-6 large-6",
-                                        Style: "padding-" + RV_RevFloat + ":0.5rem; margin-top:0.5rem;",
-                                        Childs: [
-                                            {
-                                                Type: "select", Class: "rv-input", Name: "patternNameSelect",
-                                                Style: "width:100; font-size:0.7rem;"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        Type: "div", Class: "small-6 medium-6 large-6",
-                                        Style: "padding-" + RV_Float + ":0.5rem; margin-top:0.5rem;",
-                                        Childs: [
-                                            {
-                                                Type: "input", Class: "rv-input", Name: "patternInput",
-                                                InnerTitle: RVDic.FG.RegExPattern,
-                                                Style: "width:100%; font-size:0.7rem; display:none;"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        Type: "div", Class: "small-6 medium-6 large-6",
-                                        Style: "padding-" + RV_RevFloat + ":0.5rem; margin-top:0.5rem;",
-                                        Childs: [
-                                            {
-                                                Type: "input", Class: "rv-input", Name: "placeholderInput",
-                                                Style: "width:100%; font-size:0.7rem;", InnerTitle: RVDic.FG.Placeholder
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]);
+                var elems = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: "small-12 medium-12 large-12", Name: "container",
+                    Childs: [
+                        {
+                            Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:0.5rem;",
+                            Childs: [
+                                {
+                                    Type: "div", Style: "display:inline-block;",
+                                    Childs: [{ Type: "checkbox", Name: "useSimpleEditor" }]
+                                },
+                                {
+                                    Type: "div", Style: "display:inline-block; margin-" + RV_Float + ":0.5rem;",
+                                    Childs: [{ Type: "text", TextValue: RVDic.FG.UseSimpleEditor }]
+                                }
+                            ]
+                        },
+                        {
+                            Type: "div", Class: "small-12 medium-12 large-12 row", Style: "margin:0rem;",
+                            Childs: [
+                                {
+                                    Type: "div", Class: "small-6 medium-6 large-6",
+                                    Style: "padding-" + RV_RevFloat + ":0.5rem; margin-top:0.5rem;",
+                                    Childs: [
+                                        {
+                                            Type: "select", Class: "rv-input", Name: "patternNameSelect",
+                                            Style: "width:100; font-size:0.7rem;"
+                                        }
+                                    ]
+                                },
+                                {
+                                    Type: "div", Class: "small-6 medium-6 large-6",
+                                    Style: "padding-" + RV_Float + ":0.5rem; margin-top:0.5rem;",
+                                    Childs: [
+                                        {
+                                            Type: "input", Class: "rv-input", Name: "patternInput",
+                                            InnerTitle: RVDic.FG.RegExPattern,
+                                            Style: "width:100%; font-size:0.7rem; display:none;"
+                                        }
+                                    ]
+                                },
+                                {
+                                    Type: "div", Class: "small-6 medium-6 large-6",
+                                    Style: "padding-" + RV_RevFloat + ":0.5rem; margin-top:0.5rem;",
+                                    Childs: [
+                                        {
+                                            Type: "input", Class: "rv-input", Name: "placeholderInput",
+                                            Style: "width:100%; font-size:0.7rem;", InnerTitle: RVDic.FG.Placeholder
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }]);
 
                 var container = elems["container"];
                 
@@ -551,6 +549,8 @@
                         
                         if (GlobalUtilities.trim(placeholderInput.value))
                             ret.PlaceHolder = Base64.encode(GlobalUtilities.trim(placeholderInput.value));
+
+                        if (ret.Pattern || ret.PatternName) ret.UseSimpleEditor = true;
                         
                         return ret;
                     }

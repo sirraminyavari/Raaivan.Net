@@ -184,6 +184,15 @@
         return FGAPI._send(url, params, queryString);
     },
 
+    SaveFormElements: function (params) {
+        params = params || {};
+
+        var url = FGAPI.ResponseURL + "/SaveFormElements?timeStamp=" + new Date().getTime();
+        var queryString = (params.FormID ? "&FormID=" + params.FormID : "") + 
+            (params.Elements ? "&Elements=" + params.Elements : "");
+        return FGAPI._send(url, params, queryString);
+    },
+
     GetFormElements: function (params) {
         params = params || {};
 

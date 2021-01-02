@@ -971,6 +971,7 @@
     <Content Include="Images\Language30.png" />
     <Content Include="Images\Ledgers240.png" />
     <Content Include="Images\Loading-Circle.gif" />
+    <Content Include="Images\loading-cliqmind.gif" />
     <Content Include="Images\loading_progress_bar.gif" />
     <Content Include="Images\Login.png" />
     <Content Include="Images\Logout.png" />
@@ -1144,7 +1145,7 @@
     <Content Include="CSS\KendoRTLRepair.css" />
     <Content Include="Script\AdvancedListViewer-v1\NewAdvancedListViewer.js" />
     <Content Include="Script\CN\RelatedNodesViewer.js" />
-    <Content Include="Script\FormsManager\FormElementsManager.js" />
+    <Content Include="Script\FormsManager\FormElementsManager__.js" />
     <Content Include="Script\jQuery\jquery.dad.js" />
     <Content Include="Script\LoginPage\lp_modern_29_1.js" />
     <Content Include="Script\Reports\ReportOptions\CN_RelatedNodesCountReport.js" />
@@ -1589,7 +1590,7 @@
     <Content Include="Script\Dropzone\css\basic.css" />
     <Content Include="Script\Dropzone\css\dropzone.css" />
     <Content Include="Script\Dropzone\dropzone.js" />
-    <Content Include="Script\FormsManager\FormElementsManager___.js" />
+    <Content Include="Script\FormsManager\FormElementsManager.js" />
     <Content Include="Script\FormsManager\FormElementsSelect.js" />
     <Content Include="Script\FormsManager\FormElementTypes.js" />
     <Content Include="Script\FormsManager\FormOwner.js" />
@@ -1893,10 +1894,6 @@
     <Content Include="Services\CoreNetwork.asmx" />
     <Content Include="Services\Knowledge.asmx" />
     <Content Include="Global.asax" />
-    <Content Include="ui\1.js" />
-    <Content Include="ui\build\static\3.js" />
-    <Content Include="ui\build\index.html" />
-    <Content Include="ui\script\2.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
