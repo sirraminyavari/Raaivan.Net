@@ -114,6 +114,9 @@ namespace RaaiVan.Web.API
                     return;
                 case "SaveFormElements":
                     save_form_elements(PublicMethods.parse_guid(context.Request.Params["FormID"]),
+                        PublicMethods.parse_string(context.Request.Params["Title"]),
+                        PublicMethods.parse_string(context.Request.Params["Name"], decode: false),
+                        PublicMethods.parse_string(context.Request.Params["Description"]),
                         FGUtilities.get_form_elements(context.Request.Params["Elements"]), ref responseText);
                     _return_response(ref responseText);
                     return;
@@ -965,7 +968,8 @@ namespace RaaiVan.Web.API
             //end of Save Log
         }
 
-        protected void save_form_elements(Guid? formId, List<FormElement> elements, ref string responseText)
+        protected void save_form_elements(Guid? formId, string title, string name, 
+            string description, List<FormElement> elements, ref string responseText)
         {
             //Privacy Check: OK
             if (!paramsContainer.GBEdit) return;
@@ -978,6 +982,18 @@ namespace RaaiVan.Web.API
                 return;
             }
 
+            if ((!string.IsNullOrEmpty(title) && title.Length > 25) || (!string.IsNullOrEmpty(name) && name.Length > 95) ||
+                (!string.IsNullOrEmpty(description) && description.Length > 1900))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.MaxAllowedInputLengthExceeded + "\"}";
+                return;
+            }
+            else if (!PublicMethods.is_secure_title(title) || !PublicMethods.is_secure_title(name))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.TheTextIsFormattedBadly + "\"}";
+                return;
+            }
+
             if (elements == null) elements = new List<FormElement>();
 
             elements.Where(e => !e.ElementID.HasValue).ToList().ForEach(e => e.ElementID = Guid.NewGuid());
@@ -985,7 +1001,7 @@ namespace RaaiVan.Web.API
             elements = elements.Where(e => e.Type.HasValue && !string.IsNullOrEmpty(e.Title)).ToList();
             
             bool result = FGController.save_form_elements(paramsContainer.Tenant.Id,
-                formId.Value, elements, paramsContainer.CurrentUserID.Value);
+                formId.Value, title, name, description, elements, paramsContainer.CurrentUserID.Value);
 
             responseText = !result ? "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}" :
                 "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" + 

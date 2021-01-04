@@ -91,9 +91,10 @@ namespace RaaiVan.Modules.FormGenerator
             return DataProvider.ArithmeticDeleteFormElement(applicationId, elementId, currentUserId);
         }
 
-        public static bool save_form_elements(Guid applicationId, Guid formId, List<FormElement> elements, Guid currentUserId)
+        public static bool save_form_elements(Guid applicationId, Guid formId,
+            string title, string name, string description, List<FormElement> elements, Guid currentUserId)
         {
-            return DataProvider.SaveFormElements(applicationId, formId, elements, currentUserId);
+            return DataProvider.SaveFormElements(applicationId, formId, title, name, description, elements, currentUserId);
         }
 
         public static List<FormElement> get_form_elements(Guid applicationId, 

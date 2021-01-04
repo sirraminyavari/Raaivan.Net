@@ -2478,7 +2478,7 @@ namespace RaaiVan.Web.API
                 responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";
                 return;
             }
-
+            
             if (!VerificationCode.process_request(paramsContainer.Tenant.Id,
                 obj.Address, null, verificationToken, code, ref responseText)) return;
 

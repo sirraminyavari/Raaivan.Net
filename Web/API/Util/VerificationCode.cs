@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using Newtonsoft.Json;
 using RaaiVan.Modules.GlobalUtilities;
 using RaaiVan.Modules.Users;
 
@@ -30,7 +31,7 @@ namespace RaaiVan.Web.API
             TimeOut = RaaiVanSettings.Users.TwoStepAuthenticationTimeout(applicationId);
 
             _ApplicationID = applicationId;
-            _Token = UserUtilities.generate_password(20);
+            _Token = PublicMethods.random_string(20);
             reset_code();
             _EmailAddress = emailAddress;
             _PhoneNumber = phoneNumber;
@@ -57,7 +58,10 @@ namespace RaaiVan.Web.API
             _ExpirationDate = DateTime.Now.AddSeconds(TimeOut + 10);
         }
 
+        [JsonIgnore]
         public string Token { get { return _Token; } }
+
+        [JsonIgnore]
         public long Code { get { return _Code; } }
 
         protected bool use()

@@ -776,7 +776,8 @@ namespace RaaiVan.Modules.FormGenerator
             }
         }
 
-        public static bool SaveFormElements(Guid applicationId, Guid formId, List<FormElement> elements, Guid currentUserId)
+        public static bool SaveFormElements(Guid applicationId, Guid formId, 
+            string title, string name, string description, List<FormElement> elements, Guid currentUserId)
         {
             SqlConnection con = new SqlConnection(ProviderUtil.ConnectionString);
             SqlCommand cmd = new SqlCommand();
@@ -823,6 +824,9 @@ namespace RaaiVan.Modules.FormGenerator
 
             cmd.Parameters.AddWithValue("@ApplicationID", applicationId);
             cmd.Parameters.AddWithValue("@FormID", formId);
+            cmd.Parameters.AddWithValue("@Title", title);
+            cmd.Parameters.AddWithValue("@Name", name);
+            cmd.Parameters.AddWithValue("@Description", description);
             cmd.Parameters.Add(elementsParam);
             cmd.Parameters.AddWithValue("@CurrentUserID", currentUserId);
             cmd.Parameters.AddWithValue("@Now", DateTime.Now);
@@ -830,7 +834,8 @@ namespace RaaiVan.Modules.FormGenerator
             string spName = GetFullyQualifiedName("SaveFormElements");
 
             string sep = ", ";
-            string arguments = "@ApplicationID" + sep + "@FormID" + sep + "@Elements" + sep + "@CurrentUserID" + sep + "@Now";
+            string arguments = "@ApplicationID" + sep + "@FormID" + sep + "@Title" + sep +
+                "@Name" + sep + "@Description" + sep + "@Elements" + sep + "@CurrentUserID" + sep + "@Now";
             cmd.CommandText = ("EXEC" + " " + spName + " " + arguments);
 
             con.Open();

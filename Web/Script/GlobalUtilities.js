@@ -1500,7 +1500,10 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         var reRTL = new RegExp('^[' + controlChars + ']*[' + rtlChars + ']');
         var reControl = new RegExp('^[' + controlChars + ']*$');
 
-        return function (input) { return input.match(reRTL) ? 'rtl' : (input.match(reControl) ? false : 'ltr'); }
+        return function (input) {
+            if (!input) return window.RV_RTL ? "rtl" : "ltr";
+            else return input.match(reRTL) ? 'rtl' : (input.match(reControl) ? false : 'ltr');
+        }
     })(),
 
     is_empty_text: function (content) {
@@ -2445,9 +2448,10 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
             var elemName = _elem.Name || _elem.ID;
             if (elemName) retJSON[elemName] = newElement;
-
+            
             if (_elem.Tooltip) GlobalUtilities.append_tooltip(newElement, _elem.Tooltip, { Align: _elem.TooltipAlign });
-            if (_elem.InnerTitle) GlobalUtilities.set_inner_title(newElement, _elem.InnerTitle);
+            if (_elem.InnerTitle || _elem.Placeholder)
+                GlobalUtilities.set_inner_title(newElement, _elem.InnerTitle || _elem.Placeholder, { LatinNumbers: _elem.LatinNumbers });
             if (_elem.Childs) GlobalUtilities.create_nested_elements(_elem.Childs, newElement, retJSON);
         }
 
@@ -2528,9 +2532,11 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         });
     },
 
-    set_inner_title: function (input, title) {
+    set_inner_title: function (input, title, options) {
+        options = options || {};
         //title = title.replace(/\.\.\.+/ig, "");
-        if ((input || {}).setAttribute) input.setAttribute("placeholder", GlobalUtilities.convert_numbers_to_persian(title));
+        if ((input || {}).setAttribute) input.setAttribute("placeholder",
+            (options.LatinNumbers ? title : GlobalUtilities.convert_numbers_to_persian(title)));
     },
 
     convert_numbers_to_persian: (function () {

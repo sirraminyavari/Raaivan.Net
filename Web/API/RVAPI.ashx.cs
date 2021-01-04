@@ -504,7 +504,7 @@ namespace RaaiVan.Web.API
                 response["CurrentUser"] = PublicMethods.fromJSON(currentUser.toJson(paramsContainer.ApplicationID, profileImageUrl: true));
                 response["IsSystemAdmin"] = PublicMethods.is_system_admin(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value);
             }
-
+            
             response["SystemVersion"] = PublicMethods.SystemVersion;
             response["ShowSystemVersion"] = RaaiVanSettings.ShowSystemVersion(paramsContainer.ApplicationID);
             response["UserSignUp"] = RaaiVanSettings.UserSignUp(paramsContainer.ApplicationID);

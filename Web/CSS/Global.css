@@ -462,12 +462,13 @@ pre > code
 .rv-input {
     color: rgb(51, 51, 51);
     padding: 0.3rem;
-    border-width: 0.1rem;
+    border-width: 1px;
     border-color: var(--rv-color-soft) var(--rv-color-soft) var(--rv-color-soft);
     border-style: solid;
     border-radius: 0.3rem;
     -moz-border-radius: 0.3rem;
     -webkit-border-radius: 0.3rem;
+    outline:none;
 }
 
 .rv-input:hover {
@@ -478,12 +479,19 @@ pre > code
     border-color: var(--rv-color-warmborder);
 }
 
+.rv-input-invalid {
+    border-color: red !important;
+    background-color:rgb(255,242,240) !important;
+}
+
 .rv-input-simple {
     color: rgb(51, 51, 51);
     padding: 0 0.3rem;
     border-width: 0 0 1px 0;
     border-color: rgb(240, 240, 240);
     border-style: solid;
+    background-color: transparent;
+    outline:none;
 }
 
 .rv-input-simple:hover {
@@ -797,12 +805,15 @@ pre > code
 }
 
 .rv-placeholder-align-center::-webkit-input-placeholder { text-align:center; }
+.rv-placeholder-align-center:-ms-input-placeholder { text-align: center; }
 .rv-placeholder-align-center::-moz-placeholder { text-align:center; }
 
 .rv-placeholder-align-left::-webkit-input-placeholder { text-align: left; }
+.rv-placeholder-align-left:-ms-input-placeholder { text-align: left; }
 .rv-placeholder-align-left::-moz-placeholder { text-align: left; }
 
 .rv-placeholder-align-right::-webkit-input-placeholder { text-align: right; }
+.rv-placeholder-align-right:-ms-input-placeholder { text-align: right; }
 .rv-placeholder-align-right::-moz-placeholder { text-align: right; }
 
 .rv-title {

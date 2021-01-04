@@ -979,6 +979,7 @@
                 UsersAPI.SetMainEmail({
                     EmailID: email.EmailID, UserID: that.Objects.UserID, ParseResults: true,
                     ResponseHandler: function (result) {
+                        console.log(result);
                         if (result.VerificationCode) {
                             that.verify_email_sms(result.VerificationCode, {
                                 APIFunction: "SetMainEmail",

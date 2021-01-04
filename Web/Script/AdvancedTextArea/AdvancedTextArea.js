@@ -46,21 +46,18 @@
         }
 
         //Interface Initialization
-        var __outerDiv = document.createElement("div");
-        __outerDiv.setAttribute("class", "textntags-wrapper");
-        if (params.Style) __outerDiv.setAttribute("style", params.Style);
-        var __textarea = document.createElement("textarea");
-        __textarea.id = "t" + this.generate_new_guid();
-        __textarea.setAttribute("style", "min-height: 37px;"); 
-        __textarea.setAttribute("placeholder", params.DefaultText);
-        var __bottomDiv = document.createElement("div");
-        __bottomDiv.setAttribute("class", "textntags-tag-list");
+        var elems = GlobalUtilities.create_nested_elements([{
+            Type: "div", Class: "textntags-wrapper", Style: params.Style,
+            Childs: [
+                {
+                    Type: "textarea", ID: "t" + this.generate_new_guid(), Class: params.InputClass || "rv-input",
+                    Style: "min-height: 37px;", InnerTitle: params.DefaultText ? params.DefaultText : "", Name: "textInput"
+                },
+                { Type: "div", Class: "textntags-tag-list" }
+            ]
+        }], this.ContainerDiv);
 
-        __outerDiv.appendChild(__textarea);
-        __outerDiv.appendChild(__bottomDiv);
-
-        this.ContainerDiv.appendChild(__outerDiv);
-        this.Objects.TextArea = __textarea;
+        this.Objects.TextArea = elems["textInput"];
         //end of Interface Initialization
 
         this.initialize(params);

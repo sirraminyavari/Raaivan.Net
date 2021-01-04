@@ -345,14 +345,12 @@
             item.ContainerDiv.classList.add("SoftBorder");
             
             if (!item.Settings) {
-                var _div = item.Settings = GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div", Style: "padding:1rem;", Name: "_div",
-                        Class: "small-12 medium-12 large-12 rv-border-radius-1 SoftBackgroundColor"
-                    }
-                ])["_div"];
+                var _div = item.Settings = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Style: "padding:1rem;", Name: "_div",
+                    Class: "small-12 medium-12 large-12 rv-border-radius-1 SoftBackgroundColor"
+                }])["_div"];
 
-                new FormElementsManager(_div, { FormID: itemId });
+                new FormElementsManager(_div, { FormID: itemId, Form: item });
             }
             
             jQuery(that.Interface.CommonPage).fadeOut(500, function () {

@@ -43,7 +43,9 @@ namespace RaaiVan.Web.API
 
             if (db == null || value == null || !value.GetType().IsSerializable || string.IsNullOrEmpty(key)) return false;
 
-            string str = JsonConvert.SerializeObject(value);
+            JsonSerializerSettings settings = new JsonSerializerSettings() { ContractResolver = new RVJsonContractResolver() };
+            string str = JsonConvert.SerializeObject(value, settings);
+
             return !string.IsNullOrEmpty(str) && db.StringSet(key, str);
         }
 
@@ -61,7 +63,10 @@ namespace RaaiVan.Web.API
                 RedisValue value = db.StringGet(key);
 
                 if (!value.IsNullOrEmpty)
-                    return JsonConvert.DeserializeObject<T>(value);
+                {
+                    JsonSerializerSettings settings = new JsonSerializerSettings() { ContractResolver = new RVJsonContractResolver() };
+                    return JsonConvert.DeserializeObject<T>(value, settings);
+                }
             }
 
             return default(T);

@@ -1145,7 +1145,7 @@
     <Content Include="CSS\KendoRTLRepair.css" />
     <Content Include="Script\AdvancedListViewer-v1\NewAdvancedListViewer.js" />
     <Content Include="Script\CN\RelatedNodesViewer.js" />
-    <Content Include="Script\FormsManager\FormElementsManager__.js" />
+    <Content Include="Script\FormsManager\FormElementsManager.js" />
     <Content Include="Script\jQuery\jquery.dad.js" />
     <Content Include="Script\LoginPage\lp_modern_29_1.js" />
     <Content Include="Script\Reports\ReportOptions\CN_RelatedNodesCountReport.js" />
@@ -1590,7 +1590,7 @@
     <Content Include="Script\Dropzone\css\basic.css" />
     <Content Include="Script\Dropzone\css\dropzone.css" />
     <Content Include="Script\Dropzone\dropzone.js" />
-    <Content Include="Script\FormsManager\FormElementsManager.js" />
+    <Content Include="Script\FormsManager\FormElementsManager___.js" />
     <Content Include="Script\FormsManager\FormElementsSelect.js" />
     <Content Include="Script\FormsManager\FormElementTypes.js" />
     <Content Include="Script\FormsManager\FormOwner.js" />

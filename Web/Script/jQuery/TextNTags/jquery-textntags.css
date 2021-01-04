@@ -1,7 +1,6 @@
 
 .textntags-wrapper {
   position: relative;
-  background: #fff;
 }
 
 .textntags-wrapper textarea {
@@ -11,14 +10,10 @@
   top: 0;
   bottom: 0;
   width: 100%;
-  display: block;
   height: 18px;
   padding: 9px;
   margin: 0;
-  border: 1px solid #dcdcdc;
-  border-radius:3px;
   overflow: hidden;
-  background: transparent;
   outline: 0;
   resize: none;
   /* font-family: Arial;

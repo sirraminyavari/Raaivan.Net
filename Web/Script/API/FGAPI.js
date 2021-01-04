@@ -188,7 +188,10 @@
         params = params || {};
 
         var url = FGAPI.ResponseURL + "/SaveFormElements?timeStamp=" + new Date().getTime();
-        var queryString = (params.FormID ? "&FormID=" + params.FormID : "") + 
+        var queryString = (params.FormID ? "&FormID=" + params.FormID : "") +
+            (params.Title ? "&Title=" + params.Title : "") +
+            (params.Name ? "&Name=" + params.Name : "") +
+            (params.Description ? "&Description=" + params.Description : "") +
             (params.Elements ? "&Elements=" + params.Elements : "");
         return FGAPI._send(url, params, queryString);
     },

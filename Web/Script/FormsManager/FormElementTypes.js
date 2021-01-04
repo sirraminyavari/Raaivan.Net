@@ -416,7 +416,11 @@
                 return FormElementTypes.Text.patterns[String(name).toLowerCase()] || {};
             },
 
-            edit: function () {
+            edit: function (info, params) {
+                params = params || {};
+
+                if (params.IsParagraph) return null;
+
                 var elems = GlobalUtilities.create_nested_elements([{
                     Type: "div", Class: "small-12 medium-12 large-12", Name: "container",
                     Childs: [
@@ -434,38 +438,32 @@
                             ]
                         },
                         {
-                            Type: "div", Class: "small-12 medium-12 large-12 row", Style: "margin:0rem;",
+                            Type: "div", Class: "small-12 medium-12 large-12 row", Style: "margin:0;",
                             Childs: [
                                 {
                                     Type: "div", Class: "small-6 medium-6 large-6",
                                     Style: "padding-" + RV_RevFloat + ":0.5rem; margin-top:0.5rem;",
-                                    Childs: [
-                                        {
-                                            Type: "select", Class: "rv-input", Name: "patternNameSelect",
-                                            Style: "width:100; font-size:0.7rem;"
-                                        }
-                                    ]
+                                    Childs: [{
+                                        Type: "select", Class: "rv-input", Name: "patternNameSelect",
+                                        Style: "width:100; font-size:0.7rem;"
+                                    }]
                                 },
                                 {
                                     Type: "div", Class: "small-6 medium-6 large-6",
                                     Style: "padding-" + RV_Float + ":0.5rem; margin-top:0.5rem;",
-                                    Childs: [
-                                        {
-                                            Type: "input", Class: "rv-input", Name: "patternInput",
-                                            InnerTitle: RVDic.FG.RegExPattern,
-                                            Style: "width:100%; font-size:0.7rem; display:none;"
-                                        }
-                                    ]
+                                    Childs: [{
+                                        Type: "input", Class: "rv-input rv-placeholder-align-left", Name: "patternInput",
+                                        InnerTitle: "regular expression; e.g. [0-9]{4}\-[a-zA-Z]*", LatinNumbers: true,
+                                        Style: "width:100%; font-size:0.7rem; direction:ltr; text-align:left; display:none;"
+                                    }]
                                 },
                                 {
                                     Type: "div", Class: "small-6 medium-6 large-6",
                                     Style: "padding-" + RV_RevFloat + ":0.5rem; margin-top:0.5rem;",
-                                    Childs: [
-                                        {
-                                            Type: "input", Class: "rv-input", Name: "placeholderInput",
-                                            Style: "width:100%; font-size:0.7rem;", InnerTitle: RVDic.FG.Placeholder
-                                        }
-                                    ]
+                                    Childs: [{
+                                        Type: "input", Class: "rv-input", Name: "placeholderInput",
+                                        Style: "width:100%; font-size:0.7rem;", InnerTitle: RVDic.FG.Placeholder
+                                    }]
                                 }
                             ]
                         }
@@ -500,7 +498,7 @@
                 };
                 
                 jQuery(patternInput).keyup(function () {
-                    patternInput.style.backgroundColor = GlobalUtilities.is_valid_regexp(patternInput.value) ? "white" : "#fcddfb";
+                    patternInput.classList[GlobalUtilities.is_valid_regexp(patternInput.value) ? "remove" : "add"]("rv-input-invalid");
                 });
 
                 jQuery(patternInput).keyup();
