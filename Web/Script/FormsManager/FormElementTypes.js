@@ -389,6 +389,11 @@
         ])["_div"]);
     };
 
+    window.FormElementTypeSettings = {
+        SmallOptionClass: "small-12 medium-9 large-5",
+        SmallOptionLabelWidth: 3
+    };
+
     window.FormElementTypes = {
         Text: {
             isempty: function (params) { return !(params || {}).TextValue; },
@@ -425,7 +430,7 @@
                     Type: "div", Class: "small-12 medium-12 large-12", Name: "container",
                     Childs: [
                         {
-                            Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:0.5rem;",
+                            Type: "div", Style: "margin-top:0.5rem;",
                             Childs: [
                                 {
                                     Type: "div", Style: "display:inline-block;",
@@ -438,32 +443,52 @@
                             ]
                         },
                         {
-                            Type: "div", Class: "small-12 medium-12 large-12 row", Style: "margin:0;",
+                            Type: "div",
+                            Style: "flex:0 0 auto; display:flex; flex-flow:row; align-items:center; margin:1rem 0;",
                             Childs: [
                                 {
-                                    Type: "div", Class: "small-6 medium-6 large-6",
-                                    Style: "padding-" + RV_RevFloat + ":0.5rem; margin-top:0.5rem;",
-                                    Childs: [{
-                                        Type: "select", Class: "rv-input", Name: "patternNameSelect",
-                                        Style: "width:100; font-size:0.7rem;"
-                                    }]
+                                    Type: "div", Class: "rv-flat-label",
+                                    Style: "flex:0 0 auto; padding-" + RV_RevFloat + ":0.5rem;" +
+                                        "min-width:" + FormElementTypeSettings.SmallOptionLabelWidth + "rem;",
+                                    Childs: [{ Type: "text", TextValue: RVDic.Pattern + ":" }]
                                 },
                                 {
-                                    Type: "div", Class: "small-6 medium-6 large-6",
-                                    Style: "padding-" + RV_Float + ":0.5rem; margin-top:0.5rem;",
-                                    Childs: [{
-                                        Type: "input", Class: "rv-input rv-placeholder-align-left", Name: "patternInput",
-                                        InnerTitle: "regular expression; e.g. [0-9]{4}\-[a-zA-Z]*", LatinNumbers: true,
-                                        Style: "width:100%; font-size:0.7rem; direction:ltr; text-align:left; display:none;"
-                                    }]
-                                },
-                                {
-                                    Type: "div", Class: "small-6 medium-6 large-6",
-                                    Style: "padding-" + RV_RevFloat + ":0.5rem; margin-top:0.5rem;",
-                                    Childs: [{
-                                        Type: "input", Class: "rv-input", Name: "placeholderInput",
-                                        Style: "width:100%; font-size:0.7rem;", InnerTitle: RVDic.FG.Placeholder
-                                    }]
+                                    Type: "div", Style: "flex:1 1 auto; display:flex; flex-flow:row;",
+                                    Childs: [
+                                        {
+                                            Type: "div",
+                                            Class: "rv-border-radius-quarter rv-ignore-" + RV_RevFloat.toLowerCase() + "-radius SoftBackgroundColor",
+                                            Style: "flex:0 0 auto; padding-" + RV_Float + ":0.3rem;"
+                                        },
+                                        {
+                                            Type: "div", Style: "flex:1 1 auto; display:flex; flex-flow:column; padding:0.5rem;",
+                                            Childs: [
+                                                {
+                                                    Type: "div", Class: "small-10 medium-8 large-6",
+                                                    Childs: [{
+                                                        Type: "select", Class: "rv-input", Name: "patternNameSelect",
+                                                        Style: "width:100; font-size:0.7rem; margin-bottom:0.5rem;"
+                                                    }]
+                                                },
+                                                {
+                                                    Type: "div", Class: "small-10 medium-8 large-6",
+                                                    Childs: [{
+                                                        Type: "input", Class: "rv-input rv-placeholder-align-left", Name: "patternInput",
+                                                        InnerTitle: "regular expression; e.g. [0-9]{4}\-[a-zA-Z]*", LatinNumbers: true,
+                                                        Style: "width:100%; font-size:0.7rem; direction:ltr; text-align:left;" +
+                                                            "margin-bottom:0.5rem; display:none;"
+                                                    }]
+                                                },
+                                                {
+                                                    Type: "div", Class: "small-10 medium-8 large-6",
+                                                    Childs: [{
+                                                        Type: "input", Class: "rv-input", Name: "placeholderInput",
+                                                        Style: "width:100%; font-size:0.7rem;", InnerTitle: RVDic.FG.Placeholder
+                                                    }]
+                                                }
+                                            ]
+                                        }
+                                    ]
                                 }
                             ]
                         }
@@ -1058,62 +1083,95 @@
                 var isCheckbox = params.Type == "Checkbox";
                 var weight = params.Weight;
 
-                var elems = GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12", Name: "container",
-                        Childs: [
-                            {
-                                Type: "div", Class: "small-12 medium-12 large-12",
-                                Style: "margin-top:0.5rem;" + (isCheckbox ? "display:none;" : ""),
-                                Childs: [
-                                    {
-                                        Type: "div", Style: "display:inline-block;",
-                                        Childs: [{ Type: "text", TextValue: RVDic.Weight + ":" }]
-                                    },
-                                    {
-                                        Type: "div", Style: "display:inline-block; margin-" + RV_Float + ":1rem; width:5rem;",
-                                        Childs: [{ Type: "number", Class: "rv-input", Name: "weight", Style: "font-size:0.7rem;" }]
-                                    }
-                                ]
-                            },
-                            {
-                                Type: "div", Class: "small-12 medium-12 large-12",
-                                Style: "position:relative; margin-bottom:1rem; margin-top:0.5rem; padding-" + RV_Float + ":1.2rem;",
-                                Childs: [
-                                    {
-                                        Type: "div", Style: "position:absolute; top:0rem;" + RV_Float + ":0rem;",
-                                        Childs: [{ Type: "checkbox", Name: "autosuggestMode" }]
-                                    },
-                                    {
-                                        Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-" + RV_Float + ":0.5rem;",
-                                        Childs: [{ Type: "text", TextValue: RVDic.FG.UseAutoSuggestInsteadOfListingAllTheOptions }]
-                                    }
-                                ]
-                            },
-                            { Type: "div", Class: "small-12 medium-12 large-12", Name: "items" }
-                        ]
-                    }
-                ]);
+                var elems = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: "small-12 medium-12 large-12", Name: "container",
+                    Childs: [
+                        {
+                            Type: "div", Style: "display:flex; flex-flow:row; align-items:center;",
+                            Childs: [
+                                (true ? null : {
+                                    Type: "div", Class: "rv-flat-label",
+                                    Style: "flex:0 0 auto; padding-" + RV_RevFloat + ":0.5rem;" +
+                                        "min-width:" + FormElementTypeSettings.SmallOptionLabelWidth + "rem;",
+                                    Childs: [{ Type: "text", TextValue: RVDic.Options + ":" }]
+                                }),
+                                {
+                                    Type: "div", Style: "flex:1 1 auto; display:flex; flex-flow:row;",
+                                    Childs: [
+                                        {
+                                            Type: "div",
+                                            Class: "rv-border-radius-quarter rv-ignore-" + RV_RevFloat.toLowerCase() + "-radius SoftBackgroundColor",
+                                            Style: "flex:0 0 auto; padding-" + RV_Float + ":0.3rem;"
+                                        },
+                                        {
+                                            Type: "div", Name: "items",
+                                            Style: "flex:1 1 auto; display:flex; flex-flow:column;" +
+                                                "padding:0.5rem; padding-" + RV_RevFloat + ":0rem;"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            Type: "div", Class: FormElementTypeSettings.SmallOptionClass,
+                            Style: "display:flex; flex-flow:row; align-items:center; margin-top:1rem;",
+                            Childs: [
+                                {
+                                    Type: "div", Class: "rv-flat-label", Style: "flex:1 1 auto; padding-" + RV_RevFloat + ":0.5rem;",
+                                    Childs: [{ Type: "text", TextValue: RVDic.FG.UseAutoSuggestInsteadOfListingAllTheOptions + ":" }]
+                                },
+                                {
+                                    Type: "switch", Name: "autosuggestMode",
+                                    Style: "flex:0 0 auto; margin-top:0.2rem;",
+                                    Params: { Height: 1, MiniMode: true }
+                                }
+                            ]
+                        },
+                        (isCheckbox ? null : {
+                            Type: "div", Class: FormElementTypeSettings.SmallOptionClass,
+                            Style: "display:flex; flex-flow:row; align-items:center; margin-top:1rem;",
+                            Childs: [
+                                {
+                                    Type: "div", Class: "rv-flat-label",
+                                    Style: "flex:0 0 auto; padding-" + RV_RevFloat + ":0.5rem;" +
+                                        "min-width:" + FormElementTypeSettings.SmallOptionLabelWidth + "rem;",
+                                    Childs: [{ Type: "text", TextValue: RVDic.Weight + ":" }]
+                                },
+                                {
+                                    Type: "div", Style: "flex:1 1 auto; text-align:left; direction:ltr;",
+                                    Childs: [{
+                                        Type: "input", Class: "rv-input-simple rv-placeholder-align-left",
+                                        Style: "width:100%; font-size:0.7rem;", Name: "weight", InnerTitle: "e.g. 2"
+                                    }]
+                                }
+                            ]
+                        })
+                    ]
+                }]);
 
                 var container = elems["container"];
-                var autosuggestMode = elems["autosuggestMode"];
+                var autosuggestMode = elems["autosuggestMode"].Checkbox;
 
                 var obj = new NewSingleDataContainer(elems["items"], {
-                    EnableTextItem: true,
+                    EnableTextItem: true, Sortable: true, UseInlineInput: true, Necessary: true,
                     InputStyle: "width:100%; font-size:0.8rem;",
-                    InnerTitle: RVDic.NewOption + " (" + RVDic.Necessary + ")...",
+                    InnerTitle: RVDic.NewOption + "...",
                     CustomData: isCheckbox ? null : function (con, p, done) {
-                        var _el = GlobalUtilities.create_nested_elements([
-                            {
-                                Type: "number", Params: { Float: false }, Class: "rv-input", Name: "min", InnerTitle: RVDic.Min,
-                                Style: "width:4rem; text-align:center; font-size:0.6rem; padding:0.1rem 0.3rem;"
-                            },
-                            {
-                                Type: "number", Params: { Float: false }, Class: "rv-input", Name: "max", InnerTitle: RVDic.Max,
-                                Style: "width:4rem; text-align:center; font-size:0.6rem; padding:0.1rem 0.3rem;" +
-                                    "margin-" + RV_Float + ":0.5rem;"
-                            }
-                        ], con);
+                        var _el = GlobalUtilities.create_nested_elements([{
+                            Type: "div", Style: "padding-" + RV_Float + ":1rem; display:flex; align-items:center; height:100%;",
+                            Childs: [
+                                {
+                                    Type: "number", Params: { Float: false }, Name: "min", InnerTitle: RVDic.Min,
+                                    Class: "rv-input rv-placeholder-align-center",
+                                    Style: "width:4rem; text-align:center; font-size:0.7rem;"
+                                },
+                                {
+                                    Type: "number", Params: { Float: false }, Name: "max", InnerTitle: RVDic.Max,
+                                    Class: "rv-input rv-placeholder-align-center",
+                                    Style: "width:4rem; text-align:center; font-size:0.7rem; margin-" + RV_Float + ":0.5rem;"
+                                }
+                            ]
+                        }], con);
 
                         if (GlobalUtilities.get_type(((p || {}).Data || {}).Min) == "number") _el["min"].value = p.Data.Min;
                         if (GlobalUtilities.get_type(((p || {}).Data || {}).Max) == "number") _el["max"].value = p.Data.Max;
@@ -1135,11 +1193,12 @@
                         obj.add_item(val, val, (p.Data || []).length >= (i + 1) ? p.Data[i] : null);
                     }
 
-                    if (GlobalUtilities.get_type(w) == "number") elems["weight"].value = w;
-                    else elems["weight"].value = "";
-
-                    if ((p || {}).AutoSuggestMode === true) autosuggestMode.check();
-                    else autosuggestMode.uncheck();
+                    if (elems["weight"]) {
+                        if ((GlobalUtilities.get_type(w) == "number")) elems["weight"].value = w;
+                        else elems["weight"].value = "";
+                    }
+                    
+                    autosuggestMode.checked = (p || {}).AutoSuggestMode === true;
                 };
 
                 _set(info, weight);
@@ -1158,7 +1217,7 @@
                         return items.length == 0 ? false : retVal;
                     },
                     Weight: function () {
-                        var _weight = elems["weight"].value;
+                        var _weight = !elems["weight"] ? null : elems["weight"].value;
                         return isCheckbox || !_weight || (GlobalUtilities.get_type(+_weight) != "number") ? null : +_weight;
                     }
                 };
@@ -2354,48 +2413,61 @@
             isempty: function (params) { return !((params || {}).BitValue === true || (params || {}).BitValue === false); },
 
             edit: function (info) {
-                var yesInnerTitle = RVDic.Yes + " (" + RVDic.Necessary + ")...";
-                var noInnerTitle = RVDic.No + " (" + RVDic.Necessary + ")...";
+                var optionItems = [
+                    { Name: "yes", Title: RVDic.Yes },
+                    { Name: "no", Title: RVDic.No }
+                ];
 
-                var elems = GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12", Name: "container",
-                        Childs: [
-                            {
-                                Type: "div",
-                                Childs: [{ Type: "input", Class: "rv-input", Name: "yes", InnerTitle: yesInnerTitle }]
-                            },
-                            {
-                                Type: "div", Style: "margin-top:8px;",
-                                Childs: [{ Type: "input", Class: "rv-input", Name: "no", InnerTitle: noInnerTitle }]
-                            }
-                        ]
-                    }
-                ]);
+                var elems = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: "small-12 medium-12 large-12 rv-trim-vertical-margins", Name: "container",
+                    Childs: optionItems.map(itm => {
+                        return {
+                            Type: "div", Class: FormElementTypeSettings.SmallOptionClass,
+                            Style: "display:flex; flex-flow:row; align-items:center; margin-top:1rem;",
+                            Childs: [
+                                {
+                                    Type: "div", Class: "rv-flat-label",
+                                    Style: "flex:0 0 auto; padding-" + RV_RevFloat + ":0.5rem;" +
+                                        "min-width:" + FormElementTypeSettings.SmallOptionLabelWidth + "rem;",
+                                    Childs: [{ Type: "text", TextValue: itm.Title + ":" }]
+                                },
+                                {
+                                    Type: "div", Style: "flex:1 1 auto;",
+                                    Childs: [{
+                                        Type: "input", Class: "rv-input-simple",
+                                        Style: "width:100%; font-size:0.7rem;", Name: itm.Name
+                                    }]
+                                }
+                            ]
+                        };
+                    })
+                }]);
 
                 var container = elems["container"];
                 var yesInput = elems["yes"];
                 var noInput = elems["no"];
 
-                var _set = function (p) {
-                    if (((p || {}).Yes || "") != "") {
-                        yesInput.value = Base64.decode(p.Yes);
-                        yesInput.style.color = "black";
-                        yesInput.style.fontWeight = "normal";
-                    } else {
-                        yesInput.value = "";
-                        GlobalUtilities.set_inner_title(yesInput, yesInnerTitle);
-                    }
+                var get_value = function (input) {
+                    return GlobalUtilities.trim(input.value);
+                };
 
-                    if (((p || {}).No || "") != "") {
-                        noInput.value = Base64.decode(p.No);
-                        noInput.style.color = "black";
-                        noInput.style.fontWeight = "normal";
-                    } else {
-                        noInput.value = "";
-                        GlobalUtilities.set_inner_title(noInput, noInnerTitle);
-                    }
-                }
+                var validate = function (input) {
+                    input.classList[!!get_value(input) ? "remove" : "add"]("rv-input-simple-invalid");
+                };
+
+                optionItems.forEach(itm => {
+                    jQuery(elems[itm.Name]).on("keyup", function () {
+                        validate(elems[itm.Name]);
+                        jQuery(elems[itm.Name]).css({ 'direction': GlobalUtilities.textdirection(get_value(elems[itm.Name])) });
+                    });
+
+                    validate(elems[itm.Name]);
+                });
+
+                var _set = function (p) {
+                    yesInput.value = (p || {}).Yes ? Base64.decode(p.Yes) : "";
+                    noInput.value = (p || {}).No ? Base64.decode(p.No) : "";
+                };
 
                 _set(info);
 
@@ -2403,16 +2475,12 @@
                     Container: container,
                     Clear: function () {
                         yesInput.value = noInput.value = "";
-                        GlobalUtilities.set_inner_title(yesInput, yesInnerTitle);
-                        GlobalUtilities.set_inner_title(noInput, noInnerTitle);
                     },
                     Set: function (p) { _set(p); },
                     Get: function () {
                         var yes = GlobalUtilities.trim(yesInput.value);
                         var no = GlobalUtilities.trim(noInput.value);
-                        if (yes == yesInnerTitle) yes = "";
-                        if (no == noInnerTitle) no = "";
-                        return (yes == "" || no == "") ? false : { Yes: Base64.encode(yes), No: Base64.encode(no) };
+                        return (!yes || !no) ? false : { Yes: Base64.encode(yes), No: Base64.encode(no) };
                     }
                 };
             },

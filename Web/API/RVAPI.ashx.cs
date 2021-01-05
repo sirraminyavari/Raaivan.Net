@@ -488,7 +488,7 @@ namespace RaaiVan.Web.API
 
             //UserID
             //SSOTicket
-
+            
             if (isAuthenticated)
             {
                 User currentUser = UsersController.get_user(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value);

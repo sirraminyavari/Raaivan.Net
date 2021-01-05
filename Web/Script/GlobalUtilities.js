@@ -926,20 +926,30 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         
         GlobalUtilities.load_files(["jQuery/jquery.dad.js"], {
             OnLoad: function () {
-                jQuery(container).dad({
-                    exchangeable: !!options.Exchangeable,
-                    targetFilters: options.Filters,
-                    draggable: '.' + (options.DraggableClass || 'draggable'),
-                    placeholderTarget: options.PlaceholderTarget ? '.' + options.PlaceholderTarget : null,
-                    placeholderTemplate: '<div class="rv-border-radius-half SoftBorder" ' +
-                        'style="border-width:3px; border-style:dashed; border-color:rgb(230,230,230);"></div>'
-                });
+                var counter = 0;
 
-                if (GlobalUtilities.get_type(options.OnDrop) == "function") {
-                    jQuery(container).on("dadDropEnd", function (e, targetElement) {
-                        options.OnDrop(e, targetElement);
+                var _interval = setInterval(() => {
+                    if (!jQuery(container).get(0)) {
+                        if (counter >= 100) clearInterval(_interval);
+                        return counter++;
+                    }
+                    else clearInterval(_interval);
+
+                    jQuery(container).dad({
+                        exchangeable: !!options.Exchangeable,
+                        targetFilters: options.Filters,
+                        draggable: '.' + (options.DraggableClass || 'draggable'),
+                        placeholderTarget: options.PlaceholderTarget ? '.' + options.PlaceholderTarget : null,
+                        placeholderTemplate: '<div class="rv-border-radius-half SoftBorder" ' +
+                            'style="border-width:3px; border-style:dashed; border-color:rgb(230,230,230);"></div>'
                     });
-                }
+
+                    if (GlobalUtilities.get_type(options.OnDrop) == "function") {
+                        jQuery(container).on("dadDropEnd", function (e, targetElement) {
+                            options.OnDrop(e, targetElement);
+                        });
+                    }
+                }, 100);
             }
         });
     },
@@ -1570,6 +1580,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
             params.ResponseParser && !(params.ArrayDataSource || []).length;
         var hasArrayDataSource = !hasAjaxDataSource && (params.ArrayDataSource || []).length  ;
         var hasSelectOptions = (hasAjaxDataSource || hasArrayDataSource) && (params.SelectOptions !== false);
+        var removeButton = !!params.OnRemove;
         
         var elems = GlobalUtilities.create_nested_elements([{
             Type: "div", Class: "small-12 medium-12 large-12", Style: "position:relative;",
@@ -1579,18 +1590,24 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
                     Style: params.InputStyle + "; width:100%;" +
                         (hasSelectOptions ? "padding-" + RV_RevFloat + ":2.4rem;" : "")
                 },
-                {
-                    Type: "div", Name: "expandButton",
-                    Style: "position:absolute; top:0rem; bottom:0rem;" + RV_RevFloat + ":0.5rem;" +
-                        (hasSelectOptions ? "" : "display:none;"),
+                (!hasSelectOptions && !removeButton ? null : {
+                    Type: "div", Style: "position:absolute; top:0rem; bottom:0rem;" + RV_RevFloat + ":0.5rem;",
                     Childs: [
-                        {
-                            Type: "middle", Class: "rv-air-button rv-circle",
+                        (!hasSelectOptions ? null : {
+                            Type: "middle", Class: "rv-air-button rv-circle", Name: "expandButton",
                             Style: "width:1.4rem; height:1rem; text-align:center; padding:0rem;",
                             Childs: [{ Type: "div", Style: "margin-top:-0.3rem;", Childs: [{ Type: "text", TextValue: "..." }] }]
-                        }
+                        }),
+                        (!removeButton || hasSelectOptions ? null : {
+                            Type: "middle", Name: "removeButton", Style: "text-align:center; padding:0rem;",
+                            Childs: [{
+                                Type: "i", Class: "fa fa-times fa-lg rv-icon-button",
+                                Properties: [{ Name: "onclick", Value: params.OnRemove }],
+                                Attributes: [{ Name: "aria-hidden", Value: true }]
+                            }]
+                        })
                     ]
-                }
+                })
             ]
         }], _div);
 
@@ -1633,7 +1650,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
             }
         }
         
-        elems["expandButton"].onclick = params.OnSelectButtonClick || function () {
+        if (elems["expandButton"]) elems["expandButton"].onclick = params.OnSelectButtonClick || function () {
             if (suggestUrl && (lastUsedUrl != suggestUrl) && listViewer) {
                 listViewer.clear();
                 listViewer.data_request();
@@ -1646,7 +1663,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
             dialog = GlobalUtilities.create_nested_elements([{
                 Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1 SoftBackgroundColor",
                 Style: "margin:0rem auto; padding:1rem;", Name: "_div"
-            } ])["_div"];
+            }])["_div"];
 
             GlobalUtilities.loading(dialog);
             showed = GlobalUtilities.show(dialog);
@@ -1664,14 +1681,14 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
                                     jQuery.each(params.ArrayDataSource || [], function (ind, val) {
                                         if (!options.SearchText || val[0].indexOf(options.SearchText) >= 0) retArr.push(val);
                                     });
-                                    
+
                                     return done(retArr);
                                 }
 
                                 var ds = suggestUrl + Base64.encode(options.SearchText) +
                                     "&Count=" + options.Count + "&LowerBoundary=" + options.LowerBoundary +
                                     "&timeStamp=" + (new Date().getTime());
-                                
+
                                 RVAPI.PostRequest(ds, null, function (result) {
                                     done(params.ResponseParser(JSON.stringify(result)) || []);
                                 });
@@ -1680,7 +1697,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
                                 item = item || {};
 
                                 var name = item[0], id = item[1];
-                                
+
                                 var elems = GlobalUtilities.create_nested_elements([
                                     {
                                         Type: "div", Name: "_div",

@@ -62,7 +62,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                 ",\"EVT\":" + RaaiVanConfig.Modules.Events(applicationId).ToString().ToLower() +
                 ",\"Messaging\":" + RaaiVanConfig.Modules.Messaging(applicationId).ToString().ToLower() +
                 ",\"MSG\":" + RaaiVanConfig.Modules.Messaging(applicationId).ToString().ToLower() +
-                ",\"Chat\":" + RaaiVanConfig.Modules.Chat(applicationId).ToString().ToLower() +
+                ",\"Chat\":" + (RaaiVanSettings.RealTime(applicationId) && RaaiVanConfig.Modules.Chat(applicationId)).ToString().ToLower() +
                 ",\"Resume\":" + RaaiVanConfig.Modules.Resume(applicationId).ToString().ToLower() +
                 ",\"VisualMap\":" + RaaiVanConfig.Modules.VisualMap(applicationId).ToString().ToLower() +
                 ",\"SMSEMailNotifier\":" + RaaiVanConfig.Modules.SMSEMailNotifier(applicationId).ToString().ToLower() +

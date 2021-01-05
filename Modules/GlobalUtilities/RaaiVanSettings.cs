@@ -742,7 +742,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static bool RealTime(Guid? applicationId)
         {
-            return RaaiVanConfig.Modules.RealTime(applicationId) &&
+            return RaaiVanConfig.Modules.RealTime(applicationId) && !RaaiVanSettings.SAASBasedMultiTenancy &&
                 get_value(Guid.Empty, RVSettingsItem.RealTime).ToLower() != "false";
         }
 

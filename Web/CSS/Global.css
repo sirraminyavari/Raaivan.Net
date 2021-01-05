@@ -29,6 +29,9 @@ textarea {
     font-size:10pt;
 }
 
+input::-webkit-clear-button { display:none; }
+input::-ms-clear { display:none; }
+
 /* Customized */
 
 p { margin: 0px 0px 0px 0px; }
@@ -502,17 +505,24 @@ pre > code
     border-color: var(--rv-color-warm);
 }
 
+.rv-input-simple-invalid {
+    border-color: red !important;
+}
+
 .rv-icon-button {
     cursor: pointer;
     color: var(--rv-color-warm);
+    opacity: 0.5;
 }
 
 .rv-icon-button:hover {
     color: var(--rv-color-softborder);
+    opacity: 1;
 }
 
 .rv-icon-button:active {
     color: var(--rv-color-warmborder);
+    opacity: 1;
 }
 
 .rv-air-button {
