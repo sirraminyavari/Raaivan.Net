@@ -156,6 +156,12 @@ namespace RaaiVan.Web.API
                         PublicMethods.parse_bool(context.Request.Params["PollAbstract"]), ref responseText);
                     _return_response(ref responseText);
                     return;
+                case "ValidateNewName":
+                    validate_new_name(PublicMethods.parse_guid(context.Request.Params["ObjectID"]),
+                        PublicMethods.parse_guid(context.Request.Params["FormID"]),
+                        PublicMethods.parse_string(context.Request.Params["Name"]), ref responseText);
+                    _return_response(ref responseText);
+                    return;
                 case "MeetsUniqueConstraint":
                     meets_unique_constraint(PublicMethods.parse_guid(context.Request.Params["InstanceID"]),
                         PublicMethods.parse_guid(context.Request.Params["ElementID"]),
@@ -982,8 +988,26 @@ namespace RaaiVan.Web.API
                 return;
             }
 
-            if ((!string.IsNullOrEmpty(title) && title.Length > 25) || (!string.IsNullOrEmpty(name) && name.Length > 95) ||
-                (!string.IsNullOrEmpty(description) && description.Length > 1900))
+            //Rectify inputs
+            if (!string.IsNullOrEmpty(name)) name = name.Trim().ToLower();
+            if (string.IsNullOrEmpty(name)) name = null;
+
+            if (elements == null) elements = new List<FormElement>();
+
+            elements.Where(e => !e.ElementID.HasValue).ToList().ForEach(e => e.ElementID = Guid.NewGuid());
+
+            elements.Where(e => !string.IsNullOrEmpty(e.Name)).ToList()
+                .ForEach(e =>
+                {
+                    e.Name = e.Name.Trim().ToLower();
+                    if (string.IsNullOrEmpty(e.Name)) e.Name = null;
+                });
+            //end of Rectify inputs
+
+            if ((!string.IsNullOrEmpty(title) && title.Length > 250) || (!string.IsNullOrEmpty(name) && name.Length > 95) ||
+                (!string.IsNullOrEmpty(description) && description.Length > 1900) ||
+                elements.Any(itm => (!string.IsNullOrEmpty(itm.Title) && itm.Title.Length > 250) ||
+                    (!string.IsNullOrEmpty(itm.Name) && itm.Name.Length > 95)))
             {
                 responseText = "{\"ErrorText\":\"" + Messages.MaxAllowedInputLengthExceeded + "\"}";
                 return;
@@ -993,10 +1017,16 @@ namespace RaaiVan.Web.API
                 responseText = "{\"ErrorText\":\"" + Messages.TheTextIsFormattedBadly + "\"}";
                 return;
             }
-
-            if (elements == null) elements = new List<FormElement>();
-
-            elements.Where(e => !e.ElementID.HasValue).ToList().ForEach(e => e.ElementID = Guid.NewGuid());
+            else if (!FGUtilities.is_valid_name(name) ||
+                elements.Any(itm =>
+                {
+                    return !FGUtilities.is_valid_name(itm.Name) || 
+                        elements.Any(x => x.ElementID != itm.ElementID && !string.IsNullOrEmpty(itm.Name) && x.Name == itm.Name);
+                }) || !FGController.validate_new_name(paramsContainer.Tenant.Id, objectId: formId.Value, formId: null, name: name))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.InvalidInput + "\"}";
+                return;
+            }
 
             elements = elements.Where(e => e.Type.HasValue && !string.IsNullOrEmpty(e.Title)).ToList();
             
@@ -1327,6 +1357,22 @@ namespace RaaiVan.Web.API
                 "]}";
         }
 
+        protected void validate_new_name(Guid? objectId, Guid? formId, string name, ref string responseText) {
+            //Privacy Check: OK
+            if (!paramsContainer.GBEdit) return;
+
+            if (!AuthorizationManager.has_right(AccessRoleName.ManageForms, paramsContainer.CurrentUserID))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";
+                return;
+            }
+
+            bool result = objectId.HasValue &&
+                FGController.validate_new_name(paramsContainer.Tenant.Id, objectId.Value, formId, name);
+
+            responseText = "{\"Valid\":" + result.ToString().ToLower() + "}";
+        }
+
         protected void meets_unique_constraint(Guid? instanceId,
             Guid? elementId, string textValue, double? floatValue, ref string responseText)
         {
@@ -1335,8 +1381,6 @@ namespace RaaiVan.Web.API
 
             responseText = "{\"Value\":" + result.ToString().ToLower() + "}";
         }
-
-        
 
         public bool save_form_instance_elements(List<FormElement> elements,
             List<Guid> elementsToClear, Guid? pollId, PollOwnerType pollOwnerType, ref string responseText)

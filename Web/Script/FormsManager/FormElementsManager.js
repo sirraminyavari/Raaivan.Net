@@ -33,6 +33,7 @@
 
         var that = this;
 
+        that.ContainerDiv.innerHTML = "";
         GlobalUtilities.block(that.ContainerDiv);
 
         GlobalUtilities.load_files([

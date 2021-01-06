@@ -609,9 +609,12 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         if (params.Container) scrollTop = jQuery(params.Container).scrollTop() - jQuery('html, body').scrollTop();
         //A: end
         
-        jQuery(params.Container || 'html, body').animate({
-            scrollTop: scrollTop + jQuery(_elem).offset().top - (params.Offset === 0 ? 0 : params.Offset || 100)
-        }, 'slow', params.Done);
+        var offset = params.Offset === 0 ? 0 : params.Offset || 100;
+        var containerOffset = params.ConsiderContainerOffset ? jQuery(params.Container).offset().top : 0;
+        
+        scrollTop = scrollTop + jQuery(_elem).offset().top - offset - containerOffset;
+        
+        jQuery(params.Container || 'html, body').animate({ scrollTop: scrollTop }, 'slow', params.Done);
     },
 
     append_scrollbar: function (divObj, params) {

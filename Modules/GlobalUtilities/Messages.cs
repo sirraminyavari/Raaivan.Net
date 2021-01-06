@@ -25,6 +25,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         FormOrElementNameIsNotValid,
         ImageSizeIsNotValid,
         InvalidAdditionalIDPattern,
+        InvalidInput,
         InvalidRequest,
         KnowledgeTypeSettingsNotFound,
         LoginFailed,

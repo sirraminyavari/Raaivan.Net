@@ -61,10 +61,10 @@
                     Title: RVDic.Messages, Icon: "fa-envelope", Name: "messagesButton",
                     OnClick: function (e) { that.messages_button_click(e); }
                 }),
-                {
+                (!hasApplicationId ? null : {
                     Title: RVDic.Dashboard, Icon: "fa-inbox", Name: "dashboardButton",
                     OnClick: function (e) { that.dashboard_button_click(e); }
-                },
+                }),
                 (!hasApplicationId ? null : {
                     Title: RVDic.Notifications, Icon: "fa-bell-o", Name: "notificationsButton", NoSmallMode: true
                 })

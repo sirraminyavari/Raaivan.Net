@@ -230,8 +230,8 @@
 
         // Add clone
         var $clone = $target.clone().css({
-            position: "absolute",
-            zIndex: 9999,
+            position: "fixed", //"absolute", --> ramin
+            zIndex: 9999999,
             pointerEvents: "none",
             height: $target.outerHeight(),
             width: $target.outerWidth(),
@@ -241,7 +241,7 @@
         var $placeholder = $(this.options.placeholderTemplate).css({
             position: "absolute",
             pointerEvents: "none",
-            zIndex: 9998,
+            zIndex: 9999998,
             margin: 0,
             padding: 0,
             height: $target.outerHeight(),
@@ -303,8 +303,8 @@
             var $clone = this.$clone;
             var $placeholder = this.$placeholder;
 
-            var animateToX = $target.offset().left - $current.offset().left;
-            var animateToY = $target.offset().top - $current.offset().top;
+            var animateToX = $target.offset().left;// - $current.offset().left; --> ramin
+            var animateToY = $target.offset().top;// - $current.offset().top; --> ramin
 
             // Trigger callback
             $($current).trigger("dadDropStart", [$target[0]]);
@@ -348,10 +348,11 @@
      */
     Dad.prototype.updateClonePosition = function () {
         // Get positions
+
         var targetX =
-            this.mouse.positionY - this.$current.offset().top - this.mouse.offsetY;
+            this.mouse.positionY /*- this.$current.offset().top*/ - this.mouse.offsetY; //--> ramin
         var targetY =
-            this.mouse.positionX - this.$current.offset().left - this.mouse.offsetX;
+            this.mouse.positionX /*- this.$current.offset().left*/ - this.mouse.offsetX; //--> ramin
 
         // Update clone
         this.$clone.css({ top: targetX, left: targetY });

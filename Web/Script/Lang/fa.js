@@ -1265,6 +1265,7 @@
             HistoryUpdateFailed: "خطا در به روز رسانی تاریخچه",
             ImageSizeIsNotValid: "اندازه تصویر معتبر نمی باشد",
             InvalidAdditionalIDPattern: "الگوی کددهی نامعتبر",
+            InvalidInput: "ورودی نامعتبر",
             InvalidRequest: "درخواست نامعتبر",
             InvalidSystemIDMessage: "امکان اجرای سامانه بر روی سرور وجود ندارد. برای غیر فعال شدن قفل نرم افزاری، کد زیر را برای شرکت تولید کننده ارسال فرمایید.",
             KnowledgeTypeNotFound: "نوع دانش یافت نشد",

@@ -346,11 +346,12 @@
             
             if (!item.Settings) {
                 var _div = item.Settings = GlobalUtilities.create_nested_elements([{
-                    Type: "div", Style: "padding:1rem;", Name: "_div",
-                    Class: "small-12 medium-12 large-12 rv-border-radius-1 SoftBackgroundColor"
+                    Type: "div", Class: "small-12 medium-12 large-12", Name: "_div"
                 }])["_div"];
 
-                new FormElementsManager(_div, { FormID: itemId, Form: item });
+                GlobalUtilities.loading(_div);
+
+                new FormElementsManager(_div, { FormID: itemId, Form: item, TopMargin: 6 });
             }
             
             jQuery(that.Interface.CommonPage).fadeOut(500, function () {

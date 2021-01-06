@@ -207,6 +207,11 @@ namespace RaaiVan.Modules.FormGenerator
             return DataProvider.GetFormInstanceHierarchyOwnerID(applicationId, instanceId);
         }
 
+        public static bool validate_new_name(Guid applicationId, Guid objectId, Guid? formId, string name)
+        {
+            return DataProvider.ValidateNewName(applicationId, objectId, formId, name);
+        }
+
         public static bool meets_unique_constraint(Guid applicationId,
             Guid instanceId, Guid elementId, string textValue, double? floatValue)
         {

@@ -1071,6 +1071,24 @@ namespace RaaiVan.Modules.FormGenerator
             }
         }
 
+        public static bool ValidateNewName(Guid applicationId, Guid objectId, Guid? formId, string name)
+        {
+            string spName = GetFullyQualifiedName("ValidateNewName");
+
+            try
+            {
+                if (!string.IsNullOrEmpty(name)) name = name.Trim().ToLower();
+
+                return !string.IsNullOrEmpty(name) && FGUtilities.is_valid_name(name) &&
+                    ProviderUtil.succeed(ProviderUtil.execute_reader(spName, applicationId, objectId, formId, name));
+            }
+            catch (Exception ex)
+            {
+                LogController.save_error_log(applicationId, null, spName, ex, ModuleIdentifier.FG);
+                return false;
+            }
+        }
+
         public static bool MeetsUniqueConstraint(Guid applicationId, 
             Guid instanceId, Guid elementId, string textValue, double? floatValue)
         {

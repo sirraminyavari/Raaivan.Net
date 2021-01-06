@@ -507,6 +507,7 @@ pre > code
 
 .rv-input-simple-invalid {
     border-color: red !important;
+    color: red !important;
 }
 
 .rv-icon-button {

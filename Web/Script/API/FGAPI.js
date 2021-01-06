@@ -247,6 +247,16 @@
         return FGAPI._send(url, params, queryString);
     },
 
+    ValidateNewName: function (params) {
+        params = params || {};
+
+        var url = FGAPI.ResponseURL + "/ValidateNewName?timeStamp=" + new Date().getTime();
+        var queryString = (params.ObjectID ? "&ObjectID=" + params.ObjectID : "") +
+            (params.FormID ? "&FormID=" + params.FormID : "") +
+            (params.Name ? "&Name=" + params.Name : "");
+        return FGAPI._send(url, params, queryString);
+    },
+
     MeetsUniqueConstraint: function (params) {
         params = params || {};
 
