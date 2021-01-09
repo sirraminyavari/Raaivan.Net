@@ -79,10 +79,9 @@
             }
 
             if (!that.Options.UseInlineInput) that.append_autosuggest(elems["input"]);
-            else {
-                that._add_item();
-                that.validate_necessary();
-            }
+            else that._add_item();
+
+            that.validate_necessary();
 
             if (that.Options.OnLoad) that.Options.OnLoad.call(that);
         },
@@ -151,11 +150,14 @@
 
         validate_necessary: function () {
             var that = this;
-
+            
             if (!that.Options.Necessary) return;
 
             var arr = that.get_items_dom();
             var invalid = arr.filter(itm => !itm.GetData().Title);
+            
+            if ((that.Objects.Autosuggest || {}).InputElement)
+                that.Objects.Autosuggest.InputElement.classList[!arr.length ? "add" : "remove"]("rv-input-invalid");
 
             if ((invalid.length && arr.length) && (arr.length == invalid.length))
                 arr.forEach(itm => itm.SetValidity(itm != invalid[0]));
@@ -243,6 +245,14 @@
                 }]
             }], that.Interface.ItemsArea);
 
+            if (that.Options.UseInlineInput) {
+                var allItms = that.get_items_with_dom(true);
+                allItms.reverse();
+
+                if (allItms.length && !(allItms[0].Data || {}).Title)
+                    elems["container"].after(allItms[0].Dom);
+            }
+
             var remove_option = function () {
                 if (inlineRemove && !get_data().Title && (that.get_items(true).filter((itm) => !itm.Title).length <= 1)) return;
 
@@ -259,6 +269,8 @@
                 autosuggestObj = that.append_autosuggest(elems["titleArea"], {
                     OnRemove: function () { remove_option(); }
                 });
+
+                if (title && id) autosuggestObj.set_item(title, id);
             }
 
             var customData = null;
@@ -293,6 +305,8 @@
                     autosuggestObj.InputElement.classList[value ? "remove" : "add"]("rv-input-invalid"); 
             };
 
+            that.validate_necessary();
+
             if (that.Options.OnAfterAdd) that.Options.OnAfterAdd({ ID: id, Title: title });
         },
 
@@ -316,8 +330,14 @@
 
         get_items: function (all) {
             return this.get_items_dom()
-                .map((nd) => nd.GetData())
-                .filter((dt) => !!dt && (all || !!dt.Title || !!dt.ID)) || [];
+                .map(nd => nd.GetData())
+                .filter(dt => !!dt && (all || !!dt.Title || !!dt.ID)) || [];
+        },
+
+        get_items_with_dom: function (all) {
+            return this.get_items_dom()
+                .map(nd => { return { Dom: nd, Data: nd.GetData() }; })
+                .filter(x => all || !!x.Data.Title || !!x.Data.ID) || [];
         },
 
         get_items_string: function (delimiter) {

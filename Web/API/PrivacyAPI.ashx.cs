@@ -333,17 +333,16 @@ namespace RaaiVan.Web.API
             //Privacy Check: OK
             if (!paramsContainer.GBEdit) return;
 
-            if (objectIds.Count == 0 || !check_object_type(objectIds, objectType))
-            {
-                responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";
-                return;
-            }
+            bool accessDenied = objectIds.Count == 0 || !check_object_type(objectIds, objectType);
+            
+            Dictionary<Guid, List<Audience>> audience = accessDenied ? new Dictionary<Guid, List<Audience>>() :
+                PrivacyController.get_audience(paramsContainer.Tenant.Id, objectIds);
 
-            Dictionary<Guid, List<Audience>> audience = PrivacyController.get_audience(paramsContainer.Tenant.Id, objectIds);
-            Dictionary<Guid, List<DefaultPermission>> defaultPermissions =
+            Dictionary<Guid, List<DefaultPermission>> defaultPermissions = accessDenied ? new Dictionary<Guid, List<DefaultPermission>>() :
                 PrivacyController.get_default_permissions(paramsContainer.Tenant.Id, objectIds);
 
-            List<Privacy> settings = PrivacyController.get_settings(paramsContainer.Tenant.Id, objectIds);
+            List<Privacy> settings = accessDenied ? new List<Privacy>() :
+                PrivacyController.get_settings(paramsContainer.Tenant.Id, objectIds);
 
             objectIds.ForEach(u => {
                 if (!settings.Any(x => x.ObjectID == u)) settings.Add(new Privacy() { ObjectID = u });
@@ -359,7 +358,9 @@ namespace RaaiVan.Web.API
 
             responseText = "{\"ConfidentialityLevels\":[" + string.Join(",", levels.Select(x => x.toJson())) + "]" +
                 ",\"Items\":{" + string.Join(",", settings.Where(x => x.ObjectID.HasValue)
-                .Select(u => "\"" + u.ObjectID.ToString() + "\":" + u.toJson())) + "}}";
+                    .Select(u => "\"" + u.ObjectID.ToString() + "\":" + u.toJson())) + "}" +
+                (!accessDenied ? string.Empty : ",\"ErrorText\":\"" + Messages.AccessDenied + "\"") +
+                "}";
         }
 
         protected void add_confidentiality_level(int? levelId, string title, ref string responseText)

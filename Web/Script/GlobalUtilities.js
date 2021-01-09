@@ -2055,7 +2055,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
                             { Name: "type", Value: "checkbox" },
                             (!params.Checked ? null : { Name: "checked", Value: true })
                         ],
-                        Properties: [!params.OnChange ? null : { Name: "onchange", Value: function () { params.OnChange.call(this); } }]
+                        Properties: [!params.OnChange ? null : { Name: "onchange", Value: function (e) { params.OnChange.call(this, e); } }]
                     },
                     { Type: "span", Class: "rv-switch-slider rv-switch-round " + (!params.MiniMode ? "" : "rv-switch-slider-mini") }
                 ]
@@ -2300,6 +2300,61 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         }
 
         return retJson;
+    },
+
+    append_circular_progress: function (container, params) {
+        params = params || {};
+
+        var size = params.Size || 8;
+
+        var minValue = params.MinValue;
+        var maxValue = params.MaxValue || 100;
+
+        minValue = !minValue || isNaN(minValue) ? 0 : +minValue;
+        maxValue = isNaN(maxValue) ? 100 : +maxValue;
+
+        if (minValue > maxValue) {
+            minValue = 0;
+            maxValue = 100;
+        }
+
+        if (!window.CIRBULAR_PROGRESS_KEYFRAME) {
+            window.CIRBULAR_PROGRESS_KEYFRAME = true;
+
+            var stl = document.createElement("style");
+            stl.setAttribute("type", "text/css");
+            stl.innerHTML = "@keyframes progress { 0% { stroke-dasharray: 0 100; } }";
+            document.head.appendChild(stl);
+        }
+
+        var get_value = function (val) {
+            var ret = isNaN(+val) || (val < minValue) ? minValue : (val > maxValue ? maxValue : val);
+            return Math.round(((ret - minValue) / (maxValue - minValue)) * 100);
+        };
+
+        var lineId = GlobalUtilities.random_str(10);
+        var labelId = GlobalUtilities.random_str(10);
+
+        var lbl = GlobalUtilities.convert_numbers_to_persian(!params.Label ? '' : params.Label);
+
+        container.innerHTML = '<div style="width:' + size + 'rem; height:' + size + 'rem; justify-content:space-around;">' +
+            '<svg viewbox="0 0 36 36" style="width: 100%; height: 100%;">' +
+            (params.HideChannel ? '' : '<path style="fill:none; stroke:' + (params.ChannelColor || '#eee') + '; stroke-width:3.8;" ' +
+            'd="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />') +
+            '<path id="' + lineId + '" style="fill:none; stroke-width:2.8; stroke-linecap:round; stroke:' + (params.Color || "#ff9f00") + ';' +
+            (params.Animate ? 'animation: progress ' + (params.Duration || '1') + 's ease-out forwards;' : '') + '" ' +
+            'd="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" ' +
+            'stroke-dasharray="' + get_value(params.Value || "0") + ', 100" />' +
+            '<text id="' + labelId + '" x="18" y="20.35" style="fill:' + (params.TextColor || '#666') + '; ' +
+            'font-size:' + (params.TextSize) + 'rem; text-anchor: middle;">' + lbl + '</text>' +
+            '</svg></div>';
+
+        return {
+            Update: function (value, label) {
+                jQuery("#" + lineId).attr("stroke-dasharray", get_value(value || "0") + ", 100");
+                jQuery("#" + labelId).html(GlobalUtilities.convert_numbers_to_persian(label));
+            }
+        };
     },
 
     get_side_panel: function (rev, done) {

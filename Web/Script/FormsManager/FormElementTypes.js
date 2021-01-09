@@ -3211,31 +3211,49 @@
             _edit: function (info, params, itemType) {
                 var isNode = itemType == "Node";
 
-                var elems = GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12 row", Style: "margin:0rem;", Name: "container",
-                        Childs: [
-                            {
-                                Type: "div", Class: "small-6 medium-7 large-7", Name: "nodeType",
-                                Style: "padding-" + RV_RevFloat + ":0.5rem;" + (isNode ? "" : "display:none;")
-                            },
-                            {
-                                Type: "div", Class: "small-6 medium-5 large-5",
-                                Style: "padding-" + RV_Float + ":" + (isNode ? "1.5" : "0") + "rem;",
-                                Childs: [
-                                    {
-                                        Type: "checkbox", Name: "multiSelect",
-                                        Style: "width:1rem; height:1rem; cursor:pointer;" +
-                                            "margin-" + RV_RevFloat + ":0.5rem;"
-                                    },
-                                    { Type: "text", TextValue: RVDic.MultiSelect }
-                                ]
-                            }
-                        ]
-                    }
-                ]);
+                var elems = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Name: "container",
+                    Childs: [
+                        (!isNode ? null : {
+                            Type: "div", Class: "small-12 medium-10 large-8", Style: "margin-bottom:1rem;",
+                            Childs: [
+                                {
+                                    Type: "div", Style: "flex:1 1 auto; display:flex; flex-flow:row;",
+                                    Childs: [
+                                        {
+                                            Type: "div",
+                                            Class: "rv-border-radius-quarter rv-ignore-" + RV_RevFloat.toLowerCase() + "-radius SoftBackgroundColor",
+                                            Style: "flex:0 0 auto; padding-" + RV_Float + ":0.3rem;"
+                                        },
+                                        {
+                                            Type: "div", Name: "nodeType",
+                                            Style: "flex:1 1 auto; display:flex; flex-flow:column;" +
+                                                "padding:0.5rem; padding-" + RV_RevFloat + ":0;"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }),
+                        {
+                            Type: "div", Class: FormElementTypeSettings.SmallOptionClass,
+                            Style: "display:flex; flex-flow:row; align-items:center;",
+                            Childs: [
+                                {
+                                    Type: "div", Class: "rv-flat-label", Style: "flex:1 1 auto; padding-" + RV_RevFloat + ":0.5rem;",
+                                    Childs: [{ Type: "text", TextValue: RVDic.MultiSelect + ":" }]
+                                },
+                                {
+                                    Type: "switch", Name: "multiSelect",
+                                    Style: "flex:0 0 auto; margin-top:0.2rem;",
+                                    Params: FormElementTypeSettings.SwitchParams
+                                }
+                            ]
+                        },
+                    ]
+                }]);
 
                 var container = elems["container"];
+                var multiSelect = elems["multiSelect"].Checkbox;
 
                 var as = null;
 
@@ -3245,8 +3263,9 @@
                             as = new NewSingleDataContainer(elems["nodeType"], {
                                 InputClass: "rv-input",
                                 InputStyle: "width:100%; font-size:0.7rem;",
-                                InnerTitle: RVDic.NodeTypeSelect + " (" + RVDic.Necessary + ")...",
+                                InnerTitle: RVDic.NodeTypeSelect + "...",
                                 NoButtons: true,
+                                Necessary: true,
                                 AjaxDataSource: CNAPI.GetNodeTypesDataSource(),
                                 ResponseParser: function (responseText) {
                                     var nodeTypes = JSON.parse(responseText).NodeTypes || [];
@@ -3271,27 +3290,27 @@
                         });
                     }
 
-                    elems["multiSelect"][(p || {}).MultiSelect ? "check" : "uncheck"]();
+                    multiSelect.checked = !!(p || {}).MultiSelect;
                 };
 
                 return {
                     Container: container,
                     Clear: function () {
                         if (as) as.clear();
-                        elems["multiSelect"].uncheck();
+                        multiSelect.checked = false;
                     },
                     Set: function (p) { _set(p); },
                     Get: function () {
                         var nodeTypes = (!as ? null : as.get_items()) || [];
 
 
-                        if (!isNode) return { MultiSelect: elems["multiSelect"].Checked };
+                        if (!isNode) return { MultiSelect: multiSelect.checked };
                         else {
                             return !nodeTypes.length ? false : {
                                 NodeTypes: nodeTypes.map(function (val) {
                                     return { NodeTypeID: val.ID, NodeType: Base64.encode(val.Title) };
                                 }),
-                                MultiSelect: elems["multiSelect"].Checked
+                                MultiSelect: multiSelect.checked
                             };
                         }
                     }
@@ -3764,129 +3783,119 @@
                 var maxSizeInnerTitle = RVDic.MaxFileSize + " (MB)";
                 var totalSizeInnerTitle = RVDic.MaxUploadSize + " (MB)";
 
+                var imagesOnlyExts = ["jpg", "jpeg", "png", "gif", "bmp"];
+
                 var _create_input = function (values) {
                     values = values || {};
 
                     return {
-                        Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-bottom:0.5rem;",
+                        Type: "div", Style: "display:flex; flex-flow:row; align-items:center; margin-bottom:1rem; width:15rem;",
                         Childs: [
                             {
-                                Type: "div", Style: "display:inline-block; width:11rem;",
+                                Type: "div", Class: "rv-flat-label",
+                                Style: "flex:1 1 auto; padding-" + RV_RevFloat + ":0.5rem;",
                                 Childs: [{ Type: "text", TextValue: values.Title + ":" }]
                             },
-                            { Type: "number", Class: "rv-input", Name: values.Name, Style: "width:12rem;" }
+                            {
+                                Type: "div", Style: "flex:0 0 auto; width:4rem;",
+                                Childs: [{
+                                    Type: "number", Name: values.Name, InnerTitle: values.Placeholder,
+                                    Class: "rv-input-simple rv-placeholder-align-center",
+                                    Style: "width:100%; font-size:0.7rem; text-align:center;"
+                                }]
+                            }
                         ]
                     };
                 };
 
-                var elems = GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12", Name: "container",
-                        Childs: [
-                            _create_input({ Title: maxCountInnerTitle, Name: "count" }),
-                            _create_input({ Title: maxSizeInnerTitle, Name: "size" }),
-                            _create_input({ Title: totalSizeInnerTitle, Name: "totalSize" }),
-                            {
-                                Type: "div", Class: "small-12 medium-12 large-12",
-                                Childs: [
-                                    {
-                                        Type: "div", Style: "display:inline-block;",
-                                        Childs: [
-                                            {
-                                                Type: "checkbox", Name: "imageOnly", Style: "width:1rem; height:1rem;",
-                                                Params: {
-                                                    OnClick: function (e, d) {
-                                                        d();
-                                                        if (!obj) return;
-
-                                                        if (!this.checked)
-                                                            obj.show_input();
-                                                        else {
-                                                            obj.clear();
-                                                            obj.add_item("jpg", "jpg");
-                                                            obj.add_item("png", "png");
-                                                            obj.add_item("gif", "gif");
-                                                            obj.hide_input();
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        Type: "div", Style: "display:inline-block; margin:0rem 0.3rem;",
-                                        Childs: [{ Type: "text", TextValue: RVDic.ImageOnly }]
-                                    }
-                                ]
-                            },
-                            { Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:0.5rem;", Name: "types" }
-                        ]
-                    }
-                ]);
+                var elems = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: "small-12 medium-12 large-12", Name: "container",
+                    Childs: [
+                        _create_input({ Title: maxCountInnerTitle, Name: "count", Placeholder: "e.g. 2" }),
+                        _create_input({ Title: maxSizeInnerTitle, Name: "size", Placeholder: "e.g. 20" }),
+                        _create_input({ Title: totalSizeInnerTitle, Name: "totalSize", Placeholder: "e.g. 20" }),
+                        {
+                            Type: "div", Name: "extSelectContainer",
+                            Style: "flex:0 0 auto; display:flex; flex-flow:row; align-items:center; margin-bottom:1rem; width:15rem;",
+                            Childs: [
+                                {
+                                    Type: "div", Class: "rv-flat-label",
+                                    Style: "flex:0 0 auto; padding-" + RV_RevFloat + ":0.5rem;" +
+                                        "min-width:" + FormElementTypeSettings.SmallOptionLabelWidth + "rem;",
+                                    Childs: [{ Type: "text", TextValue: RVDic.AllowedExtensions + ":" }]
+                                },
+                                {
+                                    Type: "div", Style: "flex:1 1 auto; display:flex; flex-flow:row;",
+                                    Childs: [
+                                        {
+                                            Type: "div",
+                                            Class: "rv-border-radius-quarter rv-ignore-" + RV_RevFloat.toLowerCase() + "-radius SoftBackgroundColor",
+                                            Style: "flex:0 0 auto; padding-" + RV_Float + ":0.3rem;"
+                                        },
+                                        {
+                                            Type: "div", Name: "types",
+                                            Style: "flex:1 1 auto; display:flex; flex-flow:column; padding:0.5rem;"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            Type: "div", Class: FormElementTypeSettings.SmallOptionClass,
+                            Style: "display:flex; flex-flow:row; align-items:center;",
+                            Childs: [
+                                {
+                                    Type: "div", Class: "rv-flat-label", Style: "flex:1 1 auto; padding-" + RV_RevFloat + ":0.5rem;",
+                                    Childs: [{ Type: "text", TextValue: RVDic.ImageOnly + ":" }]
+                                },
+                                {
+                                    Type: "switch", Name: "imageOnly", Style: "flex:0 0 auto; margin-top:0.2rem;",
+                                    Params: GlobalUtilities.extend(FormElementTypeSettings.SwitchParams, {
+                                        OnChange: function () { image_only_change(); }
+                                    })
+                                }
+                            ]
+                        }
+                    ]
+                }]);
 
                 var container = elems["container"];
                 var countInput = elems["count"];
                 var sizeInput = elems["size"];
                 var totalSizeInput = elems["totalSize"];
-                var imageOnly = elems["imageOnly"];
+                var imageOnly = elems["imageOnly"].Checkbox;
 
                 var obj = new NewSingleDataContainer(elems["types"], {
-                    EnableTextItem: true, InputStyle: "width:100%;", InnerTitle: RVDic.FileTypes + "..."
+                    EnableTextItem: true, UseInlineInput: true, 
+                    InputStyle: "width:100%; font-size:0.7rem;",
+                    InnerTitle: "e.g. pdf, docx"
                 });
+
+                var image_only_change = function () {
+                    jQuery(elems["extSelectContainer"])[imageOnly.checked ? "fadeOut" : "fadeIn"](200);
+                };
 
                 var _set = function (p) {
                     p = p || {};
 
-                    if (p.MaxCount) {
-                        countInput.value = p.MaxCount;
-                        countInput.style.color = "black";
-                        countInput.style.fontWeight = "normal";
-                    } else {
-                        countInput.value = "";
-                        GlobalUtilities.set_inner_title(countInput, maxCountInnerTitle);
-                    }
+                    countInput.value = p.MaxCount ? p.MaxCount : "";
+                    sizeInput.value = p.MaxSize ? p.MaxSize : "";
+                    totalSizeInput.value = p.TotalSize ? p.TotalSize : "";
 
-                    if (p.MaxSize) {
-                        sizeInput.value = p.MaxSize;
-                        sizeInput.style.color = "black";
-                        sizeInput.style.fontWeight = "normal";
-                    } else {
-                        sizeInput.value = "";
-                        GlobalUtilities.set_inner_title(sizeInput, maxSizeInnerTitle);
-                    }
+                    imageOnly.checked = p.ImageOnly === true;
+                    image_only_change();
 
-                    if (p.TotalSize) {
-                        totalSizeInput.value = p.TotalSize;
-                        totalSizeInput.style.color = "black";
-                        totalSizeInput.style.fontWeight = "normal";
-                    } else {
-                        totalSizeInput.value = "";
-                        GlobalUtilities.set_inner_title(totalSizeInput, totalSizeInnerTitle);
-                    }
-
-                    if (p.ImageOnly === true) {
-                        imageOnly.check();
-                        obj.hide_input();
-                    }
-                    else {
-                        imageOnly.uncheck();
-                        obj.show_input();
-                    }
-
-                    for (var i = 0, lnt = (p.AllowedExtensions || []).length; i < lnt; ++i) {
-                        var val = Base64.decode(p.AllowedExtensions[i]);
-                        obj.add_item(val, val);
-                    }
-                }
+                    if (obj) (p.AllowedExtensions || [])
+                        .map(ext => Base64.decode(ext))
+                        .forEach(ext => obj.add_item(ext, ext));
+                };
 
                 return {
                     Container: container,
                     Clear: function () {
-                        imageOnly.uncheck();
+                        imageOnly.checked = false;
+                        image_only_change();
                         countInput.value = sizeInput.value = "";
-                        GlobalUtilities.set_inner_title(countInput, maxCountInnerTitle);
-                        GlobalUtilities.set_inner_title(sizeInput, maxSizeInnerTitle);
-                        GlobalUtilities.set_inner_title(totalSizeInput, totalSizeInnerTitle);
                         if (obj) obj.clear();
                     },
                     Set: function (p) { _set(p); },
@@ -3898,14 +3907,18 @@
                         if (isNaN(maxSize)) maxSize = 0;
                         if (isNaN(totalSize)) totalSize = 0;
 
-                        var _image = imageOnly.checked === true;
-
                         var retVal = {
-                            MaxCount: maxCount, MaxSize: maxSize, TotalSize: totalSize,
-                            ImageOnly: _image, AllowedExtensions: []
+                            MaxCount: maxCount,
+                            MaxSize: maxSize,
+                            TotalSize: totalSize,
+                            ImageOnly: imageOnly.checked === true,
+                            AllowedExtensions: []
                         };
-                        var items = !obj ? [] : (obj.get_items() || []);
-                        for (var i = 0, lnt = items.length; i < lnt; ++i) retVal.AllowedExtensions.push(Base64.encode(items[i].Title || ""));
+
+                        retVal.AllowedExtensions = (retVal.ImageOnly ? imagesOnlyExts :
+                            (!obj ? [] : (obj.get_items() || [])).map(itm => itm.Title))
+                            .map(itm => Base64.encode(itm))
+                            .filter(itm => !!itm);
 
                         return retVal;
                     }
@@ -4099,17 +4112,40 @@
             isempty: function (params) { return !((params || {}).FormInstanceIDs || []).length; },
 
             edit: function () {
-                var elems = GlobalUtilities.create_nested_elements([
-                    { Type: "div", Class: "small-12 medium-7 large-5", Name: "container" }
-                ]);
+                var elems = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: "small-12 medium-10 large-8", Name: "container",
+                    Childs: [{
+                        Type: "div", Style: "flex:0 0 auto; display:flex; flex-flow:row; align-items:center;",
+                        Childs: [
+                            {
+                                Type: "div", Class: "rv-flat-label",
+                                Style: "flex:0 0 auto; padding-" + RV_RevFloat + ":0.5rem;" +
+                                    "min-width:" + FormElementTypeSettings.SmallOptionLabelWidth + "rem;",
+                                Childs: [{ Type: "text", TextValue: RVDic.FormSelect + ":" }]
+                            },
+                            {
+                                Type: "div", Style: "flex:1 1 auto; display:flex; flex-flow:row;",
+                                Childs: [
+                                    {
+                                        Type: "div", Style: "flex:0 0 auto; padding-" + RV_Float + ":0.3rem;",
+                                        Class: "rv-border-radius-quarter rv-ignore-" + RV_RevFloat.toLowerCase() + "-radius SoftBackgroundColor"
+                                    },
+                                    {
+                                        Type: "div", Name: "form",
+                                        Style: "flex:1 1 auto; padding:0.5rem; padding-" + RV_RevFloat + ":0;"
+                                    }
+                                ]
+                            }
+                        ]
+                    },]
+                }]);
+
                 var container = elems["container"];
 
-                var asInnerTitle = RVDic.FormSelect + " (" + RVDic.Necessary + ")...";
-
-                var as = GlobalUtilities.append_autosuggest(container, {
+                var as = GlobalUtilities.append_autosuggest(elems["form"], {
                     InputClass: "rv-input",
                     InputStyle: "width:100%;",
-                    InnerTitle: asInnerTitle,
+                    InnerTitle: RVDic.Select + "...",
                     AjaxDataSource: FGAPI.GetForms(),
                     ResponseParser: function (responseText) {
                         var items = JSON.parse(responseText).Forms || [];
@@ -4117,24 +4153,41 @@
                         for (var i = 0, lnt = items.length; i < lnt; ++i)
                             arr.push([Base64.decode(items[i].Title || ""), items[i].FormID]);
                         return arr;
-                    }
+                    },
+                    OnSelect: function () { validate(); }
                 });
 
+                var get_selected_form = function () {
+                    var index = as.selectedIndex;
+                    var formId = index >= 0 ? as.values[index] : "";
+                    var formName = index >= 0 ? as.keywords[index] : "";
+
+                    return !formId || !formName ||
+                        (GlobalUtilities.trim(as.InputElement.value) != GlobalUtilities.trim(formName)) ? null :
+                        { FormID: formId, FormName: Base64.encode(formName) };
+                };
+
+                var validate = function () {
+                    as.InputElement.classList[get_selected_form() ? "remove" : "add"]("rv-input-invalid");
+                };
+
+                jQuery(as.InputElement).on("keyup", function () { validate(); });
+
                 var _set = function (p) {
-                    if (((p || {}).FormID || "") != "")
-                        as.set_item(p.FormID, Base64.decode(p.FormName || ""));
+                    if ((p || {}).FormID && (p || {}).FormName)
+                        as.set_item(p.FormID, Base64.decode(p.FormName));
                     else as.clear();
+
+                    validate();
                 };
 
                 return {
                     Container: container, Clear: function () { as.clear(); },
                     Set: function (p) { _set(p); },
                     Get: function () {
-                        var index = as.selectedIndex;
-                        var formId = index >= 0 ? as.values[index] : "";
-                        var formName = index >= 0 ? as.keywords[index] : "";
+                        var frm = get_selected_form();
 
-                        return !formId ? false : { FormID: formId, FormName: Base64.encode(formName) };
+                        return !frm ? false : frm;
                     }
                 };
             },

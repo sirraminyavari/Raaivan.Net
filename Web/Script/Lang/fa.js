@@ -174,6 +174,7 @@
         DownloadMethod: "روش دانلود",
         DownloadWithCover: "دانلود با جلد",
         DragMe: "منو جابجا کن",
+        Duplicate: "تکرار",
         Dynamic: "پویا",
         Edit: "ویرایش",
         EditingDone: "پایان ویرایش",
@@ -1347,6 +1348,7 @@
             YouMustBeMemberInAtListOneGroupOfThisTypes: "شما باید حداقل در یکی از گروه هایی از این انواع عضو باشید",
             YourAccountIsLockedOutForNextNSeconds: "حساب کاربری شما تا " + "[n]" + " ثانیه دیگر قفل خواهد بود",
             YourMessageSentSuccessfully: "پیام شما با موفقیت ارسال شد",
+            YourSelectedFieldDeleted: "فیلد انتخابی شما حذف شد",
             YourUserAccountActivatedSuccessfully: "حساب کاربری شما با موفقیت فعال شد",
             YourUserAccountCreatedSuccessfully: "حساب کاربری شما با موفقیت ایجاد شد",
             Get_KnowledgeRegisteredSuccessfully: function (p) {

@@ -174,6 +174,7 @@
         DownloadMethod: "download method",
         DownloadWithCover: "download with cover",
         DragMe: "drag me",
+        Duplicate: "duplicate",
         Dynamic: "dynamic",
         Edit: "edit",
         EditingDone: "editing done",
@@ -1347,6 +1348,7 @@
             YouMustBeMemberInAtListOneGroupOfThisTypes: "شما باید حداقل در یکی از گروه هایی از این انواع عضو باشید",
             YourAccountIsLockedOutForNextNSeconds: "حساب کاربری شما تا " + "[n]" + " ثانیه دیگر قفل خواهد بود",
             YourMessageSentSuccessfully: "پیام شما با موفقیت ارسال شد",
+            YourSelectedFieldDeleted: "your selected field deleted",
             YourUserAccountActivatedSuccessfully: "حساب کاربری شما با موفقیت فعال شد",
             YourUserAccountCreatedSuccessfully: "حساب کاربری شما با موفقیت ایجاد شد",
             Get_KnowledgeRegisteredSuccessfully: function (p) {
