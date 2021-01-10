@@ -32,7 +32,7 @@ namespace RaaiVan.Modules.FormGenerator
 
     public static class FGUtilities
     {
-        public static List<FormElement> get_form_elements(string strElements)
+        public static List<FormElement> get_form_elements(string strElements, bool formDesignMode = false)
         {
             try
             {
@@ -86,7 +86,7 @@ namespace RaaiVan.Modules.FormGenerator
                                 name: Base64.decode((string)d["Name"]), type: tp));
                     }
 
-                    if (newElement.ElementID.HasValue && (!newElement.Filled.HasValue || !newElement.Filled.Value))
+                    if (newElement.ElementID.HasValue && !formDesignMode && (!newElement.Filled.HasValue || !newElement.Filled.Value))
                     {
                         newElement.RefElementID = newElement.ElementID;
                         newElement.ElementID = Guid.NewGuid();

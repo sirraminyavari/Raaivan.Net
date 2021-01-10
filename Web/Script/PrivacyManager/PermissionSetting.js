@@ -57,7 +57,6 @@
                     PrivacyAPI.GetAudience({
                         ObjectID: that.Objects.ObjectID, ObjectType: that.Options.ObjectType, ParseResults: true,
                         ResponseHandler: function (results) {
-                            console.log(results);
                             if ((results || {}).Items) that.Objects.PrivacyData = results.Items;
 
                             that.initialize(results);

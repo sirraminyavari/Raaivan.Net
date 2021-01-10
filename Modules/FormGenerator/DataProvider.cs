@@ -811,7 +811,7 @@ namespace RaaiVan.Modules.FormGenerator
 
                 _elem.SequenceNumber = seq++;
 
-                elementsTable.Rows.Add(_elem.ElementID, _elem.FormInstanceID, _elem.RefElementID,
+                elementsTable.Rows.Add(_elem.ElementID, Guid.NewGuid(), _elem.RefElementID,
                     PublicMethods.verify_string(_elem.Title), _elem.Name, _elem.SequenceNumber, _elem.Necessary,
                     _elem.UniqueValue, strType, PublicMethods.verify_string(_elem.Help), _elem.Info, _elem.Weight,
                     PublicMethods.verify_string(_elem.TextValue), _elem.FloatValue, _elem.BitValue, _elem.DateValue);
@@ -824,9 +824,9 @@ namespace RaaiVan.Modules.FormGenerator
 
             cmd.Parameters.AddWithValue("@ApplicationID", applicationId);
             cmd.Parameters.AddWithValue("@FormID", formId);
-            cmd.Parameters.AddWithValue("@Title", title);
-            cmd.Parameters.AddWithValue("@Name", name);
-            cmd.Parameters.AddWithValue("@Description", description);
+            if(!string.IsNullOrEmpty(title)) cmd.Parameters.AddWithValue("@Title", title);
+            if (!string.IsNullOrEmpty(name)) cmd.Parameters.AddWithValue("@Name", name);
+            if (!string.IsNullOrEmpty(description)) cmd.Parameters.AddWithValue("@Description", description);
             cmd.Parameters.Add(elementsParam);
             cmd.Parameters.AddWithValue("@CurrentUserID", currentUserId);
             cmd.Parameters.AddWithValue("@Now", DateTime.Now);
@@ -834,8 +834,11 @@ namespace RaaiVan.Modules.FormGenerator
             string spName = GetFullyQualifiedName("SaveFormElements");
 
             string sep = ", ";
-            string arguments = "@ApplicationID" + sep + "@FormID" + sep + "@Title" + sep +
-                "@Name" + sep + "@Description" + sep + "@Elements" + sep + "@CurrentUserID" + sep + "@Now";
+            string arguments = "@ApplicationID" + sep + "@FormID" + sep + 
+                (string.IsNullOrEmpty(title) ? "null" : "@Title") + sep +
+                (string.IsNullOrEmpty(name) ? "null" : "@Name") + sep +
+                (string.IsNullOrEmpty(description) ? "null" : "@Description") + sep + 
+                "@Elements" + sep + "@CurrentUserID" + sep + "@Now";
             cmd.CommandText = ("EXEC" + " " + spName + " " + arguments);
 
             con.Open();
@@ -1079,8 +1082,8 @@ namespace RaaiVan.Modules.FormGenerator
             {
                 if (!string.IsNullOrEmpty(name)) name = name.Trim().ToLower();
 
-                return !string.IsNullOrEmpty(name) && FGUtilities.is_valid_name(name) &&
-                    ProviderUtil.succeed(ProviderUtil.execute_reader(spName, applicationId, objectId, formId, name));
+                return string.IsNullOrEmpty(name) || (FGUtilities.is_valid_name(name) &&
+                    ProviderUtil.succeed(ProviderUtil.execute_reader(spName, applicationId, objectId, formId, name)));
             }
             catch (Exception ex)
             {

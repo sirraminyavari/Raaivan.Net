@@ -117,7 +117,7 @@ namespace RaaiVan.Web.API
                         PublicMethods.parse_string(context.Request.Params["Title"]),
                         PublicMethods.parse_string(context.Request.Params["Name"], decode: false),
                         PublicMethods.parse_string(context.Request.Params["Description"]),
-                        FGUtilities.get_form_elements(context.Request.Params["Elements"]), ref responseText);
+                        FGUtilities.get_form_elements(context.Request.Params["Elements"], formDesignMode: true), ref responseText);
                     _return_response(ref responseText);
                     return;
                 case "GetFormElements":
@@ -996,10 +996,10 @@ namespace RaaiVan.Web.API
 
             elements.Where(e => !e.ElementID.HasValue).ToList().ForEach(e => e.ElementID = Guid.NewGuid());
 
-            elements.Where(e => !string.IsNullOrEmpty(e.Name)).ToList()
+            elements.ToList()
                 .ForEach(e =>
                 {
-                    e.Name = e.Name.Trim().ToLower();
+                    if(!string.IsNullOrEmpty(e.Name)) e.Name = e.Name.Trim().ToLower();
                     if (string.IsNullOrEmpty(e.Name)) e.Name = null;
                 });
             //end of Rectify inputs
@@ -1035,7 +1035,7 @@ namespace RaaiVan.Web.API
 
             responseText = !result ? "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}" :
                 "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" + 
-                ",\"Elements:[" + string.Join(",", elements.Select(e => e.toJson(paramsContainer.Tenant.Id))) + "]" +
+                ",\"Elements\":[" + string.Join(",", elements.Select(e => e.toJson(paramsContainer.Tenant.Id))) + "]" +
                 "}";
 
             //Save Log

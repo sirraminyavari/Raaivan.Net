@@ -402,7 +402,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             string retUrl = fi.exists(applicationId) ? fi.url(applicationId) : string.Empty;
 
-            if (string.IsNullOrEmpty(retUrl) && !highQuality) retUrl = "../../Images/RaaiVanLogo.png";
+            if (string.IsNullOrEmpty(retUrl) && !highQuality) retUrl = RaaiVanSettings.LogoMiniURL;
 
             return networkAddress ? retUrl.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : retUrl;
         }

@@ -60,7 +60,7 @@ namespace RaaiVan.Web.API
                             PublicMethods.fromJSON(PublicMethods.parse_string(context.Request.Params["Data"]));
 
                         List<Privacy> items = new List<Privacy>();
-
+                        
                         foreach (string k in data.Keys)
                         {
                             Guid objId = Guid.Empty;
@@ -270,7 +270,7 @@ namespace RaaiVan.Web.API
             //Privacy Check: OK
             if (!paramsContainer.GBEdit) return;
 
-            if (items.Count == 0 ||
+            if (items.Count != 0 &&
                 !check_object_type(items.Where(x => x.ObjectID.HasValue).Select(u => u.ObjectID.Value).ToList(), objectType))
             {
                 responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";

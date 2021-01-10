@@ -222,6 +222,8 @@ namespace RaaiVan.Modules.Privacy
         
         public static bool SetAudience(Guid applicationId, List<Privacy> items, Guid currentUserId)
         {
+            if (items == null || items.Count == 0) return true;
+
             SqlConnection con = new SqlConnection(ProviderUtil.ConnectionString);
             SqlCommand cmd = new SqlCommand();
             cmd.Connection = con;

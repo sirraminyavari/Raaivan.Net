@@ -2340,13 +2340,14 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         container.innerHTML = '<div style="width:' + size + 'rem; height:' + size + 'rem; justify-content:space-around;">' +
             '<svg viewbox="0 0 36 36" style="width: 100%; height: 100%;">' +
             (params.HideChannel ? '' : '<path style="fill:none; stroke:' + (params.ChannelColor || '#eee') + '; stroke-width:3.8;" ' +
-            'd="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />') +
+                'd="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />') +
             '<path id="' + lineId + '" style="fill:none; stroke-width:2.8; stroke-linecap:round; stroke:' + (params.Color || "#ff9f00") + ';' +
-            (params.Animate ? 'animation: progress ' + (params.Duration || '1') + 's ease-out forwards;' : '') + '" ' +
-            'd="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" ' +
-            'stroke-dasharray="' + get_value(params.Value || "0") + ', 100" />' +
-            '<text id="' + labelId + '" x="18" y="20.35" style="fill:' + (params.TextColor || '#666') + '; ' +
-            'font-size:' + (params.TextSize) + 'rem; text-anchor: middle;">' + lbl + '</text>' +
+                (params.Animate ? 'animation: progress ' + (params.Duration || '1') + 's ease-out forwards;' : '') + '" ' +
+                'd="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" ' +
+                'stroke-dasharray="' + get_value(params.Value || "0") + ', 100" />' +
+            '<text id="' + labelId + '" x="18" y="' + (RV_RTL ? '22' : '20.35') + '" ' +
+                'style="fill:' + (params.TextColor || '#666') + '; ' +
+                'font-size:' + (params.TextSize) + 'rem; text-anchor: middle;">' + lbl + '</text>' +
             '</svg></div>';
 
         return {
@@ -2469,13 +2470,11 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
                     _elem = {
                         Type: "div", Class: _elem.OuterClass || " ",
                         Style: "display:table; width:100%; height:100%;" + (_elem.OuterStyle || " "),
-                        Childs: [
-                            {
-                                Type: "div", Class: _elem.InnerClass || " ",
-                                Style: "display:table-cell; vertical-align:" + _elemType + ";" + (_elem.InnerStyle || " "),
-                                Childs: [GlobalUtilities.extend(_elem, { Type: "div" })]
-                            }
-                        ]
+                        Childs: [{
+                            Type: "div", Class: _elem.InnerClass || " ",
+                            Style: "display:table-cell; vertical-align:" + _elemType + ";" + (_elem.InnerStyle || " "),
+                            Childs: [GlobalUtilities.extend(_elem, { Type: "div" })]
+                        }]
                     };
 
                     newElement = document.createElement(_elem.Type);
@@ -2874,13 +2873,10 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
     load_calendar: function (done) {
         var _lang = "calendar-" + (window.RV_Lang == "fa" ? "fa" : "en");
 
-        GlobalUtilities.load_files([
-            "Calendar.css",
-            {
-                Root: "JalaliJSCalendar-1.4/", Ext: "js",
-                Childs: [{ Root: "skins/", Ext: "css", Childs: ["calendar-blue"] }, "jalali.js", "calendar", "calendar-setup", _lang]
-            }
-        ], { LoadSequential: true, OnLoad: done });
+        GlobalUtilities.load_files([{
+            Root: "JalaliJSCalendar-1.4/", Ext: "js",
+            Childs: [{ Root: "skins/", Ext: "css", Childs: ["calendar-blue"] }, "jalali.js", "calendar", "calendar-setup", _lang]
+        }], { LoadSequential: true, OnLoad: done });
     },
 
     append_calendar: function (element, params, done) {

@@ -63,20 +63,12 @@ namespace RaaiVan.Web.API
         {
             if (!paramsContainer.GBView) return;
 
-            List<Modules.CoreNetwork.Node> nodes = CNController.get_nodes(paramsContainer.Tenant.Id,
+            List<Node> nodes = CNController.get_nodes(paramsContainer.Tenant.Id,
                 NodeTypes.Expertise, searchText, null, null, null, null, count, null, false, null);
 
-            responseText = "{\"Nodes\":[";
-
-            bool isFirst = true;
-            foreach (Modules.CoreNetwork.Node nd in nodes)
-            {
-                responseText += (isFirst ? string.Empty : ",") + "{\"NodeID\":\"" + nd.NodeID.Value.ToString() +
-                    "\",\"Name\":\"" + Base64.encode(nd.Name) + "\"}";
-                isFirst = false;
-            }
-
-            responseText += "]}";
+            responseText = "{\"Nodes\":[" + "" + string.Join(",", nodes.Select(
+                nd => "{\"NodeID\":\"" + nd.NodeID.Value.ToString() +
+                    "\",\"Name\":\"" + Base64.encode(nd.Name) + "\"}")) + "]}";
         }
 
         protected void get_expertise_domains(Guid userId, ref string responseText)

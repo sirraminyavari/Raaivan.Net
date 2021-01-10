@@ -486,6 +486,8 @@ namespace RaaiVan.Web.API
             response["LogoURL"] = RaaiVanSettings.LogoURL;
             response["LogoMiniURL"] = RaaiVanSettings.LogoMiniURL;
 
+            response["IsDev"] = PublicMethods.is_dev();
+
             //UserID
             //SSOTicket
             

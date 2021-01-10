@@ -198,27 +198,6 @@
 
             var isActive = (window.RVGlobal || {}).ApplicationID == item.ApplicationID;
             
-            var action_button = function (p) {
-                p = p || {};
-
-                return {
-                    Type: "div", Style: "padding:0rem 0.25rem;",
-                    Class: (item.Removable ? "small-4 medium-4 large-4" : "small-6 medium-6 large-6"),
-                    Childs: [
-                        {
-                            Type: "div", Class: "small-12 medium-12 large-12 rv-air-button rv-circle", Name: p.Name,
-                            Childs: [
-                                (!p.Icon ? null : {
-                                    Type: "i", Class: "fa " + p.Icon, Style: "margin-" + RV_RevFloat + ":0.4rem;",
-                                    Attributes: [{ Name: "aria-hidden", Value: true }]
-                                }),
-                                { Type: "text", TextValue: p.Title }
-                            ]
-                        }
-                    ]
-                };
-            };
-            
             var elems = GlobalUtilities.create_nested_elements([{
                 Type: "div", Class: "small-12 medium-6 large-4",
                 Style: "padding:1rem; opacity:0;", Name: "container",

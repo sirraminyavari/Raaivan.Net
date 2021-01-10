@@ -1053,6 +1053,7 @@
     <Content Include="Images\Star-White.png" />
     <Content Include="Images\star.png" />
     <Content Include="Images\StarOff.png" />
+    <Content Include="Images\support.png" />
     <Content Include="Images\svg\at-sign.svg" />
     <Content Include="Images\svg\checkbox.svg" />
     <Content Include="Images\svg\date.svg" />

@@ -302,11 +302,11 @@
 
                 var arr = allItems.filter(itm => itm.Data !== false).map(itm => itm.Data);
                 var invalid = allItems.filter(itm => itm.Data === false).map(itm => itm.Dom);
-                
-                var privacyData = {};
+
+                var privacyData = null;
 
                 arr.filter(itm => itm.Privacy)
-                    .forEach(itm => { privacyData = GlobalUtilities.extend(privacyData, itm.Privacy) });
+                    .forEach(itm => { privacyData = GlobalUtilities.extend(privacyData || {}, itm.Privacy) });
 
                 if (invalid.length || !isValidName) {
                     var _do_proc = function () {
@@ -328,13 +328,9 @@
                         });
                     };
 
-                    if (isValidName) invalid[0].Activate(true, _do_proc);
-                    else _do_proc();
-
-                    return;
+                    if (isValidName) return invalid[0].Activate(true, _do_proc);
+                    else return _do_proc();
                 }
-
-                return console.log(arr);
 
                 FGAPI.SaveFormElements({
                     FormID: that.Objects.FormID,
@@ -344,6 +340,17 @@
                     ParseResults: true,
                     ResponseHandler: function (result) {
                         console.log(result);
+                        if (result.ErrorText) alert(RVDic.MSG[result.ErrorText] || result.ErrorText);
+                        else {
+                            if (privacyData) PrivacyAPI.SetAudience({
+                                ObjectType: "FormElement",
+                                Data: Base64.encode(JSON.stringify(privacyData)),
+                                ParseResults: true,
+                                ResponseHandler: function (dt) {
+                                    console.log(dt);
+                                }
+                            });
+                        }
                     }
                 });
             };
@@ -803,7 +810,7 @@
                             ]
                         }], elems["removedArea"]);
 
-                        var counter = 15;
+                        var counter = 10;
 
                         var cirObj = GlobalUtilities.append_circular_progress(rmElems["timer"], {
                             Size: 2,
@@ -812,7 +819,7 @@
                             MinValue: 0,
                             MaxValue: counter,
                             Value: counter,
-                            Label: counter + "%",
+                            Label: counter,
                             Color: 'rgb(226,35,79)'
                         });
 

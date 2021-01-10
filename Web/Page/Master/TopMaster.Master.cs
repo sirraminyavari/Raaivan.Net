@@ -108,6 +108,7 @@ namespace RaaiVan.Web.Page.Master
                     ",\"SSOLoginURL\":\"" + (!RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) ? string.Empty :
                         RaaiVanSettings.SSO.LoginURL(paramsContainer.ApplicationID)) + "\"" +
                     ",\"SSOLoginTitle\":\"" + Base64.encode(RaaiVanSettings.SSO.LoginTitle(paramsContainer.ApplicationID)) + "\"" +
+                    ",\"IsDev\":" + PublicMethods.is_dev().ToString().ToLower() +
                     "}";
 
                 PublicMethods.set_rv_global(Page, PublicMethods.fromJSON(rvGlobal));
