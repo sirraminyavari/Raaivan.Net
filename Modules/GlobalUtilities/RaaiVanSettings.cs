@@ -913,13 +913,13 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static class ReautheticationForSensitivePages
         {
-            public static bool SettingsAdmin(Guid applicationId)
+            public static bool SettingsAdmin(Guid? applicationId)
             {
                 return !SSO.Enabled(applicationId) &&
                     get_value(applicationId, RVSettingsItem.ReauthenticationForSettingsAdminPage).ToLower() == "true";
             }
 
-            public static bool UsersAdmin(Guid applicationId)
+            public static bool UsersAdmin(Guid? applicationId)
             {
                 return !SSO.Enabled(applicationId) &&
                     get_value(applicationId, RVSettingsItem.ReauthenticationForUsersAdminPage).ToLower() == "true";

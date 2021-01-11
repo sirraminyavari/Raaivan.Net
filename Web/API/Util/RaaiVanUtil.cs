@@ -13,6 +13,7 @@ using RaaiVan.Modules.Log;
 using RaaiVan.Modules.RaaiVanConfig;
 using RaaiVan.Modules.CoreNetwork;
 using RaaiVan.Modules.Knowledge;
+using Newtonsoft.Json;
 
 namespace RaaiVan.Web.API
 {
@@ -36,11 +37,13 @@ namespace RaaiVan.Web.API
             _ExpiresAt = DateTime.Now.AddMinutes(5);
         }
 
+        [JsonIgnore]
         public bool Expiring
         {
             get { return _ExpiresAt.HasValue && !Expired; }
         }
-        
+
+        [JsonIgnore]
         public bool Expired
         {
             get { return (_Expired = _Expired || (_ExpiresAt.HasValue && _ExpiresAt.Value < DateTime.Now)); }

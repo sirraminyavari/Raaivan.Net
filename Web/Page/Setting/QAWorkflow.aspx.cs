@@ -24,7 +24,7 @@ namespace RaaiVan.Web.Page.Setting
                 return;
             }
 
-            AuthorizationManager.redirect_if_no_access(AccessRoleName.ManageWorkflow,
+            AuthorizationManager.redirect_if_no_access(AccessRoleName.ManageQA,
                 PublicMethods.get_current_user_id(), Page);
         }
     }

@@ -52,7 +52,8 @@ namespace RaaiVan.Modules.FormGenerator
                         RefElementID = PublicMethods.parse_guid(PublicMethods.get_dic_value(elem, "RefElementID")),
                         FormInstanceID = PublicMethods.parse_guid(PublicMethods.get_dic_value(elem, "InstanceID")),
                         Title = PublicMethods.parse_string(PublicMethods.get_dic_value(elem, "Title"), defaultValue: null),
-                        Name = PublicMethods.get_dic_value(elem, "Name", defaultValue: null),
+                        Name = formDesignMode ? Base64.decode(PublicMethods.get_dic_value(elem, "Name", defaultValue: null)) :
+                            PublicMethods.get_dic_value(elem, "Name", defaultValue: null),
                         Filled = PublicMethods.parse_bool(PublicMethods.get_dic_value(elem, "Filled"), defaultValue: false),
                         SequenceNumber = PublicMethods.parse_int(PublicMethods.get_dic_value(elem, "SequenceNumber"), defaultValue: -1),
                         Necessary = PublicMethods.parse_bool(PublicMethods.get_dic_value(elem, "Necessary")),

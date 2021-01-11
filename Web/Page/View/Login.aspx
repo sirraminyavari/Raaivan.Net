@@ -169,7 +169,7 @@
                 RVGlobal.SAASBasedMultiTenancy ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)";
 
             new LoginControl("loginArea", {
-                ReloadAfterLogin: false, ContainerClass: false, IgnoreSSO: true, InitialFocus: false,
+                ReloadAfterLogin: false, ContainerClass: false, IgnoreSSO: false, InitialFocus: false,
                 ReturnURL: (window.RVGlobal || {}).ReturnURL ? Base64.decode(window.RVGlobal.ReturnURL) : null,
                 OnLogin: function (d) { }
             });

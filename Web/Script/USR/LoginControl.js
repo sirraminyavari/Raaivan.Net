@@ -36,7 +36,7 @@
             IgnoreSSO: params.IgnoreSSO,
             InitialFocus: params.InitialFocus !== false
         };
-
+        
         var that = this;
 
         var files = [{ Root: "API/", Ext: "js", Childs: ["RVAPI", "UsersAPI"] }];

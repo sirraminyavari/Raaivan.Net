@@ -165,7 +165,7 @@
         DocumentTree: "درخت اسناد",
         DocumentTrees: "درخت های اسناد",
         DocumentTreeSelect: "انتخاب درخت اسناد",
-        DomainSelect: "انتخاب سامانه",
+        DomainSelect: "انتخاب دامنه",
         Done: "انجام شده",
         DoneStatus: "وضعیت انجام",
         DoubleClickToEdit: "برای ویرایش، کلیک دوبل کنید",

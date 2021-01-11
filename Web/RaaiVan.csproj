@@ -1965,6 +1965,7 @@
     </Compile>
     <Compile Include="API\Util\RedisAPI.cs" />
     <Compile Include="API\Util\RestAPI.cs" />
+    <Compile Include="API\Util\RouteData.cs" />
     <Compile Include="API\Util\RVScheduler.cs" />
     <Compile Include="API\SearchAPI.ashx.cs">
       <DependentUpon>SearchAPI.ashx</DependentUpon>
