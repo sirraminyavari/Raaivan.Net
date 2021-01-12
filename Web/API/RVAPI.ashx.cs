@@ -224,15 +224,21 @@ namespace RaaiVan.Web.API
                     {
                         bool? set = PublicMethods.parse_bool(context.Request.Params["Set"]);
 
-                        Dictionary<string, object> data = get_rv_global(paramsContainer,
-                            PublicMethods.parse_bool(context.Request.Params["LoginInfo"]),
-                            PublicMethods.parse_guid(context.Request.Params["InvitationID"]));
+                        Dictionary<string, object> data = get_rv_global(paramsContainer);
 
                         if (set.HasValue && set.Value) {
                             responseText = "window.RVGlobal = " + PublicMethods.toJSON(data) + ";" +
                                 "window.IsAuthenticated = " + paramsContainer.IsAuthenticated.ToString().ToLower();
                         }
                         else responseText = PublicMethods.toJSON(data);
+                    }
+                    break;
+                case "CheckRoute":
+                case "check_route":
+                    {
+                        Dictionary<string, object> resData = RouteList.get_data(paramsContainer, 
+                            PublicMethods.parse_string(paramsContainer.request_param("Name"), decode: false));
+                        responseText = PublicMethods.toJSON(resData);
                     }
                     break;
                 case "GetApplications":
@@ -459,11 +465,12 @@ namespace RaaiVan.Web.API
                 "]";
         }
 
-        public static Dictionary<string, object> get_rv_global(ParamsContainer paramsContainer, bool? loginInfo, 
-            Guid? invitationId) {
+        public static Dictionary<string, object> get_rv_global(ParamsContainer paramsContainer) {
             Dictionary<string, object> response = new Dictionary<string, object>();
 
             bool isAuthenticated = RaaiVanUtil.is_authenticated(paramsContainer.ApplicationID, HttpContext.Current);
+
+            RaaiVanUtil.initialize(paramsContainer.ApplicationID);
 
             //Updatable Items
             if (paramsContainer.ApplicationID.HasValue)
@@ -522,56 +529,6 @@ namespace RaaiVan.Web.API
             response["SSOLoginURL"] = (!RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) ? string.Empty :
                 Base64.encode(RaaiVanSettings.SSO.LoginURL(paramsContainer.ApplicationID)));
             response["SSOLoginTitle"] = Base64.encode(RaaiVanSettings.SSO.LoginTitle(paramsContainer.ApplicationID));
-
-            if (loginInfo.HasValue && loginInfo.Value)
-            {
-                bool disableLogin = false;
-                string loginErrorMessage = string.Empty;
-                bool loggedIn = false;
-                string authCookie = string.Empty;
-                Guid? userId = null;
-                bool shouldRedirect = false;
-
-                if (!isAuthenticated && RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) &&
-                    !(loggedIn = RaaiVanUtil.sso_login(paramsContainer, true, 
-                    ref loginErrorMessage, ref userId, ref authCookie, ref shouldRedirect))) disableLogin = true;
-                
-                response["LoginPageModel"] = RaaiVanSettings.LoginPageModel(paramsContainer.ApplicationID);
-                response["LoggedIn"] = loggedIn;
-                response["DisableLogin"] = disableLogin;
-                response["LoginErrorMessage"] = loginErrorMessage;
-                response["NeedsSSORedirect"] = shouldRedirect;
-
-                if (!string.IsNullOrEmpty(authCookie))
-                    response["AuthCookie"] = authCookie;
-
-                if (loggedIn)
-                {
-                    response["LoginMessage"] =
-                        Base64.encode(RVAPI.get_login_message(paramsContainer.ApplicationID, userId));
-
-                    response["LastLogins"] = 
-                        PublicMethods.fromJSON(RVAPI.get_last_logins(paramsContainer.ApplicationID, userId));
-                }
-
-                //login page info
-                string[] info = null;
-                if (!string.IsNullOrEmpty(RaaiVanSettings.LoginPageInfo(paramsContainer.ApplicationID)))
-                    info = RaaiVanSettings.LoginPageInfo(paramsContainer.ApplicationID).Split('|');
-
-                if (info != null)
-                {
-                    foreach (string str in info)
-                    {
-                        Dictionary<string, object> dt = PublicMethods.fromJSON(
-                            "{" + Page.View.Login.get_info_json(paramsContainer, str) + "}");
-
-                        if (dt != null)
-                            foreach (string key in dt.Keys) response[key] = dt[key];
-                    }
-                }
-                //end of login page info
-            }
 
             return response;
         }

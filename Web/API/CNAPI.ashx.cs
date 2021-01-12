@@ -5,6 +5,8 @@ using System.Web;
 using System.Data.Common;
 using System.Web.Security;
 using System.Data;
+using System.Drawing;
+using QRCoder;
 using RaaiVan.Modules.CoreNetwork;
 using RaaiVan.Modules.Knowledge;
 using RaaiVan.Modules.Documents;
@@ -17,6 +19,7 @@ using RaaiVan.Modules.Privacy;
 using RaaiVan.Modules.FormGenerator;
 using RaaiVan.Modules.WorkFlow;
 using RaaiVan.Modules.DataExchange;
+using System.Drawing.Imaging;
 
 namespace RaaiVan.Web.API
 {
@@ -507,6 +510,21 @@ namespace RaaiVan.Web.API
                     get_node(PublicMethods.parse_guid(context.Request.Params["NodeID"]), ref responseText);
                     _return_response(ref context, ref responseText);
                     return;
+                case "QRCode":
+                case "qrcode":
+                    {
+                        Guid? nId = PublicMethods.parse_guid(context.Request.Params["NodeID"]);
+
+                        Node _nd = !nId.HasValue ? null : CNController.get_node(paramsContainer.Tenant.Id, nId.Value);
+
+                        QRCodeGenerator qrGenerator = new QRCodeGenerator();
+                        QRCodeData qrCodeData = qrGenerator.CreateQrCode(_nd.toJson(simple: true), QRCodeGenerator.ECCLevel.M);
+                        QRCode qrCode = new QRCode(qrCodeData);
+
+                        HttpContext.Current.Response.ContentType = "image/png";
+                        qrCode.GetGraphic(20).Save(HttpContext.Current.Response.OutputStream, ImageFormat.Png);
+                        return;
+                    }
                 case "GetNodes":
                     {
                         List<Guid> nodeIds = ListMaker.get_guid_items(context.Request.Params["NodeIDs"], '|');

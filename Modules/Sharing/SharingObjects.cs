@@ -28,7 +28,7 @@ namespace RaaiVan.Modules.Sharing
         Custom
     }
 
-    public enum OwnerTypes
+    public enum PostOwnerType
     {
         None,
         User,
@@ -155,7 +155,7 @@ namespace RaaiVan.Modules.Sharing
                 (isOriginal ? OriginalSender.UserID == currentUserId : Sender.UserID == currentUserId));
 
             string ownerImageUrl = string.Empty;
-            if (OwnerType == OwnerTypes.User.ToString() && Sender.UserID != ownerId)
+            if (OwnerType == PostOwnerType.User.ToString() && Sender.UserID != ownerId)
                 ownerImageUrl = DocumentUtilities.get_personal_image_address(applicationId, ownerId);
 
             Guid pictureId = refPostId.HasValue ? refPostId.Value : postId;

@@ -28,8 +28,6 @@ namespace RaaiVan.Web.Page.View
                 if (!id.HasValue && !string.IsNullOrEmpty(Request.Params["InstanceID"]))
                     id = Guid.Parse(Request.Params["InstanceID"]);
 
-                Guid userId = paramsContainer.CurrentUserID.HasValue ? paramsContainer.CurrentUserID.Value : Guid.Empty;
-
                 Poll poll = !id.HasValue ? null : FGController.get_poll(paramsContainer.Tenant.Id, id.Value);
 
                 //if (!FGController.is_director(instanceId.HasValue ? instanceId.Value : Guid.Empty, userId)) 

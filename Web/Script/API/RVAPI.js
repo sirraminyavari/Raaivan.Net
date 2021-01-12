@@ -63,6 +63,11 @@
         return "../../node/" + (params.NodeID || params.ID || "_") + (params.QRCode ? "?qrcode=true" : "");
     },
 
+    NodeToQRCodeURL: function (params) {
+        params = params || {};
+        return "../../api/network/qrcode?NodeID=" + (params.NodeID || params.ID || "_") + "&timeStamp=" + new Date().getTime();
+    },
+
     NewQuestionPageURL: function () {
         return "../../newquestion";
     },
@@ -156,6 +161,22 @@
     OnLogout: function (params) {
         var _onLogout = GlobalUtilities.get_type(params) == "function" ? params : (params || {}).OnLogout;
         if (_onLogout) RVAPI._LogoutFuncs.push(_onLogout);
+    },
+
+    GetGlobalParams: function (params) {
+        params = params || {};
+
+        var url = RVAPI.ResponseURL + "/GetGlobalParams?timeStamp=" + new Date().getTime();
+        var queryString = (GlobalUtilities.get_type(params.Set) == "boolean" ? "&Set=" + params.Set : "");
+        return RVAPI._send(url, params, queryString);
+    },
+
+    CheckRoute: function (params) {
+        params = params || {};
+
+        var url = RVAPI.ResponseURL + "/CheckRoute?timeStamp=" + new Date().getTime();
+        var queryString = (params.Name ? "&Name=" + params.Name : "");
+        return RVAPI._send(url, params, queryString);
     },
 
     GetApplications: function (params) {

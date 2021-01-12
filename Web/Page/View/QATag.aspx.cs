@@ -31,8 +31,6 @@ namespace RaaiVan.Web.Page.View
 
                 if (!Modules.RaaiVanConfig.Modules.QA(paramsContainer.Tenant.Id)) Response.Redirect(PublicConsts.HomePage);
 
-                Guid currentUserId = paramsContainer.CurrentUserID.HasValue ? paramsContainer.CurrentUserID.Value : Guid.Empty;
-
                 Guid tagId = Guid.Empty;
                 Guid.TryParse(Request.Params["id"], out tagId);
                 if (tagId == Guid.Empty) Guid.TryParse(Request.Params["TagID"], out tagId);

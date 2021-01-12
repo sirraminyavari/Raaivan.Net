@@ -274,8 +274,8 @@ namespace RaaiVan.Web.API
                     Description = description
                 };
 
-                if (ownerType == OwnerTypes.User.ToString()) not.UserID = ownerId;
-                else if (ownerType == OwnerTypes.WFHistory.ToString())
+                if (ownerType == PostOwnerType.User.ToString()) not.UserID = ownerId;
+                else if (ownerType == PostOwnerType.WFHistory.ToString())
                 {
                     History hist = WFController.get_history(paramsContainer.Tenant.Id, ownerId.Value);
 
@@ -529,13 +529,13 @@ namespace RaaiVan.Web.API
 
             if (post.OwnerID.HasValue)
             {
-                OwnerTypes ownerType = new OwnerTypes();
-                try { ownerType = (OwnerTypes)Enum.Parse(typeof(OwnerTypes), post.OwnerType); }
-                catch { ownerType = OwnerTypes.None; }
+                PostOwnerType ownerType = new PostOwnerType();
+                try { ownerType = (PostOwnerType)Enum.Parse(typeof(PostOwnerType), post.OwnerType); }
+                catch { ownerType = PostOwnerType.None; }
 
                 switch (ownerType)
                 {
-                    case OwnerTypes.User:
+                    case PostOwnerType.User:
                         User ownerUser = UsersController.get_user(paramsContainer.Tenant.Id, post.OwnerID.Value);
                         if (ownerUser == null) break;
                         post.OwnerTitle = (ownerUser.FirstName + " " + ownerUser.LastName).Trim();
@@ -546,8 +546,8 @@ namespace RaaiVan.Web.API
                             ",\"NavigateURL\":\"" + PublicConsts.get_client_url(PublicConsts.ProfilePage) +
                                 "/" + ownerUser.UserID.Value.ToString() + "\"}";
                         break;
-                    case OwnerTypes.Node:
-                    case OwnerTypes.Knowledge:
+                    case PostOwnerType.Node:
+                    case PostOwnerType.Knowledge:
                         if (!ownerInfo.HasValue || !ownerInfo.Value) break;
                         Node node = CNController.get_node(paramsContainer.Tenant.Id, post.OwnerID.Value);
                         if (node == null) break;
@@ -559,7 +559,7 @@ namespace RaaiVan.Web.API
                             ",\"NavigateURL\":\"" + PublicConsts.get_client_url(PublicConsts.NodePage) +
                                 "/" + node.NodeID.Value.ToString() + "\"}";
                         break;
-                    case OwnerTypes.WFHistory:
+                    case PostOwnerType.WFHistory:
                         if (!ownerInfo.HasValue || !ownerInfo.Value) break;
                         History hist = WFController.get_history(paramsContainer.Tenant.Id, post.OwnerID.Value);
                         if (hist == null || !hist.OwnerID.HasValue) break;
@@ -621,7 +621,7 @@ namespace RaaiVan.Web.API
             List<Comment> comments = SharingController.get_post_comments(paramsContainer.Tenant.Id,
                 posts.Select(u => u.PostID.Value).ToList(), paramsContainer.CurrentUserID);
 
-            List<Guid> ownerUserIds = posts.Where(u => u.OwnerType == OwnerTypes.User.ToString() && u.OwnerID.HasValue)
+            List<Guid> ownerUserIds = posts.Where(u => u.OwnerType == PostOwnerType.User.ToString() && u.OwnerID.HasValue)
                 .Select(v => v.OwnerID.Value).ToList();
 
             List<User> ownerUsers = new List<User>();
@@ -725,7 +725,7 @@ namespace RaaiVan.Web.API
                     Action = Modules.NotificationCenter.ActionType.Share,
                     Description = description
                 };
-                if (ownerType == OwnerTypes.User.ToString()) not.UserID = ownerId;
+                if (ownerType == PostOwnerType.User.ToString()) not.UserID = ownerId;
                 not.Sender.UserID = paramsContainer.CurrentUserID;
                 NotificationController.send_notification(paramsContainer.Tenant.Id, not);
             }

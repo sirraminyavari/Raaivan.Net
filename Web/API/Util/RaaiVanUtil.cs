@@ -866,6 +866,10 @@ namespace RaaiVan.Web.API
             get { return Tenant == null ? null : (Guid?)Tenant.Id; }
         }
 
+        public HttpContext Context {
+            get { return _Context; }
+        }
+
         private bool _RefreshAccessToken;
 
         private bool? _is_replay_attack;

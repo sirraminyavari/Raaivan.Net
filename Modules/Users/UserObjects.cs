@@ -346,10 +346,14 @@ namespace RaaiVan.Modules.Users
             return UserID.HasValue && UserID != Guid.Empty && !string.IsNullOrEmpty(FirstName) && !string.IsNullOrEmpty(LastName);
         }
 
-        public string toJson(Guid? applicationId = null, bool profileImageUrl = false)
+        public string toJson(Guid? applicationId = null, bool profileImageUrl = false, 
+            bool highQualityProfileImageUrl = false, bool coverPhotoUrl = false, bool highQualityCoverPhotoUrl = false)
         {
             string imageUrl = !profileImageUrl ? string.Empty :
                 DocumentUtilities.get_personal_image_address(applicationId, UserID.HasValue ? UserID.Value : Guid.Empty);
+
+            string hqImageUrl = !highQualityProfileImageUrl || !UserID.HasValue ? string.Empty :
+                DocumentUtilities.get_personal_image_address(applicationId, UserID.Value, highQuality: true);
 
             return "{\"UserID\":\"" + (UserID.HasValue ? UserID.ToString() : string.Empty) + "\"" +
                 ",\"UserName\":\"" + Base64.encode(UserName) + "\"" +
@@ -361,6 +365,11 @@ namespace RaaiVan.Modules.Users
                     ",\"ProfileImageURL\":\"" + imageUrl + "\"" +
                     ",\"ImageURL\":\"" + imageUrl + "\""
                 ) +
+                (string.IsNullOrEmpty(hqImageUrl) ? string.Empty : ",\"HighQualityImageURL\":\"" + hqImageUrl + "\"") +
+                (!coverPhotoUrl || !UserID.HasValue ? string.Empty : ",\"CoverPhotoURL\":\"" +
+                    DocumentUtilities.get_cover_photo_url(applicationId, UserID.Value, networkAddress: false, highQuality: false) + "\"") +
+                (!highQualityCoverPhotoUrl || !UserID.HasValue ? string.Empty : ",\"HighQualityCoverPhotoURL\":\"" +
+                    DocumentUtilities.get_cover_photo_url(applicationId, UserID.Value, networkAddress: false, highQuality: true) + "\"") +
                 "}";
         }
     }

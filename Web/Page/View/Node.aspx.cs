@@ -45,23 +45,7 @@ namespace RaaiVan.Web.Page.View
                 if (UsersController.get_user(paramsContainer.Tenant.Id, nodeId) != null)
                     Response.Redirect(PublicConsts.ProfilePage + "/" + nodeId.ToString());
 
-                if (Request.Url.ToString().ToLower().Contains("qrcode"))
-                {
-                    ParamsContainer paramsContainer = new ParamsContainer(HttpContext.Current);
-
-                    Modules.CoreNetwork.Node _nd = CNController.get_node(paramsContainer.Tenant.Id, nodeId);
-
-                    QRCodeGenerator qrGenerator = new QRCodeGenerator();
-                    QRCodeData qrCodeData = qrGenerator.CreateQrCode(_nd.toJson(simple: true), QRCodeGenerator.ECCLevel.M);
-                    QRCode qrCode = new QRCode(qrCodeData);
-                    
-                    HttpContext.Current.Response.ContentType = "image/png";
-                    qrCode.GetGraphic(20).Save(HttpContext.Current.Response.OutputStream, ImageFormat.Png);
-                    
-                    return;
-
-                }
-                else if (Request.Url.ToString().ToLower().Contains("_escaped_fragment_="))
+                if (Request.Url.ToString().ToLower().Contains("_escaped_fragment_="))
                 {
                     ParamsContainer paramsContainer = new ParamsContainer(HttpContext.Current);
 
