@@ -237,7 +237,7 @@ namespace RaaiVan.Web.API
                 case "check_route":
                     {
                         Dictionary<string, object> resData = RouteList.get_data(paramsContainer, 
-                            PublicMethods.parse_string(paramsContainer.request_param("Name"), decode: false));
+                            PublicMethods.parse_string(paramsContainer.request_param("RouteName"), decode: false));
                         responseText = PublicMethods.toJSON(resData);
                     }
                     break;
@@ -473,17 +473,9 @@ namespace RaaiVan.Web.API
             RaaiVanUtil.initialize(paramsContainer.ApplicationID);
 
             //Updatable Items
-            if (paramsContainer.ApplicationID.HasValue)
-                response["ApplicationID"] = paramsContainer.ApplicationID.ToString();
-
-            response["IsAuthenticated"] = isAuthenticated;
             response["AccessToken"] = AccessTokenList.new_token(HttpContext.Current);
             response["Theme"] = isAuthenticated && RaaiVanSettings.EnableThemes(paramsContainer.ApplicationID) ?
                 UsersController.get_theme(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value) : string.Empty;
-
-            string reason = string.Empty;
-            response["PasswordChangeNeeded"] = RaaiVanUtil.password_change_needed(HttpContext.Current, ref reason);
-            response["PasswordChangeReason"] = reason;
             //end of Updatable Items
 
             if (!PublicMethods.check_sys_id())

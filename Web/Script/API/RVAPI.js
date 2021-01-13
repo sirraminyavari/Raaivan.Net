@@ -174,8 +174,13 @@
     CheckRoute: function (params) {
         params = params || {};
 
+        var reqParams = [];
+
+        for (var key in (params.Parameters || {}))
+            reqParams.push(key + "=" + params.Parameters[key]);
+
         var url = RVAPI.ResponseURL + "/CheckRoute?timeStamp=" + new Date().getTime();
-        var queryString = (params.Name ? "&Name=" + params.Name : "");
+        var queryString = (params.RouteName ? "&RouteName=" + params.RouteName : "") + "&" + reqParams.join("&");
         return RVAPI._send(url, params, queryString);
     },
 
