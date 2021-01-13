@@ -170,7 +170,7 @@ namespace RaaiVan.Web.API
 
                 if (!input.ParamsContainer.ApplicationID.HasValue && RaaiVanSettings.SAASBasedMultiTenancy)
                     input.set_redirect_to_teams();
-                input.set_redirect_to_home();
+                else input.set_redirect_to_home();
 
                 return false;
             }
