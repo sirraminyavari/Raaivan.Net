@@ -1365,10 +1365,6 @@ namespace RaaiVan.Modules.GlobalUtilities
                 "<link rel='shortcut icon' href='../../Images/" + RaaiVanSettings.FavIconName + ".ico' />"));
 
             pg.Header.Controls.Add(new LiteralControl("<link type='text/css' rel='stylesheet' " +
-                "href='" + pg.ResolveClientUrl("~/api/rv/theme?timeStamp=" + 
-                DateTime.Now.Millisecond.ToString()) + "' />"));
-            
-            pg.Header.Controls.Add(new LiteralControl("<link type='text/css' rel='stylesheet' " +
                 "href='" + pg.ResolveClientUrl("~/CSS/" + RaaiVanSettings.DefaultDirection(applicationId) + ".css") + "' />"));
 
             pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
@@ -1379,9 +1375,6 @@ namespace RaaiVan.Modules.GlobalUtilities
                 pg.ResolveClientUrl("~/Script/Lang/Help/" + RaaiVanSettings.DefaultLang(applicationId) + ".js?timeStamp=" +
                 DateTime.Now.Millisecond.ToString()) + "'></script>"));
 
-            pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript'>" +
-                "window.IsAuthenticated = " + isAuthenticated.ToString().ToLower() + ";</script>"));
-            
             if (RaaiVanSettings.RealTime(applicationId) && isAuthenticated)
             {
                 pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
@@ -1389,25 +1382,9 @@ namespace RaaiVan.Modules.GlobalUtilities
                 
                 pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
                     pg.ResolveClientUrl("~/signalr/hubs") + "'></script>"));
-                //pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
-                //    pg.ResolveClientUrl("~/Script/RealTime/hub.js") + "'></script>"));
-
+                
                 pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
                     pg.ResolveClientUrl("~/Script/RealTime/RaaiVanHub.js") + "'></script>"));
-            }
-
-            if (!string.IsNullOrEmpty(RaaiVanSettings.GATrackingID(applicationId)))
-            {
-                pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript'>" +
-                    "(function (i, s, o, g, r, a, m) {" +
-                    "i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {" +
-                    "(i[r].q = i[r].q || []).push(arguments)" +
-                    "}, i[r].l = 1 * new Date(); a = s.createElement(o)," +
-                    "m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)" +
-                    "})(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');" +
-                    "ga('create', 'UA-" + RaaiVanSettings.GATrackingID(applicationId) + "', 'auto');" +
-                    "ga('send', 'pageview');" +
-                    "</script>"));
             }
         }
 

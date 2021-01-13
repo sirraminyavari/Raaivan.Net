@@ -23,6 +23,9 @@
     <script type="text/javascript" src="../../Script/Lang/fa.js"></script>
     <script type="text/javascript" src="../../Script/json2.js"></script>
 
+    <link rel="stylesheet" type="text/css" href="../../api/rv/theme"/>
+    <script type="text/javascript" src="../../api/rv/global_params?Set=true"></script>
+
     <script type="text/javascript" src="../../Script/API/RVAPI.js"></script>
     <script type="text/javascript" src="../../Script/API/UsersAPI.js"></script>
 
@@ -35,10 +38,6 @@
 <body class="Direction TextAlign" style="font-family:IRANSans;">
     <form id="form1" runat="server">
         <asp:HiddenField ID="initialJson" runat="server" ClientIDMode="Static" />
-
-        <script type="text/javascript">
-            (function () { window.RVGlobal = JSON.parse(document.getElementById("initialJson").value); })();
-        </script>
     </form>
 
     <div class="small-12 medium-12 large-12 row align-center" style="margin:1.5rem;">
@@ -87,7 +86,7 @@
 
             if (window.ChangePasswordDialog) return;
 
-            window.ChangePasswordDialog = function () {
+            window.ChangePasswordDialog = function (params) {
                 this.Objects = {
                     HasPolicy: false,
                     Policy: null
@@ -106,7 +105,7 @@
                                     result.UpperLower || result.NonAlphabetic || result.Number || result.NonAlphaNumeric;
                                 that.Objects.Policy = result;
 
-                                that.initialize();
+                                that.initialize(params);
                             }
                         });
                     }
@@ -114,7 +113,8 @@
             }
 
             ChangePasswordDialog.prototype = {
-                initialize: function () {
+                initialize: function (params) {
+                    params = params || {};
                     var that = this;
 
                     if (that.Objects.HasPolicy) {
@@ -154,7 +154,7 @@
                     var currentPasswordInput = document.getElementById("currentPassword");
                     var newPasswordInput = document.getElementById("newPassword");
                     var newPasswordRepeatInput = document.getElementById("newPasswordRepeat");
-                    var submitButtonInput = document.getElementById("submitButton");
+                    var submitButton = document.getElementById("submitButton");
 
                     homeButton.innerHTML = RVDic.Home;
                     logoutButton.innerHTML = RVDic.Logout;
@@ -163,9 +163,9 @@
                     newPasswordInput.setAttribute("placeholder", RVDic.NewPassword + "...");
                     newPasswordRepeatInput.setAttribute("placeholder", RVDic.RepeatNewPassword + "...");
                     submitButton.innerHTML = RVDic.ChangePassword;
-
-                    if (window.RVGlobal.PasswordChangeNeeded) {
-                        var reason = window.RVGlobal.PasswordChangeReason;
+                    
+                    if (params.PasswordChangeNeeded) {
+                        var reason = params.PasswordChangeReason;
 
                         document.getElementById("reasonInfo").innerHTML =
                             reason == "FirstPassword" ? "لازم است تا اولین رمز عبور خود را تغییر دهید" :
@@ -271,7 +271,8 @@
 
     <script type="text/javascript">
         (function () {
-            new ChangePasswordDialog();
+            var settings = GlobalUtilities.to_json(document.getElementById("initialJson").value) || {};
+            new ChangePasswordDialog(settings);
         })();
     </script>
 </body>

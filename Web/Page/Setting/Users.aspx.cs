@@ -6,7 +6,6 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using RaaiVan.Modules.GlobalUtilities;
 using RaaiVan.Web.API;
-using RaaiVan.Modules.Users;
 
 namespace RaaiVan.Web.Page.Setting
 {
@@ -17,18 +16,7 @@ namespace RaaiVan.Web.Page.Setting
         protected void Page_Load(object sender, EventArgs e)
         {
             paramsContainer = new ParamsContainer(HttpContext.Current);
-
-            if (!paramsContainer.IsAuthenticated)
-            {
-                paramsContainer.redirect_to_login_page();
-                return;
-            }
-
-            AuthorizationManager.redirect_if_no_access(AccessRoleName.UsersManagement,
-                PublicMethods.get_current_user_id(), Page);
-
-            initialJson.Value = "{\"Reauthenticate\":" + RaaiVanSettings
-                .ReautheticationForSensitivePages.UsersAdmin(paramsContainer.Tenant.Id).ToString().ToLower() + "}";
+            initialJson.Value = PublicMethods.toJSON(RouteList.get_data_server_side(paramsContainer, RouteName.admin_users));
         }
     }
 }

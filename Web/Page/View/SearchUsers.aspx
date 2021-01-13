@@ -8,8 +8,6 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-    <asp:HiddenField ID="initialJson" runat="server" ClientIDMode="Static" Value="" />
-
     <div id="searchArea" class="small-12 medium-12 large-12 row align-center" style="margin:0rem; padding:0vw 10vw;"></div>
 
     <script type="text/javascript">

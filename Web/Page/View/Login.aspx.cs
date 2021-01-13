@@ -9,8 +9,6 @@ using System.Web.UI.WebControls;
 using System.Web.Security;
 using RaaiVan.Web.API;
 using RaaiVan.Modules.GlobalUtilities;
-using RaaiVan.Modules.Log;
-using RaaiVan.Modules.Users;
 
 namespace RaaiVan.Web.Page.View
 {
@@ -20,102 +18,16 @@ namespace RaaiVan.Web.Page.View
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            paramsContainer = new ParamsContainer(HttpContext.Current, nullTenantResponse: !RaaiVanSettings.SAASBasedMultiTenancy);
+            paramsContainer = new ParamsContainer(HttpContext.Current);
+            RouteList.get_data_server_side(paramsContainer, RouteName.login);
 
             Page.Title = RaaiVanSettings.SystemTitle(paramsContainer.ApplicationID);
+            PublicMethods.set_page_headers(paramsContainer.ApplicationID, Page, false);
 
-            try
-            {
-                if (!RaaiVanSettings.SAASBasedMultiTenancy && !paramsContainer.ApplicationID.HasValue)
-                {
-                    PublicMethods.set_page_headers(paramsContainer.ApplicationID, Page, false);
-                    PublicMethods.set_rv_global(Page, PublicMethods.fromJSON(PublicConsts.NullTenantResponse));
-                    return;
-                }
+            string returnUrl = Request.Params["ReturnUrl"];
 
-                RaaiVanUtil.initialize(paramsContainer.ApplicationID);
-
-                if (string.IsNullOrEmpty(Request.Params["iamadmin"]) && RaaiVanSettings.ServiceUnavailable)
-                    Response.Redirect(PublicConsts.ServiceUnavailablePage);
-
-                string returnUrl = Request.Params["ReturnUrl"];
-
-                if (RaaiVanSettings.IgnoreReturnURLOnLogin(paramsContainer.ApplicationID) && !string.IsNullOrEmpty(returnUrl))
-                    Response.Redirect(PublicConsts.LoginPage);
-
-                bool isValid = PublicMethods.check_sys_id();
-
-                bool disableLogin = false;
-                string loginErrorMessage = string.Empty;
-                bool loggedIn = false;
-
-                bool? local = PublicMethods.parse_bool(Request.Params["Local"]);
-                Guid? userId = null;
-
-                string authCookie = string.Empty;
-                bool shouldRedirect = false;
-
-                if (RaaiVanUtil.is_authenticated(paramsContainer.ApplicationID, HttpContext.Current))
-                {
-                    Guid? invitationId = PublicMethods.parse_guid(Request.Params["inv"]);
-                    RaaiVanUtil.init_user_application(invitationId, paramsContainer.CurrentUserID.Value);
-
-                    Response.Redirect(PublicConsts.HomePage);
-                }
-                else if ((!local.HasValue || !local.Value) && RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) &&
-                    !(loggedIn = RaaiVanUtil.sso_login(paramsContainer, false, ref loginErrorMessage, ref userId, ref authCookie, ref shouldRedirect)))
-                {
-                    disableLogin = true;
-                }
-                
-                PublicMethods.set_page_headers(paramsContainer.ApplicationID, Page, false);
-
-                string[] info = null;
-                if (!string.IsNullOrEmpty(RaaiVanSettings.LoginPageInfo(paramsContainer.ApplicationID)))
-                    info = RaaiVanSettings.LoginPageInfo(paramsContainer.ApplicationID).Split('|');
-
-                string strLoginMessage = !loggedIn ? string.Empty : RVAPI.get_login_message(paramsContainer.ApplicationID, userId);
-                string strLastLogins = !loggedIn ? string.Empty : RVAPI.get_last_logins(paramsContainer.ApplicationID, userId);
-
-                string rvGlobal = "{\"SysID\":\"" + (isValid ? string.Empty : PublicMethods.get_sys_id()) + "\"" +
-                    ",\"SystemTitle\":\"" + Base64.encode(RaaiVanSettings.SystemTitle(paramsContainer.ApplicationID)) + "\"" +
-                    ",\"SystemName\":\"" + Base64.encode(RaaiVanSettings.SystemName(paramsContainer.ApplicationID)) + "\"" +
-                    ",\"SSOLoginURL\":\"" + (!RaaiVanSettings.SSO.Enabled(paramsContainer.ApplicationID) ? string.Empty :
-                        Base64.encode(Modules.Jobs.SSO.get_login_url(paramsContainer.ApplicationID))) + "\"" +
-                    ",\"SSOLoginTitle\":\"" + Base64.encode(RaaiVanSettings.SSO.LoginTitle(paramsContainer.ApplicationID)) + "\"" +
-                    ",\"ReturnURL\":\"" + Base64.encode(returnUrl) + "\"" +
-                    ",\"SystemVersion\":\"" + PublicMethods.SystemVersion + "\"" +
-                    ",\"ShowSystemVersion\":" + RaaiVanSettings.ShowSystemVersion(paramsContainer.ApplicationID).ToString().ToLower() +
-                    ",\"LoginPageModel\":\"" + RaaiVanSettings.LoginPageModel(paramsContainer.ApplicationID) + "\"" +
-                    ",\"Modules\":" + ConfigUtilities.get_modules_json(paramsContainer.ApplicationID) +
-                    ",\"LoggedIn\":" + loggedIn.ToString().ToLower() +
-                    ",\"DisableLogin\":" + disableLogin.ToString().ToLower() +
-                    ",\"LoginErrorMessage\":\"" + loginErrorMessage + "\"" +
-                    ",\"AuthCookie\":" + (string.IsNullOrEmpty(authCookie) ? "null" : authCookie) +
-                    ",\"LoginMessage\":\"" + Base64.encode(strLoginMessage) + "\"" +
-                    (string.IsNullOrEmpty(strLastLogins) ? string.Empty : ",\"LastLogins\":" + strLastLogins) +
-                    ",\"UserSignUp\":" + RaaiVanSettings.UserSignUp(paramsContainer.ApplicationID).ToString().ToLower();
-
-                if (info != null)
-                {
-                    foreach (string str in info)
-                    {
-                        string result = get_info_json(paramsContainer, str);
-                        if (!string.IsNullOrEmpty(result)) rvGlobal += ", " + result;
-                    }
-                }
-
-                rvGlobal += "}";
-
-                PublicMethods.set_rv_global(Page, PublicMethods.fromJSON(rvGlobal));
-            }
-            catch (Exception ex)
-            {
-                LogController.save_error_log(paramsContainer.ApplicationID, null, "LoginPage_Load", ex, ModuleIdentifier.RV);
-
-                PublicMethods.set_rv_global(Page,
-                    PublicMethods.fromJSON("{\"Error\":\"" + Base64.encode(PublicMethods.get_exception(ex)) + "\"}"));
-            }
+            if (RaaiVanSettings.IgnoreReturnURLOnLogin(paramsContainer.ApplicationID) && !string.IsNullOrEmpty(returnUrl))
+                Response.Redirect(PublicConsts.LoginPage);
         }
 
         public static string get_info_json(ParamsContainer paramsContainer, string info)

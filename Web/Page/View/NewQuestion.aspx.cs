@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RaaiVan.Modules.GlobalUtilities;
 using RaaiVan.Web.API;
 
 namespace RaaiVan.Web.Page.View
@@ -16,12 +15,7 @@ namespace RaaiVan.Web.Page.View
         protected void Page_Load(object sender, EventArgs e)
         {
             paramsContainer = new ParamsContainer(HttpContext.Current);
-
-            if (!paramsContainer.IsAuthenticated)
-            {
-                paramsContainer.redirect_to_login_page();
-                return;
-            }
+            RouteList.get_data_server_side(paramsContainer, RouteName.newquestion);
         }
     }
 }

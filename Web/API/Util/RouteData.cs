@@ -13,6 +13,7 @@ using RaaiVan.Modules.Sharing;
 using RaaiVan.Modules.Reports;
 using RaaiVan.Modules.Privacy;
 using RaaiVan.Modules.Wiki;
+using System.Web.Security;
 
 namespace RaaiVan.Web.API
 {
@@ -87,13 +88,19 @@ namespace RaaiVan.Web.API
 
         public void set_redirect_to_profile(Guid? userId = null)
         {
-            if(userId.HasValue) Data["RedirectToProfile"] = userId;
+            if (userId.HasValue) Data["RedirectToProfile"] = userId;
             else Data["RedirectToProfile"] = true;
         }
 
         public void set_redirect_to_teams() { Data["RedirectToTeams"] = true; }
 
         public void set_redirect_to_change_password() { Data["RedirectToChangePassword"] = true; }
+
+        public void set_redirect_to_url(string url)
+        {
+            if (!string.IsNullOrEmpty(url)) url = url.Trim();
+            if (!string.IsNullOrEmpty(url)) Data["RedirectToURL"] = url;
+        }
 
         public void set_access_denied() { Data["AccessDenied"] = true; }
 
@@ -116,7 +123,8 @@ namespace RaaiVan.Web.API
             Action = action;
         }
 
-        private bool check_service_unavailable(RouteActionParams input) {
+        private bool check_service_unavailable(RouteActionParams input)
+        {
             if (RaaiVanSettings.ServiceUnavailable && RouteName != RouteName.none &&
                 string.IsNullOrEmpty(input.ParamsContainer.request_param("iamadmin")))
             {
@@ -255,7 +263,7 @@ namespace RaaiVan.Web.API
             {
                 if (RaaiVanSettings.SAASBasedMultiTenancy)
                 {
-                    if(input.ParamsContainer.IsAuthenticated)
+                    if (input.ParamsContainer.IsAuthenticated)
                         input.set_redirect_to_teams();
                     else input.set_redirect_to_home();
                 }
@@ -289,7 +297,8 @@ namespace RaaiVan.Web.API
             return !accessDenied;
         }
 
-        private bool check_password_change(RouteActionParams input) {
+        private bool check_password_change(RouteActionParams input)
+        {
             List<RouteName> CheckPasswordException = new List<RouteName>() {
                 RouteName.changepassword,
                 RouteName.login,
@@ -399,6 +408,43 @@ namespace RaaiVan.Web.API
             if (info == null) info = new RouteInfo(routeName);
 
             Dictionary<string, object> data = info.get_data(paramsContainer);
+
+            return data;
+        }
+
+        public static Dictionary<string, object> get_data_server_side(ParamsContainer paramsContainer, RouteName routeName)
+        {
+            Dictionary<string, object> data = get_data(paramsContainer, routeName.ToString());
+
+            Guid? userId = null;
+            string redirectToUrl = PublicMethods.get_dic_value(data, "RedirectToURL");
+
+            if (PublicMethods.get_dic_value<bool>(data, "RedirectToLogin", false))
+                FormsAuthentication.RedirectToLoginPage("ReturnUrl=" +
+                    HttpUtility.UrlEncode(paramsContainer.Context.Request.Url.AbsolutePath));
+            else if (PublicMethods.get_dic_value<bool>(data, "RedirectToHome", false))
+                paramsContainer.Context.Response.Redirect(PublicConsts.HomePage);
+            else if (PublicMethods.get_dic_value<bool>(data, "RedirectToProfile", false))
+                paramsContainer.Context.Response.Redirect(PublicConsts.ProfilePage);
+            else if ((userId = PublicMethods.parse_guid(PublicMethods.get_dic_value(data, "RedirectToProfile"))).HasValue)
+                paramsContainer.Context.Response.Redirect(PublicConsts.ProfilePage + "/" + userId.Value.ToString());
+            else if (PublicMethods.get_dic_value<bool>(data, "RedirectToTeams", false))
+                paramsContainer.Context.Response.Redirect(PublicConsts.ApplicationsPage);
+            else if (PublicMethods.get_dic_value<bool>(data, "RedirectToChangePassword", false))
+                paramsContainer.Context.Response.Redirect(PublicConsts.ChangePasswordPage);
+            else if (PublicMethods.get_dic_value<bool>(data, "AccessDenied", false) && routeName != RouteName.node)
+                paramsContainer.Context.Response.Redirect(PublicConsts.NoAccessPage);
+            else if (PublicMethods.get_dic_value<bool>(data, "NoApplicationFound", false))
+                paramsContainer.return_response(PublicConsts.NullTenantResponse);
+            else if (PublicMethods.get_dic_value<bool>(data, "ServiceUnavailable", false))
+                paramsContainer.Context.Response.Redirect(PublicConsts.ServiceUnavailablePage);
+            else if (!string.IsNullOrEmpty(redirectToUrl))
+                paramsContainer.Context.Response.Redirect(redirectToUrl);
+            else if (PublicMethods.get_dic_value<bool>(data, "NullProfileException", false))
+            {
+                paramsContainer.Context.Response.Write("پروفایل شما کامل نیست. لطفا به مدیر سیستم مراجعه فرمایید :)");
+                paramsContainer.Context.Response.End();
+            }
 
             return data;
         }
@@ -547,12 +593,13 @@ namespace RaaiVan.Web.API
             if (fs != null && fs.AreFriends.HasValue)
                 senderUserId = fs.IsSender.HasValue && fs.IsSender.Value ? input.ParamsContainer.CurrentUserID : userId;
 
-            NodeMember nm = !input.ParamsContainer.IsAuthenticated || !input.ParamsContainer.ApplicationID.HasValue ? null :
-                CNController.get_user_department(input.ParamsContainer.Tenant.Id, input.ParamsContainer.CurrentUserID.Value);
+            NodeMember nm = !input.ParamsContainer.IsAuthenticated || 
+                !input.ParamsContainer.ApplicationID.HasValue || !userId.HasValue ? null :
+                CNController.get_user_department(input.ParamsContainer.Tenant.Id, userId.Value);
 
             if (user != null)
             {
-                Dictionary<string, object> userDic = PublicMethods.fromJSON(input.CurrentUser.toJson(input.ParamsContainer.ApplicationID,
+                Dictionary<string, object> userDic = PublicMethods.fromJSON(user.toJson(input.ParamsContainer.ApplicationID,
                     profileImageUrl: true, highQualityProfileImageUrl: true, coverPhotoUrl: true, highQualityCoverPhotoUrl: true));
 
                 if (userDic != null && nm != null && nm.Node.NodeID.HasValue)
@@ -610,6 +657,12 @@ namespace RaaiVan.Web.API
                 !(loggedIn = RaaiVanUtil.sso_login(input.ParamsContainer, true,
                 ref loginErrorMessage, ref userId, ref authCookie, ref shouldRedirect))) disableLogin = true;
 
+            if (shouldRedirect)
+            {
+                input.set_redirect_to_url(Modules.Jobs.SSO.get_login_url(input.ParamsContainer.ApplicationID));
+                return;
+            }
+
             input.Data["LoginPageModel"] = RaaiVanSettings.LoginPageModel(input.ParamsContainer.ApplicationID);
             input.Data["LoggedIn"] = loggedIn;
             input.Data["DisableLogin"] = disableLogin;
@@ -653,7 +706,7 @@ namespace RaaiVan.Web.API
             Guid? nodeTypeId = PublicMethods.parse_guid(input.ParamsContainer.request_param("ID"),
                 alternatvieValue: PublicMethods.parse_guid(input.ParamsContainer.request_param("NodeTypeID")));
 
-            Service service = !nodeTypeId.HasValue ? null : 
+            Service service = !nodeTypeId.HasValue ? null :
                 CNController.get_service(input.ParamsContainer.Tenant.Id, nodeTypeId.Value);
 
             if (!nodeTypeId.HasValue || service == null)

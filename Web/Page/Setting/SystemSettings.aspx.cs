@@ -16,14 +16,7 @@ namespace RaaiVan.Web.Page.Setting
         protected void Page_Load(object sender, EventArgs e)
         {
             paramsContainer = new ParamsContainer(HttpContext.Current);
-
-            if (!RaaiVanUtil.is_authenticated(paramsContainer.ApplicationID, HttpContext.Current) || 
-                !paramsContainer.CurrentUserID.HasValue ||
-                !PublicMethods.is_system_admin(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value))
-                Response.Redirect(PublicConsts.NoAccessPage);
-
-            initialJson.Value = "{\"Reauthenticate\":" + RaaiVanSettings
-                .ReautheticationForSensitivePages.SettingsAdmin(paramsContainer.Tenant.Id).ToString().ToLower() + "}";
+            initialJson.Value = PublicMethods.toJSON(RouteList.get_data_server_side(paramsContainer, RouteName.admin_systemsettings));
         }
     }
 }

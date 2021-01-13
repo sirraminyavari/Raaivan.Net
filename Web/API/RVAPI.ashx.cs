@@ -226,9 +226,23 @@ namespace RaaiVan.Web.API
 
                         Dictionary<string, object> data = get_rv_global(paramsContainer);
 
-                        if (set.HasValue && set.Value) {
-                            responseText = "window.RVGlobal = " + PublicMethods.toJSON(data) + ";" +
-                                "window.IsAuthenticated = " + paramsContainer.IsAuthenticated.ToString().ToLower();
+                        if (set.HasValue && set.Value)
+                        {
+                            responseText = "window.RVGlobal = " + PublicMethods.toJSON(data) + "; " +
+                                "window.IsAuthenticated = " + paramsContainer.IsAuthenticated.ToString().ToLower() + "; " +
+                                "document.title = Base64.decode(window.RVGlobal.SystemTitle); ";
+
+                            if (!string.IsNullOrEmpty(RaaiVanSettings.GATrackingID(paramsContainer.ApplicationID)))
+                            {
+                                responseText += "(function (i, s, o, g, r, a, m) {" +
+                                    "i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {" +
+                                    "(i[r].q = i[r].q || []).push(arguments)" +
+                                    "}, i[r].l = 1 * new Date(); a = s.createElement(o)," +
+                                    "m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)" +
+                                    "})(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');" +
+                                    "ga('create', 'UA-" + RaaiVanSettings.GATrackingID(paramsContainer.ApplicationID) + "', 'auto');" +
+                                    "ga('send', 'pageview');";
+                            }
                         }
                         else responseText = PublicMethods.toJSON(data);
                     }
@@ -468,9 +482,17 @@ namespace RaaiVan.Web.API
         public static Dictionary<string, object> get_rv_global(ParamsContainer paramsContainer) {
             Dictionary<string, object> response = new Dictionary<string, object>();
 
-            bool isAuthenticated = RaaiVanUtil.is_authenticated(paramsContainer.ApplicationID, HttpContext.Current);
+            bool isAuthenticated = paramsContainer.IsAuthenticated;
 
             RaaiVanUtil.initialize(paramsContainer.ApplicationID);
+
+            //Removed In ReactUI
+            response["IsAuthenticated"] = isAuthenticated;
+
+            if (paramsContainer.ApplicationID.HasValue)
+                response["ApplicationID"] = paramsContainer.ApplicationID;
+            //end of Removed In ReactUI
+
 
             //Updatable Items
             response["AccessToken"] = AccessTokenList.new_token(HttpContext.Current);

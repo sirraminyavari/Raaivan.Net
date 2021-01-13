@@ -28,6 +28,9 @@
     <script type="text/javascript" src="../../Script/jQuery/Tooltip/jquery.tooltip.js"></script>
     <script type="text/javascript" src="../../Script/json2.js"></script>
 
+    <link rel="stylesheet" type="text/css" href="../../api/rv/theme"/>
+    <script type="text/javascript" src="../../api/rv/global_params?Set=true"></script>
+
     <script type="text/javascript" src="../../Script/API/RVAPI.js"></script>
 
     <script type="text/javascript">
@@ -54,12 +57,10 @@
             GlobalUtilities.create_nested_elements([
                 {
                     Type: "div", Style: "text-align:center; margin-bottom:1rem;",
-                    Childs: [
-                        {
-                            Type: "img", Style: "max-width:20rem;", Link: RVAPI.HomePageURL(),
-                            Attributes: [{ Name: "src", Value: GlobalUtilities.icon("RaaiVanLogo.png") }]
-                        }
-                    ]
+                    Childs: [{
+                        Type: "img", Style: "max-width:20rem;", Link: RVAPI.HomePageURL(),
+                        Attributes: [{ Name: "src", Value: GlobalUtilities.icon("RaaiVanLogo.png") }]
+                    }]
                 },
                 {
                     Type: "div", Style: "font-size:2rem; margin-bottom:1rem;",

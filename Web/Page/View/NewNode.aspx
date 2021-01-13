@@ -14,7 +14,6 @@
     <script type="text/javascript">
         (function () {
             var options = JSON.parse(document.getElementById("initialJson").value || "{}") || {};
-            var rvGlobal = window.RVGlobal || {};
             
             setTimeout(function () {
                 document.title = Base64.decode((options.Service || {}).Title) + (!document.title ? "" : " - " + document.title);

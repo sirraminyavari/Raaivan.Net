@@ -185,6 +185,8 @@ namespace RaaiVan.Modules.NotificationCenter
                         case SubjectType.Post:
                             foreach (Guid _usr in mentionedUserIds) users.Add(new Pair(_usr, UserStatus.Mentioned));
 
+                            Node node = null;
+
                             bool isNode = info.RefItemID.HasValue && 
                                 CNController.is_node(applicationId, info.RefItemID.Value);
 
@@ -207,7 +209,7 @@ namespace RaaiVan.Modules.NotificationCenter
                                     userIds = CNController.get_node_fans_user_ids(applicationId, info.RefItemID.Value).ToList();
                                 foreach (Guid _usr in userIds) users.Add(new Pair(_usr, UserStatus.Fan));
 
-                                Modules.CoreNetwork.Node node = CNController.get_node(applicationId, info.RefItemID.Value);
+                                node = CNController.get_node(applicationId, info.RefItemID.Value);
                                 if (node != null) info.SubjectName = node.Name;
                             }
 
@@ -224,6 +226,14 @@ namespace RaaiVan.Modules.NotificationCenter
                                     PublicConsts.get_complete_url(applicationId, PublicConsts.PostPage) +
                                     "/" + info.SubjectID.Value.ToString();
                                 info.ReplacementDic["Description"] = info.Description;
+
+                                if (isNode)
+                                {
+                                    info.ReplacementDic["NodePageURL"] =
+                                        PublicConsts.get_complete_url(applicationId, PublicConsts.NodePage) +
+                                        "/" + info.RefItemID.Value.ToString();
+                                    if (node != null) info.ReplacementDic["NodeName"] = node.Name;
+                                }
                             }
 
                             break;

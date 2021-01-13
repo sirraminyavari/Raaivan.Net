@@ -5,8 +5,6 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RaaiVan.Web.API;
-using RaaiVan.Modules.GlobalUtilities;
-using RaaiVan.Modules.Users;
 
 namespace RaaiVan.Web.Page.Setting
 {
@@ -17,15 +15,7 @@ namespace RaaiVan.Web.Page.Setting
         protected void Page_Load(object sender, EventArgs e)
         {
             paramsContainer = new ParamsContainer(HttpContext.Current);
-
-            if (!paramsContainer.IsAuthenticated)
-            {
-                paramsContainer.redirect_to_login_page();
-                return;
-            }
-
-            AuthorizationManager.redirect_if_no_access(AccessRoleName.ManageOntology,
-                PublicMethods.get_current_user_id(), Page);
+            RouteList.get_data_server_side(paramsContainer, RouteName.admin_map);
         }
     }
 }

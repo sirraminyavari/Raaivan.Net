@@ -41,6 +41,9 @@
     <script type="text/javascript" src="../../Script/AutoSuggest/autosuggest.js?v=29"></script>
     <script type="text/javascript" src="../../Script/RaaiVanHelp/HelpUtils.js?v=29"></script>
 
+    <link rel="stylesheet" type="text/css" href="../../api/rv/theme"/>
+    <script type="text/javascript" src="../../api/rv/global_params?Set=true"></script>
+
     <script type="text/javascript" src="../../Script/API/UsersAPI.js?v=29"></script>
     <script type="text/javascript" src="../../Script/API/RVAPI.js?v=29"></script>
     <script type="text/javascript" src="../../Script/API/PrivacyAPI.js?v=29"></script>
