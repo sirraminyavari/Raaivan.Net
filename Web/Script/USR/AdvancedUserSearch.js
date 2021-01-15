@@ -34,8 +34,8 @@
         var that = this;
 
         GlobalUtilities.load_files(["API/UsersAPI.js", "API/CNAPI.js", "SingleDataContainer/NewSingleDataContainer.js"], {
-                OnLoad: function () { that.initialize(); }
-            });
+            OnLoad: function () { that.initialize(); }
+        });
     };
 
     AdvancedUserSearch.prototype = {

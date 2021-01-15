@@ -2,9 +2,6 @@
     MasterPageFile="~/Page/Master/TopMaster.Master" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-    <script type="text/javascript" src="../../Script/API/CNAPI.js"></script>
-    <script type="text/javascript" src="../../Script/API/UsersAPI.js"></script>
-    <script type="text/javascript" src="../../Script/USR/AdvancedUserSearch.js"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">

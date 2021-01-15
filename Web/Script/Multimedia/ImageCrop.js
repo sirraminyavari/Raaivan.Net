@@ -9,8 +9,8 @@
         this.Objects = {
             ImageURL: params.ImageURL,
             Dimensions: GlobalUtilities.extend({ X: 0, Y: 0, Width: 100, Height: 100 }, params.Dimensions || {})
-        }
-
+        };
+        
         this.Options = {
             MaxWidth: 600,
             MaxHeight: 600,

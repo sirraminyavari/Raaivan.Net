@@ -2,8 +2,6 @@
     MasterPageFile="~/Page/Master/TopMaster.Master" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-    <script type="text/javascript" src="../../Script/Lang/Help/fa.js"></script>
-    <script type="text/javascript" src="../../Script/RaaiVanHelp/RaaiVanHelp.js"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
@@ -12,9 +10,7 @@
     <script type="text/javascript">
         (function () {
             GlobalUtilities.load_files(["RaaiVanHelp/RaaiVanHelp.js"], {
-                OnLoad: function () {
-                    new RaaiVanHelp("helpArea");
-                }
+                OnLoad: function () { new RaaiVanHelp("helpArea"); }
             });
         })();
     </script>

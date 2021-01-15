@@ -2,8 +2,6 @@
     MasterPageFile="~/Page/Master/TopMaster.Master" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-    <script type="text/javascript" src="../../Script/CN/RegisterNewNode.js"></script>
-    <script type="text/javascript" src="../../Script/CN/RegisterNewNoContentNode.js"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
@@ -45,16 +43,20 @@
                     Name: Base64.decode(options.PreviousVersion.Name)
                 };
             }
-            
-            new RegisterNewNode("nodeArea", GlobalUtilities.extend(options || {}, {
-                Options: {
-                    IsServiceAdmin: options.IsServiceAdmin,
-                    NodeSelectType: (options.KnowledgeType || {}).NodeSelectType,
-                    PreviousVersion: options.PreviousVersion,
-                    ParentNode: options.ParentNode,
-                    DocumentTreeNode: options.DocumentTreeNode
+
+            GlobalUtilities.load_files(["CN/RegisterNewNode.js"], {
+                OnLoad: function () {
+                    new RegisterNewNode("nodeArea", GlobalUtilities.extend(options || {}, {
+                        Options: {
+                            IsServiceAdmin: options.IsServiceAdmin,
+                            NodeSelectType: (options.KnowledgeType || {}).NodeSelectType,
+                            PreviousVersion: options.PreviousVersion,
+                            ParentNode: options.ParentNode,
+                            DocumentTreeNode: options.DocumentTreeNode
+                        }
+                    }));
                 }
-            }));
+            });
 
             GlobalUtilities.append_goto_top_button();
         })();

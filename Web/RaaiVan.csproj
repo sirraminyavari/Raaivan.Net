@@ -1149,6 +1149,7 @@
     <Content Include="Script\FormsManager\FormElementsManager__.js" />
     <Content Include="Script\jQuery\jquery.dad.js" />
     <Content Include="Script\LoginPage\lp_modern_29_1.js" />
+    <Content Include="Script\RaaiVanHelp\HelpAdmin.js" />
     <Content Include="Script\Reports\ReportOptions\CN_RelatedNodesCountReport.js" />
     <Content Include="Script\Reports\ReportOptions\CN_RelatedNodesReport.js" />
     <Content Include="Script\Reports\ReportOptions\KW_KnowledgeEvaluationsHistoryReport.js" />
@@ -1158,6 +1159,7 @@
     <Content Include="Script\Reports\ReportOptions\USR_ResumeLanguagesReport.js" />
     <Content Include="Script\Reports\ReportOptions\USR_ResumeReportParameters.js" />
     <Content Include="Script\Reports\ReportOptions\USR_ResumeJobExperienceReport.js" />
+    <Content Include="Script\RVEditor\RVEditor.js" />
     <Content Include="Script\SharingManager\ShareDialog.js" />
     <Content Include="Script\SharingManager\SharingManager.js" />
     <Content Include="Script\AdvancedTextArea\AdvancedTextArea.js" />
@@ -1841,6 +1843,7 @@
     <Content Include="Script\TreeView\TreeView.js" />
     <Content Include="Script\UserViewer\FullViewer.js" />
     <Content Include="Script\USR\ApplicationsManager.js" />
+    <Content Include="Script\USR\ChangePasswordDialog.js" />
     <Content Include="Script\USR\HomePageMainContent.js" />
     <Content Include="Script\USR\MasterPageBuilder.js" />
     <Content Include="Script\USR\AdvancedUserSearch.js" />
@@ -1848,6 +1851,7 @@
     <Content Include="Script\USR\CoverPhoto.js" />
     <Content Include="Script\USR\Invitation.js" />
     <Content Include="Script\USR\LoginControl.js" />
+    <Content Include="Script\USR\PersonalPageInitializer.js" />
     <Content Include="Script\USR\RelatedUsersManager.js" />
     <Content Include="Script\USR\Resume.js" />
     <Content Include="Script\USR\UserConnections.js" />

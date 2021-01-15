@@ -41,11 +41,6 @@
             var groupName = Base64.decode(params.User.GroupName);
             //end of variables initialization
 
-            var _borderRadius = function (value) {
-                var str = String("border-radius:[n]px; -webkit-border-radius:[n]px; -moz-border-radius:[n]px; -op-border-radius:[n]px;");
-                return str.replace(new RegExp(str, 'g'), String(value));
-            };
-
             var bgColor = "background-color:rgba(255,255,255,0.6);";
 
             var _count_box = function (p) {
@@ -166,14 +161,17 @@
                     ]
                 }
             ], that.ContainerDiv);
-
+            
             GlobalUtilities.load_files(["Multimedia/InlineImageCrop.js"], {
                 OnLoad: function () {
                     new InlineImageCrop(elems["coverPhoto"], {
                         ObjectID: userId, DisableImageCrop: true,
                         ImageURL: params.User.CoverPhotoURL || GlobalUtilities.icon("DefaultCoverPhoto.jpg"),
                         HighQualityImageURL: params.User.HighQualityCoverPhotoURL,
-                        Editable: currentUserId == userId || isSystemAdmin, IconType: "CoverPhoto"
+                        Editable: currentUserId == userId || isSystemAdmin,
+                        IconType: "CoverPhoto",
+                        HighQualityIconType: "HighQualityCoverPhoto",
+                        DimensionsVariableName: "CoverDimensions"
                     });
                 }
             });

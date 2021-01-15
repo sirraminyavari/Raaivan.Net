@@ -23,7 +23,7 @@
             Zoom: 1,
             Processing: false
         };
-
+        
         this.Options = {
             Editable: params.Editable === true,
             DisableImageCrop: params.DisableImageCrop === true,
@@ -61,7 +61,7 @@
                 ResponseHandler: function (result) {
                     that.Objects.Dimensions = result.Value ? JSON.parse(Base64.decode(result.Value)) : {};
                     that.Objects.Zoom = that.Options.ContainerWidth / that.Objects.Dimensions.Width;
-
+                    
                     that.goto_view_mode();
                 }
             });
@@ -129,7 +129,7 @@
 
             if (that.Objects.Processing) return;
             that.Objects.Processing = true;
-
+            
             that.ContainerDiv.innerHTML = "";
 
             that.ContainerDiv.style.zIndex = null;
@@ -142,22 +142,18 @@
 
             that.ContainerDiv.style.overflow = "";
 
-            var imageUrl = that.Objects.ImageURL + "?timeStamp=" + new Date().getTime();
-
-            var imgObj = GlobalUtilities.create_nested_elements([
-                {
-                    Type: "img", Name: "imgObj", Attributes: [{ Name: "src", Value: imageUrl }],
-                    Properties: [
-                        {
-                            Name: "onload",
-                            Value: function () {
-                                that.ContainerDiv.style.backgroundImage = "url('" + imageUrl + "')";
-                                that.Objects.Processing = false;
-                            }
-                        }
-                    ]
-                }
-            ])["imgObj"];
+            var imageUrl = GlobalUtilities.add_timestamp(that.Objects.ImageURL);
+            
+            var imgObj = GlobalUtilities.create_nested_elements([{
+                Type: "img", Name: "imgObj", Attributes: [{ Name: "src", Value: imageUrl }],
+                Properties: [{
+                    Name: "onload",
+                    Value: function () {
+                        that.ContainerDiv.style.backgroundImage = "url('" + imageUrl + "')";
+                        that.Objects.Processing = false;
+                    }
+                }]
+            }])["imgObj"];
 
             if (that.Options.Editable) {
                 var btns = [];
@@ -182,13 +178,11 @@
                     Style: (hasNavigationButton ? "margin-top:0.3rem;" : "")
                 }));
 
-                GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div",
-                        Style: "position:absolute; z-index:1;" + RV_Float + ":1rem; top:2.5rem;",
-                        Childs: btns
-                    }
-                ], that.ContainerDiv);
+                GlobalUtilities.create_nested_elements([{
+                    Type: "div",
+                    Style: "position:absolute; z-index:1;" + RV_Float + ":1rem; top:2.5rem;",
+                    Childs: btns
+                }], that.ContainerDiv);
             }
         },
 
@@ -299,7 +293,7 @@
             that.ContainerDiv.style.overflow = "hidden";
             that.ContainerDiv.style.zIndex = 1;
 
-            var imageUrl = that.Objects.HighQualityImageURL + "?timeStamp=" + new Date().getTime();
+            var imageUrl = GlobalUtilities.add_timestamp(that.Objects.HighQualityImageURL);
 
             var imgObj = GlobalUtilities.create_nested_elements([
                 {
