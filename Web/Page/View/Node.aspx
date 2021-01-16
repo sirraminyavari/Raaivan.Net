@@ -2,9 +2,6 @@
     MasterPageFile="~/Page/Master/TopMaster.Master" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-    <meta name="fragment" content="!" >
-    <link type="text/css" rel="stylesheet" href="../../Script/jQuery/highlight/styles/vs.css" />
-    <script type="text/javascript" src="../../Script/CN/NodeAccessDeniedResponse.js"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
@@ -14,20 +11,29 @@
 
     <script type="text/javascript">
         (function () {
-            var modules = (window.RVGlobal || {}).Modules || {};
             var initialJson = JSON.parse(document.getElementById("initialJson").value);
-            var nodeId = initialJson.NodeID || "";
+            var container = document.getElementById("nodeView");
+
+            var modules = (window.RVGlobal || {}).Modules || {};
+            
+            var nodeId = initialJson.NodeID;
             var showWorkFlow = initialJson.ShowWorkFlow === true;
             var showKnowledgeOptions = initialJson.ShowKnowledgeOptions === true;
             var hideContributors = initialJson.HideContributors === true;
-            
-            if (initialJson.AccessDenied) return new NodeAccessDeniedResponse("nodeView", initialJson);
-            
-            GlobalUtilities.loading("nodeView");
-            
-            GlobalUtilities.load_files(["CN/NodeViewer.js"], {
+
+            GlobalUtilities.loading(container);
+
+            var loadArr = [
+                { Root: "jQuery/highlight/styles/", Childs: ["vs.css"] },
+                "CN/NodeViewer.js",
+                "CN/NodeAccessDeniedResponse.js"
+            ];
+
+            GlobalUtilities.load_files(loadArr, {
                 OnLoad: function () {
-                    new NodeViewer("nodeView", {
+                    if (initialJson.NodeAccessDenied) return new NodeAccessDeniedResponse(container, initialJson);
+
+                    new NodeViewer(container, {
                         NodeID: nodeId,
                         Modules: modules,
                         ShowWorkFlow: showWorkFlow,

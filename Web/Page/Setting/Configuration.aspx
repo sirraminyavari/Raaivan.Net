@@ -7,9 +7,7 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <asp:HiddenField ID="initialJson" runat="server" ClientIDMode="Static" Value="" />
 
-    <div id="settingsArea" class="small-12 medium-12 large-12 row" 
-        style="margin:0 0 3rem 0; padding:0vw 4vw;">
-    </div>
+    <div id="settingsArea" class="small-12 medium-12 large-12 row" style="margin:0 0 3rem 0; padding:0vw 4vw;"></div>
 
     <script type="text/javascript">
         (function () {

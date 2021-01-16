@@ -55,7 +55,9 @@
 <body class="Direction TextAlign" style="font-family:IRANSans;">
     <script type="text/javascript" src="../../Script/USR/LoginControl.js<% = "?rnd=" + DateTime.Now.Millisecond.ToString() %>"></script>
 
-    <form id="idFrmMain" runat="server"> </form>
+    <form id="idFrmMain" runat="server">
+        <asp:HiddenField ID="initialJson" runat="server" ClientIDMode="Static" />
+    </form>
 
     <div id="mainContent" class="small-12 medium-12 large-12" 
         style="background-repeat:no-repeat; background-attachment:fixed; background-position:center; background-size:cover; 
@@ -87,6 +89,8 @@
 
     <script type="text/javascript">
         (function () {
+            var initialJson = GlobalUtilities.to_json(document.getElementById("initialJson").value) || {}; 
+
             var ind = GlobalUtilities.random(6, 28);
             var bgUrl = GlobalUtilities.icon("background/RV-BG-" + (ind < 10 ? "0" : "") + ind + ".jpg");
             document.getElementById("mainContent").style.backgroundImage = "url(" + bgUrl + ")";
@@ -102,13 +106,13 @@
                 GlobalUtilities.scroll_into_view(firstPage, { Offset: 0 });
             };
 
-            if (RVGlobal.LoggedIn) {
-                var msg = RVGlobal.LoginMessage ? Base64.decode(RVGlobal.LoginMessage) : null;
+            if (initialJson.LoggedIn) {
+                var msg = initialJson.LoginMessage ? Base64.decode(initialJson.LoginMessage) : null;
 
-                GlobalUtilities.set_auth_cookie(RVGlobal.AuthCookie);
-                
-                if (msg || ((RVGlobal.LastLogins || []).length > 0))
-                    (new LoginControl()).show_last_logins(msg, RVGlobal.LastLogins, function () { window.location.href = "../../home"; });
+                GlobalUtilities.set_auth_cookie(initialJson.AuthCookie);
+
+                if (msg || ((initialJson.LastLogins || []).length > 0))
+                    (new LoginControl()).show_last_logins(msg, initialJson.LastLogins, function () { window.location.href = "../../home"; });
                 else window.location.href = "../../home";
 
                 return;
@@ -129,12 +133,10 @@
                         },
                         {
                             Type: "div", Class: "small-12 medium-12 large-12", Style: "text-align:center; margin-top:1rem;",
-                            Childs: [
-                                {
-                                    Type: "div", Class: "rv-border-radius-half WarmTextShadow", Name: "sysId",
-                                    Style: "display:inline-block; font-size:1rem; padding:0.5rem; background-color:white; color:rgb(80,80,80);"
-                                }
-                            ]
+                            Childs: [{
+                                Type: "div", Class: "rv-border-radius-half WarmTextShadow", Name: "sysId",
+                                Style: "display:inline-block; font-size:1rem; padding:0.5rem; background-color:white; color:rgb(80,80,80);"
+                            }]
                         },
                         {
                             Type: "div", Class: "small-4 medium-4 large-4 rv-air-button rv-circle", Style: "margin:1rem auto 0 auto;",
@@ -151,11 +153,11 @@
 
             GlobalUtilities.cheadget("sudoku", "gesi", "ramin", "fliptext", "instaprofile");
 
-            var loginPageModel = RVGlobal.LoginPageModel || "";
+            var loginPageModel = initialJson.LoginPageModel;
             
             if (loginPageModel) {
                 var _jsFileName = "lp_" + loginPageModel;
-                var statistics = window.RVGlobal[loginPageModel];
+                var statistics = initialJson[loginPageModel];
 
                 if (statistics) {
                     GlobalUtilities.load_files(["LoginPage/" + _jsFileName + ".js"], {
@@ -173,7 +175,7 @@
 
             new LoginControl("loginArea", {
                 ReloadAfterLogin: false, ContainerClass: false, IgnoreSSO: false, InitialFocus: false,
-                ReturnURL: (window.RVGlobal || {}).ReturnURL ? Base64.decode(window.RVGlobal.ReturnURL) : null,
+                ReturnURL: initialJson.ReturnURL ? Base64.decode(initialJson.ReturnURL) : null,
                 OnLogin: function (d) { }
             });
         })();

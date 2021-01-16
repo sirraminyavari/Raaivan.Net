@@ -486,19 +486,18 @@ namespace RaaiVan.Web.API
 
             RaaiVanUtil.initialize(paramsContainer.ApplicationID);
 
-            //Removed In ReactUI
+
+            //Updatable Items
             response["IsAuthenticated"] = isAuthenticated;
 
             if (paramsContainer.ApplicationID.HasValue)
                 response["ApplicationID"] = paramsContainer.ApplicationID;
-            //end of Removed In ReactUI
 
-
-            //Updatable Items
             response["AccessToken"] = AccessTokenList.new_token(HttpContext.Current);
             response["Theme"] = isAuthenticated && RaaiVanSettings.EnableThemes(paramsContainer.ApplicationID) ?
                 UsersController.get_theme(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value) : string.Empty;
             //end of Updatable Items
+
 
             if (!PublicMethods.check_sys_id())
                 response["SysID"] = PublicMethods.get_sys_id();
@@ -509,9 +508,6 @@ namespace RaaiVan.Web.API
 
             response["IsDev"] = PublicMethods.is_dev();
 
-            //UserID
-            //SSOTicket
-            
             if (isAuthenticated)
             {
                 User currentUser = UsersController.get_user(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value);

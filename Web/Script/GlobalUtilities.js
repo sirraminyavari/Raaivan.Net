@@ -2971,123 +2971,83 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
     },
 
     load_files: function (files, params) {
-        files = files || [];
-        for (var i = 0, lnt = files.length; i < lnt; ++i) files[i] = files[i].File || files[i] || "";
-        if (files.length == 0) return;
+        params = params || {};
+
+        files = (GlobalUtilities.get_type(files) == "string" ? [files] : files || [])
+            .map(f => (f || {}).File || f).filter(f => !!f);
+        
+        if (!files.length) return;
 
         var _prefixRegExp = function () {
             return new RegExp("^((" + GlobalUtilities.escape4regexp(GlobalUtilities.js().toLowerCase()) + ")|(" +
                 GlobalUtilities.escape4regexp("../") + "))", "g");
-        }
+        };
 
-        var checkFuncs = {};
 
         //clarify files
         var _newFiles = [];
 
         var _tree2array = function (obj, prefix, ext) {
-            var root = (prefix ? prefix : "") + (obj || {}).Root, ext = (obj || {}).Ext || ext || "";
+            var root = (prefix ? prefix : "") + (obj || {}).Root, ext = (obj || {}).Ext || ext;
 
             if (root && !_prefixRegExp().test(root.toLowerCase())) root = GlobalUtilities.js(root);
-            if (ext && ext.length > 0 && ext[0] == ".") ext = ext.substr(1);
+            if (ext && ext.length && (ext[0] == ".")) ext = ext.substr(1);
 
-            for (var i = 0, lnt = ((obj || {}).Childs || []).length; i < lnt; ++i) {
-                if (obj.Childs[i].Root) _tree2array(obj.Childs[i], root, ext);
+            ((obj || {}).Childs || []).forEach(ch => {
+                if (ch.Root) _tree2array(ch, root, ext);
                 else {
-                    var _isUrl = GlobalUtilities.is_url(obj.Childs[i]);
-
-                    obj.Childs[i] = obj.Childs[i] +
-                        (_isUrl ? "" : ((new RegExp("(\.css)|(\.js)$", "g")).test(obj.Childs[i].toLowerCase()) ? "" : (ext ? "." + ext : "")));
-
-                    _newFiles.push((_isUrl ? "" : root) + obj.Childs[i]);
-
-                    if (obj.Check) checkFuncs[String((_isUrl ? "" : root) + obj.Childs[i]).toLowerCase()] = obj.Check;
+                    var _isUrl = GlobalUtilities.is_url(ch);
+                    ch += (_isUrl ? "" : ((new RegExp("(\.css)|(\.js)$", "g")).test(ch.toLowerCase()) ? "" : (ext ? "." + ext : "")));
+                    _newFiles.push((_isUrl ? "" : root) + ch);
                 }
-            }
-        }
+            });
+        };
 
-        for (var i = 0, lnt = files.length; i < lnt; ++i)
-            GlobalUtilities.get_type(files[i]) == "json" ? _tree2array(files[i]) : _newFiles.push(files[i]);
-
-        files = _newFiles;
-
-        for (var i = 0, lnt = files.length; i < lnt; ++i) {
-            var _fname = String(files[i]).toLowerCase();
+        files.forEach(f => GlobalUtilities.get_type(f) == "json" ? _tree2array(f) : _newFiles.push(f));
+        
+        files = _newFiles.map(f => {
+            var _fname = String(f).toLowerCase();
             var isJs = _fname.substring(_fname.lastIndexOf(".") + 1, _fname.length) !== String("css");
 
-            //if (!_prefixRegExp().test(_fname)) files[i] = isJs ? GlobalUtilities.js(files[i]) : GlobalUtilities.css(files[i]);
-
-            if (files[i].Check) checkFuncs[_fname] = files[i].Check;
-
             if (!GlobalUtilities.is_url(_fname) && !_prefixRegExp().test(_fname))
-                files[i] = isJs ? GlobalUtilities.js(files[i]) : GlobalUtilities.css(files[i]);
-        }
+                return isJs ? GlobalUtilities.js(f) : GlobalUtilities.css(f);
+            else return f;
+        });
         //end of clarify files
 
-        params = params || {};
-        params.__Interval = null;
-        var loadSequential = params.LoadSequential === true;
 
-        if (loadSequential && files.length > 1) {
-            var _fls = [];
-            for (var i = 1, lnt = files.length; i < lnt; ++i) _fls.push(files[i]);
-
-            var _onload = function (newFiles, prms) { GlobalUtilities.load_files(newFiles, prms); }
-
-            var _sp = {};
-            for (var _item in params) _sp[_item] = params[_item];
-            _sp.LoadSequential = false;
-            _sp.OnLoad = function () { _onload(_fls, params) }
-            return GlobalUtilities.load_files([files[0]], _sp);
+        if (params.LoadSequential && (files.length > 1)) {
+            return GlobalUtilities.load_files([files[0]], GlobalUtilities.extend({}, params || {}, {
+                LoadSequential: false,
+                OnLoad: function () { GlobalUtilities.load_files(files.filter((f, ind) => ind > 0), params); }
+            }));
         }
 
-        var _execute = function () { if (params.OnLoad) params.OnLoad(params.LoadParams); }
+        var onLoadCalled = false;
 
-        if (DynamicFileUtilities.files_exist(files, checkFuncs) === true) return _execute();
+        var check_file = function (file, loaded) {
+            if ((DynamicFileUtilities.files_exist(files) === true)) {
+                if (params.OnLoad && !onLoadCalled) {
+                    onLoadCalled = true;
+                    params.Timeout ? setTimeout(() => params.OnLoad(), params.Timeout) : params.OnLoad();
+                }
 
-        if (params.DivToBlock) GlobalUtilities.block(params.DivToBlock);
-
-        for (var j = 0, lnt = files.length; j < lnt; ++j) {
-            var fileName = String(files[j].File || files[j] || "");
-            var extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length);
-            var isJs = extension.toLowerCase() !== String("css");
-
-            isJs ? DynamicFileUtilities.load_js(fileName) : DynamicFileUtilities.load_css(fileName);
-        }
-
-        var _failCount = 0;
-        var _intervalMiliseconds = 50;
-        var _errorThreshold = 2000000 / _intervalMiliseconds;
-
-        var check_files = function () {
-            if (++_failCount > _errorThreshold) {
-                var _failedItems = [];
-
-                for (var i = 0; i < files.length; ++i)
-                    if (!DynamicFileUtilities.files_exist([files[i]]), checkFuncs) _failedItems.push(files[i]);
-
-                var errorText = "<div class='Direction TextAlign' style='margin-bottom:8px; text-align:center; font-weight:bold;'>" +
-                    RVDic.MSG.LoadingFilesFailed + "</div>";
-
-                for (var i = 0; i < _failedItems.length; ++i)
-                    errorText += "<div>" + (_failedItems[i].File || _failedItems[i] || "") + "</div>";
-
-                errorText = "<div style='direction:ltr; text-align:left;'>" + errorText + "</div>";
-
-                //alert(errorText, { Timeout: 1000000 });
-
-                return clearInterval(params.__Interval);
+                return true;
             }
 
-            if (!DynamicFileUtilities.files_exist(files, checkFuncs)) return false;
-            clearInterval(params.__Interval);
-            var _to = +params.Timeout;
-            if (isNaN(_to)) _to = 0;
-            _to == 0 ? _execute() : setTimeout(_execute, _to);
-            if (params.UnblockOnLoad === true) GlobalUtilities.unblock(params.DivToBlock);
-        }
+            if (file && !loaded) console.error("Loading file '" + file + "' failed!");
+            return false;
+        };
 
-        params.__Interval = setInterval(check_files, _intervalMiliseconds);
+        if (check_file()) return;
+
+        files.map(f => (f || {}).File || f).forEach(f => {
+            var extension = f.substring(f.lastIndexOf(".") + 1, f.length);
+            var isJs = extension.toLowerCase() !== String("css");
+
+            isJs ? DynamicFileUtilities.load_js(f, (r) => check_file(f, r)) :
+                DynamicFileUtilities.load_css(f, (r) => check_file(f, r));
+        });
     }
 };
 
@@ -3105,12 +3065,18 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 if (!window.DynamicFileUtilities) window.DynamicFileUtilities = {
     AddedFiles: {},
 
-    _create_js_file_object: function (fileName, data) {
+    _create_js_file_object: function (fileName, data, callback) {
+        callback = callback || function () { };
+
         var scriptTag = document.createElement("script");
         scriptTag.setAttribute("type", "text/javascript");
 
         if (data) scriptTag.innerHTML = data;
-        else scriptTag.setAttribute("src", fileName);
+        else {
+            scriptTag.onload = scriptTag.onreadystatechange = function () { callback(true); };
+            scriptTag.onerror = function () { callback(false); };
+            scriptTag.setAttribute("src", fileName);
+        }
 
         return scriptTag;
     },
@@ -3124,29 +3090,52 @@ if (!window.DynamicFileUtilities) window.DynamicFileUtilities = {
         return linkTag;
     },
 
-    load_js: function (fileName) {
-        fileName = String(fileName).toLowerCase();
-        if (DynamicFileUtilities.AddedFiles[fileName]) return;
-        DynamicFileUtilities.AddedFiles[fileName] = { Exists: false };
+    load_js: function (fileName, callback) {
+        callback = callback || function () { };
 
-        if (GlobalUtilities.is_url(fileName))
+        fileName = String(fileName).toLowerCase();
+
+        if (DynamicFileUtilities.AddedFiles[fileName]) {
+            var fl = DynamicFileUtilities.AddedFiles[fileName];
+            if (fl.Exists) return callback(true);
+
+            var _interval = setInterval(() => {
+                if (!fl.Exists && !fl.Error) return;
+                clearInterval(_interval);
+                callback(fl.Exists);
+            }, 50);
+
+            return;
+        }
+
+        DynamicFileUtilities.AddedFiles[fileName] = { Exists: false, Error: false };
+
+        if (GlobalUtilities.is_url(fileName)) {
             document.getElementsByTagName("head")[0].appendChild(DynamicFileUtilities._create_js_file_object(fileName));
+            callback(true);
+        }
         else {
-            return send_get_request(fileName + "?timeStamp=" + new Date().getTime(), function (responseText) {
-                document.getElementsByTagName("head")[0].appendChild(DynamicFileUtilities._create_js_file_object(fileName, responseText));
-                DynamicFileUtilities.AddedFiles[fileName] = { Exists: true };
-            });
+            document.getElementsByTagName("head")[0]
+                .appendChild(DynamicFileUtilities._create_js_file_object(fileName, null, function (loaded) {
+                    if (loaded) DynamicFileUtilities.AddedFiles[fileName].Exists = true;
+                    else DynamicFileUtilities.AddedFiles[fileName].Error = true;
+
+                    callback(loaded);
+                }));
         }
     },
 
-    load_css: function (fileName) {
+    load_css: function (fileName, callback) {
+        callback = callback || function () { };
+
         fileName = String(fileName).toLowerCase();
-        if (DynamicFileUtilities.AddedFiles[fileName]) return;
+        if (DynamicFileUtilities.AddedFiles[fileName]) return callback(true);
         DynamicFileUtilities.AddedFiles[fileName] = { Exists: false };
 
         document.getElementsByTagName("head")[0].appendChild(DynamicFileUtilities._create_css_file_object(fileName));
 
         DynamicFileUtilities.AddedFiles[fileName] = { Exists: true };
+        callback(true);
     },
 
     remove_css: function (fileName) {
@@ -3189,7 +3178,7 @@ if (!window.DynamicFileUtilities) window.DynamicFileUtilities = {
         }
     })(),
 
-    files_exist: function (files, checkFuncs) {
+    files_exist: function (files) {
         DynamicFileUtilities._init_added_items();
 
         if (GlobalUtilities.get_type(files) != "array") files = [files];
@@ -3199,10 +3188,6 @@ if (!window.DynamicFileUtilities) window.DynamicFileUtilities = {
 
             if (!DynamicFileUtilities.AddedFiles[fileName]) return false;
             else if (DynamicFileUtilities.AddedFiles[fileName].Exists) continue;
-            else if (checkFuncs && checkFuncs[fileName]) {
-                if (checkFuncs[fileName]()) DynamicFileUtilities.AddedFiles[fileName].Exists = true;
-                else return false;
-            }
             else if (GlobalUtilities.get_type(DynamicFileUtilities.AddedFiles[fileName].Exists) == "boolean" &&
                 !DynamicFileUtilities.AddedFiles[fileName].Exists) return false;
         }

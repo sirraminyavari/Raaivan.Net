@@ -22,6 +22,8 @@
             var membershipButton = params.MembershipButton === true;
             var hasPendingRequest = params.HasPendingRequest === true;
 
+            that.Container.innerHTML = "";
+
             var elems = GlobalUtilities.create_nested_elements([
                 {
                     Type: "div", Class: "small-12 medium-12 large-12",

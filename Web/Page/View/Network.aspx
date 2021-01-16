@@ -9,6 +9,8 @@
 
     <script type="text/javascript">
         (function () {
+            var container = document.getElementById("pageContainer");
+
             var rvGlobal = window.RVGlobal || {};
 
             var loc = window.location.toString();
@@ -24,7 +26,7 @@
 
             GlobalUtilities.load_files(["USR/UserConnections.js"], {
                 OnLoad: function () {
-                    new UserConnections(document.getElementById("pageContainer"), {
+                    new UserConnections(container, {
                         UserID: rvGlobal.CurrentUserID,
                         ProfileImageURL: (rvGlobal.CurrentUser || {}).ImageURL,
                         OpenTab: openTab,

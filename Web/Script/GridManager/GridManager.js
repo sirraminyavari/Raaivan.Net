@@ -53,7 +53,7 @@
         }
 
         if (window.RV_RTL) {
-            GlobalUtilities.load_files(["Kendo/kendo.rtl.css", "../../CSS/KendoRTLRepair.css"]);
+            GlobalUtilities.load_files(["kendo.rtl.css", "KendoRTLRepair.css"]);
             document.body.setAttribute("class", document.body.getAttribute("class") + " k-rtl");
         }
 

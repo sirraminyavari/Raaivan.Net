@@ -380,7 +380,7 @@ namespace RaaiVan.Web.API
             new RouteInfo(name: RouteName.admin_dataimport, roleName: AccessRoleName.DataImport),
             new RouteInfo(name: RouteName.admin_externalnotifications, roleName: AccessRoleName.SMSEMailNotifier),
 
-            new RouteInfo(name: RouteName.reports, roleName: AccessRoleName.Reports),
+            new RouteInfo(name: RouteName.reports, roleName: AccessRoleName.Reports, action: reports),
 
             new RouteInfo(name: RouteName.advanced_search, action: advanced_search),
             new RouteInfo(name: RouteName.search, action: search),
@@ -393,8 +393,7 @@ namespace RaaiVan.Web.API
             new RouteInfo(name: RouteName.node, action: node),
             new RouteInfo(name: RouteName.posts, action: posts),
             new RouteInfo(name: RouteName.qatag, action: qa_tag),
-            new RouteInfo(name: RouteName.question, action: question),
-            new RouteInfo(name: RouteName.reports, action: reports)
+            new RouteInfo(name: RouteName.question, action: question)
         };
 
         public static Dictionary<string, object> get_data(ParamsContainer paramsContainer, string name)
@@ -663,6 +662,10 @@ namespace RaaiVan.Web.API
                 return;
             }
 
+            string returnUrl = input.ParamsContainer.request_param("ReturnUrl");
+            if (!string.IsNullOrEmpty(returnUrl))
+                input.Data["ReturnURL"] = Base64.encode(returnUrl);
+
             input.Data["LoginPageModel"] = RaaiVanSettings.LoginPageModel(input.ParamsContainer.ApplicationID);
             input.Data["LoggedIn"] = loggedIn;
             input.Data["DisableLogin"] = disableLogin;
@@ -690,7 +693,7 @@ namespace RaaiVan.Web.API
                 foreach (string str in info)
                 {
                     Dictionary<string, object> dt = PublicMethods.fromJSON(
-                        "{" + Page.View.Login.get_info_json(input.ParamsContainer, str) + "}");
+                        "{" + RaaiVanUtil.get_login_page_info(input.ParamsContainer, str) + "}");
 
                     if (dt != null)
                         foreach (string key in dt.Keys) input.Data[key] = dt[key];
@@ -832,7 +835,7 @@ namespace RaaiVan.Web.API
                     input.ParamsContainer.CurrentUserID.Value, null, NodeMemberStatuses.Pending);
 
                 input.Data["NodeID"] = nodeId;
-                input.set_access_denied();
+                input.Data["NodeAccessDenied"] = true;
 
                 if (!isAuthenticated)
                 {

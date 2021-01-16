@@ -1159,6 +1159,8 @@
     <Content Include="Script\Reports\ReportOptions\USR_ResumeLanguagesReport.js" />
     <Content Include="Script\Reports\ReportOptions\USR_ResumeReportParameters.js" />
     <Content Include="Script\Reports\ReportOptions\USR_ResumeJobExperienceReport.js" />
+    <Content Include="Script\RVAdmin\AdminPanelInitializer.js" />
+    <Content Include="Script\RVAdmin\DataImportManager.js" />
     <Content Include="Script\RVEditor\RVEditor.js" />
     <Content Include="Script\SharingManager\ShareDialog.js" />
     <Content Include="Script\SharingManager\SharingManager.js" />
@@ -1734,7 +1736,7 @@
     <Content Include="Script\Kendo\kendo.pager.js" />
     <Content Include="Script\Kendo\kendo.reorderable.js" />
     <Content Include="Script\Kendo\kendo.resizable.js" />
-    <Content Include="Script\Kendo\kendo.rtl.css" />
+    <Content Include="CSS\kendo.rtl.css" />
     <Content Include="Script\Kendo\kendo.selectable.js" />
     <Content Include="Script\Kendo\kendo.slider.js" />
     <Content Include="Script\Kendo\kendo.sortable.js" />
@@ -1834,6 +1836,7 @@
     <Content Include="Script\SimpleListViewer\NewSimpleListViewer.js" />
     <Content Include="Script\SingleDataContainer\NewSingleDataContainer.js" />
     <Content Include="Script\Social\RelatedUsersViewer.js" />
+    <Content Include="Script\RVAdmin\SystemSettings.js" />
     <Content Include="Script\TabsManager\TabsManager.js" />
     <Content Include="Script\TeamSelect\TeamSelect.js" />
     <Content Include="Script\TextEncoding.js" />

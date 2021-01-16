@@ -280,7 +280,8 @@
                 var reqParams = GlobalUtilities.request_params();
                 
                 UsersAPI.CreateTemporaryUser({
-                    FirstName: firstname, LastName: lastname, UserName: Base64.encode(username), Password: password,
+                    FirstName: Base64.encode(firstname), LastName: Base64.encode(lastname),
+                    UserName: Base64.encode(username), Password: Base64.encode(password),
                     Email: email, InvitationID: reqParams.get_value("inv"), Captcha: Base64.encode(captcha),
                     ParseResults: true,
                     ResponseHandler: function (results) {

@@ -12,6 +12,7 @@
     <script type="text/javascript">
         (function () {
             var options = JSON.parse(document.getElementById("initialJson").value || "{}") || {};
+            var container = document.getElementById("nodeArea");
             
             setTimeout(function () {
                 document.title = Base64.decode((options.Service || {}).Title) + (!document.title ? "" : " - " + document.title);
@@ -46,7 +47,7 @@
 
             GlobalUtilities.load_files(["CN/RegisterNewNode.js"], {
                 OnLoad: function () {
-                    new RegisterNewNode("nodeArea", GlobalUtilities.extend(options || {}, {
+                    new RegisterNewNode(container, GlobalUtilities.extend(options || {}, {
                         Options: {
                             IsServiceAdmin: options.IsServiceAdmin,
                             NodeSelectType: (options.KnowledgeType || {}).NodeSelectType,

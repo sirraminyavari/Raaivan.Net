@@ -8,7 +8,7 @@
     <asp:HiddenField ID="initialJson" runat="server" ClientIDMode="Static" Value="" />
 
     <div id="questionArea" class="small-12 medium-12 large-12 row align-center" 
-        style="margin:0rem; margin-bottom:5rem; padding:0vw 10vw;">
+        style="margin:0; margin-bottom:5rem; padding:0vw 10vw;">
     </div>
 
     <script type="text/javascript">
