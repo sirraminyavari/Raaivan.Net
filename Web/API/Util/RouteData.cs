@@ -419,8 +419,10 @@ namespace RaaiVan.Web.API
             string redirectToUrl = PublicMethods.get_dic_value(data, "RedirectToURL");
 
             if (PublicMethods.get_dic_value<bool>(data, "RedirectToLogin", false))
-                FormsAuthentication.RedirectToLoginPage("ReturnUrl=" +
-                    HttpUtility.UrlEncode(paramsContainer.Context.Request.Url.AbsolutePath));
+            {
+                FormsAuthentication.RedirectToLoginPage();
+                //FormsAuthentication.RedirectToLoginPage("ReturnUrl=" + HttpUtility.UrlEncode(paramsContainer.Context.Request.Url.AbsolutePath));
+            }
             else if (PublicMethods.get_dic_value<bool>(data, "RedirectToHome", false))
                 paramsContainer.Context.Response.Redirect(PublicConsts.HomePage);
             else if (PublicMethods.get_dic_value<bool>(data, "RedirectToProfile", false))
