@@ -1,9 +1,6 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Help.aspx.cs" Inherits="RaaiVan.Web.Page.Setting.Help" 
     MasterPageFile="~/Page/Master/TopMaster.Master" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-</asp:Content>
-
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <div id="helpArea" class="small-12 medium-12 large-12 row" style="margin:0rem; padding:1rem 6vw;"></div>
 

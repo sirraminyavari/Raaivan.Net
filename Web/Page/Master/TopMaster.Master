@@ -66,17 +66,15 @@
                 RVGlobal.Modules[String(i).toLowerCase()] = RVGlobal.Modules[i];
         });
     </script>
-
-    <asp:ContentPlaceHolder ID="HeadContent" runat="server"></asp:ContentPlaceHolder>
 </head>
 <body class="ColdBackgroundColor Direction TextAlign" style="font-family:IRANSans;">
     <!-- CSRF Refresh: In order to refresh CSRF Token after page load when page is loaded after back button click -->
     <input id="backbuttonstate" type="text" value="0" style="display:none;" />
     <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-           var ibackbutton = document.getElementById("backbuttonstate");
-           if (ibackbutton.value == "0") ibackbutton.value = "1";
-           else window.location.href = window.location.href;
+        var ibackbutton = document.getElementById("backbuttonstate");
+        if (ibackbutton) document.addEventListener('DOMContentLoaded', function () {
+            if (ibackbutton.value == "0") ibackbutton.value = "1";
+            else window.location.href = window.location.href;
         }, false);
     </script>
     <!-- end of CSRF Refresh -->

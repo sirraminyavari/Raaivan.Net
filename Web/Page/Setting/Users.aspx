@@ -1,9 +1,6 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Users.aspx.cs" Inherits="RaaiVan.Web.Page.Setting.Users"
     MasterPageFile="~/Page/Master/TopMaster.Master" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-</asp:Content>
-
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <asp:HiddenField ID="initialJson" runat="server" ClientIDMode="Static" Value="" />
 

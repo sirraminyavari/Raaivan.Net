@@ -1,9 +1,6 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Network.aspx.cs" Inherits="RaaiVan.Web.Page.View.Network"
     MasterPageFile="~/Page/Master/TopMaster.Master" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-</asp:Content>
-
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <div id="pageContainer" class="small-12 medium-12 large-12" style="padding:0vw 6vw; margin-bottom:5rem;"></div>
 
