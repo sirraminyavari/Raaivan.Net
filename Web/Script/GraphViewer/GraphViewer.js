@@ -40,26 +40,20 @@
 
         var body = document.getElementsByTagName("body")[0];
 
-        var elems = GlobalUtilities.create_nested_elements([
-            {
-                Type: "div", Class: "SoftShadow WarmBackgroundColor SoftBorder RevTextAlign", Name: "selectionArea",
-                Style: "position:fixed; top:0rem; left:0rem; right:0rem; height:2.75rem; z-index:2;"
-            }
-        ], body);
+        var elems = GlobalUtilities.create_nested_elements([{
+            Type: "div", Class: "SoftShadow WarmBackgroundColor SoftBorder RevTextAlign", Name: "selectionArea",
+            Style: "position:fixed; top:0rem; left:0rem; right:0rem; height:3.25rem; z-index:2;"
+        }], body);
 
         var selectionArea = elems["selectionArea"];
 
-        elems = GlobalUtilities.create_nested_elements([
-            {
-                Type: "div", Style: "margin-top:44px;", Attributes: [{ Name: "id", Value: "container" }],
-                Childs: [
-                    {
-                        Type: "div", Attributes: [{ Name: "id", Value: "center-container" }],
-                        Childs: [{ Type: "div", Name: "convas", Attributes: [{ Name: "id", Value: "infovis" }] }]
-                    }
-                ]
-            }
-        ], that.ContainerDiv);
+        elems = GlobalUtilities.create_nested_elements([{
+            Type: "div", Style: "margin-top:3.25rem;", Attributes: [{ Name: "id", Value: "container" }],
+            Childs: [{
+                Type: "div", Attributes: [{ Name: "id", Value: "center-container" }],
+                Childs: [{ Type: "div", Name: "convas", Attributes: [{ Name: "id", Value: "infovis" }] }]
+            }]
+        }], that.ContainerDiv);
 
         var convasContainer = elems["convas"];
 
@@ -130,24 +124,6 @@
 
             GlobalUtilities.create_nested_elements([
                 {
-                    Type: "div", Name: "selectionArea",
-                    Style: "z-index:3; position:fixed; top:0px; " + RV_RevFloat + ":2rem;",
-                    Childs: [
-                        {
-                            Type: "a", Attributes: [{ Name: "href", Value: RVAPI.HomePageURL() }],
-                            Childs: [
-                                {
-                                    Type: "img", Style: "width:43px; height:41px;", Tooltip: RVDic.PersonalPage,
-                                    Attributes: [{ Name: "src", Value: GlobalUtilities.icon("home2.png") }]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ], body);
-
-            GlobalUtilities.create_nested_elements([
-                {
                     Type: "div",
                     Style: "z-index:1; background:#e1e6ff; position:fixed; top:55px; " + RV_Float + ":10px; " +
                         "border:1px dotted #C0C0C0; padding:4px; opacity:0.40; opacity:filter:alpha(opacity=40);",
@@ -158,29 +134,22 @@
                     Childs: [
                         {
                             Type: "div",
-                            Childs: [
-                                {
-                                    Type: "img", Style: "width:20px; height:20px; cursor:pointer;",
-                                    Attributes: [{ Name: "src", Value: GlobalUtilities.icon("Add_256.png") }],
-                                    Properties: [{ Name: "onclick", Value: function () { that.zoom(false); } }]
-                                }
-                            ]
+                            Childs: [{
+                                Type: "img", Style: "width:20px; height:20px; cursor:pointer;",
+                                Attributes: [{ Name: "src", Value: GlobalUtilities.icon("Add_256.png") }],
+                                Properties: [{ Name: "onclick", Value: function () { that.zoom(false); } }]
+                            }]
                         },
                         {
                             Type: "div", Style: "margin-top:4px;",
-                            Childs: [
-                                {
-                                    Type: "img", Style: "width:20px; height:20px; cursor:pointer;",
-                                    Attributes: [{ Name: "src", Value: GlobalUtilities.icon("Minus-Over.png") }],
-                                    Properties: [{ Name: "onclick", Value: function () { that.zoom(true); } }]
-                                }
-                            ]
+                            Childs: [{
+                                Type: "img", Style: "width:20px; height:20px; cursor:pointer;",
+                                Attributes: [{ Name: "src", Value: GlobalUtilities.icon("Minus-Over.png") }],
+                                Properties: [{ Name: "onclick", Value: function () { that.zoom(true); } }]
+                            }]
                         }
                     ]
-                }
-            ], body);
-
-            GlobalUtilities.create_nested_elements([
+                },
                 {
                     Type: "div",
                     Style: "z-index:1; background:#e1e6ff; position:fixed; top:55px; " + RV_RevFloat + ":10px; " +
@@ -189,17 +158,12 @@
                         { Name: "onmouseover", Value: function () { _set_info_style_over(this); } },
                         { Name: "onmouseout", Value: function () { _set_info_style(this); } }
                     ],
-                    Childs: [
-                        {
-                            Type: "img", Style: "width:20px; height:20px; cursor:pointer;",
-                            Attributes: [{ Name: "src", Value: GlobalUtilities.icon("Settings.png") }],
-                            Properties: [{ Name: "onclick", Value: function () { GlobalUtilities.show(that.Interface.SettingsArea); } }]
-                        }
-                    ]
-                }
-            ], body);
-
-            GlobalUtilities.create_nested_elements([
+                    Childs: [{
+                        Type: "img", Style: "width:20px; height:20px; cursor:pointer;",
+                        Attributes: [{ Name: "src", Value: GlobalUtilities.icon("Settings.png") }],
+                        Properties: [{ Name: "onclick", Value: function () { GlobalUtilities.show(that.Interface.SettingsArea); } }]
+                    }]
+                },
                 {
                     Type: "div",
                     Style: "z-index:1; background:#e1e6ff; position:fixed; top:95px; " + (RV_RTL ? "left" : "right") + ":10px; " +
@@ -208,18 +172,14 @@
                         { Name: "onmouseover", Value: function () { _set_info_style_over(this); } },
                         { Name: "onmouseout", Value: function () { _set_info_style(this); } }
                     ],
-                    Childs: [
-                        {
-                            Type: "div",
-                            Childs: [
-                                {
-                                    Type: "img", Style: "width:20px; height:20px; cursor:pointer;", //Tooltip: RVDic.Clean,
-                                    Attributes: [{ Name: "src", Value: GlobalUtilities.icon("Clean.png") }],
-                                    Properties: [{ Name: "onclick", Value: function () { that.empty(); } }]
-                                }
-                            ]
-                        }
-                    ]
+                    Childs: [{
+                        Type: "div",
+                        Childs: [{
+                            Type: "img", Style: "width:20px; height:20px; cursor:pointer;", //Tooltip: RVDic.Clean,
+                            Attributes: [{ Name: "src", Value: GlobalUtilities.icon("Clean.png") }],
+                            Properties: [{ Name: "onclick", Value: function () { that.empty(); } }]
+                        }]
+                    }]
                 }
             ], body);
 
@@ -384,29 +344,37 @@
 
             var elems = GlobalUtilities.create_nested_elements([
                 {
+                    Type: "div",
+                    Style: "display:flex; align-items:center; z-index:3; position:absolute;" +
+                        "top:0; bottom:0;" + RV_RevFloat + ":2rem; font-size:1.2rem;",
+                    Childs: [{
+                        Type: "i", Class: "fa fa-home fa-2x", Style: "color:white;",
+                        Tooltip: RVDic.PersonalPage, Link: RVAPI.HomePageURL(),
+                        Attributes: [{ Name: "aria-hidden", Value: true }]
+                    }]
+                },
+                {
                     Type: "div", Class: "Direction",
-                    Style: "position:relative; padding-top:0.3rem; width:40rem; margin:0 auto;" + 
+                    Style: "position:relative; padding-top:0.5rem; width:40rem; margin:0 auto;" + 
                         "padding-" + RV_RevFloat + ":10rem;",
                     Childs: [
                         {
                             Type: "div", Class: "rv-border-radius-quarter",
-                            Style: "position:absolute; top:0.3rem;" + RV_RevFloat + ":0rem; width:9.5rem;" +
+                            Style: "position:absolute; top:0.5rem;" + RV_RevFloat + ":0rem; width:9.5rem;" +
                                 "padding:0.2rem; background-color:white;",
-                            Childs: [
-                                {
-                                    Type: "div", Name: "menu", Style: "padding:0.2rem 0; font-size:0.7rem;",
-                                    Class: "small-12 medium-12 large-12 rv-air-button-base " +
-                                        "rv-air-button-black rv-border-radius-quarter",
-                                    Properties: [{ Name: "onmouseover", Value: function () { this.onmouseover = null; _init_mouse_over(); } }],
-                                    Childs: [
-                                        {
-                                            Type: "i", Class: "fa fa-chevron-down", Style: "margin-" + RV_RevFloat + ":0.4rem;",
-                                            Attributes: [{ Name: "aria-hidden", Value: true }]
-                                        },
-                                        { Type: "text", TextValue: RVDic.AdvancedSelect }
-                                    ]
-                                }
-                            ]
+                            Childs: [{
+                                Type: "div", Name: "menu", Style: "padding:0.2rem 0; font-size:0.7rem;",
+                                Class: "small-12 medium-12 large-12 rv-air-button-base " +
+                                    "rv-air-button-black rv-border-radius-quarter",
+                                Properties: [{ Name: "onmouseover", Value: function () { this.onmouseover = null; _init_mouse_over(); } }],
+                                Childs: [
+                                    {
+                                        Type: "i", Class: "fa fa-chevron-down", Style: "margin-" + RV_RevFloat + ":0.4rem;",
+                                        Attributes: [{ Name: "aria-hidden", Value: true }]
+                                    },
+                                    { Type: "text", TextValue: RVDic.AdvancedSelect }
+                                ]
+                            }]
                         },
                         { Type: "div", Class: "small-12 medium-12 large-12", Name: "itemSelect" }
                     ]
@@ -433,25 +401,21 @@
                     Childs: [
                         {
                             Type: "div", Class: "small-6 medium-6 large-6", Style: "padding-" + RV_RevFloat + ":0.5rem;",
-                            Childs: [
-                                {
-                                    Type: "div", Style: "height:7rem;",
-                                    Class: "small-12 medium-12 large-12 rv-air-button rv-border-radius-half",
-                                    Properties: [{ Name: "onclick", Value: function () { _userSelect(); } }],
-                                    Childs: [{ Type: "text", TextValue: RVDic.User }]
-                                }
-                            ]
+                            Childs: [{
+                                Type: "div", Style: "height:7rem;",
+                                Class: "small-12 medium-12 large-12 rv-air-button rv-border-radius-half",
+                                Properties: [{ Name: "onclick", Value: function () { _userSelect(); } }],
+                                Childs: [{ Type: "text", TextValue: RVDic.User }]
+                            }]
                         },
                         {
                             Type: "div", Class: "small-6 medium-6 large-6", Style: "padding-" + RV_Float + ":0.5rem;",
-                            Childs: [
-                                {
-                                    Type: "div", Style: "height:7rem;",
-                                    Class: "small-12 medium-12 large-12 rv-air-button rv-border-radius-half",
-                                    Properties: [{ Name: "onclick", Value: function () { _nodeSelect(); } }],
-                                    Childs: [{ Type: "text", TextValue: RVDic.Node }]
-                                }
-                            ]
+                            Childs: [{
+                                Type: "div", Style: "height:7rem;",
+                                Class: "small-12 medium-12 large-12 rv-air-button rv-border-radius-half",
+                                Properties: [{ Name: "onclick", Value: function () { _nodeSelect(); } }],
+                                Childs: [{ Type: "text", TextValue: RVDic.Node }]
+                            }]
                         }
                     ]
                 }
@@ -495,12 +459,10 @@
                     return;
                 }
 
-                var _div = that.__UserListContainer = GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1 SoftBackgroundColor",
-                        Style: "margin:0 auto; padding:1rem;", Name: "_div"
-                    }
-                ])["_div"];
+                var _div = that.__UserListContainer = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1 SoftBackgroundColor",
+                    Style: "margin:0 auto; padding:1rem;", Name: "_div"
+                }])["_div"];
 
                 that.__ShowedUserList = GlobalUtilities.show(_div);
                 GlobalUtilities.loading(_div);
