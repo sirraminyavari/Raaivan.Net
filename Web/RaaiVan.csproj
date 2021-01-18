@@ -1848,6 +1848,7 @@
     <Content Include="Script\USR\ApplicationsManager.js" />
     <Content Include="Script\USR\ChangePasswordDialog.js" />
     <Content Include="Script\USR\HomePageMainContent.js" />
+    <Content Include="Script\USR\LoginPageInitializer.js" />
     <Content Include="Script\USR\MasterPageBuilder.js" />
     <Content Include="Script\USR\AdvancedUserSearch.js" />
     <Content Include="Script\USR\HomePageSideInfo.js" />
@@ -2005,6 +2006,13 @@
     <Compile Include="HostNameTenantResolver.cs" />
     <Compile Include="Hubs\RaaiVanHub.cs" />
     <Compile Include="OwinExtensions.cs" />
+    <Compile Include="Page\Master\MainMaster.Master.cs">
+      <DependentUpon>MainMaster.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Page\Master\MainMaster.Master.designer.cs">
+      <DependentUpon>MainMaster.Master</DependentUpon>
+    </Compile>
     <Compile Include="Page\Master\TopMaster.Master.cs">
       <DependentUpon>TopMaster.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -2373,6 +2381,7 @@
     <Content Include="Fonts\woff2\IRANSansWeb_Light.woff2" />
     <Content Include="Fonts\woff2\IRANSansWeb_Medium.woff2" />
     <Content Include="Fonts\woff2\IRANSansWeb_UltraLight.woff2" />
+    <Content Include="Page\Master\MainMaster.Master" />
     <None Include="Properties\PublishProfiles\Default - AnyCPU.pubxml" />
     <None Include="Properties\PublishProfiles\Default - x64.pubxml" />
     <Content Include="Script\DataTables\Persian.json" />

@@ -7,18 +7,27 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RaaiVan.Web.Page.View {
+namespace RaaiVan.Web.Page.Master {
     
     
-    public partial class Login {
+    public partial class MainMaster {
         
         /// <summary>
-        /// initialJson control.
+        /// frmMainMaster control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField initialJson;
+        protected global::System.Web.UI.HtmlControls.HtmlForm frmMainMaster;
+        
+        /// <summary>
+        /// MainMasterBodySection control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder MainMasterBodySection;
     }
 }

@@ -1,55 +1,8 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Error.aspx.cs" Inherits="RaaiVan.Web.Page.View.Error" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Error.aspx.cs" Inherits="RaaiVan.Web.Page.View.Error"
+    MasterPageFile="~/Page/Master/MainMaster.Master" %>
 
-<!DOCTYPE html>
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
-    <title></title>
-
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-
-    <link rel="stylesheet" type="text/css" href="../../Script/jQuery/Tooltip/style.css" />
-    <link rel="stylesheet" type="text/css" href="../../Fonts/font-awesome.css"/>
-    <link rel="stylesheet" type="text/css" href="../../Script/Foundation/foundation.css"/>
-    <link rel="stylesheet" type="text/css" href="../../CSS/foundation-fix.css"/>
-
-    <script type="text/javascript" src="../../Script/jQuery/jquery.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../../Script/jQuery/jquery.mb.browser.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../../Script/jQuery/jquery.mousewheel.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../../Script/jQuery/jquery.blockUI.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../../Script/Foundation/foundation.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../../Script/Foundation/what-input.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../../Script/API/RVRequest.js"></script>
-    <script type="text/javascript" src="../../Script/TextEncoding.js"></script>
-    <script type="text/javascript" src="../../Script/GlobalUtilities.js"></script>
-    <script type="text/javascript" src="../../Script/OverrideAlerts.js"></script>
-    <script type="text/javascript" src="../../Script/jQuery/Tooltip/jquery.tooltip.js"></script>
-    <script type="text/javascript" src="../../Script/json2.js"></script>
-
-    <link rel='shortcut icon' href='../../api/rv/fav_icon' />
-    <link rel="stylesheet" type="text/css" href="../../api/rv/theme"/>
-    <link rel="stylesheet" type="text/css" href="../../api/rv/css_direction"/>
-    <script type="text/javascript" src="../../api/rv/global_params?Set=true"></script>
-    <script type="text/javascript" src="../../api/rv/language_dictionary"></script>
-    <script type="text/javascript" src="../../api/rv/language_dictionary?Help=true"></script>
-    <script type="text/javascript" src="../../api/rv/jquery_signalr"></script>
-    <script type="text/javascript" src="../../signalr/hubs"></script>
-    <script type="text/javascript" src="../../api/rv/raaivan_hub_js"></script>
-
-    <script type="text/javascript" src="../../Script/API/RVAPI.js"></script>
-
-    <script type="text/javascript">
-        jQuery(document).ready(function () {
-            jQuery(document).foundation();
-        });
-    </script>
-</head>
-<body class="Direction TextAlign" style="font-family:IRANSans;">
-    <form id="idFrmMain" runat="server">
-        <asp:HiddenField ID="initialJson" runat="server" ClientIDMode="Static" />
-    </form>
+<asp:Content ID="Content1" ContentPlaceHolderID="MainMasterBodySection" runat="server">
+    <asp:HiddenField ID="initialJson" runat="server" ClientIDMode="Static" />
 
     <div class="small-12 medium-12 large-12" style="width:100vw; height:100vh;">
         <div style="display:table; width:100%; height:100%;">
@@ -80,5 +33,4 @@
             ], document.getElementById("errorArea"));
         })();
     </script>
-</body>
-</html>
+</asp:Content>

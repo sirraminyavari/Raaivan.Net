@@ -193,6 +193,7 @@ namespace RaaiVan.Web.API
             List<RouteName> AuthenticationException = new List<RouteName>() {
                 RouteName.login,
                 RouteName.accessdenied,
+                RouteName.error,
                 allowNotAuth ? RouteName.graph : RouteName.none,
                 allowNotAuth ? RouteName.qatag : RouteName.none,
                 allowNotAuth ? RouteName.question : RouteName.none,
@@ -414,7 +415,7 @@ namespace RaaiVan.Web.API
         public static Dictionary<string, object> get_data_server_side(ParamsContainer paramsContainer, RouteName routeName)
         {
             Dictionary<string, object> data = get_data(paramsContainer, routeName.ToString());
-
+            
             Guid? userId = null;
             string redirectToUrl = PublicMethods.get_dic_value(data, "RedirectToURL");
 

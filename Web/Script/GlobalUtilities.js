@@ -36,6 +36,25 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         return { Color: color, Hover: hover, Dark: dark, Bright: bright };
     },
 
+    browser_version: function () {
+        var ua = navigator.userAgent, tem,
+            M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+
+        if (/trident/i.test(M[1])) {
+            tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
+            return { Name: 'msie', Version: tem[1] || '' };
+        }
+
+        if (M[1] === 'Chrome') {
+            tem = ua.match(/\bOPR\/(\d+)/);
+            if (tem != null) return { Name: 'Opera', Version: tem[1] || '' };
+        }
+
+        M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, '-?'];
+        if ((tem = ua.match(/version\/(\d+)/i)) != null) M.splice(1, 1, tem[1]);
+        return { Name: String(M[0]).toLowerCase(), Version: M[1] };
+    },
+
     to_json: function (str) {
         try { return JSON.parse(str); }
         catch (e) { return null; }
