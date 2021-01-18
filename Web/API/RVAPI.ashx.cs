@@ -434,6 +434,57 @@ namespace RaaiVan.Web.API
                         paramsContainer.file_response(themeContent, "thm.css", contentType: "text/css", isAttachment: false);
                         return true;
                     }
+                case "fav_icon":
+                    {
+                        paramsContainer.file_response(DocumentUtilities.FavIcon, 
+                            "favicon.ico", contentType: "image/x-icon", isAttachment: false);
+                        return true;
+                    }
+                case "language_dictionary":
+                    {
+                        bool? help = PublicMethods.parse_bool(paramsContainer.request_param("Help"));
+
+                        RVLang lang = PublicMethods.get_current_language(paramsContainer.ApplicationID);
+
+                        string fileContent = lang == RVLang.none ? string.Empty :
+                            DocumentUtilities.StaticFile((help.HasValue && help.Value ?
+                            PublicConsts.LanguageHelpFile : PublicConsts.LanguageFile).Replace("[lang]", lang.ToString()));
+
+                        paramsContainer.file_response(fileContent, "lang" + PublicMethods.random_string(5) + ".js",
+                            contentType: "text/javascript", isAttachment: false);
+
+                        return true;
+                    }
+                case "css_direction":
+                    {
+                        bool isRTL = PublicMethods.is_rtl_language(paramsContainer.ApplicationID,
+                            PublicMethods.get_current_language(paramsContainer.ApplicationID));
+
+                        string fileContent = DocumentUtilities.StaticFile(isRTL ? PublicConsts.CSSRTL : PublicConsts.CSSLTR);
+                        paramsContainer.file_response(fileContent, "dir.css", contentType: "text/css", isAttachment: false);
+
+                        return true;
+                    }
+                case "jquery_signalr":
+                    {
+                        string fileContent = !RaaiVanSettings.RealTime(paramsContainer.ApplicationID) ? string.Empty :
+                            DocumentUtilities.StaticFile(PublicConsts.JQuerySignalR);
+
+                        paramsContainer.file_response(fileContent, "jquery.signalr.js", 
+                            contentType: "text/javascript", isAttachment: false);
+
+                        return true;
+                    }
+                case "raaivan_hub_js":
+                    {
+                        string fileContent = !RaaiVanSettings.RealTime(paramsContainer.ApplicationID) ? string.Empty :
+                            DocumentUtilities.StaticFile(PublicConsts.RaaiVanHub);
+
+                        paramsContainer.file_response(fileContent, "RaaiVanHub.js", 
+                            contentType: "text/javascript", isAttachment: false);
+
+                        return true;
+                    }
             }
 
             if (!string.IsNullOrEmpty(responseText))

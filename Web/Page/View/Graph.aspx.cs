@@ -6,7 +6,6 @@ using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RaaiVan.Web.API;
-using RaaiVan.Modules.GlobalUtilities;
 
 namespace RaaiVan.Web.Page.View
 {
@@ -18,8 +17,6 @@ namespace RaaiVan.Web.Page.View
         {
             paramsContainer = new ParamsContainer(HttpContext.Current);
             RouteList.get_data_server_side(paramsContainer, RouteName.graph);
-
-            PublicMethods.set_page_headers(paramsContainer.ApplicationID, Page, false);
         }
     }
 }

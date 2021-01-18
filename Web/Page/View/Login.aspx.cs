@@ -22,7 +22,6 @@ namespace RaaiVan.Web.Page.View
             initialJson.Value = PublicMethods.toJSON(RouteList.get_data_server_side(paramsContainer, RouteName.login));
 
             Page.Title = RaaiVanSettings.SystemTitle(paramsContainer.ApplicationID);
-            PublicMethods.set_page_headers(paramsContainer.ApplicationID, Page, false);
 
             string returnUrl = Request.Params["ReturnUrl"];
             

@@ -8,11 +8,10 @@ namespace RaaiVan.Modules.GlobalUtilities
 {
     public enum RVLang
     {
+        none,
+
         fa,
         en,
-        ar,
-        fr,
-        de,
-        ku
+        ar
     }
 }

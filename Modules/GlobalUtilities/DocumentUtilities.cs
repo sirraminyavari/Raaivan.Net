@@ -62,6 +62,42 @@ namespace RaaiVan.Modules.GlobalUtilities
 
     public class DocumentUtilities
     {
+        private static byte[] _FavIcon;
+
+        public static byte[] FavIcon
+        {
+            get
+            {
+                if (_FavIcon !=  null) return _FavIcon;
+
+                try
+                {
+                    byte[] fav = File.ReadAllBytes(PublicMethods.map_path(PublicConsts.FavIcon));
+                    if (!PublicMethods.is_dev()) _FavIcon = fav;
+                    return fav;
+                }
+                catch { return new byte[0]; }
+            }
+        }
+
+        public static Dictionary<string, string> _StaticFiles = new Dictionary<string, string>();
+
+        public static string StaticFile(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return string.Empty;
+
+            if (_StaticFiles.ContainsKey(name.ToLower())) return _StaticFiles[name];
+
+            try
+            {
+                string path = PublicMethods.map_path(name);
+                string content = !File.Exists(path) ? string.Empty : File.ReadAllText(path);
+                if (!PublicMethods.is_dev()) _StaticFiles[name.ToLower()] = content;
+                return content;
+            }
+            catch { return string.Empty; }
+        }
+
         protected static DocFileInfo _get_file_info(Dictionary<string, object> dic)
         {
             if (dic == null) return null;

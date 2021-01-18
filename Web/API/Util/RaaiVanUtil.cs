@@ -1277,14 +1277,14 @@ namespace RaaiVan.Web.API
             xml_response(xDoc);
         }
 
-        public void file_response(byte[] byteArray, string fileName)
+        public void file_response(byte[] byteArray, string fileName, string contentType = null, bool isAttachment = true)
         {
             _Context.Response.Clear();
             _Context.Response.ClearContent();
             _Context.Response.ClearHeaders();
             _Context.Response.Buffer = true;
-            _Context.Response.ContentType = "application/octet-stream";
-            _Context.Response.AddHeader("Content-Disposition", "attachment; filename=" + fileName.Replace(' ', '_'));
+            _Context.Response.ContentType = string.IsNullOrEmpty(contentType) ? "application/octet-stream" : contentType;
+            if (isAttachment) _Context.Response.AddHeader("Content-Disposition", "attachment; filename=" + fileName.Replace(' ', '_'));
             _Context.Response.AddHeader("Content-Length", byteArray.Length.ToString());
 
             _Context.Response.BinaryWrite(byteArray);

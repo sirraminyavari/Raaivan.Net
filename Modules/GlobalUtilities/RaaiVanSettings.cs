@@ -516,12 +516,12 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             string str = get_value(applicationId, RVSettingsItem.DefaultLang, "fa").ToLower();
             RVLang lng = RVLang.fa;
-            return Enum.TryParse<RVLang>(str, out lng) ? lng : RVLang.fa;
+            return Enum.TryParse<RVLang>(str, out lng) && lng != RVLang.none ? lng : RVLang.fa;
         }
 
         public static string DefaultDirection(Guid? applicationId)
         {
-            return PublicMethods.is_rtl_language(DefaultLang(applicationId)) ? "RTL" : "LTR";
+            return PublicMethods.is_rtl_language(applicationId, DefaultLang(applicationId)) ? "RTL" : "LTR";
         }
 
         public static bool ShowSystemVersion(Guid? applicationId)

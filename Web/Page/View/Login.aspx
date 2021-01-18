@@ -39,8 +39,15 @@
     <script type="text/javascript" src="../../Script/json2.js"></script>
     <script type="text/javascript" src="../../Script/AutoSuggest/autosuggest.js?v=28"></script>
 
+    <link rel='shortcut icon' href='../../api/rv/fav_icon' />
     <link rel="stylesheet" type="text/css" href="../../api/rv/theme"/>
+    <link rel="stylesheet" type="text/css" href="../../api/rv/css_direction"/>
     <script type="text/javascript" src="../../api/rv/global_params?Set=true"></script>
+    <script type="text/javascript" src="../../api/rv/language_dictionary"></script>
+    <script type="text/javascript" src="../../api/rv/language_dictionary?Help=true"></script>
+    <script type="text/javascript" src="../../api/rv/jquery_signalr"></script>
+    <script type="text/javascript" src="../../signalr/hubs"></script>
+    <script type="text/javascript" src="../../api/rv/raaivan_hub_js"></script>
 
     <script type="text/javascript" src="../../Script/API/UsersAPI.js?v=28"></script>
     <script type="text/javascript" src="../../Script/API/RVAPI.js?v=28"></script>

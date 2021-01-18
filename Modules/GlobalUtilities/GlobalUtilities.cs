@@ -374,6 +374,8 @@ namespace RaaiVan.Modules.GlobalUtilities
 
     public static class PublicConsts
     {
+        public static string FavIcon = "~/Images/" + RaaiVanSettings.FavIconName + ".ico";
+
         public static string LoginPage = "~/login";
         public static string ApplicationsPage = "~/teams";
         public static string HomePage = "~/home";
@@ -402,6 +404,12 @@ namespace RaaiVan.Modules.GlobalUtilities
         public static string EncryptedFileNamePrefix = "e_";
         public static string LicenseFilePath = "~/raaivan.license";
         public static string GlobalCSS = "~/CSS/Global.css";
+        public static string CSSLTR = "~/CSS/LTR.css";
+        public static string CSSRTL = "~/CSS/RTL.css";
+        public static string LanguageFile = "~/Script/Lang/[lang].js";
+        public static string LanguageHelpFile = "~/Script/Lang/Help/[lang].js";
+        public static string JQuerySignalR = "~/Script/jQuery/jquery.signalr.js";
+        public static string RaaiVanHub = "~/Script/RealTime/RaaiVanHub.js";
 
         public static string NotAuthenticatedResponse = "{\"NotAuthenticated\":" + true.ToString().ToLower() + "}";
         public static string NullTenantResponse = "{\"NoApplicationFound\":" + true.ToString().ToLower() + "}";
@@ -690,6 +698,22 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             if (HttpContext.Current != null && HttpContext.Current.Session != null)
                 HttpContext.Current.Session[PublicConsts.ApplicationIDSessionVariableName] = application;
+        }
+
+        public static RVLang get_current_language(Guid? applicationId = null)
+        {
+            object l = null;
+            if (HttpContext.Current != null && HttpContext.Current.Session != null)
+                l = HttpContext.Current.Session[PublicConsts.LanguageSessionVariableName];
+            return l != null && l.GetType() == typeof(RVLang) ? (RVLang)l : RaaiVanSettings.DefaultLang(applicationId);
+        }
+
+        public static void set_current_language(RVLang lang)
+        {
+            if (lang == RVLang.none) return;
+
+            if (HttpContext.Current != null && HttpContext.Current.Session != null)
+                HttpContext.Current.Session[PublicConsts.LanguageSessionVariableName] = lang;
         }
 
         private static SortedList<Guid, Dictionary<Guid, bool>> _SystemAdmins = 
@@ -1027,25 +1051,14 @@ namespace RaaiVan.Modules.GlobalUtilities
             return !length.HasValue || length <= 0 || ret.Length <= length ? ret : ret.Substring(0, length.Value) + "...";
         }
 
-        public static bool is_rtl_language(RVLang lang)
+        public static bool is_rtl_language(Guid? applicationId, RVLang lang)
         {
-            return lang == RVLang.fa || lang == RVLang.ar;
+            return lang == RVLang.none ? is_rtl_language(applicationId, RaaiVanSettings.DefaultLang(applicationId)) :
+                lang == RVLang.fa || lang == RVLang.ar;
         }
 
         public static bool has_persian_numbers(RVLang lang) {
             return lang == RVLang.fa || lang == RVLang.ar;
-        }
-
-        public static RVLang get_current_language(Guid applicationId) {
-            object l = null;
-            if (HttpContext.Current != null && HttpContext.Current.Session != null)
-                l = HttpContext.Current.Session[PublicConsts.LanguageSessionVariableName];
-            return l != null && l.GetType() == typeof(RVLang) ? (RVLang)l : RaaiVanSettings.DefaultLang(applicationId);
-        }
-
-        public static RVLang get_current_language()
-        {
-            return get_current_language(Guid.Empty);
         }
 
         public static bool uses_jalali_calendar(RVLang lang)
@@ -1356,35 +1369,6 @@ namespace RaaiVan.Modules.GlobalUtilities
             {
                 errorMessage = ex.InnerException == null ? ex.ToString() : ex.InnerException.ToString();
                 return null;
-            }
-        }
-
-        public static void set_page_headers(Guid? applicationId, Page pg, bool isAuthenticated)
-        {
-            pg.Header.Controls.Add(new LiteralControl(
-                "<link rel='shortcut icon' href='../../Images/" + RaaiVanSettings.FavIconName + ".ico' />"));
-
-            pg.Header.Controls.Add(new LiteralControl("<link type='text/css' rel='stylesheet' " +
-                "href='" + pg.ResolveClientUrl("~/CSS/" + RaaiVanSettings.DefaultDirection(applicationId) + ".css") + "' />"));
-
-            pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
-                pg.ResolveClientUrl("~/Script/Lang/" + RaaiVanSettings.DefaultLang(applicationId) + ".js?timeStamp=" +
-                DateTime.Now.Millisecond.ToString()) + "'></script>"));
-
-            pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
-                pg.ResolveClientUrl("~/Script/Lang/Help/" + RaaiVanSettings.DefaultLang(applicationId) + ".js?timeStamp=" +
-                DateTime.Now.Millisecond.ToString()) + "'></script>"));
-
-            if (RaaiVanSettings.RealTime(applicationId) && isAuthenticated)
-            {
-                pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
-                    pg.ResolveClientUrl("~/Script/jQuery/jquery.signalr.js") + "'></script>"));
-                
-                pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
-                    pg.ResolveClientUrl("~/signalr/hubs") + "'></script>"));
-                
-                pg.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
-                    pg.ResolveClientUrl("~/Script/RealTime/RaaiVanHub.js") + "'></script>"));
             }
         }
 
