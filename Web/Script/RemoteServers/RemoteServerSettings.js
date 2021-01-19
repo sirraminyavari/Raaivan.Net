@@ -2,10 +2,10 @@
     if (window.RemoteServerSettings) return;
 
     window.RemoteServerSettings = function (container, params) {
-        this.Container = typeof (container) == "object" ? container : document.getElementById("container");
+        this.Container = typeof (container) == "object" ? container : document.getElementById(container);
         if (!this.Container) return;
         params = params || {};
-
+        
         this.Interface = {
             SearchContainer: null,
             SearchInput: null,
@@ -14,6 +14,7 @@
 
         this.Options = {
             SelectMode: !!params.SelectMode,
+            Checkbox: !!params.Checkbox,
             OnSelect: params.OnSelect
         };
 
@@ -30,7 +31,7 @@
             params = params || {};
             
             if (params.Servers) return that.initialize(params.Servers);
-
+            
             UsersAPI.GetRemoteServers({
                 ParseResults: true,
                 ResponseHandler: function (result) {
@@ -114,19 +115,17 @@
         new_item: function (itemsContainer) {
             var that = this;
 
-            var elems = GlobalUtilities.create_nested_elements([
-                {
-                    Type: "div", Class: "small-10 medium-9 large-8 rv-border-radius-1 SoftBackgroundColor",
-                    Style: "margin:0 auto; padding:1rem;", Name: "container",
-                    Childs: [
-                        {
-                            Type: "div", Class: "small-12 medium-12 large-12 rv-title",
-                            Childs: [{ Type: "text", TextValue: RVDic.NewN.replace("[n]", RVDic.RemoteServer) }]
-                        },
-                        { Type: "div", Class: "small-12 medium-12 large-12", Name: "_div" }
-                    ]
-                }
-            ], that.Container);
+            var elems = GlobalUtilities.create_nested_elements([{
+                Type: "div", Class: "small-10 medium-9 large-8 rv-border-radius-1 SoftBackgroundColor",
+                Style: "margin:0 auto; padding:1rem;", Name: "container",
+                Childs: [
+                    {
+                        Type: "div", Class: "small-12 medium-12 large-12 rv-title",
+                        Childs: [{ Type: "text", TextValue: RVDic.NewN.replace("[n]", RVDic.RemoteServer) }]
+                    },
+                    { Type: "div", Class: "small-12 medium-12 large-12", Name: "_div" }
+                ]
+            }], that.Container);
 
             var showed = GlobalUtilities.show(elems["container"]);
 
@@ -183,67 +182,75 @@
                 };
             };
 
-            var elems = GlobalUtilities.create_nested_elements([
-                {
-                    Type: "div", Name: "container",
-                    Class: "small-12 medium-12 large-12 " +
-                        (item.ID ? "rv-border-radius-half rv-bg-color-white-softer SoftShadow" : ""),
-                    Style: "position:relative; padding:0.5rem; margin-top:0.5rem;" + 
-                        (item.ID && !that.Options.SelectMode ? "padding-" + RV_Float + ":4rem;" : "") +
-                        (item.ID ? "padding-" + RV_RevFloat + ":2rem;" : "") +
-                        (that.Options.SelectMode ? "cursor:pointer" : ""),
-                    Properties: !that.Options.SelectMode || !that.Options.OnSelect ? null : [
-                        { Name: "onclick", Value: function () { that.Options.OnSelect(item); }}
-                    ],
-                    Childs: [
-                        (!item.ID || that.Options.SelectMode ? null : {
-                            Type: "div", Style: "position:absolute; top:0.5rem;" + RV_Float + ":0.5rem;",
-                            Childs: [
-                                {
+            var elems = GlobalUtilities.create_nested_elements([{
+                Type: "div", Name: "container",
+                Class: "small-12 medium-12 large-12" +
+                    (item.ID ? "rv-border-radius-half rv-bg-color-white-softer SoftShadow" : ""),
+                Style: "position:relative; padding:0.5rem; margin-top:0.5rem;" +
+                    (that.Options.SelectMode ? "cursor:pointer" : ""),
+                Properties: !(that.Options.Checkbox || (that.Options.SelectMode && that.Options.OnSelect)) ? null : [{
+                    Name: "onclick",
+                    Value: function (e) {
+                        if (elems["chb"]) elems["container"].Checked(!elems["chb"].Checked);
+                        if (that.Options.SelectMode && that.Options.OnSelect) that.Options.OnSelect(item);
+                    }
+                }],
+                Childs: [
+                    {
+                        Type: "div", Style: "display:flex; flex-flow:row; align-items:center;",
+                        Childs: [
+                            (!that.Options.Checkbox ? null : {
+                                Type: "div", Style: "flex:0 0 auto;" ,
+                                Childs: [{ Type: "checkbox", Style: "width:1rem; height:1rem;", Name: "chb", Params: { Checked: true } }]
+                            }),
+                            (!item.ID || that.Options.SelectMode ? null : {
+                                Type: "div", Style: "flex:0 0 auto;",
+                                Childs: [{
                                     Type: "i", Class: "fa fa-trash-o fa-lg rv-icon-button",
                                     Tooltip: RVDic.Remove, Name: "removeButton",
                                     Attributes: [{ Name: "aria-hidden", Value: true }]
-                                }
-                            ]
-                        }),
-                        (!item.ID || that.Options.SelectMode ? null : {
-                            Type: "div", Style: "position:absolute; top:0.5rem;" + RV_Float + ":2rem;",
-                            Childs: [
-                                {
+                                }]
+                            }),
+                            (!item.ID || that.Options.SelectMode ? null : {
+                                Type: "div", Style: "flex:0 0 auto; margin-" + RV_Float + ":0.7rem;",
+                                Childs: [{
                                     Type: "i", Class: "fa fa-pencil fa-lg rv-icon-button",
                                     Tooltip: RVDic.Edit, Name: "editButton",
                                     Attributes: [{ Name: "aria-hidden", Value: true }]
-                                }
-                            ]
-                        }),
-                        (!item.ID ? null : {
-                            Type: "div", Style: "position:absolute; top:0.5rem;" + RV_RevFloat + ":0.5rem;",
-                            Childs: [
-                                {
+                                }]
+                            }),
+                            {
+                                Type: "div", Style: "flex:1 1 auto; padding:0 1rem;",
+                                Childs: [
+                                    { Type: "div", Class: "small-12 medium-12 large-12 row", Name: "viewArea", Style: "margin:0rem;" },
+                                    (that.Options.SelectMode ? null : {
+                                        Type: "div", Class: "small-12 medium-12 large-12 row", Name: "editArea",
+                                        Style: "margin:0rem; display:none;",
+                                        Childs: [
+                                            create_input({ Name: "name", Title: RVDic.Name }),
+                                            create_input({ Name: "url", Title: RVDic.URL }),
+                                            create_input({ Name: "username", Title: RVDic.UserName }),
+                                            create_input({ Name: "password", Title: RVDic.Password, Type: "password" })
+                                        ]
+                                    }),
+                                ]
+                            },
+                            (!item.ID ? null : {
+                                Type: "div", Style: "flex:0 0 auto;",
+                                Childs: [{
                                     Type: "i", Style: (item.ID ? "" : "display:none;"), Name: "checkButton",
                                     Attributes: [{ Name: "aria-hidden", Value: true }]
-                                }
-                            ]
-                        }),
-                        { Type: "div", Class: "small-12 medium-12 large-12 row", Name: "viewArea", Style: "margin:0rem;" },
-                        (that.Options.SelectMode ? null : {
-                            Type: "div", Class: "small-12 medium-12 large-12 row", Name: "editArea",
-                            Style: "margin:0rem; display:none;",
-                            Childs: [
-                                create_input({ Name: "name", Title: RVDic.Name }),
-                                create_input({ Name: "url", Title: RVDic.URL }),
-                                create_input({ Name: "username", Title: RVDic.UserName }),
-                                create_input({ Name: "password", Title: RVDic.Password, Type: "password" })
-                            ]
-                        }),
-                        (item.ID ? null : {
-                            Type: "div", Class: "small-6 medium-5 large-4 rv-air-button rv-circle",
-                            Style: "margin:1rem auto 0 auto;", Name: "editButton",
-                            Childs: [{ Type: "text", TextValue: RVDic.Confirm }]
-                        })
-                    ]
-                }
-            ]);
+                                }]
+                            })
+                        ]
+                    },
+                    (item.ID ? null : {
+                        Type: "div", Class: "small-6 medium-5 large-4 rv-air-button rv-circle",
+                        Style: "margin:1rem auto 0 auto;", Name: "editButton",
+                        Childs: [{ Type: "text", TextValue: RVDic.Confirm }]
+                    })
+                ]
+            }]);
 
             if (options.Add2Top) container.insertBefore(elems["container"], container.firstChild);
             else container.appendChild(elems["container"]);
@@ -260,6 +267,15 @@
 
             var removeButton = elems["removeButton"];
             var editButton = elems["editButton"];
+
+            elems["container"].ItemObject = item;
+
+            elems["container"].Checked = function (value) {
+                if (GlobalUtilities.get_type(value) == "boolean") {
+                    if (elems["chb"]) elems["chb"][value ? "check" : "uncheck"]();
+                }
+                else return !elems["chb"] ? null : elems["chb"].Checked;
+            };
 
             var processing = false;
 
@@ -306,11 +322,26 @@
             var _set_data = function () {
                 viewArea.innerHTML = "";
 
-                GlobalUtilities.create_nested_elements([
-                    create_view_element({ Title: RVDic.Name, Value: Base64.decode(item.Name) }),
-                    create_view_element({ Title: RVDic.URL, Value: Base64.decode(item.URL) }),
-                    create_view_element({ Title: RVDic.UserName, Value: Base64.decode(item.UserName) })
-                ], viewArea);
+                if (that.Options.Checkbox) {
+                    GlobalUtilities.create_nested_elements([
+                        {
+                            Type: "div", Class: "small-12 medium-12 large-12 WarmColor",
+                            Childs: [{ Type: "text", TextValue: Base64.decode(item.Name) }]
+                        },
+                        {
+                            Type: "div", Class: "small-12 medium-12 large-12",
+                            Style: "color:rgb(150,150,150); font-size:0.7rem;",
+                            Childs: [{ Type: "text", TextValue: Base64.decode(item.URL) }]
+                        }
+                    ], viewArea);
+                }
+                else {
+                    GlobalUtilities.create_nested_elements([
+                        create_view_element({ Title: RVDic.Name, Value: Base64.decode(item.Name) }),
+                        create_view_element({ Title: RVDic.URL, Value: Base64.decode(item.URL) }),
+                        create_view_element({ Title: RVDic.UserName, Value: Base64.decode(item.UserName) })
+                    ], viewArea);
+                }
                 
                 if (item.ID && editArea) {
                     nameInput.value = Base64.decode(item.Name);
@@ -387,6 +418,26 @@
             _set_data();
 
             that.set_search_input_display();
+        },
+
+        get_items_dom: function () {
+            return [].filter.call((this.Interface.Items || []).childNodes, d => !!d.Checked) || [];
+        },
+
+        get_items: function () {
+            return this.get_items_dom().map(d => d.ItemObject);
+        },
+
+        get_checked_items: function () {
+            return this.get_items_dom().filter(d => d.Checked()).map(d => d.ItemObject);
+        },
+
+        check_all: function () {
+            this.get_items_dom().forEach(d => d.Checked(true));
+        },
+
+        uncheck_all: function () {
+            this.get_items_dom().forEach(d => d.Checked(false));
         }
     };
 })();

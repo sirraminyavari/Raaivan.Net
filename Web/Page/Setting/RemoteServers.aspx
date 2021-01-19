@@ -7,7 +7,9 @@
     <script type="text/javascript">
         (function () {
             GlobalUtilities.load_files(["RemoteServers/RemoteServerSettings.js"], {
-                OnLoad: function () { new RemoteServerSettings("remoteServers"); }
+                OnLoad: function () {
+                    new RemoteServerSettings("remoteServers");
+                }
             });
         })();
     </script>

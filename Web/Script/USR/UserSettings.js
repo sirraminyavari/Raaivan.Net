@@ -44,12 +44,6 @@
                             Class: "small-12 medium-12 large-12 rv-air-button rv-circle",
                             Properties: [{ Name: "onclick", Value: function () { that.notification_settings(); } }],
                             Childs: [{ Type: "text", TextValue: RVDic.NotificationSettings }]
-                        }),
-                        (!modules.RestAPI ? null : {
-                            Type: "div", Name: "remoteServers", Style: "margin-bottom:0.5rem;",
-                            Class: "small-12 medium-12 large-12 rv-air-button rv-circle",
-                            Properties: [{ Name: "onclick", Value: function () { that.remote_servers(); } }],
-                            Childs: [{ Type: "text", TextValue: RVDic.RemoteServers }]
                         })
                     ]
                 }
@@ -94,7 +88,7 @@
                 var codes = thm.Codes;
 
                 var thmCode = thm.Name.substr(thm.Name.indexOf("_") + 1);
-                
+
                 var items = [];
 
                 var _add_item = function (itm) {
@@ -122,7 +116,7 @@
                 _add_item({ Name: "twarm", Style: "background-color:" + codes.transparentwarm + ";" });
 
                 items.push({
-                    Type: "div", Class: "check-button", 
+                    Type: "div", Class: "check-button",
                     Style: "position:absolute; top:0.1rem;" + RV_Float + ":0rem; width:2rem; text-align:center;" +
                         "display:" + (String(thm.Name).toLowerCase() == String(window.RVGlobal.Theme).toLowerCase() ? "block;" : "none;"),
                     Properties: [{ Name: "themeName", Value: thm.Name }],
@@ -135,7 +129,7 @@
                 });
 
                 arr.push({
-                    Type: "div", Class: "small-12 medium-12 large-12", 
+                    Type: "div", Class: "small-12 medium-12 large-12",
                     Style: "position:relative; margin:0.2rem; padding:0.2rem; background-color:white; cursor:pointer;" +
                         "padding-" + RV_Float + ":3rem; height:2.1rem;" + GlobalUtilities.border_radius("0.3rem"),
                     Tooltip: !thmCode || (thmCode.toLowerCase() == "default") ? null : thmCode,
@@ -152,7 +146,7 @@
 
                                         var curThmUrl = RVAPI.ThemeURL({ Name: window.RVGlobal.Theme || "Default" });
                                         var newThmUrl = RVAPI.ThemeURL({ Name: thm.Name });
-                                        
+
                                         DynamicFileUtilities.replace_css(curThmUrl, newThmUrl);
 
                                         window.RVGlobal.Theme = thm.Name;
@@ -172,7 +166,7 @@
                 if (String(thm.Name).toLowerCase() == "default") {
                     var temp = [];
                     temp.push(arr[arr.length - 1]);
-                    for (var i = 0; i < (arr.length - 1) ; ++i)
+                    for (var i = 0; i < (arr.length - 1); ++i)
                         temp.push(arr[i]);
                     arr = temp;
                 }
@@ -239,40 +233,13 @@
             GlobalUtilities.load_files(["Notifications/SendMessageUserSetting.js"], {
                 OnLoad: function () {
                     var settings = window.RVGlobal || {};
-                    
+
                     new SendMessageUserSetting(elems["_div"], {
                         UserID: settings.UserID,
                         CurrentUserID: settings.CurrentUserID,
                         IsSystemAdmin: settings.IsSystemAdmin === true
                     });
                 }
-            });
-        },
-
-        remote_servers: function () {
-            var that = this;
-
-            if (that.RemoteServersPanel) return GlobalUtilities.show(that.RemoteServersPanel);
-
-            var elems = GlobalUtilities.create_nested_elements([{
-                Type: "div", Class: "small-11 medium-10 large-9 rv-border-radius-1 SoftBackgroundColor",
-                Style: "margin:0 auto; padding:1rem;", Name: "container",
-                Childs: [
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12 rv-title",
-                        Childs: [{ Type: "text", TextValue: RVDic.RemoteServers }]
-                    },
-                    { Type: "div", Class: "small-12 medium-12 large-12", Name: "_div" }
-                ]
-            }]);
-
-            that.RemoteServersPanel = elems["container"];
-
-            GlobalUtilities.loading(elems["_div"]);
-            GlobalUtilities.show(elems["container"]);
-
-            GlobalUtilities.load_files(["RemoteServers/RemoteServerSettings.js"], {
-                OnLoad: function () { new RemoteServerSettings(elems["_div"]); }
             });
         }
     }

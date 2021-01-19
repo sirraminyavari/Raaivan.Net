@@ -1783,6 +1783,13 @@ namespace RaaiVan.Web.API
             //Privacy Check: OK
             if (!paramsContainer.GBEdit) return;
 
+            if (!paramsContainer.CurrentUserID.HasValue ||
+                !PublicMethods.is_system_admin(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";
+                return;
+            }
+
             if ((!string.IsNullOrEmpty(name) && name.Length > 200) || (!string.IsNullOrEmpty(url) && url.Length > 90) ||
                 (!string.IsNullOrEmpty(username) && username.Length > 90) || (!string.IsNullOrEmpty(password) && password.Length > 20))
             {
@@ -1838,6 +1845,13 @@ namespace RaaiVan.Web.API
             //Privacy Check: OK
             if (!paramsContainer.GBEdit) return;
 
+            if (!paramsContainer.CurrentUserID.HasValue ||
+                !PublicMethods.is_system_admin(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";
+                return;
+            }
+
             RemoteServer rs = !id.HasValue ? null : UsersController.get_remote_server(paramsContainer.Tenant.Id, id.Value);
 
             if (rs == null || !paramsContainer.CurrentUserID.HasValue || rs.UserID != paramsContainer.CurrentUserID)
@@ -1873,8 +1887,15 @@ namespace RaaiVan.Web.API
             //Privacy Check: OK
             if (!paramsContainer.GBEdit) return;
 
-            List<RemoteServer> servers =
-                UsersController.get_remote_servers(paramsContainer.Tenant.Id, paramsContainer.CurrentUserID.Value);
+            if (!paramsContainer.CurrentUserID.HasValue || (
+                !PublicMethods.is_system_admin(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value) &&
+                !AuthorizationManager.has_right(AccessRoleName.RemoteServers, paramsContainer.CurrentUserID.Value)))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";
+                return;
+            }
+
+            List<RemoteServer> servers = UsersController.get_remote_servers(paramsContainer.Tenant.Id);
 
             responseText = "{\"Servers\":[" + string.Join(",", servers.Select(u => u.toJson())) + "]}";
         }

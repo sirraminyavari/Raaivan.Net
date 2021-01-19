@@ -1623,13 +1623,13 @@ namespace RaaiVan.Modules.Users
             }
         }
 
-        public static List<RemoteServer> GetRemoteServers(Guid applicationId, Guid? userId, Guid? serverId)
+        public static List<RemoteServer> GetRemoteServers(Guid applicationId, Guid? serverId)
         {
             string spName = GetFullyQualifiedName("GetRemoteServers");
 
             try
             {
-                IDataReader reader = ProviderUtil.execute_reader(spName, applicationId, userId, serverId);
+                IDataReader reader = ProviderUtil.execute_reader(spName, applicationId, serverId);
                 List<RemoteServer> retItems = new List<RemoteServer>();
                 _parse_remote_servers(ref reader, ref retItems);
                 return retItems;

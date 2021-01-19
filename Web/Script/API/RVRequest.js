@@ -1,7 +1,7 @@
 ﻿(function () {
     if (window.RVRequest) return;
 
-    RVRequest = function () {
+    _RVRequest = function () {
         this.Objects = {
             AccessToken: null,
             AccessTokenParameterName: "acstkn",
@@ -16,7 +16,7 @@
         };
     };
 
-    RVRequest.prototype = {
+    _RVRequest.prototype = {
         parse_response: function (responseText, parseResults, remoteSettings) {
             var that = this;
 
@@ -308,15 +308,17 @@
         }
     };
 
-    window.RVRequest = new RVRequest();
+    window.RVRequest = new _RVRequest();
+
+    window.RVRequest.new = function () { return new _RVRequest(); };
     
     window.send_post_request = function (url, queryString, responseHandler, responseParams,
         failureHandler, failureParams, parseResults, options) {
-        RVRequest.post_request(url, queryString, responseHandler, options, parseResults);
+        ((options || {}).RequestHandler || RVRequest).post_request(url, queryString, responseHandler, options, parseResults);
     };
 
     window.send_get_request = function (url, responseHandler, responseParams,
         failureHandler, failureParams, parseResults, options) {
-        RVRequest.get_request(url, responseHandler, options, parseResults);
+        ((options || {}).RequestHandler || RVRequest).get_request(url, responseHandler, options, parseResults);
     };
 })();

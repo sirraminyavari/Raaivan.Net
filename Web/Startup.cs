@@ -32,7 +32,8 @@ namespace RaaiVan.Web
                     conf.Use((context, next) =>
                     {
                         ParamsContainer paramsContainer = new ParamsContainer(HttpContext.Current);
-                        paramsContainer.return_response("var daslkdjhalskfh84t94uthgk = {\"Message\":\"-)\"};");
+                        paramsContainer.file_response("var daslkdjhalskfh84t94uthgk = {\"Message\":\"-)\"};", 
+                            "empty.js", "text/javascript", isAttachment: false);
                         return next();
                     });
                 });

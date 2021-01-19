@@ -427,7 +427,7 @@
 
             GlobalUtilities.loading(_div);
             GlobalUtilities.show(_div);
-
+            
             GlobalUtilities.load_files(["USR/UserSettings.js"], { OnLoad: function () { new UserSettings(_div); } });
         },
 

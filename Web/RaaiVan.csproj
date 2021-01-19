@@ -1142,6 +1142,7 @@
     <Content Include="Page\View\QA.aspx" />
     <Content Include="Page\View\QATag.aspx" />
     <Content Include="Page\View\Question.aspx" />
+    <Content Include="Page\View\RemoteSearch.aspx" />
     <Content Include="Page\View\Reports.aspx" />
     <Content Include="Page\View\Search.aspx" />
     <Content Include="Page\View\SearchUsers.aspx" />
@@ -2287,6 +2288,13 @@
     </Compile>
     <Compile Include="Page\View\Question.aspx.designer.cs">
       <DependentUpon>Question.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Page\View\RemoteSearch.aspx.cs">
+      <DependentUpon>RemoteSearch.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Page\View\RemoteSearch.aspx.designer.cs">
+      <DependentUpon>RemoteSearch.aspx</DependentUpon>
     </Compile>
     <Compile Include="Page\View\Reports.aspx.cs">
       <DependentUpon>Reports.aspx</DependentUpon>

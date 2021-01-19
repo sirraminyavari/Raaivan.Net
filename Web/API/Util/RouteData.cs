@@ -47,11 +47,13 @@ namespace RaaiVan.Web.API
         newnode,
         node,
         advanced_search,
+        search,
+        usersearch,
+        remotesearch,
         profile,
         form,
         posts,
         home,
-        search,
         reports,
         dashboard,
         graph,
@@ -60,7 +62,6 @@ namespace RaaiVan.Web.API
         question,
         qatag,
         newquestion,
-        usersearch,
         network,
         messages,
         help
@@ -155,6 +156,10 @@ namespace RaaiVan.Web.API
                 !Modules.RaaiVanConfig.Modules.QA(input.ParamsContainer.ApplicationID) ? RouteName.admin_qa : RouteName.none,
                 !Modules.RaaiVanConfig.Modules.QAAdmin(input.ParamsContainer.ApplicationID) ? RouteName.admin_qa : RouteName.none,
                 !Modules.RaaiVanConfig.Modules.Explorer(input.ParamsContainer.ApplicationID) ? RouteName.explorer : RouteName.none,
+                !Modules.RaaiVanConfig.Modules.RestAPI(input.ParamsContainer.ApplicationID) || RaaiVanSettings.SAASBasedMultiTenancy ? 
+                    RouteName.admin_remoteservers : RouteName.none,
+                !Modules.RaaiVanConfig.Modules.RestAPI(input.ParamsContainer.ApplicationID) || RaaiVanSettings.SAASBasedMultiTenancy ? 
+                    RouteName.remotesearch : RouteName.none,
 
                 !RaaiVanSettings.SAASBasedMultiTenancy ? RouteName.teams : RouteName.none
             }.Where(n => n != RouteName.none).Distinct().ToList();
@@ -397,14 +402,15 @@ namespace RaaiVan.Web.API
             new RouteInfo(name: RouteName.node, action: node),
             new RouteInfo(name: RouteName.posts, action: posts),
             new RouteInfo(name: RouteName.qatag, action: qa_tag),
-            new RouteInfo(name: RouteName.question, action: question)
+            new RouteInfo(name: RouteName.question, action: question),
+            new RouteInfo(name: RouteName.remotesearch, roleName: AccessRoleName.RemoteServers)
         };
 
         public static Dictionary<string, object> get_data(ParamsContainer paramsContainer, string name)
         {
             if (!string.IsNullOrEmpty(name)) name = name.ToLower().Trim();
 
-            RouteName routeName = PublicMethods.parse_enum<RouteName>(name, RouteName.none); ;
+            RouteName routeName = PublicMethods.parse_enum<RouteName>(name, RouteName.none);
 
             RouteInfo info = Routes.Where(r => r.RouteName == routeName).FirstOrDefault();
 

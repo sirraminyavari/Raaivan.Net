@@ -6,16 +6,16 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using RaaiVan.Web.API;
 
-namespace RaaiVan.Web.Page.Setting
+namespace RaaiVan.Web.Page.View
 {
-    public partial class RemoteServers : System.Web.UI.Page
+    public partial class RemoteSearch : System.Web.UI.Page
     {
         ParamsContainer paramsContainer = null;
 
         protected void Page_Load(object sender, EventArgs e)
         {
             paramsContainer = new ParamsContainer(HttpContext.Current);
-            RouteList.get_data_server_side(paramsContainer, RouteName.admin_remoteservers);
+            RouteList.get_data_server_side(paramsContainer, RouteName.remotesearch);
         }
     }
 }

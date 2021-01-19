@@ -426,16 +426,15 @@ namespace RaaiVan.Modules.Users
             return DataProvider.RemoveRemoteServer(applicationId, serverId);
         }
 
-        public static List<RemoteServer> get_remote_servers(Guid applicationId, Guid userId)
+        public static List<RemoteServer> get_remote_servers(Guid applicationId)
         {
-            return userId == Guid.Empty ? new List<RemoteServer>() :
-                DataProvider.GetRemoteServers(applicationId, userId, null);
+            return DataProvider.GetRemoteServers(applicationId, null);
         }
 
         public static RemoteServer get_remote_server(Guid applicationId, Guid serverId)
         {
             List<RemoteServer> items = serverId == Guid.Empty ? new List<RemoteServer>() :
-                DataProvider.GetRemoteServers(applicationId, null, serverId);
+                DataProvider.GetRemoteServers(applicationId, serverId);
             return items.Count > 0 ? items[0] : null;
         }
 
