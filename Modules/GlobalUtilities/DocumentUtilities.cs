@@ -80,13 +80,13 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        public static Dictionary<string, string> _StaticFiles = new Dictionary<string, string>();
+        private static Dictionary<string, string> _StaticFiles = new Dictionary<string, string>();
 
         public static string StaticFile(string name)
         {
             if (string.IsNullOrEmpty(name)) return string.Empty;
 
-            if (_StaticFiles.ContainsKey(name.ToLower())) return _StaticFiles[name];
+            if (_StaticFiles.ContainsKey(name.ToLower())) return _StaticFiles[name.ToLower()];
 
             try
             {

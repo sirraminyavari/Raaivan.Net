@@ -114,7 +114,9 @@ namespace RaaiVan.Web.API
             }
 
             string responseText = string.Empty;
+
             string command = PublicMethods.parse_string(context.Request.Params["Command"], false);
+            if (!string.IsNullOrEmpty(command)) command = command.ToLower();
 
             Guid userId = Guid.Empty;
 

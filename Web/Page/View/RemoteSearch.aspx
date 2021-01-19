@@ -95,6 +95,12 @@
                                 SearchAPI.Search({
                                     SearchText: Base64.encode(searchText),
                                     ItemTypes: "Node",
+                                    Title: true,
+                                    Description: true,
+                                    Content: true,
+                                    Tags: true,
+                                    FileContent: true,
+                                    Count: 100,
                                     RequestHandler: rh.Request,
                                     ParseResults: true,
                                     ResponseHandler: function (result) {
