@@ -793,7 +793,8 @@ namespace RaaiVan.Modules.Users
         ManagePolls,
         KnowledgeAdmin,
         SMSEMailNotifier,
-        ManageQA
+        ManageQA,
+        RemoteServers
     }
 
     public class AccessRole

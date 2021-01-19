@@ -1028,6 +1028,7 @@
     <Content Include="Images\RaaiVanLogo.png" />
     <Content Include="Images\Refresh-Over.png" />
     <Content Include="Images\Refresh.png" />
+    <Content Include="Images\remote_server.png" />
     <Content Include="Images\reports2.png" />
     <Content Include="Images\Resend.png" />
     <Content Include="Images\Resume24.png" />
@@ -1114,6 +1115,7 @@
     <Content Include="Page\Setting\Notifications.aspx" />
     <Content Include="Page\Setting\Polls.aspx" />
     <Content Include="Page\Setting\QAWorkflow.aspx" />
+    <Content Include="Page\Setting\RemoteServers.aspx" />
     <Content Include="Page\Setting\SystemSettings.aspx" />
     <Content Include="Page\Setting\UserGroups.aspx" />
     <Content Include="Page\Setting\Users.aspx" />
@@ -2096,6 +2098,13 @@
     </Compile>
     <Compile Include="Page\Setting\QAWorkflow.aspx.designer.cs">
       <DependentUpon>QAWorkflow.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Page\Setting\RemoteServers.aspx.cs">
+      <DependentUpon>RemoteServers.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Page\Setting\RemoteServers.aspx.designer.cs">
+      <DependentUpon>RemoteServers.aspx</DependentUpon>
     </Compile>
     <Compile Include="Page\Setting\SystemSettings.aspx.cs">
       <DependentUpon>SystemSettings.aspx</DependentUpon>

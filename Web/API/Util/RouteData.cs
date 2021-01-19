@@ -38,6 +38,7 @@ namespace RaaiVan.Web.API
         admin_qa,
         admin_dataimport,
         admin_externalnotifications,
+        admin_remoteservers,
         admin_help,
 
         login,
@@ -281,6 +282,7 @@ namespace RaaiVan.Web.API
             List<RouteName> SystemAdminAccess = new List<RouteName>()
             {
                 RouteName.admin_systemsettings,
+                RouteName.admin_remoteservers,
                 RouteName.admin_help
             };
 
@@ -380,6 +382,7 @@ namespace RaaiVan.Web.API
             new RouteInfo(name: RouteName.admin_qa, roleName: AccessRoleName.ManageQA),
             new RouteInfo(name: RouteName.admin_dataimport, roleName: AccessRoleName.DataImport),
             new RouteInfo(name: RouteName.admin_externalnotifications, roleName: AccessRoleName.SMSEMailNotifier),
+            new RouteInfo(name: RouteName.admin_remoteservers),
 
             new RouteInfo(name: RouteName.reports, roleName: AccessRoleName.Reports, action: reports),
 

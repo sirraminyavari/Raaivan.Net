@@ -25,7 +25,18 @@ namespace RaaiVan.Web
             RVScheduler.run_jobs();
 
             // Any connection or hub wire up and configuration should go here
-            if (RaaiVanSettings.RealTime(null)) app.MapSignalR("/signalr", new HubConfiguration());
+            if (RaaiVanSettings.RealTime(null))
+                app.MapSignalR("/signalr", new HubConfiguration());
+            else {
+                app.Map("/signalr", conf => {
+                    conf.Use((context, next) =>
+                    {
+                        ParamsContainer paramsContainer = new ParamsContainer(HttpContext.Current);
+                        paramsContainer.return_response("var daslkdjhalskfh84t94uthgk = {\"Message\":\"-)\"};");
+                        return next();
+                    });
+                });
+            }
             
             //Ignore SSL certificate check for web requests
             ServicePointManager.ServerCertificateValidationCallback = delegate (object s,

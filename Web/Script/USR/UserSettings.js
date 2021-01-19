@@ -254,19 +254,17 @@
 
             if (that.RemoteServersPanel) return GlobalUtilities.show(that.RemoteServersPanel);
 
-            var elems = GlobalUtilities.create_nested_elements([
-                {
-                    Type: "div", Class: "small-11 medium-10 large-9 rv-border-radius-1 SoftBackgroundColor",
-                    Style: "margin:0 auto; padding:1rem;", Name: "container",
-                    Childs: [
-                        {
-                            Type: "div", Class: "small-12 medium-12 large-12 rv-title",
-                            Childs: [{ Type: "text", TextValue: RVDic.RemoteServers }]
-                        },
-                        { Type: "div", Class: "small-12 medium-12 large-12", Name: "_div" }
-                    ]
-                }
-            ]);
+            var elems = GlobalUtilities.create_nested_elements([{
+                Type: "div", Class: "small-11 medium-10 large-9 rv-border-radius-1 SoftBackgroundColor",
+                Style: "margin:0 auto; padding:1rem;", Name: "container",
+                Childs: [
+                    {
+                        Type: "div", Class: "small-12 medium-12 large-12 rv-title",
+                        Childs: [{ Type: "text", TextValue: RVDic.RemoteServers }]
+                    },
+                    { Type: "div", Class: "small-12 medium-12 large-12", Name: "_div" }
+                ]
+            }]);
 
             that.RemoteServersPanel = elems["container"];
 

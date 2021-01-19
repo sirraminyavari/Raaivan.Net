@@ -24,7 +24,8 @@
                 { Name: "ManageWorkflow", Icon: "Workflow240.png", URL: "workflows" },
                 { Name: "ManageQA", Icon: "Question.png", URL: "qa" },
                 { Name: "DataImport", Icon: "DataImport128.png", URL: "dataimport" },
-                { Name: "SMSEMailNotifier", Icon: "Notification128.png", URL: "externalnotifications" }
+                { Name: "SMSEMailNotifier", Icon: "Notification128.png", URL: "externalnotifications" },
+                { Name: "RemoteServers", Icon: "remote_server.png", URL: "remoteservers" }
             ];
 
             var permissionsDic = {};
@@ -62,7 +63,8 @@
                     ((name == "ManagePolls") && !modules.FG) ||
                     ((name == "ManageWorkflow") && !modules.WF) ||
                     ((name == "ManageQA") && !modules.QAAdmin) ||
-                    ((name == "SMSEMailNotifier") && !modules.SMSEMailNotifier)) return;
+                    ((name == "SMSEMailNotifier") && !modules.SMSEMailNotifier) ||
+                    ((name == "RemoteServers") && RVGlobal.SAASBasedMultiTenancy)) return;
 
                 GlobalUtilities.create_nested_elements([{
                     Type: "div", Class: "small-12 medium-4 large-3", Style: "padding:0.1rem;",
