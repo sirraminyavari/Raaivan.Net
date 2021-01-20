@@ -849,7 +849,7 @@ namespace RaaiVan.Modules.Users
         public string toJson()
         {
             return "{\"ID\":" + (!ID.HasValue ? "null" : "\"" + ID.Value.ToString() + "\"") +
-                ",\"UserID\":" + (!UserID.HasValue ? "null" : "\"" + UserID.Value.ToString() + "\"") +
+                //",\"UserID\":" + (!UserID.HasValue ? "null" : "\"" + UserID.Value.ToString() + "\"") +
                 ",\"Name\":\"" + (string.IsNullOrEmpty(Name) ? string.Empty : Base64.encode(Name)) + "\"" +
                 ",\"URL\":\"" + (string.IsNullOrEmpty(URL) ? string.Empty : Base64.encode(URL)) + "\"" +
                 ",\"UserName\":\"" + (string.IsNullOrEmpty(UserName) ? string.Empty : Base64.encode(UserName)) + "\"" +

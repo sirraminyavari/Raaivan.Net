@@ -1,7 +1,9 @@
 (function () {
-    if (window.RAPI) return;
+    if (window._RAPI) return;
 
-    window.RAPI = {
+    window._RAPI = function () { };
+
+    _RAPI.prototype = {
         _BaseURL: "",
         _Username: "",
         _Password: "",
@@ -9,11 +11,11 @@
         Ticket: null,
 
         init: function (params) {
-            RAPI._BaseURL = (params || {}).BaseURL || RAPI._BaseURL;
-            RAPI._Username = (params || {}).Username || RAPI._Username;
-            RAPI._Password = (params || {}).Password || RAPI._Password;
+            this._BaseURL = (params || {}).BaseURL || this._BaseURL;
+            this._Username = (params || {}).Username || this._Username;
+            this._Password = (params || {}).Password || this._Password;
 
-            RAPI.Ticket = null;
+            this.Ticket = null;
         },
 
         EndPoints: {
@@ -43,44 +45,50 @@
         })(),
 
         _parse: function (input) {
-            try { return RAPI.get_type(input) == "json" ? input : JSON.parse(String(input || "{}")); }
+            try { return this.get_type(input) == "json" ? input : JSON.parse(String(input || "{}")); }
             catch (e) { return { error: "json parse error" }; }
         },
 
         _ajax_request: function (data, callback, params) {
-            var url = RAPI._BaseURL;
+            var that = this;
+
+            var url = that._BaseURL;
             if (url) {
                 if (url[url.length - 1] != '/') url += '/';
                 url += params.Action;
             }
 
-            if (RAPI.get_type(callback) != "function") return;
-            data = jQuery.extend(data || {}, { time_stamp: (new Date()).getTime(), Ticket: RAPI.Ticket ? RAPI.Ticket : null });
+            if (that.get_type(callback) != "function") return;
+            data = jQuery.extend(data || {}, { time_stamp: (new Date()).getTime(), Ticket: that.Ticket ? that.Ticket : null });
             params = params || {};
 
             jQuery[params.Method ? String(params.Method).toLowerCase() : "post"](url, data, function (d) {
-                callback(RAPI._parse(d));
+                callback(that._parse(d));
             });
         },
 
         authenticate: function (callback) {
-            if ((RAPI.Ticket === false) || RAPI.Ticket) return callback(RAPI.Ticket, true);
+            var that = this;
 
-            var authenticate = RAPI._ajax_request({ username: RAPI._Username, password: RAPI._Password }, function (d) {
-                callback(RAPI.Ticket = (d || {}).Ticket ? d.Ticket : false);
-            }, { Action: RAPI.EndPoints.API + "authenticate" });
+            if ((that.Ticket === false) || that.Ticket) return callback(that.Ticket, true);
+
+            that._ajax_request({ username: that._Username, password: that._Password }, function (d) {
+                callback(that.Ticket = (d || {}).Ticket ? d.Ticket : false);
+            }, { Action: that.EndPoints.API + "authenticate" });
         },
 
         send_request: function (data, callback, params) {
-            if (RAPI.get_type(callback) != "function") return;
+            var that = this;
 
-            RAPI.authenticate(function (d, oldTicketUsed) {
+            if (that.get_type(callback) != "function") return;
+
+            that.authenticate(function (d, oldTicketUsed) {
                 if (d === false) return callback({ error: "authentication failed" });
 
-                RAPI._ajax_request(data, !oldTicketUsed ? callback : function (r) {
+                that._ajax_request(data, !oldTicketUsed ? callback : function (r) {
                     if ((r || {}).InvalidTicket === true) {
-                        RAPI.Ticket = null;
-                        RAPI.send_request(data, callback, params);
+                        that.Ticket = null;
+                        that.send_request(data, callback, params);
                     }
                     else callback(r);
                 }, params);
@@ -88,43 +96,47 @@
         },
 
         post: function (action, data, callback) {
-            RAPI.send_request(data, callback, { Method: "POST", Action: action });
+            this.send_request(data, callback, { Method: "POST", Action: action });
         },
 
         get: function (action, data, callback) {
-            RAPI.send_request(data, callback, { Method: "GET", Action: action });
+            this.send_request(data, callback, { Method: "GET", Action: action });
         },
 
         get_form: function (data, callback) {
-            RAPI.post(RAPI.EndPoints.API + "get_form", data, callback);
+            this.post(this.EndPoints.API + "get_form", data, callback);
         },
 
         search_form_instances: function (data, callback) {
-            RAPI.post(RAPI.EndPoints.API + "search_form_instances", data, callback);
+            this.post(this.EndPoints.API + "search_form_instances", data, callback);
         },
 
         save_form: function (data, callback) {
-            RAPI.post(RAPI.EndPoints.API + "save_form", data, callback);
+            this.post(this.EndPoints.API + "save_form", data, callback);
         },
 
         get_form_instance: function (data, callback) {
-            RAPI.post(RAPI.EndPoints.API + "get_form_instance", data, callback);
+            this.post(this.EndPoints.API + "get_form_instance", data, callback);
         },
 
         new_node: function (data, callback) {
-            RAPI.post(RAPI.EndPoints.API + "new_node", data, callback);
+            this.post(this.EndPoints.API + "new_node", data, callback);
         },
 
         get_nodes: function (data, callback) {
-            RAPI.post(RAPI.EndPoints.API + "get_nodes", data, callback);
+            this.post(this.EndPoints.API + "get_nodes", data, callback);
         },
 
         //Knowledge EndPoint
 
         send_node_to_admin: function (data, callback) {
-            RAPI.post(RAPI.EndPoints.Knowledge + "send_to_admin", data, callback);
+            this.post(this.EndPoints.Knowledge + "send_to_admin", data, callback);
         }
 
         //end of Knowledge EndPoint
-    }
+    };
+
+    window.RAPI = new _RAPI();
+
+    RAPI.new = function () { return new _RAPI(); };
 })();
