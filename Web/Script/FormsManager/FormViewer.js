@@ -647,7 +647,7 @@
         onedit: function (callbackData, options) {
             var that = this;
             options = options || {};
-
+            
             var set_things = function (p) {
                 p = p || {};
                 
@@ -664,14 +664,16 @@
 
                 if (that.Options.OnEditStateChange) that.Options.OnEditStateChange({ IsEditState: that.Objects.Editing });
             };
-
+            
             if (that.Objects.Editing === true) {
-                var elements = [];
+                var elements = (that.Objects.Elements || []).filter(e => e.BodyTextManager.is_edit_mode());
+                var formElems = (that.Objects.Elements || []).filter(e => e.Data.Type == "Form");
                 
-                for (var i = 0, lnt = (that.Objects.Elements || []).length; i < lnt; ++i)
-                    if (that.Objects.Elements[i].BodyTextManager.is_edit_mode()) elements.push(that.Objects.Elements[i]);
-                
-                if (elements.length == 0) return;
+                if (!elements.length) {
+                    if (formElems.length && that.Options.OnAfterSave)
+                        that.Options.OnAfterSave.call(that, elements, callbackData);
+                    return;
+                }
                 
                 that.save_elements(elements, {
                     IgnoreInvalidInputs: options.IgnoreInvalidInputs,
@@ -735,76 +737,74 @@
 
             var isNecessary = that.Options.Editable && (element.Necessary === true);
             
-            var elems = GlobalUtilities.create_nested_elements([
-                {
-                    Type: "div", Style: "padding:0.5rem; margin-bottom:0.5rem;", Name: "elementDiv",
-                    Class: "small-12 medium-12 large-12 rv-bg-color-trans-white rv-border-radius-quarter",
-                    Tooltip: (element.Necessary === true ? RVDic.Necessary : null), TooltipAlign: RV_Float,
-                    Childs: [
-                        {
-                            Type: "div", Class: "small-12 medium-12 large-12",
-                            Style: "position:relative; margin-bottom:0.5rem; padding-" + RV_Float + ":" +
-                                (!that.Options.Editable || !that.Options.ElementsEditable ? 0 : 2) + "rem;",
-                            Childs: [
-                                {
-                                    Type: "div", Class: "rv-not-printable",
-                                    Style: "position:absolute; top:0rem;" + RV_Float + ":0rem; width:2rem;",
-                                    Childs: [
-                                        {
-                                            Type: "i", Class: "fa fa-pencil fa-lg rv-icon-button", Name: "editButton",
-                                            Style: (!showEditButton ? "display:none;" : ""),
-                                            Attributes: [{ Name: "aria-hidden", Value: true }]
-                                        }
-                                    ]
-                                },
-                                {
-                                    Type: "div", Name: "titleArea",
-                                    Style: "display:inline-block; text-align:justify; font-weight:bold;"
-                                },
-                                (!isNecessary ? null : {
-                                    Type: "div", Name: "necessaryArea",
-                                    Style: "display:inline-block; font-weight:bold; color:red; margin:0rem 0.3rem;",
-                                    Childs: [{ Type: "text", TextValue: "*" }]
-                                }),
-                                (!element.Help ? null : {
-                                    Type: "i", Class: "fa fa-question-circle-o fa-lg rv-icon-button", Name: "helpButton", Tooltip: helpTip,
-                                    Style: "margin-" + RV_Float + ":" + (isNecessary ? "0.2" : "0.5") + "rem; cursor:pointer;",
-                                    Attributes: [{ Name: "aria-hidden", Value: true }],
-                                    Properties: [{ Name: "onclick", Value: function () { that.show_help(elems["helpButton"], element.Help); } }]
-                                }),
-                                {
-                                    Type: "div", Name: "hintArea",
-                                    Class: "rv-tab-selected rv-border-radius-quarter", 
-                                    Style: "display:" + (!hint ? "none" : "inline-block") + "; color:rgb(200, 50, 50);" +
-                                        "margin-" + RV_Float + ":0.5rem; font-size:0.6rem; cursor:default; font-weight:bold;",
-                                    Childs: [{ Type: "text", TextValue: hint }]
-                                },
-                                {
-                                    Type: "div", Class: "rv-air-button rv-border-radius-half", Name: "peopleCount",
-                                    Style: "margin-" + RV_Float + ":0.5rem; padding:0rem 1rem; font-size:0.7rem;" +
-                                        "display:" + (!isNaN(valuesCount) && (valuesCount > 0) ? "inline-block" : "none") + ";" +
-                                        (that.hide_poll_contributors() ? "cursor:default;" : ""),
-                                    Childs: [{ Type: "text", TextValue: RVDic.NPeople.replace("[n]", valuesCount) }]
-                                },
-                                {
-                                    Type: "div", Name: "editionsCount",
-                                    Class: "rv-air-button-base rv-air-button-black rv-border-radius-half", 
-                                    Style: "margin-" + RV_Float + ":0.5rem; padding:0rem 1rem; font-size:0.7rem;" +
-                                        "display:" + (!isNaN(editionsCount) && (editionsCount > 1) && that.Options.Editable ? "inline-block" : "none") + ";",
-                                    Childs: [{ Type: "text", TextValue: RVDic.EditionsHistory + " (" + editionsCount + ")" }]
-                                },
-                                (!showCreator ? null : {
-                                    Type: "div", Class: "rv-air-button-base rv-air-button-black rv-border-radius-half",
-                                    Style: "margin-" + RV_Float + ":0.5rem; padding:0rem 1rem; font-size:0.7rem; display:inline-block;",
-                                    Properties: [{ Name: "onclick", Value: function (e) { GlobalUtilities.link_click(e, RVAPI.UserPageURL({ UserID: creatorUserId })); } }],
-                                    Childs: [{ Type: "text", TextValue: RVDic.Author + ": " + creatorFullName }]
-                                })
-                            ]
-                        },
-                        { Type: "div", Class: "small-12 medium-12 large-12", Name: "bodyTextArea" }
-                    ]
-                }
-            ], that.Interface.ElementsArea);
+            var elems = GlobalUtilities.create_nested_elements([{
+                Type: "div", Style: "padding:0.5rem; margin-bottom:0.5rem;", Name: "elementDiv",
+                Class: "small-12 medium-12 large-12 rv-bg-color-trans-white rv-border-radius-quarter",
+                Tooltip: (element.Necessary === true ? RVDic.Necessary : null), TooltipAlign: RV_Float,
+                Childs: [
+                    {
+                        Type: "div", Class: "small-12 medium-12 large-12",
+                        Style: "position:relative; margin-bottom:0.5rem; padding-" + RV_Float + ":" +
+                            (!that.Options.Editable || !that.Options.ElementsEditable ? 0 : 2) + "rem;",
+                        Childs: [
+                            {
+                                Type: "div", Class: "rv-not-printable",
+                                Style: "position:absolute; top:0rem;" + RV_Float + ":0rem; width:2rem;",
+                                Childs: [
+                                    {
+                                        Type: "i", Class: "fa fa-pencil fa-lg rv-icon-button", Name: "editButton",
+                                        Style: (!showEditButton ? "display:none;" : ""),
+                                        Attributes: [{ Name: "aria-hidden", Value: true }]
+                                    }
+                                ]
+                            },
+                            {
+                                Type: "div", Name: "titleArea",
+                                Style: "display:inline-block; text-align:justify; font-weight:bold;"
+                            },
+                            (!isNecessary ? null : {
+                                Type: "div", Name: "necessaryArea",
+                                Style: "display:inline-block; font-weight:bold; color:red; margin:0rem 0.3rem;",
+                                Childs: [{ Type: "text", TextValue: "*" }]
+                            }),
+                            (!element.Help ? null : {
+                                Type: "i", Class: "fa fa-question-circle-o fa-lg rv-icon-button", Name: "helpButton", Tooltip: helpTip,
+                                Style: "margin-" + RV_Float + ":" + (isNecessary ? "0.2" : "0.5") + "rem; cursor:pointer;",
+                                Attributes: [{ Name: "aria-hidden", Value: true }],
+                                Properties: [{ Name: "onclick", Value: function () { that.show_help(elems["helpButton"], element.Help); } }]
+                            }),
+                            {
+                                Type: "div", Name: "hintArea",
+                                Class: "rv-tab-selected rv-border-radius-quarter",
+                                Style: "display:" + (!hint ? "none" : "inline-block") + "; color:rgb(200, 50, 50);" +
+                                    "margin-" + RV_Float + ":0.5rem; font-size:0.6rem; cursor:default; font-weight:bold;",
+                                Childs: [{ Type: "text", TextValue: hint }]
+                            },
+                            {
+                                Type: "div", Class: "rv-air-button rv-border-radius-half", Name: "peopleCount",
+                                Style: "margin-" + RV_Float + ":0.5rem; padding:0rem 1rem; font-size:0.7rem;" +
+                                    "display:" + (!isNaN(valuesCount) && (valuesCount > 0) ? "inline-block" : "none") + ";" +
+                                    (that.hide_poll_contributors() ? "cursor:default;" : ""),
+                                Childs: [{ Type: "text", TextValue: RVDic.NPeople.replace("[n]", valuesCount) }]
+                            },
+                            {
+                                Type: "div", Name: "editionsCount",
+                                Class: "rv-air-button-base rv-air-button-black rv-border-radius-half",
+                                Style: "margin-" + RV_Float + ":0.5rem; padding:0rem 1rem; font-size:0.7rem;" +
+                                    "display:" + (!isNaN(editionsCount) && (editionsCount > 1) && that.Options.Editable ? "inline-block" : "none") + ";",
+                                Childs: [{ Type: "text", TextValue: RVDic.EditionsHistory + " (" + editionsCount + ")" }]
+                            },
+                            (!showCreator ? null : {
+                                Type: "div", Class: "rv-air-button-base rv-air-button-black rv-border-radius-half",
+                                Style: "margin-" + RV_Float + ":0.5rem; padding:0rem 1rem; font-size:0.7rem; display:inline-block;",
+                                Properties: [{ Name: "onclick", Value: function (e) { GlobalUtilities.link_click(e, RVAPI.UserPageURL({ UserID: creatorUserId })); } }],
+                                Childs: [{ Type: "text", TextValue: RVDic.Author + ": " + creatorFullName }]
+                            })
+                        ]
+                    },
+                    { Type: "div", Class: "small-12 medium-12 large-12", Name: "bodyTextArea" }
+                ]
+            }], that.Interface.ElementsArea);
 
             GlobalUtilities.append_markup_text(elems["titleArea"], element.Title);
 
@@ -960,7 +960,7 @@
                                     if (_itm.TextValue) _itm.TextValue = Base64.decode(_itm.TextValue);
                                     _itm.Abstract = null;
 
-                                    var viewElement = ((FormElementTypes[element.Type || ""] || {}).dataview || function () { })(_itm) || {};
+                                    var viewElement = ((FormElementTypes[element.Type] || {}).dataview || function () { })(_itm) || {};
                                     if (viewElement.Container) _el["data"].appendChild(viewElement.Container);
                                     if (viewElement.Set) viewElement.Set(_itm);
 

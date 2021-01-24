@@ -9,6 +9,7 @@
         this.Interface = {
             SearchContainer: null,
             SearchInput: null,
+            SelectAll: null,
             Items: null
         };
 
@@ -52,18 +53,36 @@
                     Childs: [{ Type: "text", TextValue: "+ " + RVDic.NewN.replace("[n]", RVDic.RemoteServer) }]
                 }),
                 {
-                    Type: "div", Class: "small-10 medium-8 large-6", Name: "searchContainer",
-                    Style: "margin:0 auto 1rem auto; display:none;",
-                    Childs: [{
-                        Type: "input", Class: "rv-input", Name: "searchInput",
-                        Style: "width:100%; font-size:0.7rem;", InnerTitle: RVDic.Search + "..."
-                    }]
+                    Type: "div", Style: "display:flex; flex-flow:row; align-items:center;",
+                    Childs: [
+                        (!that.Options.Checkbox ? null : {
+                            Type: "div",
+                            Style: "flex:0 0 auto; margin:0.5rem 0; margin-" + RV_RevFloat + ":1rem; margin-" + RV_Float + ":0.5rem;",
+                            Childs: [{
+                                Type: "i", Name: "selectAllChb", Style: "cursor:pointer; font-size:1.2rem;",
+                                Attributes: [{ Name: "aria-hidden", Value: true }]
+                            }]
+                        }),
+                        {
+                            Type: "div", Style: "flex:1 1 auto; margin:0.5rem 0;",
+                            Childs: [{
+                                Type: "div", Name: "searchContainer",
+                                Class: that.Options.Checkbox ? "small-12 medium-12 large-12" : "small-10 medium-8 large-6",
+                                Style: "margin:0 auto; display:none;",
+                                Childs: [{
+                                    Type: "input", Class: "rv-input", Name: "searchInput",
+                                    Style: "width:100%; font-size:0.7rem;", InnerTitle: RVDic.Search + "..."
+                                }]
+                            }]
+                        }
+                    ]
                 },
                 { Type: "div", Class: "small-12 medium-12 large-12 rv-trim-vertical margins", Name: "items" }
             ], that.Container);
 
             that.Interface.SearchContainer = elems["searchContainer"];
             that.Interface.SearchInput = elems["searchInput"];
+            that.Interface.SelectAll = elems["selectAllChb"];
             that.Interface.Items = elems["items"];
 
             jQuery.each(servers || [], function (ind, val) { that.add_item(elems["items"], val); });
@@ -71,6 +90,29 @@
             if (elems["newItem"]) elems["newItem"].onclick = function () { that.new_item(elems["items"]); };
 
             GlobalUtilities.set_onchangeorenter(that.Interface.SearchInput, function () { that.search(); });
+
+            that.set_select_all_checkbox_status();
+        },
+
+        set_select_all_checkbox_status: function () {
+            var that = this;
+            var chb = that.Interface.SelectAll;
+
+            if (!chb) return;
+
+            var allCount = that.get_items().length;
+            var chCount = that.get_checked_items().length;
+            
+            var cls = allCount == chCount ? "fa-check-square-o" : (chCount > 0 ? "fa-minus-square-o" : "fa-square-o");
+            
+            chb.setAttribute("class", "fa " + cls + " fa-lg");
+
+            if (!chb.onclick) chb.onclick = function () {
+                if (!that.get_checked_items().length) that.check_all();
+                else that.uncheck_all();
+
+                that.set_select_all_checkbox_status();
+            };
         },
 
         set_search_input_display: function () {
@@ -193,6 +235,7 @@
                     Value: function (e) {
                         if (elems["chb"]) elems["container"].Checked(!elems["chb"].Checked);
                         if (that.Options.SelectMode && that.Options.OnSelect) that.Options.OnSelect(item);
+                        that.set_select_all_checkbox_status();
                     }
                 }],
                 Childs: [
@@ -201,7 +244,12 @@
                         Childs: [
                             (!that.Options.Checkbox ? null : {
                                 Type: "div", Style: "flex:0 0 auto;" ,
-                                Childs: [{ Type: "checkbox", Style: "width:1rem; height:1rem;", Name: "chb", Params: { Checked: true } }]
+                                Childs: [{
+                                    Type: "checkbox", Style: "width:1rem; height:1rem;", Name: "chb", Params: {
+                                        Checked: true,
+                                        OnChange: function () { that.set_select_all_checkbox_status(); }
+                                    }
+                                }]
                             }),
                             (!item.ID || that.Options.SelectMode ? null : {
                                 Type: "div", Style: "flex:0 0 auto;",

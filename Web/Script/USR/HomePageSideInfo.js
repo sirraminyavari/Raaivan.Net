@@ -96,7 +96,8 @@
                                     Childs: listNames.map(function (name) {
                                         return { Type: "div", Style: "margin-bottom:0.5rem; display:none;", Name: name };
                                     })
-                                }
+                                },
+                                { Type: "div", Class: "small-12 medium-12 large-12", Name: "remoteSearch", Style: "padding:1rem 1rem 0 1rem;" }
                             ]
                         },
                         { Type: "div", Name: "nodesOfFriends", Class: "small-12 medium-12 large-12", Style: "margin-top:1rem; display:none;" },
@@ -165,6 +166,27 @@
                 });
             }
             //end of Fill Friend Suggestions
+
+            
+            if (!RVGlobal.SAASBasedMultiTenancy) {
+                GlobalUtilities.load_files(["API/PrivacyAPI.js"], {
+                    OnLoad: function () {
+                        PrivacyAPI.CheckAuthority({
+                            Permissions: "RemoteServers", ParseResults: true,
+                            ResponseHandler: function (result) {
+                                if (result.RemoteServers) {
+                                    GlobalUtilities.create_nested_elements([{
+                                        Type: "div", Class: "rv-air-button rv-border-radius-quarter",
+                                        Style: "margin:0 auto; padding:0.3rem; color:black;", Link: RVAPI.RemoteSearchPageURL(),
+                                        Childs: [{ Type: "text", TextValue: RVDic.SearchRemoteServers }]
+                                    }], elems["remoteSearch"]);
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
 
             if (false && that.Options.Modules.SignUpViaInvitation && elems["invitationArea"]) {
                 GlobalUtilities.load_files(["USR/Invitation.js"], {

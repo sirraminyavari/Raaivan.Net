@@ -613,6 +613,7 @@
         ScoringOptions: "تنظیمات امتیازدهی",
         Search: "جستجو",
         SearchKnowledgeWorkers: "جستجوی دانشکاران",
+        SearchRemoteServers: "جستجو در سرورهای راه دور",
         SearchText: "عبارت جستجو",
         SearchUsers: "جستجوی کاربران",
         Security: "امنیت",

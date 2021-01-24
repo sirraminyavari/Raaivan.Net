@@ -124,6 +124,10 @@
         return window.location.pathname.toLowerCase().indexOf("/dosearch") == 0;
     },
 
+    RemoteSearchPageURL: function (params) {
+        return "../../remotesearch";
+    },
+
     DownloadURL: function (params) {
         params = params || {};
         return "../../download/" + (params.FileID || "_") + "?" +

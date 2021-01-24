@@ -541,6 +541,7 @@ namespace RaaiVan.Web.API
             List<string> nodeAdditionalIds = new List<string>();
             List<Guid> nodeIds = new List<Guid>();
 
+
             //Extract NodeTypeIDs
             typeIds.Where(u => !string.IsNullOrEmpty(u)).ToList().ForEach(id => {
                 Guid? ntId = PublicMethods.parse_guid(id);
@@ -553,19 +554,15 @@ namespace RaaiVan.Web.API
                 nodeTypeIds.AddRange(CNController.get_node_type_ids(paramsContainer.Tenant.Id, typeAdditionalIds));
             //end of Extract NodeTypeIDs
             
-            if (nodeTypeIds.Count == 0) {
-                responseText = "{\"Result\":\"nok\",\"Message\":\"InvalidTypeID\"}";
-                return;
-            }
 
             //Extract NodeIDs
-            if (nodeTypeIds.Count == 1)
+            if (nodeTypeIds.Count <= 1)
             {
                 strNodeIds.Where(u => !string.IsNullOrEmpty(u)).ToList().ForEach(id => {
                     Guid? nId = PublicMethods.parse_guid(id);
 
                     if (nId.HasValue) nodeIds.Add(nId.Value);
-                    else if (!string.IsNullOrEmpty(id.Trim())) nodeAdditionalIds.Add(id);
+                    else if (!string.IsNullOrEmpty(id.Trim()) && nodeTypeIds.Count == 1) nodeAdditionalIds.Add(id);
                 });
 
                 if (nodeAdditionalIds.Count > 0) nodeIds.AddRange(CNController.get_node_ids(paramsContainer.Tenant.Id,
@@ -573,7 +570,13 @@ namespace RaaiVan.Web.API
             }
             //end of Extract NodeIDs
 
-            if (strNodeIds.Count > 0 && nodeIds.Count == 0)
+
+            if (nodeTypeIds.Count == 0 && nodeIds.Count == 0)
+            {
+                responseText = "{\"Result\":\"nok\",\"Message\":\"InvalidTypeID\"}";
+                return;
+            }
+            else if (strNodeIds.Count > 0 && nodeIds.Count == 0)
             {
                 responseText = "{\"Result\":\"nok\",\"Message\":\"InvalidID\"}";
                 return;

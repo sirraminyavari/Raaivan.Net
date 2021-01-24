@@ -1229,7 +1229,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
     })(),
 
     extend: function (jsonValue) {
-        var hasLevel = arguments.length > 0 && GlobalUtilities.get_type(arguments[arguments.length - 1]) == "number";
+        var hasLevel = (arguments.length > 0) && (GlobalUtilities.get_type(arguments[arguments.length - 1]) == "number");
         var level = hasLevel ? arguments[arguments.length - 1] : 3;
 
         var args = arguments.length == (hasLevel ? 2 : 1) && GlobalUtilities.get_type(jsonValue) == "array" ? jsonValue : arguments;
@@ -1237,13 +1237,13 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         var first = args.length > 0 ? args[0] : null;
         var second = args.length > 1 ? args[1] : null;
 
-        if (GlobalUtilities.get_type(first) != "json" || GlobalUtilities.get_type(second) != "json") return first;
+        if ((GlobalUtilities.get_type(first) != "json") || (GlobalUtilities.get_type(second) != "json")) return first;
 
         for (var o in second) {
             var type = GlobalUtilities.get_type(second[o]);
             if (type == "undefined") continue;
 
-            if (GlobalUtilities.get_type(first[o]) == "json" && GlobalUtilities.get_type(second[o]) == "json" && level > 0)
+            if ((GlobalUtilities.get_type(first[o]) == "json") && (GlobalUtilities.get_type(second[o]) == "json") && (level > 0))
                 first[o] = GlobalUtilities.extend((first[o] || {}), second[o], level - 1);
             else
                 first[o] = second[o];

@@ -1153,6 +1153,7 @@
     <Content Include="Script\jQuery\jquery.dad.js" />
     <Content Include="Script\LoginPage\lp_modern_29_1.js" />
     <Content Include="Script\RaaiVanHelp\HelpAdmin.js" />
+    <Content Include="Script\RemoteServers\RemoteSearch.js" />
     <Content Include="Script\Reports\ReportOptions\CN_RelatedNodesCountReport.js" />
     <Content Include="Script\Reports\ReportOptions\CN_RelatedNodesReport.js" />
     <Content Include="Script\Reports\ReportOptions\KW_KnowledgeEvaluationsHistoryReport.js" />
