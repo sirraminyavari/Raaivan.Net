@@ -115,7 +115,7 @@ namespace RaaiVan.Web.API
                 case "SaveFormElements":
                     save_form_elements(PublicMethods.parse_guid(context.Request.Params["FormID"]),
                         PublicMethods.parse_string(context.Request.Params["Title"]),
-                        PublicMethods.parse_string(context.Request.Params["Name"], decode: false),
+                        PublicMethods.parse_string(context.Request.Params["Name"]),
                         PublicMethods.parse_string(context.Request.Params["Description"]),
                         FGUtilities.get_form_elements(context.Request.Params["Elements"], formDesignMode: true), ref responseText);
                     _return_response(ref responseText);

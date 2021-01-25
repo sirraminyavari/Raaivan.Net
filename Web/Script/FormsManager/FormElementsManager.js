@@ -19,6 +19,7 @@
         };
         
         this.Options = {
+            OnReturn: params.OnReturn,
             TopMargin: params.TopMargin || "0",
             CssClass: {
                 TypesContainer: "r" + GlobalUtilities.random_str(10),
@@ -90,7 +91,7 @@
                 }
             }
             //end of Populate Types
-
+            
             var elems = GlobalUtilities.create_nested_elements([{
                 Type: "div", Style: "display:flex; flex-flow:row; height:calc(100vh - " + that.Options.TopMargin + "rem);",
                 Childs: [
@@ -111,12 +112,25 @@
                         Type: "div", Name: "formContent",
                         Class: "rv-border-radius-quarter rv-trim-vertical-margins SurroundingShadow",
                         Style: "flex:1 1 auto; padding:1rem 0; background-color:rgb(250,250,250);" +
-                            "display:flex; flex-flow:column;",
+                            "display:flex; flex-flow:column; position:relative;",
                         Childs: [
+                            (!that.Options.OnReturn ? null : {
+                                Type: "div", Class: "rv-text-button",
+                                Style: "position:absolute; top:0.5rem;" + RV_RevFloat + ":0.5rem; font-size:0.7rem;",
+                                Properties: [{ Name: "onclick", Value: function (e) { e.stopImmediatePropagation(); that.Options.OnReturn(); } }],
+                                Childs: [
+                                    { Type: "text", TextValue: RVDic.Return },
+                                    {
+                                        Type: "i", Class: "fa " + (RV_RTL ? "fa-chevron-left" : "fa-chevron-right"),
+                                        Style: "margin-" + RV_Float + ":0.3rem; font-size:0.6rem;",
+                                        Attributes: [{ Name: "aria-hidden", Value: true }]
+                                    }
+                                ]
+                            }),
                             {
                                 Type: "div", Class: "WarmColor",
                                 Style: "flex:0 0 auto; text-align:center; font-weight:500; font-size:1rem;",
-                                Childs: [{ Type: "text", TextValue: that.Objects.Form.Title }]
+                                Childs: [{ Type: "text", TextValue: Base64.decode(that.Objects.Form.Title) }]
                             },
                             {
                                 Type: "div",
@@ -134,7 +148,7 @@
                                             Type: "div", Class: "small-12 medium-8 large-4", Style: "text-align:left; direction:ltr;",
                                             Childs: [{
                                                 Type: "input", Class: "rv-input-simple rv-placeholder-align-left",
-                                                Style: "width:100%; font-size:0.7rem;", Name: "nameInput", InnerTitle: "e.g. field_id",
+                                                Style: "width:100%; font-size:0.7rem;", Name: "nameInput", InnerTitle: "e.g. form_id",
                                                 Attributes: !params.FormName ? null :
                                                     [{ Name: "value", Value: Base64.decode(params.FormName) }]
                                             }]
@@ -159,36 +173,54 @@
                         ]
                     },
                     {
-                        Type: "div", Class: "rv-border-radius-quarter SurroundingShadow",
-                        Style: "flex:0 0 auto; display:flex; flex-flow:column; padding:0.5rem;" +
-                            "background-color:white; margin-" + RV_Float + ":1rem; min-width:12rem;",
-                        Childs: [
-                            { Type: "div", Style: "flex:1 1 auto;" },
-                            {
-                                Type: "div", Style: "flex:0 0 auto;",
-                                Childs: [
-                                    {
-                                        Type: "div", Class: "rv-air-button rv-border-radius-quarter", Style: "margin-bottom:0.5rem;",
-                                        Childs: [{ Type: "text", TextValue: "removed elements" }]
-                                    },
-                                    {
-                                        Type: "div", Class: "rv-air-button rv-border-radius-quarter", 
-                                        Style: "margin-bottom:0.5rem;",
-                                        Childs: [{ Type: "text", TextValue: RVDic.Preview + " - " + RVDic.Poll }]
-                                    },
-                                    {
-                                        Type: "div", Class: "rv-air-button rv-border-radius-quarter", Name: "previewButton",
-                                        Style: "margin-bottom:0.5rem;",
-                                        Properties: [{ Name: "onclick", Value: function () { that.preview(); } }],
-                                        Childs: [{ Type: "text", TextValue: RVDic.Preview }]
-                                    },
-                                    {
-                                        Type: "div", Class: "rv-air-button rv-border-radius-quarter", Name: "saveButton",
-                                        Childs: [{ Type: "text", TextValue: RVDic.Save }]
-                                    }
-                                ]
-                            }
-                        ]
+                        Type: "div", 
+                        Style: "flex:0 0 auto; display:flex; flex-flow:column;" +
+                            "margin-" + RV_Float + ":1rem; min-width:12rem;",
+                        Childs: [{
+                            Type: "div", Style: "flex:0 0 auto;",
+                            Childs: [
+                                {
+                                    Type: "div", Class: "rv-air-button rv-border-radius-quarter SoftShadow", Style: "margin-bottom:0.5rem;",
+                                    Childs: [{ Type: "text", TextValue: RVDic.Archive }]
+                                },
+                                {
+                                    Type: "div", Class: "rv-air-button rv-border-radius-quarter SoftShadow SoftBorder", Name: "previewButton",
+                                    Style: "margin-bottom:0.5rem;",
+                                    Properties: [{ Name: "onclick", Value: function () { that.preview(); } }],
+                                    Childs: [{ Type: "text", TextValue: RVDic.Preview }]
+                                },
+                                (!that.Options.OnReturn ? null : {
+                                    Type: "div", Name: "cancelButton",
+                                    Class: "rv-border-radius-quarter rv-air-button-base RedBorder RedColor SoftShadow",
+                                    Style: "display:flex; flex-flow:row; margin-bottom:0.5rem; background-color:white;", 
+                                    Properties: [{ Name: "onclick", Value: function () { that.Options.OnReturn({ Destroy: true }); } }],
+                                    Childs: [
+                                        {
+                                            Type: "div", Style: "flex:0 0 auto; width:1.6rem; text-align:center;",
+                                            Childs: [{ Type: "i", Class: "fa fa-trash fa-lg" }]
+                                        },
+                                        {
+                                            Type: "div", Style: "flex:1 1 auto; text-align:cetner;",
+                                            Childs: [{ Type: "text", TextValue: RVDic.Cancel }]
+                                        }
+                                    ]
+                                }),
+                                {
+                                    Type: "div", Class: "rv-border-radius-quarter ActionButton SoftShadow", Name: "saveButton",
+                                    Style: "display:flex; flex-flow:row;",
+                                    Childs: [
+                                        {
+                                            Type: "div", Style: "flex:0 0 auto; width:1.6rem; text-align:center;",
+                                            Childs: [{ Type: "i", Class: "fa fa-floppy-o fa-lg" }]
+                                        },
+                                        {
+                                            Type: "div", Style: "flex:1 1 auto; text-align:cetner;",
+                                            Childs: [{ Type: "text", TextValue: RVDic.Save }]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }]
                     }
                 ]
             }], that.ContainerDiv);
@@ -629,8 +661,8 @@
                                                     },
                                                     { Type: "div", Style: "flex:0 0 auto; padding-left:1px; background-color:rgb(240,240,240);" },
                                                     {
-                                                        Type: "div", Name: "removeButton",
-                                                        Style: "flex:0 0 auto; color:rgb(226,35,79); cursor:pointer;" +
+                                                        Type: "div", Class: "RedColor", Name: "removeButton",
+                                                        Style: "flex:0 0 auto; cursor:pointer;" +
                                                             "font-size:0.7rem; margin-" + RV_Float + ":0.7rem;",
                                                         Childs: [
                                                             {
@@ -933,8 +965,15 @@
 
             GlobalUtilities.load_files(["FormsManager/FormViewer.js",], {
                 OnLoad: function () {
+                    var items = that.get_elements_dom().map(nd => nd.GetData());
+
+                    items.forEach(i => {
+                        ["Info", "Title", "Name", "Help"].filter(k => !!i[k]).forEach(k => { i[k] = Base64.encode(i[k]); });
+                    });
+                    
                     new FormViewer(elems["container"], {
                         FormID: that.Objects.FormID,
+                        Elements: items,
                         Editable: true, ElementsEditable: false, HideDescription: true,
                         FillButton: false, Exportable: false, HasConfidentiality: false
                     });

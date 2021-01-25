@@ -202,8 +202,20 @@ pre > code
     border: solid 1px var(--rv-color-softborder);
 }
 
+.RedBorder {
+    border: solid 1px rgb(226,35,79) !important;
+}
+
+.Color {
+    color: var(--rv-color);
+}
+
 .WarmColor {
     color: var(--rv-color-verywarm);
+}
+
+.RedColor {
+    color: rgb(226,35,79) !important;
 }
 
 .WarmBackgroundColor {
@@ -249,7 +261,7 @@ pre > code
     cursor: pointer;
     text-align: center;
     border: 1px solid var(--rv-color-warmborder);
-    padding: 4px;
+    padding: 0.2rem 0.5rem;
     /*font: 13px/100% Tahoma;*/
     font: 13px/100%;
     color: rgb(255, 255, 255);
@@ -696,6 +708,15 @@ pre > code
     border-style: solid;
     border-color: var(--rv-color-softborder);
     border-width: 0.1rem;
+}
+
+.rv-text-button {
+    color: var(--rv-color);
+    cursor:pointer;
+}
+
+.rv-text-button:hover {
+    text-shadow: 1px 1px 1px rgba(150, 150, 150, 1);
 }
 
 .rv-tab {

@@ -37,6 +37,7 @@
         };
         
         this.Options = {
+            ElementsToShow: params.Elements,
             ShowAllIfNoLimit: params.ShowAllIfNoLimit === true,
             PollAbstract: params.PollAbstract === true,
             Editable: params.Editable,
@@ -65,7 +66,7 @@
         };
         
         var that = this;
-
+        
         GlobalUtilities.load_files([
             { Root: "API/", Ext: "js", Childs: ["FGAPI", "UsersAPI", "DocsAPI"] },
             "AdvancedTextArea/AdvancedTextArea.js",
@@ -82,8 +83,11 @@
     FormViewer.prototype = {
         _preinit: function () {
             var that = this;
-            
-            if (that.Objects.FormID && !that.Objects.InstanceID) {
+
+            if (that.Options.ElementsToShow) {
+                that._initialize({ Elements: that.Options.ElementsToShow });
+            }
+            else if (that.Objects.FormID && !that.Objects.InstanceID) {
                 FGAPI.GetFormElements({
                     FormID: that.Objects.FormID, ParseResults: true,
                     ResponseHandler: function (result) {
@@ -166,44 +170,40 @@
 
             that.ContainerDiv.innerHTML = "";
             
-            var elems = GlobalUtilities.create_nested_elements([
-                {
-                    Type: "div", Style: "padding:1rem;",
-                    Class: "small-12 medium-12 large-12 rv-border-radius-1 SoftBackgroundColor",
-                    Childs: [
-                        {
-                            Type: "div", Class: "small-12 medium-12 large-12", Name: "header",
-                            Style: (that.Options.HideHeader === true ? "display:none;" : "")
-                        },
-                        { Type: "div", Class: "small-12 medium-12 large-12", Name: "elementsArea" },
-                        {
-                            Type: "div", Name: "statistics",
-                            Class: "small-12 medium-12 large-12 rv-border-radius-half WarmBackgroundColor",
-                            Style: "margin-bottom:1rem; text-align:center; padding:0.5rem; display:none;"
-                        },
-                        {
-                            Type: "div", Class: "small-12 medium-12 large-12", Name: "footer",
+            var elems = GlobalUtilities.create_nested_elements([{
+                Type: "div", Style: "padding:1rem;",
+                Class: "small-12 medium-12 large-12 rv-border-radius-1 SoftBackgroundColor",
+                Childs: [
+                    {
+                        Type: "div", Class: "small-12 medium-12 large-12", Name: "header",
+                        Style: (that.Options.HideHeader === true ? "display:none;" : "")
+                    },
+                    { Type: "div", Class: "small-12 medium-12 large-12", Name: "elementsArea" },
+                    {
+                        Type: "div", Name: "statistics",
+                        Class: "small-12 medium-12 large-12 rv-border-radius-half WarmBackgroundColor",
+                        Style: "margin-bottom:1rem; text-align:center; padding:0.5rem; display:none;"
+                    },
+                    {
+                        Type: "div", Class: "small-12 medium-12 large-12", Name: "footer",
+                        Childs: [{
+                            Type: "div", Name: "footerSaveButton",
+                            Class: "small-8 medium-6 large-4 rv-air-button rv-circle",
+                            Style: "margin:1rem auto 0rem auto; padding:0.5rem; font-weight:bold;" +
+                                (that.Options.FooterSaveButton ? "" : "display:none;"),
+                            Properties: [{ Name: "onclick", Value: function () { that.onedit(); } }],
                             Childs: [
                                 {
-                                    Type: "div", Name: "footerSaveButton",
-                                    Class: "small-8 medium-6 large-4 rv-air-button rv-circle",
-                                    Style: "margin:1rem auto 0rem auto; padding:0.5rem; font-weight:bold;" +
-                                        (that.Options.FooterSaveButton ? "" : "display:none;"),
-                                    Properties: [{ Name: "onclick", Value: function () { that.onedit(); } }],
-                                    Childs: [
-                                        {
-                                            Type: "i", Class: "fa fa-floppy-o fa-lg",
-                                            Style: "margin-" + RV_RevFloat + ":0.5rem;",
-                                            Attributes: [{ Name: "aria-hidden", Value: true }]
-                                        },
-                                        { Type: "text", TextValue: RVDic.Save }
-                                    ]
-                                }
+                                    Type: "i", Class: "fa fa-floppy-o fa-lg",
+                                    Style: "margin-" + RV_RevFloat + ":0.5rem;",
+                                    Attributes: [{ Name: "aria-hidden", Value: true }]
+                                },
+                                { Type: "text", TextValue: RVDic.Save }
                             ]
-                        }
-                    ]
-                }
-            ], that.ContainerDiv);
+                        }]
+                    }
+                ]
+            }], that.ContainerDiv);
 
             that.Interface.Header = elems["header"];
             that.Interface.Footer = elems["footer"];
@@ -1149,7 +1149,7 @@
             //end of statistics
 
             var twoPurposeElement = null;
-            if ((FormElementTypes[element.Type || ""] || {}).fill_and_dataview) {
+            if ((FormElementTypes[element.Type] || {}).fill_and_dataview) {
                 twoPurposeElement = FormElementTypes[element.Type]
                     .fill_and_dataview(GlobalUtilities.extend(element, { Editable: that.Options.Editable }), {
                         UnlimitedDownloadAccess: that.Options.UnlimitedDownloadAccess,
@@ -1158,12 +1158,12 @@
             }
             
             var fillElement = twoPurposeElement ||
-                ((FormElementTypes[element.Type || ""] || {}).fill || function () { })(element) || {};
+                ((FormElementTypes[element.Type] || {}).fill || function () { })(element) || {};
             if (fillElement.Container && !(twoPurposeElement && !that.Options.Editable))
                 editArea.appendChild(fillElement.Container);
 
             var viewElement = twoPurposeElement ||
-                ((FormElementTypes[element.Type || ""] || {}).dataview || function () { })(element, {
+                ((FormElementTypes[element.Type] || {}).dataview || function () { })(element, {
                     UnlimitedDownloadAccess: that.Options.UnlimitedDownloadAccess,
                     PDFCovers: that.Options.PDFCovers || []
                 }) || {};

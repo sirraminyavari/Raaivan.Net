@@ -1425,9 +1425,9 @@
             },
 
             dataview: function (params) {
-                var elems = GlobalUtilities.create_nested_elements([
-                    { Type: "div", Class: "small-12 medium-12 large-12", Name: "container" }
-                ]);
+                var elems = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: "small-12 medium-12 large-12", Name: "container"
+                }]);
 
                 var container = elems["container"];
 
@@ -1437,13 +1437,11 @@
                     options.push(Base64.decode(params.Info.Options[i]));
 
                 var _add_normal = function (val) {
-                    GlobalUtilities.create_nested_elements([
-                        {
-                            Type: "div", Style: "margin-top:0.2rem; cursor:default;",
-                            Class: "small-12 medium-12 large-12 rv-air-button rv-border-radius-quarter",
-                            Childs: [{ Type: "text", TextValue: val }]
-                        }
-                    ], container);
+                    GlobalUtilities.create_nested_elements([{
+                        Type: "div", Style: "margin-top:0.2rem; cursor:default;",
+                        Class: "small-12 medium-12 large-12 rv-air-button rv-border-radius-quarter",
+                        Childs: [{ Type: "text", TextValue: val }]
+                    }], container);
                 };
 
                 return {
