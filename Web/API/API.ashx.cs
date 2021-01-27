@@ -26,6 +26,14 @@ namespace RaaiVan.Web.API
         {
             paramsContainer = new ParamsContainer(context, nullTenantResponse: false);
 
+            if (PublicMethods.parse_string(context.Request.Params["command"], false) == "sql_scripts")
+            {
+                string fileName = PublicMethods.parse_string(paramsContainer.request_param("FileName"));
+                paramsContainer.file_response(PublicMethods.generate_script_file(fileName),
+                    fileName: "script.sql", contentType: "application/sql", isAttachment: true); 
+                return;
+            }
+
             if (ProcessTenantIndependentRequest(context)) return;
             
             if (!paramsContainer.ApplicationID.HasValue)

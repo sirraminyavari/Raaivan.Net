@@ -24,6 +24,7 @@ using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
 using RaaiVan.Modules.RaaiVanConfig;
 using System.Web.Hosting;
+using System.Collections;
 
 namespace RaaiVan.Modules.GlobalUtilities
 {
@@ -684,6 +685,82 @@ namespace RaaiVan.Modules.GlobalUtilities
                 sw.Stop();
                 trd.LastActivityDuration = sw.ElapsedMilliseconds;
             }
+        }
+
+        private static string _process_script_file(string path, ArrayList subPath)
+        {
+            if (string.IsNullOrEmpty(path))
+                return string.Empty;
+            else if (subPath != null && subPath.Count > 0)
+            {
+                List<string> contentArr = subPath
+                    .ToArray()
+                    .ToList()
+                    .Select(s =>
+                    {
+                        if (s.GetType() == typeof(string))
+                        {
+                            string newPath = path + 
+                                (path[path.Length - 1] != '\\' ? "\\" : string.Empty) + ((string)s).Replace('/', '\\');
+                            return _process_script_file(newPath, subPath: null);
+                        }
+                        else if (s.GetType() == typeof(Dictionary<string, object>))
+                            return _process_script_file(path, (Dictionary<string, object>)s);
+                        else return string.Empty;
+                    })
+                    .Where(c => !string.IsNullOrEmpty(c))
+                    .ToList();
+
+                return string.Join("\r\n\r\n", contentArr);
+            }
+            else if (!Directory.Exists(path))
+                return string.Empty;
+            else
+            {
+                List<string> files = Directory.GetFiles(path).ToList().Select(f =>
+                {
+                    string heading = @"[Uu][Ss][Ee][\s\t\n\r]+.{1,20}[\s\t\n\r]+[Gg][Oo][\s\t\n\r]+";
+                    return Regex.Replace(File.ReadAllText(f), heading, "");
+                }).Where(f => !string.IsNullOrEmpty(f)).ToList();
+
+                return string.Join("\r\n\r\n", files);
+            }
+        }
+
+        private static string _process_script_file(string path, Dictionary<string, object> dic)
+        {
+            string newPath = PublicMethods.get_dic_value(dic, "path");
+
+            if (string.IsNullOrEmpty(newPath))
+                return string.Empty;
+            else if (string.IsNullOrEmpty(path))
+            {
+                if (newPath[0] == '\\')
+                {
+                    string basePath = PublicMethods.map_path("~/");
+                    newPath = basePath.Substring(0, basePath.ToLower().LastIndexOf("web") - 1) + newPath.Replace('/', '\\');
+                }
+
+                path = newPath;
+            }
+            else
+                path += (path[path.Length - 1] != '\\' ? "\\" : "") + newPath.Replace('/', '\\');
+
+            return _process_script_file(path, PublicMethods.get_dic_value<ArrayList>(dic, "sub"));
+        }
+
+        public static string generate_script_file(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName)) return string.Empty;
+
+            string address = PublicMethods.map_path("~/" + fileName);
+
+            string content = File.Exists(address) ? File.ReadAllText(address) : string.Empty;
+
+            content = content.Substring(content.IndexOf("{"));
+            content = content.Substring(0, content.LastIndexOf("}") + 1);
+
+            return _process_script_file(path: null, PublicMethods.fromJSON(content));
         }
 
         public static Application get_current_application()
