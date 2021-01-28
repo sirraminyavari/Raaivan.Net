@@ -1315,7 +1315,7 @@ namespace RaaiVan.Web.API
             _Context.Response.ClearHeaders();
             _Context.Response.Buffer = true;
             _Context.Response.ContentType = string.IsNullOrEmpty(contentType) ? "application/octet-stream" : contentType;
-            if(isAttachment) _Context.Response.AddHeader("Content-Disposition", "attachment; filename=" + fileName.Replace(' ', '_'));
+            if (isAttachment) _Context.Response.AddHeader("Content-Disposition", "attachment; filename=" + fileName.Replace(' ', '_'));
             _Context.Response.AddHeader("Content-Length", content.Length.ToString());
 
             _Context.Response.Write(content);
