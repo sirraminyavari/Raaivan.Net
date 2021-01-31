@@ -1150,7 +1150,6 @@
     <Content Include="Script\AdvancedListViewer-v1\NewAdvancedListViewer.js" />
     <Content Include="Script\CN\RelatedNodesViewer.js" />
     <Content Include="Script\FormsManager\FormsManager.js" />
-    <Content Include="Script\FormsManager\FormElementsManager__.js" />
     <Content Include="Script\jQuery\jquery.dad.js" />
     <Content Include="Script\LoginPage\lp_modern_29_1.js" />
     <Content Include="Script\RaaiVanHelp\HelpAdmin.js" />

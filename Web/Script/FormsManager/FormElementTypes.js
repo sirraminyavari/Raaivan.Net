@@ -4226,46 +4226,44 @@
 
             fill_and_dataview: function (params, options) {
                 options = options || {};
-
+                
                 var editable = !!params.Editable;
 
-                var elems = GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12", Name: "container",
-                        Childs: [
-                            {
-                                Type: "div", Class: "small-12 medium-12 large-12 rv-border-radius-quarter SoftBorder", Name: "items",
-                                Style: "overflow-x:auto; overflow-y:hidden; font-size:0.7rem; border-color:rgb(150,150,150);"
-                            },
-                            {
-                                Type: "div", Class: "ActionButton", Name: "addButton",
-                                Style: "display:none; margin-top:0.3rem; width:8rem; padding:0.2rem 0rem;" +
-                                    "font-size:0.7rem; font-weight:bold;",
-                                Properties: [{ Name: "onclick", Value: function () { _new_record(); } }],
-                                Childs: [
-                                    {
-                                        Type: "i", Class: "fa fa-plus", Style: "margin-" + RV_RevFloat + ":0.3rem;",
-                                        Attributes: [{ Name: "aria-hidden", Value: true }]
-                                    },
-                                    { Type: "text", TextValue: RVDic.Add }
-                                ]
-                            },
-                            {
-                                Type: "div", Class: "ActionButton", Name: "removeButton",
-                                Style: "display:none; margin-top:0.3rem; width:8rem; padding:0.2rem 0rem;" +
-                                    "font-size:0.7rem; margin-" + RV_Float + ":0.5rem; font-weight:bold;",
-                                Properties: [{ Name: "onclick", Value: function () { _remove_all(); } }],
-                                Childs: [
-                                    {
-                                        Type: "i", Class: "fa fa-times", Style: "margin-" + RV_RevFloat + ":0.3rem;",
-                                        Attributes: [{ Name: "aria-hidden", Value: true }]
-                                    },
-                                    { Type: "text", TextValue: RVDic.RemoveAll }
-                                ]
-                            }
-                        ]
-                    }
-                ]);
+                var elems = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: "small-12 medium-12 large-12", Name: "container",
+                    Childs: [
+                        {
+                            Type: "div", Class: "small-12 medium-12 large-12 rv-border-radius-quarter SoftBorder", Name: "items",
+                            Style: "overflow-x:auto; overflow-y:hidden; font-size:0.7rem; border-color:rgb(150,150,150);"
+                        },
+                        {
+                            Type: "div", Class: "ActionButton", Name: "addButton",
+                            Style: "display:none; margin-top:0.3rem; width:8rem; padding:0.2rem 0rem;" +
+                                "font-size:0.7rem; font-weight:bold;",
+                            Properties: [{ Name: "onclick", Value: function () { _new_record(); } }],
+                            Childs: [
+                                {
+                                    Type: "i", Class: "fa fa-plus", Style: "margin-" + RV_RevFloat + ":0.3rem;",
+                                    Attributes: [{ Name: "aria-hidden", Value: true }]
+                                },
+                                { Type: "text", TextValue: RVDic.Add }
+                            ]
+                        },
+                        {
+                            Type: "div", Class: "ActionButton", Name: "removeButton",
+                            Style: "display:none; margin-top:0.3rem; width:8rem; padding:0.2rem 0rem;" +
+                                "font-size:0.7rem; margin-" + RV_Float + ":0.5rem; font-weight:bold;",
+                            Properties: [{ Name: "onclick", Value: function () { _remove_all(); } }],
+                            Childs: [
+                                {
+                                    Type: "i", Class: "fa fa-times", Style: "margin-" + RV_RevFloat + ":0.3rem;",
+                                    Attributes: [{ Name: "aria-hidden", Value: true }]
+                                },
+                                { Type: "text", TextValue: RVDic.RemoveAll }
+                            ]
+                        }
+                    ]
+                }]);
 
                 var formId = (params.Info || {}).FormID;
 
