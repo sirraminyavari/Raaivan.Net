@@ -1384,14 +1384,14 @@ namespace RaaiVan.Modules.FormGenerator
             }
         }
 
-        public static Guid? InitializeOwnerFormInstance(Guid applicationId, Guid ownerId, Guid currentUserId)
+        public static Guid? InitializeOwnerFormInstance(Guid applicationId, Guid ownerId, Guid? formId, Guid currentUserId)
         {
             string spName = GetFullyQualifiedName("InitializeOwnerFormInstance");
 
             try
             {
                 Guid? instanceId = ProviderUtil.succeed_guid(ProviderUtil.execute_reader(spName, applicationId,
-                    ownerId, currentUserId, DateTime.Now));
+                    ownerId, formId, currentUserId, DateTime.Now));
 
                 if (instanceId == Guid.Empty) instanceId = null;
 

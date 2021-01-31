@@ -284,7 +284,6 @@ namespace RaaiVan.Modules.NotificationCenter
         public string Text;
         public string Lang;
         public bool? Enable;
-        public bool? IsDefault;
     }
 
     public class NotificationMessage

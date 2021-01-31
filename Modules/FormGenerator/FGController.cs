@@ -325,9 +325,9 @@ namespace RaaiVan.Modules.FormGenerator
             return DataProvider.GetOwnerForm(applicationId, ownerId);
         }
 
-        public static Guid? initialize_owner_form_instance(Guid applicationId, Guid ownerId, Guid currentUserId)
+        public static Guid? initialize_owner_form_instance(Guid applicationId, Guid ownerId, Guid? formId, Guid currentUserId)
         {
-            return DataProvider.InitializeOwnerFormInstance(applicationId, ownerId, currentUserId);
+            return DataProvider.InitializeOwnerFormInstance(applicationId, ownerId, formId, currentUserId);
         }
 
         public static bool set_element_limits(Guid applicationId, 

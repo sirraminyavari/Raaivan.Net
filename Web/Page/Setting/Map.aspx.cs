@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using RaaiVan.Modules.GlobalUtilities;
 using RaaiVan.Web.API;
 
 namespace RaaiVan.Web.Page.Setting
@@ -15,7 +16,7 @@ namespace RaaiVan.Web.Page.Setting
         protected void Page_Load(object sender, EventArgs e)
         {
             paramsContainer = new ParamsContainer(HttpContext.Current);
-            RouteList.get_data_server_side(paramsContainer, RouteName.admin_map);
+            initialJson.Value = PublicMethods.toJSON(RouteList.get_data_server_side(paramsContainer, RouteName.admin_map));
         }
     }
 }

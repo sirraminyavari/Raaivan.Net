@@ -665,16 +665,6 @@ namespace RaaiVan.Modules.NotificationCenter
                 templateId, currentUserId, subjectType, action, media, userStatus, lang, enable);
         }
 
-        public static bool is_default_message_template(Guid applicationId, Guid templateId, bool isDefault)
-        {
-            return DataProvider.IsDefaultMessageTemplate(applicationId, templateId, isDefault);
-        }
-
-        public static bool is_default_message_template(Guid applicationId, Guid templateId)
-        {
-            return DataProvider.IsDefaultMessageTemplate(applicationId, templateId, null);
-        }
-
         public static bool set_notification_message_template_text(Guid applicationId, 
             Guid templateId, Guid currentUserId, string subject, string text)
         {

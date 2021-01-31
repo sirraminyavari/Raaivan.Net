@@ -238,7 +238,8 @@ namespace RaaiVan.Web.API
                     _return_response(ref responseText);
                     return;
                 case "InitializeOwnerFormInstance":
-                    initialize_owner_form_instance(PublicMethods.parse_guid(context.Request.Params["OwnerID"]), ref responseText);
+                    initialize_owner_form_instance(PublicMethods.parse_guid(context.Request.Params["OwnerID"]),
+                        PublicMethods.parse_guid(context.Request.Params["FormID"]), ref responseText);
                     _return_response(ref responseText);
                     return;
                 case "SetElementLimits":
@@ -1660,13 +1661,13 @@ namespace RaaiVan.Web.API
                 ",\"Elements\":[" + string.Join(",", elements.Select(u => u.toJson(paramsContainer.Tenant.Id))) + "]}";
         }
 
-        protected void initialize_owner_form_instance(Guid? ownerId, ref string responseText)
+        protected void initialize_owner_form_instance(Guid? ownerId, Guid? formId, ref string responseText)
         {
             if (!paramsContainer.GBEdit) return;
 
             Guid? instanceId = !ownerId.HasValue ? null :
                 FGController.initialize_owner_form_instance(paramsContainer.Tenant.Id,
-                ownerId.Value, paramsContainer.CurrentUserID.Value);
+                ownerId.Value, formId, paramsContainer.CurrentUserID.Value);
 
             responseText = instanceId.HasValue ? "{\"InstanceID\":\"" + instanceId.ToString() + "\"}" :
                 "{\"ErrorText\":\"" + Messages.FormInstanceInitializationFailed + "\"}";

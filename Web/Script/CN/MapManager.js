@@ -13,6 +13,7 @@
         };
 
         this.Objects = {
+            IdentityFormID: params.IdentityFormID,
             ClassesTree: null,
             Panels: {}
         };
@@ -28,73 +29,67 @@
         initialize: function () {
             var that = this;
 
-            var elems = GlobalUtilities.create_nested_elements([
-                {
-                    Type: "div",
-                    Style: "position:fixed; top:6rem; " + RV_RevFloat + ":4rem; " + RV_Float + ":1rem; bottom:1rem;",
+            var elems = GlobalUtilities.create_nested_elements([{
+                Type: "div",
+                Style: "position:fixed; top:6rem; " + RV_RevFloat + ":4rem; " + RV_Float + ":1rem; bottom:1rem;",
+                Childs: [{
+                    Type: "div", Class: "small-12 medium-12 large-12 row", Style: "margin:0rem; height:100%;",
                     Childs: [
                         {
-                            Type: "div", Class: "small-12 medium-12 large-12 row", Style: "margin:0rem; height:100%;",
+                            Type: "div", Class: "small-6 medium-5 large-4",
+                            Style: "position:relative; height:100%; padding-top:5rem;" +
+                                "padding-" + RV_RevFloat + ":0.3rem;",
                             Childs: [
                                 {
-                                    Type: "div", Class: "small-6 medium-5 large-4",
-                                    Style: "position:relative; height:100%; padding-top:5rem;" +
-                                        "padding-" + RV_RevFloat + ":0.3rem;",
+                                    Type: "div", Class: "rv-circle SoftBackgroundColor",
+                                    Style: "position:absolute; top:0rem; " + RV_RevFloat + ":0rem; bottom:0rem;" +
+                                        "padding-" + RV_RevFloat + ":0.2rem;"
+                                },
+                                {
+                                    Type: "div", Style: "position:absolute; top:0rem; left:1rem; right:1rem;",
                                     Childs: [
                                         {
-                                            Type: "div", Class: "rv-circle SoftBackgroundColor",
-                                            Style: "position:absolute; top:0rem; " + RV_RevFloat + ":0rem; bottom:0rem;" +
-                                                "padding-" + RV_RevFloat + ":0.2rem;"
-                                        },
-                                        {
-                                            Type: "div", Style: "position:absolute; top:0rem; left:1rem; right:1rem;",
+                                            Type: "div", Class: "small-12 medium-12 large-12 row", Style: "margin:0rem; margin-bottom:0.5rem;",
                                             Childs: [
                                                 {
-                                                    Type: "div", Class: "small-12 medium-12 large-12 row", Style: "margin:0rem; margin-bottom:0.5rem;",
-                                                    Childs: [
-                                                        {
-                                                            Type: "div", Class: "small-4 medium-4 large-4 rv-air-button rv-circle", Name: "editTree",
-                                                            Properties: [{ Name: "onclick", Value: function () { that.node_types_edit(); }}],
-                                                            Childs: [{Type: "text", TextValue: RVDic.Edit}]
-                                                        },
-                                                        {
-                                                            Type: "div", Class: "small-8 medium-8 large-8", Style: "padding-" + RV_Float + ":1rem;",
-                                                            Childs: [
-                                                                {
-                                                                    Type: "middle",
-                                                                    Childs: [
-                                                                        {
-                                                                            Type: "checkbox", Name: "archiveChb", Params: { OnChange: function () { _on_archive_chb_change(); } },
-                                                                            Style: "width:1rem; height:1rem; cursor:pointer; margin-" + RV_RevFloat + ":0.5rem;"
-                                                                        },
-                                                                        { Type: "text", TextValue: RVDic.ShowRemovedItems }
-                                                                    ]
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
+                                                    Type: "div", Class: "small-4 medium-4 large-4 rv-air-button rv-circle", Name: "editTree",
+                                                    Properties: [{ Name: "onclick", Value: function () { that.node_types_edit(); } }],
+                                                    Childs: [{ Type: "text", TextValue: RVDic.Edit }]
                                                 },
                                                 {
-                                                    Type: "input", Class: "rv-input", InnerTitle: RVDic.Search,
-                                                    Style: "width:100%; font-size:0.7rem;", Name: "searchInput",
+                                                    Type: "div", Class: "small-8 medium-8 large-8", Style: "padding-" + RV_Float + ":1rem;",
+                                                    Childs: [{
+                                                        Type: "middle",
+                                                        Childs: [
+                                                            {
+                                                                Type: "checkbox", Name: "archiveChb", Params: { OnChange: function () { _on_archive_chb_change(); } },
+                                                                Style: "width:1rem; height:1rem; cursor:pointer; margin-" + RV_RevFloat + ":0.5rem;"
+                                                            },
+                                                            { Type: "text", TextValue: RVDic.ShowRemovedItems }
+                                                        ]
+                                                    }]
                                                 }
                                             ]
                                         },
                                         {
-                                            Type: "div", Class: "small-12 medium-12 large-12",
-                                            Style: "height:100%;", Name: "nodeTypes"
+                                            Type: "input", Class: "rv-input", InnerTitle: RVDic.Search,
+                                            Style: "width:100%; font-size:0.7rem;", Name: "searchInput",
                                         }
                                     ]
                                 },
                                 {
-                                    Type: "div", Class: "small-6 medium-7 large-8", Name: "panel",
-                                    Style: "padding-" + RV_Float + ":0.5rem;"
+                                    Type: "div", Class: "small-12 medium-12 large-12",
+                                    Style: "height:100%;", Name: "nodeTypes"
                                 }
                             ]
+                        },
+                        {
+                            Type: "div", Class: "small-6 medium-7 large-8", Name: "panel",
+                            Style: "padding-" + RV_Float + ":0.5rem;"
                         }
                     ]
-                }
-            ], that.ContainerDiv);
+                }]
+            }], that.ContainerDiv);
 
             that.Interface.RemovedNodeTypesCheckbox = elems["archiveChb"];
             that.Interface.SearchInput = elems["searchInput"];
@@ -335,12 +330,10 @@
             var hasInited = !!that.Objects.Panels[nodeType.NodeTypeID];
 
             var container = that.Objects.Panels[nodeType.NodeTypeID] =
-                that.Objects.Panels[nodeType.NodeTypeID] || GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12", Name: "_div",
-                        Style: "position:relative; height:100%; padding-top:3rem;"
-                    }
-                ])["_div"];
+                that.Objects.Panels[nodeType.NodeTypeID] || GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: "small-12 medium-12 large-12", Name: "_div",
+                    Style: "position:relative; height:100%; padding-top:3rem;"
+                }])["_div"];
 
             var to = that.Interface.Panel.firstChild ? 500 : 0;
 
@@ -379,11 +372,14 @@
                 { Type: "div", Class: "small-12 medium-12 large-12 row", Name: "service", Style: "margin:0rem;" },
                 { Type: "div", Class: "small-12 medium-12 large-12 row", Name: "admins", Style: "margin:0rem;" },
                 { Type: "div", Class: "small-12 medium-12 large-12 row", Name: "nodes", Style: "margin:0rem;" },
-                { Type: "div", Class: "small-12 medium-12 large-12 row", Name: "complexes", Style: "margin:0rem;" }
+                { Type: "div", Class: "small-12 medium-12 large-12 row", Name: "complexes", Style: "margin:0rem;" },
+                (!that.Objects.IdentityFormID ? null : {
+                    Type: "div", Class: "small-12 medium-12 large-12 row", Name: "identity", Style: "margin:0rem;"
+                })
             ], _div);
 
             //Initialize tabs
-            var inited = { General: false, Extensions: false, Service: false, Admins: false, Nodes: false, Complexes: false };
+            var inited = { General: false, Extensions: false, Service: false, Admins: false, Nodes: false, Complexes: false, Identity: false };
 
             var tabs = [];
 
@@ -446,6 +442,18 @@
                     that.complexes(pages["complexes"], nodeType);
                 }
             });
+
+            if (that.Objects.IdentityFormID) {
+                tabs.push({
+                    Page: pages["identity"], Title: RVDic.Specifications, FixedPage: true,
+                    OnActive: function (ind) {
+                        if (inited.Identity) return;
+                        inited.Identity = true;
+
+                        that.identity(pages["identity"], nodeType);
+                    }
+                });
+            }
 
             (new TabsManager({ ContainerDiv: elems["tabs"], Pages: tabs })).goto_page(0);
             //end of tabs initialization
@@ -516,6 +524,36 @@
                     new CNListsManager(container, {
                         NodeTypeID: nodeType.NodeTypeID,
                         NodeType: Base64.decode(nodeType.Name || nodeType.TypeName)
+                    });
+                }
+            });
+        },
+
+        identity: function (container, nodeType) {
+            var that = this;
+
+            GlobalUtilities.loading(container);
+            
+            GlobalUtilities.load_files(["API/FGAPI.js"], {
+                OnLoad: function () {
+                    FGAPI.InitializeOwnerFormInstance({
+                        OwnerID: nodeType.NodeTypeID, FormID: that.Objects.IdentityFormID, ParseResults: true,
+                        ResponseHandler: function (result) {
+                            if (result.ErrorText) {
+                                container.innerHTML = "<div style='text-align:center; font-weight:bold;'>" +
+                                    RVDic.MSG[result.ErrorText] || result.ErrorText + "</div>";
+                                return;
+                            }
+
+                            GlobalUtilities.load_files(["FormsManager/FormViewer.js",], {
+                                OnLoad: function () {
+                                    new FormViewer(container, {
+                                        InstanceID: result.InstanceID,  Editable: true,
+                                        ElementsEditable: true, HideDescription: true, FillButton: false
+                                    });
+                                }
+                            });
+                        }
                     });
                 }
             });

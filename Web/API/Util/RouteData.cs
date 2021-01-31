@@ -378,7 +378,7 @@ namespace RaaiVan.Web.API
             new RouteInfo(name: RouteName.admin_users, roleName: AccessRoleName.UsersManagement),
             new RouteInfo(name: RouteName.admin_confidentiality, roleName: AccessRoleName.ManageConfidentialityLevels),
             new RouteInfo(name: RouteName.admin_usergroups, roleName: AccessRoleName.UserGroupsManagement),
-            new RouteInfo(name: RouteName.admin_map, roleName: AccessRoleName.ManageOntology),
+            new RouteInfo(name: RouteName.admin_map, roleName: AccessRoleName.ManageOntology, action: admin_map),
             new RouteInfo(name: RouteName.admin_knowledge, roleName: AccessRoleName.KnowledgeAdmin),
             new RouteInfo(name: RouteName.admin_documents, roleName: AccessRoleName.ContentsManagement),
             new RouteInfo(name: RouteName.admin_forms, roleName: AccessRoleName.ManageForms),
@@ -427,7 +427,7 @@ namespace RaaiVan.Web.API
             
             Guid? userId = null;
             string redirectToUrl = PublicMethods.get_dic_value(data, "RedirectToURL");
-
+            
             if (PublicMethods.get_dic_value<bool>(data, "RedirectToLogin", false))
             {
                 FormsAuthentication.RedirectToLoginPage();
@@ -458,6 +458,12 @@ namespace RaaiVan.Web.API
             }
 
             return data;
+        }
+
+        private static void admin_map(RouteActionParams input)
+        {
+            Guid? formId = RaaiVanSettings.NodeTypeIdentityFormID(input.ParamsContainer.ApplicationID);
+            if (formId.HasValue) input.Data["IdentityFormID"] = formId;
         }
 
         private static void search(RouteActionParams input)

@@ -3246,11 +3246,10 @@ namespace RaaiVan.Web.API
                 return;
             }
 
-            List<AccessRole> roles = UsersController.get_access_roles(paramsContainer.Tenant.Id);
+            List<AccessRole> roles = AccessRole.remove_ref_tenant_specific_roles(paramsContainer.ApplicationID,
+                UsersController.get_access_roles(paramsContainer.Tenant.Id));
 
-            responseText = "{\"Roles\":[" + ProviderUtil.list_to_string<string>(roles.Select(
-                u => "{\"ID\":\"" + u.RoleID.ToString() + "\"" + ",\"Title\":\"" + Base64.encode(u.Title) + "\"" + "}")
-                .ToList()) + "]}";
+            responseText = "{\"Roles\":[" + string.Join(",", roles.Select(u => u.toJson())) + "]}";
         }
 
         protected void get_user_group_permissions(Guid? id, ref string responseText)

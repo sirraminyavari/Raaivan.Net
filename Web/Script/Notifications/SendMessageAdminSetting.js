@@ -181,30 +181,6 @@
                 });
             };
 
-            var is_default_click = function (obj, e, done) {
-                e.preventDefault();
-                var _th = this;
-
-                if (_th._Processing) return;
-                _th._Processing = true;
-
-                NotificationsAPI.IsDefaultMessageTemplate({
-                    TemplateID: obj.TemplateID, IsDefault: !_th.Checked, ParseResults: true,
-                    ResponseHandler: function (result) {
-                        if (result.ErrorText) {
-                            alert(RVDic.MSG[result.ErrorText] || result.ErrorText);
-                            done(false);
-                        }
-                        else {
-                            done();
-                            obj.IsDefault = _th.Checked;
-                        }
-
-                        _th._Processing = false;
-                    }
-                });
-            };
-
             var elems = GlobalUtilities.create_nested_elements([
                 {
                     Type: "div", Class: "small-12 medium-12 large-12", Name: "container",
@@ -224,20 +200,6 @@
                     Type: "div", Class: "small-12 medium-12 large-12", Name: "options",
                     Style: "margin-top:0.5rem;" + (media.Enabled ? "" : "display:none;"),
                     Childs: [
-                        {
-                            Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-bottom:0.5rem;",
-                            Childs: [
-                                {
-                                    Type: "checkbox",
-                                    Style: "width:1rem; height:1rem; cursor:pointer; margin-" + RV_RevFloat + ":0.5rem;",
-                                    Params: {
-                                        Checked: !!media.IsDefault,
-                                        OnClick: function (e, done) { is_default_click.call(this, media, e, done); }
-                                    }
-                                },
-                                { Type: "text", TextValue: RVDic.BeDefault }
-                            ]
-                        },
                         {
                             Type: "div", Class: "small-12 medium-12 large-12",
                             Style: "position:relative; padding-" + RV_Float + ":1.5rem;",

@@ -11,6 +11,8 @@ namespace RaaiVan.Modules.GlobalUtilities
     public enum RVSettingsItem
     {
         SAASBasedMultiTenancy,
+        ReferenceTenantID,
+        NodeTypeIdentityFormID,
 
         USBToken,
 
@@ -259,8 +261,22 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             get
             {
-                return get_value(Guid.Empty, RVSettingsItem.SAASBasedMultiTenancy).ToLower() == "true";
+                return get_value(null, RVSettingsItem.SAASBasedMultiTenancy).ToLower() == "true";
             }
+        }
+
+        public static Guid? ReferenceTenantID {
+            get
+            {
+                return !SAASBasedMultiTenancy ? null :
+                    PublicMethods.parse_guid(get_value(null, RVSettingsItem.ReferenceTenantID));
+            }
+        }
+
+        public static Guid? NodeTypeIdentityFormID(Guid? applicationId)
+        {
+            return !applicationId.HasValue || !ReferenceTenantID.HasValue || ReferenceTenantID != applicationId ? null :
+                PublicMethods.parse_guid(get_value(null, RVSettingsItem.NodeTypeIdentityFormID));
         }
 
         public static bool USBToken

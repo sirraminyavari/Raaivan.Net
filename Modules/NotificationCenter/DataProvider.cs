@@ -135,7 +135,6 @@ namespace RaaiVan.Modules.NotificationCenter
 
                     if (!string.IsNullOrEmpty(reader["TemplateID"].ToString())) messageTemplate.TemplateId = (Guid)reader["TemplateID"];
                     if (!string.IsNullOrEmpty(reader["Enable"].ToString())) messageTemplate.Enable = (bool)reader["Enable"];
-                    if (!string.IsNullOrEmpty(reader["IsDefault"].ToString())) messageTemplate.IsDefault = (bool)reader["IsDefault"];
                     if (!string.IsNullOrEmpty(reader["Lang"].ToString())) messageTemplate.Lang = (string)reader["Lang"];
                     if (!string.IsNullOrEmpty(reader["Subject"].ToString())) messageTemplate.Subject = (string)reader["Subject"];
                     if (!string.IsNullOrEmpty(reader["Text"].ToString())) messageTemplate.Text = (string)reader["Text"];
@@ -560,6 +559,8 @@ namespace RaaiVan.Modules.NotificationCenter
             userStatusPairParam.Value = userStatusPairTable;
 
             cmd.Parameters.AddWithValue("@ApplicationID", applicationId);
+            if(RaaiVanSettings.ReferenceTenantID.HasValue)
+                cmd.Parameters.AddWithValue("@RefAppID", RaaiVanSettings.ReferenceTenantID.Value);
             cmd.Parameters.Add(userStatusPairParam);
             cmd.Parameters.AddWithValue("@SubjectType", subjectType.ToString());
             cmd.Parameters.AddWithValue("@Action", action.ToString());
@@ -567,7 +568,9 @@ namespace RaaiVan.Modules.NotificationCenter
             string spName = GetFullyQualifiedName("GetNotificationMessagesInfo");
 
             string sep = ",";
-            string arguments = "@ApplicationID" + sep + "@UserStatusPair" + sep + "@SubjectType" + sep + "@Action";
+            string arguments = "@ApplicationID" + sep +
+                (!RaaiVanSettings.ReferenceTenantID.HasValue ? "null" : "@RefAppID") + sep +
+                "@UserStatusPair" + sep + "@SubjectType" + sep + "@Action";
             cmd.CommandText = ("EXEC" + " " + spName + " " + arguments);
 
             con.Open();
@@ -593,21 +596,6 @@ namespace RaaiVan.Modules.NotificationCenter
             {
                 return ProviderUtil.succeed(ProviderUtil.execute_reader(spName, applicationId,
                     templateId, currentUserId, DateTime.Now, subjectType, action, media, userStatus, lang, enable));
-            }
-            catch(Exception ex)
-            {
-                LogController.save_error_log(applicationId, null, spName, ex, ModuleIdentifier.NTFN);
-                return false;
-            }
-        }
-
-        public static bool IsDefaultMessageTemplate(Guid applicationId, Guid templateId, bool? isDefault)
-        {
-            string spName = GetFullyQualifiedName("IsDefaultMessageTemplate");
-
-            try
-            {
-                return ProviderUtil.succeed(ProviderUtil.execute_reader(spName, applicationId, templateId, isDefault));
             }
             catch(Exception ex)
             {
@@ -666,14 +654,14 @@ namespace RaaiVan.Modules.NotificationCenter
             }
         }
 
-        public static void GetUserMessagingActivation(Guid applicationId, 
+        public static void GetUserMessagingActivation(Guid applicationId,
             Guid userId, ref List<MessagingActivationOption> retMessagingActivationOpt)
         {
             string spName = GetFullyQualifiedName("GetUserMessagingActivation");
 
             try
             {
-                IDataReader reader = ProviderUtil.execute_reader(spName, applicationId, userId);
+                IDataReader reader = ProviderUtil.execute_reader(spName, applicationId, RaaiVanSettings.ReferenceTenantID, userId);
                 _parse_messaging_activation_option(ref reader, ref retMessagingActivationOpt);
             }
             catch (Exception ex)

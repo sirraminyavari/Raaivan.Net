@@ -802,6 +802,30 @@ namespace RaaiVan.Modules.Users
         public Guid? RoleID;
         public AccessRoleName Name;
         public string Title;
+
+        public string toJson() {
+            return "{\"ID\":\"" + (!RoleID.HasValue ? string.Empty : RoleID.ToString()) + "\"" +
+                ",\"Title\":\"" + Base64.encode(Title) + "\"" +
+                "}";
+        }
+
+        public static List<AccessRoleName> remove_ref_tenant_specific_roles(Guid? applicationId, List<AccessRoleName> names) {
+            List<AccessRoleName> refTenantSpecificItems = 
+                !RaaiVanSettings.ReferenceTenantID.HasValue || RaaiVanSettings.ReferenceTenantID == applicationId ? 
+                new List<AccessRoleName>() :
+                new List<AccessRoleName>()
+                {
+                    AccessRoleName.SMSEMailNotifier
+                };
+
+            return names.Where(n => !refTenantSpecificItems.Any(x => x == n)).ToList();
+        }
+
+        public static List<AccessRole> remove_ref_tenant_specific_roles(Guid? applicationId, List<AccessRole> roles)
+        {
+            List<AccessRoleName> names = remove_ref_tenant_specific_roles(applicationId, roles.Select(r => r.Name).Distinct().ToList());
+            return roles.Where(r => names.Any(x => x == r.Name)).ToList();
+        }
     }
 
     public class AdvancedUserSearch

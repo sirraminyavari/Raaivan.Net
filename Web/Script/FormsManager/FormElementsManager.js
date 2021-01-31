@@ -179,10 +179,10 @@
                         Childs: [{
                             Type: "div", Style: "flex:0 0 auto;",
                             Childs: [
-                                {
+                                (true ? null : {
                                     Type: "div", Class: "rv-air-button rv-border-radius-quarter SoftShadow", Style: "margin-bottom:0.5rem;",
                                     Childs: [{ Type: "text", TextValue: RVDic.Archive }]
-                                },
+                                }),
                                 {
                                     Type: "div", Class: "rv-air-button rv-border-radius-quarter SoftShadow SoftBorder", Name: "previewButton",
                                     Style: "margin-bottom:0.5rem;",
@@ -371,7 +371,6 @@
                     Elements: Base64.encode(JSON.stringify({ Elements: arr })),
                     ParseResults: true,
                     ResponseHandler: function (result) {
-                        console.log(result);
                         if (result.ErrorText) alert(RVDic.MSG[result.ErrorText] || result.ErrorText);
                         else {
                             if (privacyData) PrivacyAPI.SetAudience({
@@ -379,9 +378,10 @@
                                 Data: Base64.encode(JSON.stringify(privacyData)),
                                 ParseResults: true,
                                 ResponseHandler: function (dt) {
-                                    console.log(dt);
+                                    alert(RVDic.MSG[result.Succeed] || result.Succeed);
                                 }
                             });
+                            else alert(RVDic.MSG[result.Succeed] || result.Succeed);
                         }
                     }
                 });

@@ -31,7 +31,7 @@ namespace RaaiVan.Web.API
                 paramsContainer.return_response(PublicConsts.NullTenantResponse);
                 return;
             }
-
+            
             string responseText = string.Empty;
             string command = PublicMethods.parse_string(context.Request.Params["Command"], false);
 

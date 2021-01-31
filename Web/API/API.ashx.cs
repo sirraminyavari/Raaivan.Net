@@ -28,7 +28,7 @@ namespace RaaiVan.Web.API
 
             if (PublicMethods.parse_string(context.Request.Params["command"], false) == "sql_scripts")
             {
-                string fileName = PublicMethods.parse_string(paramsContainer.request_param("FileName"));
+                string fileName = PublicMethods.parse_string(paramsContainer.request_param("FileName"), decode: false);
                 paramsContainer.file_response(System.Text.Encoding.UTF8.GetBytes(PublicMethods.generate_script_file(fileName)),
                     fileName: "script.sql", contentType: "application/sql", isAttachment: true);
                 return;

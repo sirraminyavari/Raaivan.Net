@@ -696,6 +696,7 @@
         SortParagraphs: "مرتب سازی پاراگراف ها",
         SortTitles: "مرتب سازی عناوین",
         Source: "منبع",
+        Specifications: "مشخصات",
         SSO: "لاگین یکپارچه",
         StandardDeviation: "انحراف معیار",
         Start: "شروع",

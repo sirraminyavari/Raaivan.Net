@@ -16,6 +16,8 @@ namespace RaaiVan.Web.API
 
             if (!userId.HasValue || userId == Guid.Empty || tenant == null /*|| 
                 !RaaiVanUtil.is_authenticated(HttpContext.Current)*/) return new List<AccessRoleName>();
+
+            roles = AccessRole.remove_ref_tenant_specific_roles(tenant.Id, roles);
             
             if (PublicMethods.is_system_admin(tenant.Id, userId.Value)) return roles;
 

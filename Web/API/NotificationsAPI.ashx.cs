@@ -164,11 +164,6 @@ namespace RaaiVan.Web.API
                         _return_response(ref responseText);
                     }
                     break;
-                case "IsDefaultMessageTemplate":
-                    is_default_message_template(PublicMethods.parse_guid(context.Request.Params["TemplateID"]),
-                        PublicMethods.parse_bool(context.Request.Params["IsDefault"]), ref responseText);
-                    _return_response(ref responseText);
-                    return;
                 case "SetUserMessagingActivation":
                     {
                         SubjectType subjectType = SubjectType.None;
@@ -641,51 +636,6 @@ namespace RaaiVan.Web.API
                 "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
         }
 
-        protected void is_default_message_template(Guid? templateId, bool? isDefault, ref string responseText)
-        {
-            //Privacy Check: OK
-            if (!isDefault.HasValue)
-            {
-                if (!paramsContainer.GBView) return;
-
-                responseText = (templateId.HasValue &&
-                    NotificationController.is_default_message_template(paramsContainer.Tenant.Id,
-                    templateId.Value)).ToString().ToLower();
-                return;
-            }
-
-            if (!paramsContainer.GBEdit) return;
-
-            if (!AuthorizationManager.has_right(AccessRoleName.SMSEMailNotifier, paramsContainer.CurrentUserID))
-            {
-                responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";
-                return;
-            }
-
-            bool result = templateId.HasValue && NotificationController.is_default_message_template(paramsContainer.Tenant.Id,
-                templateId.Value, isDefault.Value);
-
-            responseText = result ? "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}" :
-                "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
-
-            //Save Log
-            if (result)
-            {
-                LogController.save_log(paramsContainer.Tenant.Id, new Log()
-                {
-                    UserID = paramsContainer.CurrentUserID.Value,
-                    Date = DateTime.Now,
-                    HostAddress = PublicMethods.get_client_ip(HttpContext.Current),
-                    HostName = PublicMethods.get_client_host_name(HttpContext.Current),
-                    Action = Modules.Log.Action.SetDefaultMessageTemplate,
-                    SubjectID = templateId,
-                    Info = "{\"IsDefault\":" + isDefault.ToString().ToLower() + "}",
-                    ModuleIdentifier = ModuleIdentifier.NTFN
-                });
-            }
-            //end of Save Log
-        }
-
         protected void set_user_messaging_activation(Guid? optionId, Guid? userId, SubjectType subjectType,
             UserStatus userStatus, NC.ActionType action, Media media, string lang, bool? enable, ref string responseText)
         {
@@ -900,7 +850,6 @@ namespace RaaiVan.Web.API
                                     string _text = "";
                                     string _lang = "";
                                     bool _enable = false;
-                                    bool _isDefault = false;
 
                                     if (lstMessageTemplates.Where(so => so.SubjectType == _subjectType.SubjectTypeName &&
                                             so.Action == _action && so.UserStatus == _userStatus && so.Media == _media).ToList<NotificationMessageTemplate>().Count == 1)
@@ -919,9 +868,6 @@ namespace RaaiVan.Web.API
 
                                         _enable = lstMessageTemplates.Where(so => so.SubjectType == _subjectType.SubjectTypeName &&
                                             so.Action == _action && so.UserStatus == _userStatus && so.Media == _media).Select(so => so.Enable.Value).ToList<bool>().First();
-
-                                        _isDefault = lstMessageTemplates.Where(so => so.SubjectType == _subjectType.SubjectTypeName &&
-                                            so.Action == _action && so.UserStatus == _userStatus && so.Media == _media).Select(so => so.IsDefault.Value).ToList<bool>().First();
                                     }
 
                                     responseText += (!isFirstMedia ? "," : "") +
@@ -931,7 +877,6 @@ namespace RaaiVan.Web.API
                                             ",\"MessageText\": \"" + Base64.encode(_text) + "\"" +
                                             ",\"Language\": \"" + _lang + "\"" +
                                             ",\"Enabled\": " + _enable.ToString().ToLower() +
-                                            ",\"IsDefault\": " + _isDefault.ToString().ToLower() +
                                         "}";
                                     isFirstMedia = false;
                                 }

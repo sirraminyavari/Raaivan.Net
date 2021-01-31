@@ -197,15 +197,6 @@
         return NotificationsAPI._send(url, params, queryString);
     },
 
-    IsDefaultMessageTemplate: function (params) {
-        params = params || {};
-
-        var url = NotificationsAPI.ResponseURL + "/IsDefaultMessageTemplate?timeStamp=" + new Date().getTime();
-        var queryString = (params.TemplateID ? "&TemplateID=" + params.TemplateID : "") +
-            (GlobalUtilities.get_type(params.IsDefault) == "boolean" ? "&IsDefault=" + params.IsDefault : "");
-        return NotificationsAPI._send(url, params, queryString);
-    },
-
     GetUserMessagingActivation: function (params) {
         params = params || {};
 

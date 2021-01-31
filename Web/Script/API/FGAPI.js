@@ -374,7 +374,8 @@
         params = params || {};
 
         var url = FGAPI.ResponseURL + "/InitializeOwnerFormInstance?timeStamp=" + new Date().getTime();
-        var queryString = (params.OwnerID ? "&OwnerID=" + params.OwnerID : "");
+        var queryString = (params.OwnerID ? "&OwnerID=" + params.OwnerID : "") +
+            (params.FormID ? "&FormID=" + params.FormID : "");
         return FGAPI._send(url, params, queryString);
     },
 
