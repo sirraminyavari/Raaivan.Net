@@ -640,22 +640,16 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         if (typeof (divObj) != "object" && !(divObj = document.getElementById(divObj))) return;
         params = params || {};
 
-        var elems = GlobalUtilities.create_nested_elements([
-            {
-                Type: "div", Class: "nano has-scrollbar", Name: "main",
-                Childs: [
-                    {
-                        Type: "div", Class: "overthrow nano-content", Style: "overflow-y:hidden;", Name: "container",
-                        Childs: [
-                            {
-                                Type: "div", Name: "__",
-                                Childs: [{ Type: "div", Class: "small-12 medium-12 large-12 clearfix", Name: "content" }]
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]);
+        var elems = GlobalUtilities.create_nested_elements([{
+            Type: "div", Class: "nano has-scrollbar", Name: "main",
+            Childs: [{
+                Type: "div", Class: "overthrow nano-content", Style: "overflow-y:hidden;", Name: "container",
+                Childs: [{
+                    Type: "div", Name: "__", Style: "height:100%;",
+                    Childs: [{ Type: "div", Class: "small-12 medium-12 large-12 clearfix", Name: "content" }]
+                }]
+            }]
+        }]);
 
         jQuery(elems["main"]).on("mousewheel", function (event) {
             event.stopPropagation();

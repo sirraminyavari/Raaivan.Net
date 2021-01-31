@@ -234,7 +234,7 @@
                 Done: function (dt) { that.Interface.ElementsScrollee = dt.Scrollee }
             });
 
-            jQuery(that.Interface.ElementsContainer).css({ 'padding': '1rem' });
+            jQuery(that.Interface.ElementsContainer).css({ 'padding': '1rem', 'height': '100%' });
             jQuery(that.Interface.ElementsContainer).css({ [RV_RTL ? 'padding-left' : 'padding-right']: '1.2rem' });
 
             ["rv-trim-vertical-margins", that.Options.CssClass.ElementsContainer]
@@ -742,7 +742,7 @@
                 }
             });
 
-            element.HelpInput = new AdvancedTextArea({
+            element.HelpInput = !helpEditArea ? null : new AdvancedTextArea({
                 ContainerDiv: helpEditArea, InputClass: "rv-input-simple", QueryTemplate: "RelatedThings",
                 ItemTemplate: { ItemsTitle: "Items", ID: "ItemID", Name: "Name", Type: "Type", ImageURL: "ImageURL" },
                 OnLoad: function () { this.set_data(help); }
@@ -931,12 +931,12 @@
             container.GetData = function (encode) {
                 var newTitle = GlobalUtilities.trim(element.TitleInput.get_data());
                 var newName = GlobalUtilities.trim(element.NameInput.value);
-                var newHelp = GlobalUtilities.trim(element.HelpInput.get_data());
+                var newHelp = !element.HelpInput ? null : GlobalUtilities.trim(element.HelpInput.get_data());
                 var newInfo = optionsEdit && optionsEdit.Get ? optionsEdit.Get() : null;
                 var newWeight = optionsEdit && optionsEdit.Weight ? optionsEdit.Weight() : null;
-
+                
                 if (!newTitle || (newInfo === false) || (nameValidationObj && !nameValidationObj.Check())) return false;
-
+                
                 return {
                     ElementID: elementId,
                     Type: element.Type,

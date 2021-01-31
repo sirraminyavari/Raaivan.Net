@@ -170,8 +170,6 @@
         add_item: function (container, item, add2top, archive) {
             var that = this;
 
-            var id = item.ID;
-
             var action_button = function (p, size) {
                 p = p || {};
 
@@ -198,32 +196,30 @@
             };
 
             var elems = GlobalUtilities.create_nested_elements([{
-                Type: "div", Class: "small-12 medium-6 large-4",
-                Style: "padding:0.5rem; opacity:0;", Name: "container",
+                Type: "div", Class: "small-12 medium-6 large-4", Name: "container",
+                Style: "padding:0.5rem; opacity:0;" + (archive ? "" : "cursor:pointer;"), 
                 Childs: [{
-                    Type: "div",
-                    Class: "small-12 medium-12 large-12 rv-border-radius-half rv-bg-color-softer-soft",
-                    Style: "position:relative; height:100%; padding:0.4rem; padding-bottom:3.5rem; text-align:center;",
+                    Type: "div", Class: "rv-border-radius-half rv-bg-color-softer-soft",
+                    Style: "display:flex; flex-flow:column; height:100%; padding:0.4rem;",
                     Childs: [
+                        { Type: "div", Name: "editableTitle", Style: "flex:1 1 auto;" },
                         {
-                            Type: "div", Class: "rv-border-radius-quarter",
-                            Style: "position:absolute; bottom:0.5rem; left:0.5rem; right:0.5rem;" +
-                                "padding:0.3rem; background-color:white;",
-                            Childs: [{
-                                Type: "div", Class: "small-12 medium-12 large-12 row", Style: "margin:0rem;",
-                                Childs: create_buttons([
-                                    { Name: "rename", Title: RVDic.Rename, Icon: "fa-i-cursor" },
-                                    (archive ? null : { Name: "edit", Title: RVDic.Edit, Icon: "fa-pencil" }),
-                                    {
-                                        Name: "remove", Title: archive ? RVDic.Recycle : RVDic.Remove,
-                                        Icon: archive ? "fa-recycle" : "fa-times"
-                                    }
-                                ])
-                            }]
-                        },
-                        {
-                            Type: "middle", Style: "display:inline-block; font-size:1rem;",
-                            Childs: [{ Type: "text", TextValue: Base64.decode(item.Title), Name: "formName" }]
+                            Type: "div", Style: "flex:0 0 auto; display:flex; flex-flow:row; padding-top:1rem;",
+                            Childs: [
+                                { Type: "div", Style: "flex:1 1 auto;" },
+                                {
+                                    Type: "div", Class: "rv-border-radius-quarter rv-air-button-base rv-air-button-black",
+                                    Style: "flex:0 0 auto; font-size:0.7rem;", Name: "remove",
+                                    Childs: [
+                                        {
+                                            Type: "i", Class: "fa " + (archive ? "fa-recycle" : "fa-trash"),
+                                            Style: "margin-" + RV_RevFloat + ":0.3rem;",
+                                            Attributes: [{ Name: "aria-hidden", Value: true }]
+                                        },
+                                        { Type: "text", TextValue: archive ? RVDic.Recycle : RVDic.Remove }
+                                    ]
+                                }
+                            ]
                         }
                     ]
                 }]
@@ -236,46 +232,37 @@
 
             elems["container"].ItemObject = item;
 
-            elems["rename"].onclick = function () {
-                that.rename(item, function (name) {
-                    item.Title = Base64.encode(name);
-                    elems["formName"].data = GlobalUtilities.convert_numbers_to_persian(name);
-                });
+            //Append title
+            var editableTitle = GlobalUtilities.append_editable_title(elems["editableTitle"], {
+                Editable: !archive,
+                Container: { Style: "display:flex; flex-flow:row; justify-content:center; align-items:center; height:100%;" },
+                Title: {
+                    Value: Base64.decode(item.Title),
+                    Class: "WarmColor TextAlign",
+                    Style: "display:flex; flex:1 1 auto; font-size:1.1rem; font-weight:bold; align-items:center; padding:0.4rem;",
+                    Builder: (title) => [{ Type: "text", TextValue: title.Value }]
+                },
+                Input: { Placeholder: RVDic.Title, Style: "font-size:1.1rem;" },
+                Save: (title) => {
+                    FGAPI.SetFormTitle({
+                        FormID: item.FormID, Title: Base64.encode(title.Value), ParseResults: true,
+                        ResponseHandler: function (result) { }
+                    });
+                }
+            });
+            //end of Append title
+
+            if (!archive) elems["container"].onclick = function () {
+                if (!editableTitle.is_edit_mode()) that.edit(item);
             };
 
-            if (elems["edit"]) elems["edit"].onclick = function () { that.edit(item); }
-            
-            elems["remove"].onclick = function () {
+            elems["remove"].onclick = function (e) {
+                e.stopPropagation();
+
                 that.remove_recycle(item, archive, function () {
                     jQuery(elems["container"]).fadeOut(500, function () { jQuery(elems["container"]).remove(); });
                 });
             };
-        },
-
-        rename: function (item, done) {
-            var that = this;
-
-            if (that.SavingName) return;
-            that.SavingName = true;
-            
-            new NameDialog({
-                Title: RVDic.NewN.replace("[n]", RVDic.Name), InitialValue: Base64.decode(item.Title), InnerTitle: RVDic.Name,
-                OnActionCall: function (name, callback) {
-                    if (!name) return callback(!(that.SavingName = false));
-
-                    FGAPI.SetFormTitle({
-                        FormID: item.FormID, Title: Base64.encode(name), ParseResults: true,
-                        ResponseHandler: function (result) {
-                            if (result.ErrorText) alert(RVDic.MSG[result.ErrorText] || result.ErrorText);
-                            else if (result.Succeed) done(name);
-
-                            callback(!!(result || {}).Succeed);
-
-                            that.SavingName = false;
-                        }
-                    });
-                }
-            });
         },
 
         edit: function (item) {

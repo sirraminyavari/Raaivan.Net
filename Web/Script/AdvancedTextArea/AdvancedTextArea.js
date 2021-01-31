@@ -39,11 +39,11 @@
         AdvancedTextArea.Instanses[this.InstanceID] = this;
         //end of Instance Initialization
 
-        this.DefaultTagType = params.DefaultTagType || "";
+        this.DefaultTagType = params.DefaultTagType;
 
         this.Objects = {
             TextArea: null
-        }
+        };
 
         //Interface Initialization
         var elems = GlobalUtilities.create_nested_elements([{
