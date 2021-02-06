@@ -125,7 +125,9 @@
             (params.Extensions ? "&Extensions=" + params.Extensions : "") +
             (params.Count ? "&Count=" + params.Count : "") +
             (params.LowerBoundary ? "&LowerBoundary=" + params.LowerBoundary : "") +
-            (params.HasChild ? "&HasChild=" + params.HasChild : "");
+            (params.HasChild ? "&HasChild=" + params.HasChild : "") +
+            (params.Tree ? "&Tree=" + params.Tree : "") +
+            (params.CheckAccess ? "&CheckAccess=" + params.CheckAccess : "");
         return CNAPI._send(url, params, queryString);
     },
 

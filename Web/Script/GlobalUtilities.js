@@ -1766,10 +1766,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
             loading = true;
 
-            var editorUrl = window.location.protocol + "//" + window.location.host + "/" +
-                GlobalUtilities.ScriptsFolder + "/CK_Editor_" + window.CKE_VERSION + "/ckeditor.js";
-
-            GlobalUtilities.load_files([{ Childs: [editorUrl], Check: function () { return true; } }], {
+            GlobalUtilities.load_files(["CK_Editor_" + window.CKE_VERSION + "/ckeditor.js"], {
                 OnLoad: function () {
                     var y = setInterval(function () {
                         if (String((window.CKEDITOR || {}).status || " ").toLowerCase() != "loaded") return;

@@ -26,7 +26,7 @@ namespace RaaiVan.Web.API
         {
             paramsContainer = new ParamsContainer(context, nullTenantResponse: false);
 
-            if (PublicMethods.parse_string(context.Request.Params["command"], false) == "sql_scripts")
+            if (PublicMethods.parse_string(context.Request.Params["command"], false) == "sql_scripts" && PublicMethods.is_dev())
             {
                 string fileName = PublicMethods.parse_string(paramsContainer.request_param("FileName"), decode: false);
                 paramsContainer.file_response(System.Text.Encoding.UTF8.GetBytes(PublicMethods.generate_script_file(fileName)),

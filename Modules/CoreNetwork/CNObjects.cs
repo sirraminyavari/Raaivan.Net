@@ -310,10 +310,16 @@ namespace RaaiVan.Modules.CoreNetwork
         public DateTime? CreationDate;
         public Guid? LastModifierUserID;
         public DateTime? LastModificationDate;
+        public bool? Hidden;
         public bool? Archive;
         public bool? HasChild;
         public string IconURL;
         public string HighQualityIconURL;
+        public List<NodeType> Sub;
+
+        public NodeType() {
+            Sub = new List<NodeType>();
+        }
 
         public string toJson(Guid? applicationId = null, bool iconUrl = false)
         {
@@ -330,15 +336,41 @@ namespace RaaiVan.Modules.CoreNetwork
             return "{\"NodeTypeID\":\"" + (!NodeTypeID.HasValue ? string.Empty : NodeTypeID.ToString()) + "\"" +
                 ",\"AdditionalID\":\"" + Base64.encode(NodeTypeAdditionalID) + "\"" +
                 ",\"TypeName\":\"" + Base64.encode(Name) + "\"" +
-                ",\"ParentID\":\"" + (ParentID.HasValue ? ParentID.ToString() : string.Empty) + "\"" +
-                ",\"AdditionalIDPattern\":\"" + AdditionalIDPattern + "\"" +
-                ",\"IsDefault\":" + AdditionalID.HasValue.ToString().ToLower() +
-                ",\"IsArchive\":" + (Archive.HasValue && Archive.Value).ToString().ToLower() +
-                ",\"HasDefaultPattern\":" + hasDefaultPattern.ToString().ToLower() +
-                ",\"IconURL\":" + (string.IsNullOrEmpty(IconURL) ? "null" : "\"" + IconURL + "\"") +
-                ",\"HighQualityIconURL\":" + (string.IsNullOrEmpty(HighQualityIconURL) ? "null" : "\"" + HighQualityIconURL + "\"") +
-                ",\"HasChild\":" + (!HasChild.HasValue ? "null" : HasChild.Value.ToString().ToLower()) +
+                (!ParentID.HasValue ? string.Empty : 
+                    ",\"ParentID\":\"" + ParentID.ToString() + "\"") +
+                (string.IsNullOrEmpty(AdditionalIDPattern) ? string.Empty : 
+                    ",\"AdditionalIDPattern\":\"" + AdditionalIDPattern + "\"") +
+                (!AdditionalID.HasValue ? string.Empty : 
+                    ",\"IsDefault\":" + AdditionalID.HasValue.ToString().ToLower()) +
+                (!Hidden.HasValue || !Hidden.Value ? string.Empty :
+                    ",\"Hidden\":" + Hidden.Value.ToString().ToLower()) +
+                (!Archive.HasValue || !Archive.Value ? string.Empty : 
+                    ",\"IsArchive\":" + Archive.Value.ToString().ToLower()) +
+                (!hasDefaultPattern ? string.Empty : 
+                    ",\"HasDefaultPattern\":" + hasDefaultPattern.ToString().ToLower()) +
+                (string.IsNullOrEmpty(IconURL) ? string.Empty : 
+                    ",\"IconURL\":\"" + IconURL + "\"") +
+                (string.IsNullOrEmpty(HighQualityIconURL) ? string.Empty : 
+                    ",\"HighQualityIconURL\":\"" + HighQualityIconURL + "\"") +
+                (!HasChild.HasValue || !HasChild.Value ? string.Empty :
+                    ",\"HasChild\":" + HasChild.Value.ToString().ToLower()) +
+                (Sub == null || Sub.Count == 0 ? string.Empty :
+                    ",\"Sub\":[" + string.Join(",", Sub.Select(s => s.toJson(applicationId, iconUrl))) + "]") +
                 "}";
+        }
+
+        private static List<NodeType> _children(List<NodeType> all, Guid? parentId = null)
+        {
+            List<NodeType> children = all == null ? new List<NodeType>() : 
+                all.Where(a => (!parentId.HasValue && !a.ParentID.HasValue) || parentId == a.ParentID).ToList();
+
+            children.ForEach(c => c.Sub = _children(all, c.NodeTypeID));
+
+            return children;
+        }
+
+        public static List<NodeType> toTree(List<NodeType> all) {
+            return _children(all, null);
         }
     }
 

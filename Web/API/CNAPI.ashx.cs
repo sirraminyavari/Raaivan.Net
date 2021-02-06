@@ -323,7 +323,9 @@ namespace RaaiVan.Web.API
                             extensions,
                             PublicMethods.parse_int(context.Request.Params["Count"]),
                             PublicMethods.parse_long(context.Request.Params["LowerBoundary"]),
-                            PublicMethods.parse_bool(context.Request.Params["HasChild"]), ref responseText);
+                            PublicMethods.parse_bool(context.Request.Params["HasChild"]),
+                            PublicMethods.parse_bool(context.Request.Params["Tree"]),
+                            PublicMethods.parse_bool(context.Request.Params["CheckAccess"]), ref responseText);
                         _return_response(ref context, ref responseText);
                     }
                     return;
@@ -2023,7 +2025,7 @@ namespace RaaiVan.Web.API
 
         protected void get_node_types(List<Guid> nodeTypeIds, bool? grabSubNodeTypes, bool? icon, 
             string searchText, bool? isKnowledge, bool? isDocument, bool? archive, List<ExtensionType> extensions,
-            int? count, long? lowerBoundary, bool? hasChild, ref string responseText)
+            int? count, long? lowerBoundary, bool? hasChild, bool? tree, bool? checkAccess, ref string responseText)
         {
             //Privacy Check: OK
             if (!paramsContainer.GBView) return;
@@ -2042,15 +2044,45 @@ namespace RaaiVan.Web.API
                 CNController.get_node_types(paramsContainer.Tenant.Id, searchText, isKnowledge,
                     isDocument, archive, extensions, count, lowerBoundary, ref totalCount).OrderBy(u => u.Archive).ToList();
 
+            nodeTypeIds = nodeTypes.Select(u => u.NodeTypeID.Value).ToList();
+
+
+            //Check HaveChild
             List<Guid> haveChild = !hasChild.HasValue || !hasChild.Value ? new List<Guid>() :
-                CNController.have_child_node_types(paramsContainer.Tenant.Id, nodeTypes.Select(u => u.NodeTypeID.Value).ToList());
+                CNController.have_child_node_types(paramsContainer.Tenant.Id, nodeTypeIds);
             
             nodeTypes.ForEach(u => { u.HasChild = haveChild.Any(x => x == u.NodeTypeID); });
+            //end of Check HaveChild
+
+
+            //Check Access
+            if (checkAccess.HasValue && checkAccess.Value)
+            {
+                bool isSystemAdmin = paramsContainer.CurrentUserID.HasValue &&
+                    PublicMethods.is_system_admin(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value);
+
+                List<Guid> serviceAdmin = !paramsContainer.CurrentUserID.HasValue || isSystemAdmin ? new List<Guid>() :
+                    CNController.is_service_admin(paramsContainer.Tenant.Id, nodeTypeIds, paramsContainer.CurrentUserID.Value);
+
+                Dictionary<Guid, List<PermissionType>> accessDic = isSystemAdmin ? new Dictionary<Guid, List<PermissionType>>() :
+                    PrivacyController.check_access(paramsContainer.Tenant.Id, paramsContainer.CurrentUserID,
+                        nodeTypeIds.Where(id => !serviceAdmin.Any(x => x == id)).ToList(),
+                        PrivacyObjectType.NodeType, new List<PermissionType>() { PermissionType.View, PermissionType.ViewAbstract });
+
+                nodeTypes
+                    .Where(nt => !isSystemAdmin && !serviceAdmin.Any(x => x == nt.NodeTypeID) && !accessDic.Keys.Any(x => x == nt.NodeTypeID))
+                    .ToList().ForEach(nt => nt.Hidden = true);
+            }
+            //end of Check Access
+
 
             responseText = "{\"DefaultAdditionalIDPattern\":\"" + CNUtilities.DefaultAdditionalIDPattern + "\"" +
                 ",\"TotalCount\":" + totalCount.ToString() +
                 ",\"NodeTypes\":[" + string.Join(",", nodeTypes.Select(
                     u => u.toJson(paramsContainer.Tenant.Id, icon.HasValue && icon.Value)).ToList()) + "]" +
+                (!tree.HasValue || !tree.Value ? string.Empty : 
+                    ",\"Tree\":[" + string.Join(",", NodeType.toTree(nodeTypes)
+                        .Select(t => t.toJson(paramsContainer.Tenant.Id, icon.HasValue && icon.Value))) + "]") +
                 "}";
         }
 
