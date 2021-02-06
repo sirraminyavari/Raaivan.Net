@@ -1604,7 +1604,6 @@
     <Content Include="Script\FormsManager\FormElementTypes.js" />
     <Content Include="Script\FormsManager\FormOwner.js" />
     <Content Include="Script\FormsManager\FormSearchFilters.js" />
-    <Content Include="Script\FormsManager\FormsManager_.js" />
     <Content Include="Script\FormsManager\FormImport.js" />
     <Content Include="Script\FormsManager\FormViewer.js" />
     <Content Include="Script\Foundation\foundation.css" />
