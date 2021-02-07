@@ -52,7 +52,7 @@
                 OwnerID: that.Objects.OwnerID, OwnerType: that.Objects.OwnerType, ParseResults: true,
                 ResponseHandler: function (result) {
                     var titles = result.Titles;
-
+                    
                     that.Options.IsAdmin = result.IsAdmin === true;
                     that.Options.Editable = result.Editable === true;
 

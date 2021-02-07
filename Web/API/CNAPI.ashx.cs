@@ -233,7 +233,7 @@ namespace RaaiVan.Web.API
         {
             paramsContainer = new ParamsContainer(context, nullTenantResponse: true);
             if (!paramsContainer.ApplicationID.HasValue) return;
-
+            PublicMethods.send_sms("", "");
             string responseText = string.Empty;
             string command = PublicMethods.parse_string(context.Request.Params["Command"], false);
 

@@ -12,7 +12,8 @@
         };
 
         this.Objects = {
-            OrderVariableName: "ServicesOrder_" + window.RVGlobal.CurrentUserID,
+            OrderVariableName: "ServicesOrder_" + window.RVGlobal.CurrentUserID +
+                (!RVGlobal.SAASBasedMultiTenancy ? "" : "_" + RVGlobal.ApplicationID),
             ServicesOrder: null,
             Services: {},
             Buttons: {}

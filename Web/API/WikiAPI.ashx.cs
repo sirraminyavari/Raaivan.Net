@@ -301,8 +301,8 @@ namespace RaaiVan.Web.API
             }
             //end of Check Access to Wiki
 
-            List<WikiTitle> titles = WikiController.get_titles(paramsContainer.Tenant.Id, ownerId.Value, isAdmin,
-                paramsContainer.CurrentUserID, removed.Value);
+            List<WikiTitle> titles = WikiController.get_titles(paramsContainer.Tenant.Id,
+                ownerId.Value, isAdmin, paramsContainer.CurrentUserID, removed.Value);
 
             List<Guid> titleIds = titles.Select(u => u.TitleID.Value).ToList();
 

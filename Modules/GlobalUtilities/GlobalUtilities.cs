@@ -1657,15 +1657,19 @@ namespace RaaiVan.Modules.GlobalUtilities
             if (string.IsNullOrEmpty(url)) return string.Empty;
             if (values == null) values = new NameValueCollection();
             if (headers == null) headers = new NameValueCollection();
-
+            
             try
             {
                 if (method == HTTPMethod.POST)
-                    return Encoding.Default.GetString((new WebClient()).UploadValues(url, "POST", values));
+                {
+                    WebClient client = new WebClient();
+                    if (headers != null) client.Headers.Add(headers);
+                    return Encoding.Default.GetString(client.UploadValues(url, "POST", values));
+                }
                 else
                 {
                     HttpWebRequest request = WebRequest.CreateHttp(url);
-                    
+
                     if (values.Count == 0) values.Add("dsfalfha4", "1");
 
                     string data = "{" + string.Join(",", values.AllKeys.Select(
@@ -1674,12 +1678,12 @@ namespace RaaiVan.Modules.GlobalUtilities
                     request.Method = method.ToString();
                     request.ContentType = "application/json";
                     request.Accept = "application/json";
-                    if(method != HTTPMethod.GET) request.ContentLength = data.Length;
+                    if (method != HTTPMethod.GET) request.ContentLength = data.Length;
 
                     foreach (string key in headers.Keys)
                         request.Headers.Add(key, headers[key]);
 
-                    if(method != HTTPMethod.GET)
+                    if (method != HTTPMethod.GET)
                         using (StreamWriter writer = new StreamWriter(request.GetRequestStream())) writer.Write(data);
 
                     using (Stream objStream = request.GetResponse().GetResponseStream())

@@ -4,25 +4,25 @@
 }
 
 .textntags-wrapper textarea {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  height: 18px;
-  padding: 9px;
-  margin: 0;
-  overflow: hidden;
-  outline: 0;
-  resize: none;
-  /* font-family: Arial;
-  font-size: 13px; */
-  line-height: 17px;
-
-  -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 18px;
+    padding: 9px;
+    margin: 0;
+    overflow: hidden;
+    background: transparent;
+    outline: 0;
+    resize: none;
+    /* font-family: Arial;
+    font-size: 13px; */
+    line-height: 17px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 @-moz-document url-prefix() {
   .textntags-wrapper textarea{

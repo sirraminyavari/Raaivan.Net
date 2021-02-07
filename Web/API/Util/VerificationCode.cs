@@ -23,10 +23,13 @@ namespace RaaiVan.Web.API
         protected string _PhoneNumber;
         protected string _Media;
         protected int _TTL;
+        protected EmailTemplateType _EmailTemplate;
+        protected EmailTemplateType _SMSTemplate;
 
         protected static Dictionary<string, VerificationCode> Tokens = new Dictionary<string, VerificationCode>();
 
-        public VerificationCode(Guid? applicationId, string emailAddress, string phoneNumber)
+        public VerificationCode(Guid? applicationId, string emailAddress, string phoneNumber,
+            EmailTemplateType emailTemplate = EmailTemplateType.None, EmailTemplateType smsTemplate = EmailTemplateType.None)
         {
             TimeOut = RaaiVanSettings.Users.TwoStepAuthenticationTimeout(applicationId);
 
@@ -36,6 +39,9 @@ namespace RaaiVan.Web.API
             _EmailAddress = emailAddress;
             _PhoneNumber = phoneNumber;
             _TTL = 3;
+
+            _EmailTemplate = emailTemplate == EmailTemplateType.None ? EmailTemplateType.ConfirmationCode : emailTemplate;
+            _SMSTemplate = smsTemplate == EmailTemplateType.None ? EmailTemplateType.ConfirmationCodeSMS : smsTemplate;
         }
 
         protected bool update_ttl(string token)
@@ -103,15 +109,16 @@ namespace RaaiVan.Web.API
             Dictionary<string, string> dic = new Dictionary<string, string>();
             dic.Add("Code", _Code.ToString());
 
-            body = EmailTemplates.get_email_template(!_ApplicationID.HasValue ? Guid.Empty : _ApplicationID.Value,
-                EmailTemplateType.ConfirmationCode, dic);
-            subject = EmailTemplates.get_email_subject_template(!_ApplicationID.HasValue ? Guid.Empty : _ApplicationID.Value,
-                EmailTemplateType.ConfirmationCode, dic);
+            body = EmailTemplates.get_email_template(_ApplicationID, _EmailTemplate, dic);
+            subject = EmailTemplates.get_email_subject_template(_ApplicationID, _EmailTemplate, dic);
         }
 
         protected virtual string sms_body()
         {
-            return "کد تایید شما در رای ون " + _Code.ToString() + " است.";
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            dic.Add("Code", _Code.ToString());
+
+            return EmailTemplates.get_email_template(_ApplicationID, _SMSTemplate, dic);
         }
 
         protected bool send_email()
@@ -213,31 +220,20 @@ namespace RaaiVan.Web.API
         private Guid? _UserID;
         private bool? _WasNormalUserPassLogin;
 
+        [JsonIgnore]
         public Guid? UserID { get { return _UserID; } }
 
-        protected override void email_body_subject(ref string body, ref string subject)
-        {
-            Dictionary<string, string> dic = new Dictionary<string, string>();
-            dic.Add("Code", _Code.ToString());
-
-            body = EmailTemplates.get_email_template(!_ApplicationID.HasValue ? Guid.Empty : _ApplicationID.Value,
-                EmailTemplateType.TwoStepAuthenticationCode, dic);
-            subject = EmailTemplates.get_email_subject_template(!_ApplicationID.HasValue ? Guid.Empty : _ApplicationID.Value,
-                EmailTemplateType.TwoStepAuthenticationCode, dic);
-        }
-
-        protected override string sms_body()
-        {
-            return "کد احراز هویت شما در رای ون " + _Code.ToString() + " است.";
-        }
-
-        public TwoStepAuthenticationToken(Guid? applicationId, Guid userId, bool wasNormalUserPassLogin,
-            string emailAddress, string phoneNumber) : base(applicationId, emailAddress, phoneNumber)
+        public TwoStepAuthenticationToken(Guid? applicationId, Guid userId, bool wasNormalUserPassLogin, 
+            string emailAddress, string phoneNumber) : 
+            base(applicationId, emailAddress, phoneNumber, 
+                emailTemplate: EmailTemplateType.TwoStepAuthenticationCode,
+                smsTemplate: EmailTemplateType.TwoStepAuthenticationCodeSMS)
         {
             _UserID = userId;
             _WasNormalUserPassLogin = wasNormalUserPassLogin;
         }
 
+        [JsonIgnore]
         public bool WasNormalUserPassLogin { get { return _WasNormalUserPassLogin.HasValue && _WasNormalUserPassLogin.Value; } }
     }
 }

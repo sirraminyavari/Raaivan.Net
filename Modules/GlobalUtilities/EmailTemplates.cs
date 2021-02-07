@@ -6,13 +6,16 @@ namespace RaaiVan.Modules.GlobalUtilities
 {
     public enum EmailTemplateType
     {
+        None,
         Master,
         CreateAccount,
         InviteUser,
         InviteUserBatch,
         PasswordReset,
         TwoStepAuthenticationCode,
-        ConfirmationCode
+        TwoStepAuthenticationCodeSMS,
+        ConfirmationCode,
+        ConfirmationCodeSMS
     }
 
     public class EmailTemplateDictionary
@@ -60,7 +63,7 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             foreach (string str in Enum.GetNames(typeof(EmailTemplateType)))
             {
-                if (str != EmailTemplateType.Master.ToString())
+                if (str != EmailTemplateType.Master.ToString() && str != EmailTemplateType.None.ToString())
                 {
                     Templates.set_value(applicationId, str, inject_into_master(applicationId, _get_email_template(applicationId, str)));
                     TemplateSubjects.set_value(applicationId, str, _get_email_template(applicationId, str + "Subject"));

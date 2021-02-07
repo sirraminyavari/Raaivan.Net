@@ -12,7 +12,7 @@
         this.ContainerDiv = typeof (containerDiv) == "object" ? containerDiv : document.getElementById(containerDiv);
         if (!this.ContainerDiv) return;
         params = params || {};
-        
+
         this.Interface = {
             UserName: null,
             Password: null,
@@ -24,7 +24,7 @@
             Captcha: null,
             InvitationID: GlobalUtilities.request_params().get_value("inv")
         };
-        
+
         this.Options = {
             UseCaptcha: params.UseCaptcha,
             Title: params.Title,
@@ -36,7 +36,7 @@
             IgnoreSSO: params.IgnoreSSO,
             InitialFocus: params.InitialFocus !== false
         };
-        
+
         var that = this;
 
         var files = [{ Root: "API/", Ext: "js", Childs: ["RVAPI", "UsersAPI"] }];
@@ -48,19 +48,19 @@
     LoginControl.prototype = {
         _preinit: function () {
             var that = this;
-            
+
             var reqParams = GlobalUtilities.request_params();
 
             var activationCode = reqParams.get_value("ac");
             var userName = reqParams.get_value("un");
             var passwordTicket = reqParams.get_value("pt");
-            
+
             if (activationCode) {
-                UsersAPI.ActivateTemporaryUser({ ActivationCode: activationCode,
-                    ResponseHandler: function (responseText) {
-                        var result = JSON.parse(responseText);
-                        if (result.Succeed) alert(RVDic.MSG[result.Succeed], { Timeout: 30000 });
-                        if (result.ErrorText) alert(RVDic.MSG[result.ErrorText]);
+                UsersAPI.ActivateTemporaryUser({
+                    ActivationCode: activationCode, ParseResults: true,
+                    ResponseHandler: function (result) {
+                        if (result.Succeed) alert(RVDic.MSG[result.Succeed] || result.Succeed, { Timeout: 30000 });
+                        if (result.ErrorText) alert(RVDic.MSG[result.ErrorText] || result.ErrorText);
                         that._initialize();
                     }
                 });
@@ -74,7 +74,7 @@
 
         _initialize: function () {
             var that = this;
-            
+
             RVAPI.GetDomains({
                 ParseResults: true,
                 ResponseHandler: function (r) {
@@ -91,7 +91,7 @@
         initialize: function (domains) {
             var that = this;
             domains = domains || [];
-            
+
             var isInvited = that.Objects.IsInvited;
 
             var signupable = window.RVGlobal.Modules.UserSignUp === true || window.RVGlobal.Modules.SignUpViaInvitation === true;
@@ -103,7 +103,7 @@
             that.ContainerDiv.innerHTML = "";
 
             var hasMultipleDomains = domains.length > 1;
-            
+
             var domainOptions = [];
 
             if (domains.length > 0)
@@ -116,7 +116,7 @@
                     Childs: [{ Type: "text", TextValue: domains[i].Text }]
                 });
             }
-
+            
             var ssoUrl = that.Options.IgnoreSSO ? "" : Base64.decode((window.RVGlobal || {}).SSOLoginURL);
             var isSaaS = RVGlobal.SAASBasedMultiTenancy;
 
@@ -195,7 +195,7 @@
                                     Class: (!ssoUrl ? "small-12 medium-12 large-12" : "small-6 medium-6 large-6"),
                                     Childs: [
                                         {
-                                            Type: "div", Name: "loginButton", 
+                                            Type: "div", Name: "loginButton",
                                             Class: "small-12 medium-12 large-12 " +
                                                 (ssoUrl ? "rv-air-button-base rv-air-button-black" :
                                                     "rv-border-radius-quarter rv-air-button-base " + buttonClass),
@@ -246,7 +246,7 @@
                     ]
                 }
             ], that.ContainerDiv);
-            
+
             that.Interface.UserName = elems["usernameInput"].Input;
             that.Interface.Password = elems["passwordInput"].Input;
             that.Interface.Captcha = elems["captcha"];
@@ -256,13 +256,13 @@
                     OnEnter: function () { that.try_login(); }
                 });
             }
-            
+
             if (!enableSignUp) elems["_signupArea"].parentNode.removeChild(elems["_signupArea"]);
-            
+
             jQuery(that.Interface.Password).keydown(function (e) { e.stopImmediatePropagation(); });
-            
+
             var domainSelect = elems["domainSelect"];
-            
+
             var _do = function () {
                 if (window.IsAuthenticated) return;
 
@@ -287,7 +287,7 @@
                 that.__Processing = true;
 
                 GlobalUtilities.block(elems["loginButton"]);
-                
+
                 RVAPI.Login({
                     UserName: Base64.encode(username),
                     Password: Base64.encode(password),
@@ -322,33 +322,33 @@
                     }
                 });
             }
-            
+
             var _onEnter = that.try_login = function () {
                 var msg = _do();
                 if (msg) alert(msg, null, function () { /*that.clear();*/ });
             };
-            
+
             GlobalUtilities.set_onenter(that.Interface.UserName, _onEnter);
             GlobalUtilities.set_onenter(that.Interface.Password, _onEnter);
             elems["loginButton"].onclick = _onEnter;
 
             //if (that.Options.InitialFocus) jQuery(that.Interface.UserName).focus(); //.select();
-            
+
             if (isInvited) that.show_signup_form();
         },
 
-        try_login: function(){}, //will be implemented in initialize function
+        try_login: function () { }, //will be implemented in initialize function
 
         init_captcha: function () {
             var that = this;
-            
+
             if (that.Options.UseCaptcha || that.Objects.Captcha) return;
             that.Options.UseCaptcha = true;
 
             GlobalUtilities.load_files(["CaptchaImage.js"], {
                 OnLoad: function () {
                     jQuery(that.Interface.Captcha).fadeIn(500);
-                    
+
                     that.Objects.Captcha = new CaptchaImage(that.Interface.Captcha, {
                         OnEnter: function () { that.try_login(); }
                     });
@@ -387,7 +387,7 @@
 
         clear: function () {
             var that = this;
-            
+
             if (that.Objects.Captcha) that.Objects.Captcha.reset();
 
             that.Interface.UserName.value = "";
@@ -400,7 +400,7 @@
             var that = this;
 
             window.IsAuthenticated = true;
-            
+
             RVAPI.LoggedIn();
 
             GlobalUtilities.set_auth_cookie(data.AuthCookie);
@@ -485,7 +485,7 @@
 
         show_signup_form: function (container) {
             var that = this;
-            
+
             if (that.__ProcessingUserSignUpForm) return;
             that.__ProcessingUserSignUpForm = true;
 
@@ -564,12 +564,12 @@
                 else {
                     GlobalUtilities.block(sendButton);
 
-                    UsersAPI.SetPasswordResetTicket({ UserName: Base64.encode(GlobalUtilities.secure_string(username)),
-                        Email: Base64.encode(GlobalUtilities.secure_string(email)),
-                        ResponseHandler: function (responseText) {
-                            var result = JSON.parse(responseText);
+                    UsersAPI.SetPasswordResetTicket({
+                        UserName: Base64.encode(GlobalUtilities.secure_string(username)),
+                        Email: Base64.encode(GlobalUtilities.secure_string(email)), ParseResults: true,
+                        ResponseHandler: function (result) {
                             if (result.ErrorText) alert(RVDic.MSG[result.ErrorText] || result.ErrorText);
-                            if (result.Succeed) {
+                            else if (result.Succeed) {
                                 showedDiv.Close();
                                 alert(RVDic.MSG["AnEmailContainingPasswordResetLinkSentToYou"]);
                             }
@@ -583,7 +583,7 @@
         show_reset_password_form: function (passwordTicket, userName) {
             var that = this;
             if (!passwordTicket || !userName) return;
-            
+
             var elems = GlobalUtilities.create_nested_elements([{
                 Type: "div", Name: "container",
                 Class: "small-10 medium-8 large-4 rv-border-radius-1 SoftBackgroundColor",
@@ -661,7 +661,7 @@
                 else if (!passwordConfirm) return alert(RVDic.Checks.PleaseEnterYourPasswordConfirm);
                 else if (String(password).length < 5) return alert(RVDic.Checks.PasswordLengthMustBeGreaterThanN.replace("[n]", 4));
                 else if (password != passwordConfirm) return alert(RVDic.Checks.PasswordsDoesntMatch);
-                
+
                 GlobalUtilities.block(setPasswordButton);
 
                 UsersAPI.SetPassword({
@@ -674,7 +674,7 @@
                             passwordInput.value = "";
                             passwordConfirmInput.value = "";
                             showedDiv.Close();
-                            alert(RVDic.MSG[result.Succeed]);
+                            alert(RVDic.MSG[result.Succeed] || result.Succeed);
                         }
 
                         GlobalUtilities.unblock(setPasswordButton);
