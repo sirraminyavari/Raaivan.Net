@@ -4,8 +4,6 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainMasterBodySection" runat="server">
     <asp:HiddenField ID="initialJson" runat="server" ClientIDMode="Static" />
 
-    <script type="text/javascript" src="../../Script/APIHandler.js"></script>
-
     <div id="contentArea"></div>
 
     <script type="text/javascript">

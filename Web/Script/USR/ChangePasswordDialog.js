@@ -115,38 +115,12 @@
                         Type: "div", Class: "small-12 medium-12 large-12", Name: "reason",
                         Style: "text-align:center; font-weight:bold; margin:2rem 0 1rem 0; display:none;"
                     },
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12",
-                        Name: "pwdPolicy", Style: "margin:1rem 0rem 0.5rem 0rem;",
-                        Childs: [{ Type: "text", TextValue: RVDic.PasswordPolicyIsAsFollows + ":" }]
-                    },
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12",
-                        Childs: [
-                            { Name: "pwdMinLength", Title: RVDic.PasswordPolicyMinLength.replace("n", settings.Policy.MinLength || "0") },
-                            { Name: "pwdNewCharacters", Title: RVDic.PasswordPolicyMinLength.replace("n", settings.Policy.MinLength || "0") },
-                            { Name: "pwdUpperLower", Title: RVDic.PasswordPolicyUpperLower },
-                            { Name: "pwdNonAlphabetic", Title: RVDic.PasswordPolicyNonAlphabetic },
-                            { Name: "pwdNumber", Title: RVDic.PasswordPolicyNumber },
-                            { Name: "pwdNonAlphaNumeric", Title: RVDic.PasswordPolicyNonAlphaNumeric }
-                        ].map(lbl => {
-                            return {
-                                Type: "div", Class: "small-12 medium-12 large-12", Name: lbl.Name, Style: "color:#f00; display:none;",
-                                Childs: [{ Type: "text", TextValue: "- " + lbl.Title }]
-                            };
-                        })
-                    }
+                    { Type: "div", Class: "small-12 medium-12 large-12", Name: "policyArea", Style: "margin-top:1rem;" }
                 ]
             }], that.Container);
 
-            if (settings.HasPolicy) jQuery(elems["pwdPolicy"]).fadeIn(0);
-            if (settings.Policy.MinLength) jQuery(elems["pwdMinLength"]).fadeIn(0);
-            if (settings.Policy.NewCharacters && (settings.Policy.NewCharacters > 1)) jQuery(elems["pwdNewCharacters"]).fadeIn(0);
-            if (settings.Policy.UpperLower) jQuery(elems["pwdUpperLower"]).fadeIn(0);
-            if (settings.Policy.NonAlphabetic) jQuery(elems["pwdNonAlphabetic"]).fadeIn(0);
-            if (settings.Policy.Number) jQuery(elems["pwdNumber"]).fadeIn(0);
-            if (settings.Policy.NonAlphaNumeric) jQuery(elems["pwdNonAlphaNumeric"]).fadeIn(0);
-            
+            var policyChecker = settings.HasPolicy ? that.password_policy_checker(elems["policyArea"], settings.Policy) : null;
+
             if (settings.PasswordChangeReason) {
                 jQuery(elems["reason"]).fadeIn(0);
 
@@ -156,34 +130,6 @@
                             RVDic.MSG.YouHaveToChangeYourPassword);
             }
 
-            var check_policy = function (pass, oldPass) {
-                pass = String(pass);
-
-                //elems["pwdStrength"].style.backgroundColor = GlobalUtilities.password_score(pass).Color;
-
-                var result = {
-                    MinLength: pass && (!settings.Policy.MinLength || (pass.length >= settings.Policy.MinLength)),
-                    NewCharacters: pass && settings.Policy.NewCharacters &&
-                        (GlobalUtilities.diff(pass, oldPass).length >= settings.Policy.NewCharacters),
-                    UpperLower: pass && (!settings.Policy.UpperLower || (/[a-z]/g.test(pass) && /[A-Z]/g.test(pass))),
-                    NonAlphabetic: pass && (!settings.Policy.NonAlphabetic || !/^[a-zA-Z]+$/g.test(pass)),
-                    Number: pass && (!settings.Policy.Number || /[0-9]/g.test(pass)),
-                    NonAlphaNumeric: pass && (!settings.Policy.NonAlphaNumeric || !/^[a-zA-Z0-9]+$/g.test(pass))
-                };
-
-                jQuery(elems["pwdMinLength"]).css({ color: result.MinLength ? "rgb(22,188,31)" : "#f00" });
-                jQuery(elems["pwdNewCharacters"]).css({ color: result.NewCharacters ? "rgb(22,188,31)" : "#f00" });
-                jQuery(elems["pwdUpperLower"]).css({ color: result.UpperLower ? "rgb(22,188,31)" : "#f00" });
-                jQuery(elems["pwdNonAlphabetic"]).css({ color: result.NonAlphabetic ? "rgb(22,188,31)" : "#f00" });
-                jQuery(elems["pwdNumber"]).css({ color: result.Number ? "rgb(22,188,31)" : "#f00" });
-                jQuery(elems["pwdNonAlphaNumeric"]).css({ color: result.NonAlphaNumeric ? "rgb(22,188,31)" : "#f00" });
-
-                for (var k in result)
-                    if (!result[k]) return false;
-
-                return true;
-            };
-
             var check_repeat = function () {
                 var pass = elems["newPassInput"].value, passRepeat = elems["repNewPassInput"].value;
                 elems["repNewPassInput"].style.backgroundColor = !passRepeat ? "white" :
@@ -192,7 +138,7 @@
 
             var check_pass = function () {
                 var pass = elems["newPassInput"].value;
-                var result = check_policy(pass, elems["curPassInput"].value);
+                var result = !(policyChecker || {}).check ? true : policyChecker.check(pass, elems["curPassInput"].value);
                 elems["newPassInput"].style.backgroundColor = !pass ? "white" :
                     (result ? "rgba(160, 251, 160, 0.47)" : "#FCDDFB");
                 check_repeat();
@@ -201,6 +147,63 @@
             jQuery(elems["curPassInput"]).keyup(check_pass);
             jQuery(elems["newPassInput"]).keyup(check_pass);
             jQuery(elems["repNewPassInput"]).keyup(check_repeat);
-        }
+        },
+
+        password_policy_checker: function (container, settings, isFirstPassword) {
+            var that = this;
+            settings = settings || {};
+            
+            var elems = GlobalUtilities.create_nested_elements([{
+                Type: "div", Class: "small-12 medium-12 large-12",
+                Name: "pwdPolicy", Style: "margin-bottom:0.25rem;",
+                Childs: [{ Type: "text", TextValue: RVDic.PasswordPolicyIsAsFollows + ":" }]
+            }].concat([
+                (!settings.MinLength ? null : {
+                    Name: "pwdMinLength",
+                    Title: RVDic.PasswordPolicyMinLength.replace("n", settings.MinLength || "0")
+                }),
+                (isFirstPassword || !settings.NewCharacters || (settings.NewCharacters < 2) ? null : {
+                    Name: "pwdNewCharacters",
+                    Title: RVDic.PasswordPolicyNewCharacters.replace("n", settings.NewCharacters || "0")
+                }),
+                (!settings.UpperLower ? null : { Name: "pwdUpperLower", Title: RVDic.PasswordPolicyUpperLower }),
+                (!settings.NonAlphabetic ? null : { Name: "pwdNonAlphabetic", Title: RVDic.PasswordPolicyNonAlphabetic }),
+                (!settings.Number ? null : { Name: "pwdNumber", Title: RVDic.PasswordPolicyNumber }),
+                (!settings.NonAlphaNumeric ? null : { Name: "pwdNonAlphaNumeric", Title: RVDic.PasswordPolicyNonAlphaNumeric })
+            ].filter(x => !!x).map(lbl => {
+                return {
+                    Type: "div", Class: "small-12 medium-12 large-12", Name: lbl.Name, Style: "color:#f00;",
+                    Childs: [{ Type: "text", TextValue: "- " + lbl.Title }]
+                };
+            })), container);
+
+            return {
+                check: function (pass, oldPass) {
+                    pass = String(pass);
+
+                    var result = {
+                        MinLength: pass && (!settings.MinLength || (pass.length >= settings.MinLength)),
+                        NewCharacters: isFirstPassword || !oldPass || (pass && settings.NewCharacters &&
+                            (GlobalUtilities.diff(pass, oldPass).length >= settings.NewCharacters)),
+                        UpperLower: pass && (!settings.UpperLower || (/[a-z]/g.test(pass) && /[A-Z]/g.test(pass))),
+                        NonAlphabetic: pass && (!settings.NonAlphabetic || !/^[a-zA-Z]+$/g.test(pass)),
+                        Number: pass && (!settings.Number || /[0-9]/g.test(pass)),
+                        NonAlphaNumeric: pass && (!settings.NonAlphaNumeric || !/^[a-zA-Z0-9]+$/g.test(pass))
+                    };
+
+                    if (elems["pwdMinLength"]) jQuery(elems["pwdMinLength"]).css({ color: result.MinLength ? "rgb(22,188,31)" : "#f00" });
+                    if (elems["pwdNewCharacters"]) jQuery(elems["pwdNewCharacters"]).css({ color: result.NewCharacters ? "rgb(22,188,31)" : "#f00" });
+                    if (elems["pwdUpperLower"]) jQuery(elems["pwdUpperLower"]).css({ color: result.UpperLower ? "rgb(22,188,31)" : "#f00" });
+                    if (elems["pwdNonAlphabetic"]) jQuery(elems["pwdNonAlphabetic"]).css({ color: result.NonAlphabetic ? "rgb(22,188,31)" : "#f00" });
+                    if (elems["pwdNumber"]) jQuery(elems["pwdNumber"]).css({ color: result.Number ? "rgb(22,188,31)" : "#f00" });
+                    if (elems["pwdNonAlphaNumeric"]) jQuery(elems["pwdNonAlphaNumeric"]).css({ color: result.NonAlphaNumeric ? "rgb(22,188,31)" : "#f00" });
+
+                    for (var k in result)
+                        if (!result[k]) return false;
+
+                    return true;
+                }
+            };
+        },
     };
 })();

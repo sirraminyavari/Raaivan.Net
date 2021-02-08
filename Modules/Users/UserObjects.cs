@@ -521,59 +521,19 @@ namespace RaaiVan.Modules.Users
     
     public class PhoneNumber
     {
-        private Guid _NumberID;
-        private Guid _UserID;
-        private string _Number;
-        private PhoneType _PhoneType;
-
-        public Guid NumberID
-        {
-            get { return _NumberID; }
-            set { _NumberID = value; }
-        }
-
-        public Guid UserID
-        {
-            get { return _UserID; }
-            set { _UserID = value; }
-        }
-
-        public string Number
-        {
-            get { return _Number; }
-            set { _Number = value; }
-        }
-
-        public PhoneType PhoneType
-        {
-            get { return _PhoneType; }
-            set { _PhoneType = value; }
-        }
+        public Guid? NumberID;
+        public Guid? UserID;
+        public string Number;
+        public PhoneType PhoneType;
+        public bool? IsMain;
     }
 
     public class EmailAddress
     {
-        private Guid _EmailID;
-        private Guid _UserID;
-        private string _EmailAddress;
-
-        public Guid EmailID
-        {
-            get { return _EmailID; }
-            set { _EmailID = value; }
-        }
-
-        public Guid UserID
-        {
-            get { return _UserID; }
-            set { _UserID = value; }
-        }
-
-        public string Address
-        {
-            get { return _EmailAddress; }
-            set { _EmailAddress = value; }
-        }
+        public Guid? EmailID;
+        public Guid? UserID;
+        public string Address;
+        public bool? IsMain;
     }
 
     public class EmailContactStatus

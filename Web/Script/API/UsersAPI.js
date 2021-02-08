@@ -119,6 +119,29 @@
         return UsersAPI._send(url, params, queryString);
     },
 
+    CreateUserToken: function (params) {
+        params = params || {};
+
+        var url = UsersAPI.ResponseURL + "/CreateUserToken?timeStamp=" + new Date().getTime();
+        var queryString = (params.UserName ? "&UserName=" + params.UserName : "") +
+            (params.FirstName ? "&FirstName=" + params.FirstName : "") +
+            (params.LastName ? "&LastName=" + params.LastName : "") +
+            (params.Contact ? "&Contact=" + params.Contact : "") +
+            (params.Password ? "&Password=" + params.Password : "") +
+            (params.InvitationID ? "&InvitationID=" + params.InvitationID : "");
+        return UsersAPI._send(url, params, queryString);
+    },
+
+    ValidateUserCreation: function (params) {
+        params = params || {};
+
+        var url = UsersAPI.ResponseURL + "/ValidateUserCreation?timeStamp=" + new Date().getTime();
+        var queryString = (params.VerificationToken ? "&VerificationToken=" + params.VerificationToken : "") +
+            (params.Code ? "&Code=" + params.Code : "") +
+            (params.Login ? "&Login=" + params.Login : "");
+        return UsersAPI._send(url, params, queryString);
+    },
+
     CreateTemporaryUser: function (params) {
         params = params || {};
 

@@ -14,7 +14,7 @@ namespace RaaiVan.Web.API
     {
         protected int TimeOut;
         protected static int TotalTimeOutCoefficient = 4;
-
+        
         protected Guid? _ApplicationID;
         protected string _Token;
         protected long _Code;
@@ -26,9 +26,11 @@ namespace RaaiVan.Web.API
         protected EmailTemplateType _EmailTemplate;
         protected EmailTemplateType _SMSTemplate;
 
+        protected string _CustomData;
+
         protected static Dictionary<string, VerificationCode> Tokens = new Dictionary<string, VerificationCode>();
 
-        public VerificationCode(Guid? applicationId, string emailAddress, string phoneNumber,
+        public VerificationCode(Guid? applicationId, string emailAddress, string phoneNumber, string customData = "",
             EmailTemplateType emailTemplate = EmailTemplateType.None, EmailTemplateType smsTemplate = EmailTemplateType.None)
         {
             TimeOut = RaaiVanSettings.Users.TwoStepAuthenticationTimeout(applicationId);
@@ -42,6 +44,8 @@ namespace RaaiVan.Web.API
 
             _EmailTemplate = emailTemplate == EmailTemplateType.None ? EmailTemplateType.ConfirmationCode : emailTemplate;
             _SMSTemplate = smsTemplate == EmailTemplateType.None ? EmailTemplateType.ConfirmationCodeSMS : smsTemplate;
+
+            _CustomData = customData;
         }
 
         protected bool update_ttl(string token)
@@ -69,6 +73,9 @@ namespace RaaiVan.Web.API
 
         [JsonIgnore]
         public long Code { get { return _Code; } }
+
+        [JsonIgnore]
+        public string CustomData { get { return _CustomData; } }
 
         protected bool use()
         {
@@ -153,6 +160,7 @@ namespace RaaiVan.Web.API
                 ",\"PhoneNumber\":\"" + Base64.encode(_PhoneNumber) + "\"" +
                 ",\"Timeout\":" + TimeOut.ToString() +
                 ",\"TotalTimeout\":" + (TimeOut * (TotalTimeOutCoefficient - 1)).ToString() +
+                ",\"Length\":" + Code.ToString().Length.ToString() +
                 "}";
         }
 
@@ -188,29 +196,47 @@ namespace RaaiVan.Web.API
             else return null;
         }
 
-        public static bool process_request(Guid applicationId, string emailAddress, string phoneNumber,
-            string token, long? code, ref string responseText)
+        public static bool process_request(Guid? applicationId, string emailAddress, string phoneNumber,
+            string token, long? code, ref string responseText, string customData = "")
         {
             bool disposed = false;
 
             if (string.IsNullOrEmpty(token) || !code.HasValue)
             {
-                VerificationCode vc = new VerificationCode(applicationId, emailAddress, phoneNumber);
+                VerificationCode vc = new VerificationCode(applicationId, emailAddress, phoneNumber, customData: customData);
 
-                if (vc.send_code())
-                    responseText = "{\"VerificationCode\":" + vc.toJson() + "}";
+                if (vc.send_code()) responseText = "{\"VerificationCode\":" + vc.toJson() + "}";
                 else responseText = "{\"ErrorText\":\"" + Messages.SendingVerificationCodeFailed.ToString() + "\"}";
 
                 return false;
             }
-            else if (VerificationCode.validate(token, code.Value, ref disposed) == null)
-            {
-                responseText = "{\"ErrorText\":\"" + Messages.VerificationCodeDidNotMatch.ToString() + "\"" +
-                    ",\"CodeDisposed\":" + disposed.ToString().ToLower() + "}";
-                return false;
+            else {
+                VerificationCode vc = VerificationCode.validate(token, code.Value, ref disposed);
+
+                if (vc != null)
+                    responseText = vc.CustomData;
+                else if (vc == null)
+                {
+                    responseText = "{\"ErrorText\":\"" + Messages.VerificationCodeDidNotMatch.ToString() + "\"" +
+                        ",\"CodeDisposed\":" + disposed.ToString().ToLower() + "}";
+                    return false;
+                }
             }
 
             return true;
+        }
+
+        public static bool process_request(Guid? applicationId, string emailAddress, string phoneNumber,
+            ref string responseText, string customData = "")
+        {
+            return process_request(applicationId, emailAddress: emailAddress, phoneNumber: phoneNumber, 
+                token: null, code: null, responseText: ref responseText, customData: customData);
+        }
+
+        public static bool process_request(Guid? applicationId, string token, long? code, ref string responseText)
+        {
+            return process_request(applicationId, emailAddress: null, phoneNumber: null,
+                token: token, code: code, responseText: ref responseText);
         }
     }
 

@@ -10,7 +10,6 @@ using RaaiVan.Modules.Users;
 using RaaiVan.Modules.Log;
 using RaaiVan.Modules.NotificationCenter;
 using RaaiVan.Modules.Privacy;
-using System.Collections.Specialized;
 
 namespace RaaiVan.Web.API
 {

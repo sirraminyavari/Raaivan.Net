@@ -208,7 +208,7 @@
                 },
                 expertisedomain: { title: RVDic.ExpertiseDomain, url: RVAPI.NodePageURL({ NodeID: notification.RefItemID }) },
                 group: { title: RVDic.Group, url: RVAPI.NodePageURL({ NodeID: notification.RefItemID }) },
-                registered: { title: RVDic.Registered, url: RVAPI.NodePageURL({ NodeID: notification.RefItemID }) }
+                registered: { title: RVDic.Registered_Verb, url: RVAPI.NodePageURL({ NodeID: notification.RefItemID }) }
             };
             
             jQuery.each(options, function (key, value) {

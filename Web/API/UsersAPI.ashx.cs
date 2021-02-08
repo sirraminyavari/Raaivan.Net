@@ -453,6 +453,21 @@ namespace RaaiVan.Web.API
                 case "GetPasswordPolicy":
                     get_password_policy(ref responseText);
                     break;
+                case "CreateUserToken":
+                    create_user_token(PublicMethods.parse_string(context.Request.Params["UserName"]),
+                        PublicMethods.parse_string(context.Request.Params["FirstName"]),
+                        PublicMethods.parse_string(context.Request.Params["LastName"]),
+                        PublicMethods.parse_string(context.Request.Params["Contact"]),
+                        PublicMethods.parse_string(context.Request.Params["Password"]),
+                        PublicMethods.parse_guid(context.Request.Params["InvitationID"]),
+                        ref responseText);
+                    break;
+                case "ValidateUserCreation":
+                    validate_user_creation(PublicMethods.parse_string(context.Request.Params["VerificationToken"], false),
+                        PublicMethods.parse_long(context.Request.Params["Code"]),
+                        PublicMethods.parse_bool(context.Request.Params["Login"]),
+                        ref responseText);
+                    break;
                 case "CreateTemporaryUser":
                     if (!Captcha.check(context, PublicMethods.parse_string(context.Request.Params["Captcha"])))
                     {
@@ -746,6 +761,180 @@ namespace RaaiVan.Web.API
             }
 
             responseText += "]}";
+        }
+
+        public void create_user_token(string username, string firstName, string lastName, string contact,
+            string password, Guid? invitationId, ref string responseText)
+        {
+            //Privacy Check: OK
+            if (!RaaiVanSettings.UserSignUp(paramsContainer.ApplicationID) &&
+                !RaaiVanSettings.SignUpViaInvitation(paramsContainer.ApplicationID)) return;
+
+            if (invitationId.HasValue &&
+                !UsersController.get_invitation_application_id(invitationId.Value, checkIfNotUsed: true).HasValue)
+                invitationId = null;
+
+
+            //Check Password Policy
+            if (!UserUtilities.check_password_policy(paramsContainer.ApplicationID, password, string.Empty))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.PasswordPolicyDidntMeet.ToString() + "\"}";
+                return;
+            }
+            //end of Check Password Policy
+
+
+            //Check UserName
+            if (!string.IsNullOrEmpty(username))
+            {
+                if (username.Length > 250 || string.IsNullOrEmpty(password))
+                {
+                    responseText = "{\"ErrorText\":\"" + Messages.MaxAllowedInputLengthExceeded + "\"}";
+                    return;
+                }
+                else if (!PublicMethods.is_valid_username(paramsContainer.ApplicationID, username))
+                {
+                    responseText = "{\"ErrorText\":\"" + Messages.UserNamePatternIsNotValid + "\"}";
+                    return;
+                }
+                else if (UsersController.get_user(paramsContainer.ApplicationID, username) != null)
+                {
+                    responseText = "{\"ErrorText\":\"" + Messages.UserNameAlreadyExists + "\"}";
+                    return;
+                }
+            }
+            else {
+                while (string.IsNullOrEmpty(username) || UsersController.get_user(paramsContainer.ApplicationID, username) != null)
+                    username = PublicMethods.random_string(8).ToLower();
+            }
+            //end of Check UserName
+
+
+            bool isEmail = PublicMethods.is_email(contact);
+            bool isNumber = PublicMethods.parse_long(contact).HasValue;
+
+            string email = isEmail ? contact : string.Empty;
+            string phone = !isEmail && isNumber ? contact : string.Empty;
+
+            if (string.IsNullOrEmpty(email) && string.IsNullOrEmpty(phone)) {
+                responseText = "{\"ErrorText\":\"" + Messages.InvalidInput + "\"}";
+                return;
+            }
+            else if (!string.IsNullOrEmpty(email) && 
+                UsersController.get_email_owners(paramsContainer.ApplicationID, new List<string>() { email })
+                    .Any(e => e.IsMain.HasValue && e.IsMain.Value))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.EmailAlreadyExists + "\"}";
+                return;
+            }
+            else if (!string.IsNullOrEmpty(phone) && 
+                UsersController.get_phone_owners(paramsContainer.ApplicationID, new List<string>() { phone })
+                    .Any(e => e.IsMain.HasValue && e.IsMain.Value))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.PhoneNumberAlreadyExists + "\"}";
+                return;
+            }
+
+            Dictionary<string, object> customData = new Dictionary<string, object>();
+            customData["UserName"] = username;
+            customData["FirstName"] = firstName;
+            customData["LastName"] = lastName;
+            customData["Email"] = email;
+            customData["Phone"] = phone;
+            customData["Password"] = password;
+            if (invitationId.HasValue) customData["InvitationID"] = invitationId.Value;
+
+            bool result = VerificationCode.process_request(paramsContainer.ApplicationID, emailAddress: email, 
+                phoneNumber: phone, responseText: ref responseText, customData: PublicMethods.toJSON(customData));
+        }
+
+        public void validate_user_creation(string token, long? code, bool? login, ref string responseText)
+        {
+            //Privacy Check: OK
+            if (!RaaiVanSettings.UserSignUp(paramsContainer.ApplicationID) &&
+                !RaaiVanSettings.SignUpViaInvitation(paramsContainer.ApplicationID)) return;
+
+            if (string.IsNullOrEmpty(token) || !code.HasValue)
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.InvalidInput + "\"}";
+                return;
+            }
+
+            string customData = string.Empty;
+
+            bool result = VerificationCode.process_request(paramsContainer.ApplicationID, token: token, code: code, ref customData);
+
+            if (!result)
+            {
+                responseText = customData;
+                return;
+            }
+
+            Dictionary<string, object> dic = PublicMethods.fromJSON(customData);
+
+            string email = PublicMethods.get_dic_value(dic, "Email");
+            string phone = PublicMethods.get_dic_value(dic, "Phone");
+            Guid? invitationId = PublicMethods.parse_guid(PublicMethods.get_dic_value(dic, "InvitationID"));
+
+            if (!string.IsNullOrEmpty(email) &&
+                UsersController.get_email_owners(paramsContainer.ApplicationID, new List<string>() { email })
+                    .Any(e => e.IsMain.HasValue && e.IsMain.Value))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.EmailAlreadyExists + "\"}";
+                return;
+            }
+            else if (!string.IsNullOrEmpty(phone) &&
+                UsersController.get_phone_owners(paramsContainer.ApplicationID, new List<string>() { phone })
+                    .Any(e => e.IsMain.HasValue && e.IsMain.Value))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.PhoneNumberAlreadyExists + "\"}";
+                return;
+            }
+
+            User newUser = new User()
+            {
+                UserID = Guid.NewGuid(),
+                UserName = PublicMethods.get_dic_value(dic, "UserName"),
+                FirstName = PublicMethods.get_dic_value(dic, "FirstName"),
+                LastName = PublicMethods.get_dic_value(dic, "LastName"),
+                Password = PublicMethods.get_dic_value(dic, "Password"),
+                Emails = string.IsNullOrEmpty(email) ? new List<EmailAddress>() :
+                    new List<EmailAddress>() { new EmailAddress() { Address = email } },
+                PhoneNumbers = string.IsNullOrEmpty(phone) ? new List<PhoneNumber>() :
+                    new List<PhoneNumber>() { new PhoneNumber() { Number = phone } }
+            };
+
+            if (string.IsNullOrEmpty(newUser.UserName) || string.IsNullOrEmpty(newUser.FirstName) ||
+                string.IsNullOrEmpty(newUser.LastName) || string.IsNullOrEmpty(newUser.Password))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.InvalidInput + "\"}";
+                return;
+            }
+            else if (UsersController.get_user(paramsContainer.ApplicationID, newUser.UserName) != null)
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.UserNameAlreadyExists + "\"}";
+                return;
+            }
+
+            Guid? appId = paramsContainer.ApplicationID.HasValue ? paramsContainer.ApplicationID :
+                (!invitationId.HasValue ? null : UsersController.get_invitation_application_id(invitationId.Value, checkIfNotUsed: true));
+
+            bool succeed = UsersController.create_user(appId, newUser, passAutoGenerated: false);
+
+            string authCookie = string.Empty;
+
+            if (succeed && login.HasValue && login.Value)
+            {
+                HttpContext curContext = HttpContext.Current;
+
+                RaaiVanUtil.after_login_procedures(appId, newUser.UserID.Value, rememberMe: false,
+                    invitationId: null, loggedInWithActiveDirectory: false, ref curContext, ref authCookie);
+            }
+
+            responseText = !succeed ? "{\"ErrorText\":\"" + Messages.UserCreationFailed + "\"}" :
+                "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" +
+                (string.IsNullOrEmpty(authCookie) ? string.Empty : ",\"AuthCookie\":" + authCookie) +
+                "}";
         }
 
         public void create_temporary_user(string username, string firstName, string lastName, string email,
@@ -2181,7 +2370,7 @@ namespace RaaiVan.Web.API
             }
 
             PhoneNumber obj = !numberID.HasValue ? null : UsersController.get_phone_number(numberID.Value);
-            Guid? mainId = obj == null ? null : UsersController.get_main_phone(obj.UserID);
+            Guid? mainId = obj == null ? null : UsersController.get_main_phone(obj.UserID.Value);
 
             if (mainId.HasValue && mainId == numberID)
             {
@@ -2268,25 +2457,29 @@ namespace RaaiVan.Web.API
             if (!paramsContainer.GBEdit) return;
 
             PhoneNumber obj = !numberId.HasValue ? null : UsersController.get_phone_number(numberId.Value);
-            Guid? curMainId = obj == null ? null : UsersController.get_main_phone(obj.UserID);
+            Guid? curMainId = obj == null ? null : UsersController.get_main_phone(obj.UserID.Value);
 
             if (curMainId.HasValue && curMainId == numberId)
             {
                 responseText = "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}";
                 return;
             }
-
-            if (obj == null || (obj.UserID != paramsContainer.CurrentUserID &&
+            else if (obj == null || (obj.UserID != paramsContainer.CurrentUserID &&
                 !PublicMethods.is_system_admin(paramsContainer.Tenant.Id, paramsContainer.CurrentUserID.Value)))
             {
                 responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";
+                return;
+            }
+            else if (UsersController.get_phone_owners(paramsContainer.ApplicationID, new List<string>() { obj.Number })
+                    .Any(e => e.UserID != obj.UserID && e.IsMain.HasValue && e.IsMain.Value)) {
+                responseText = "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
                 return;
             }
 
             if (!VerificationCode.process_request(paramsContainer.Tenant.Id,
                 null, obj.Number, verificationToken, code, ref responseText)) return;
 
-            bool result = numberId.HasValue && UsersController.set_main_phone(numberId.Value, obj.UserID);
+            bool result = numberId.HasValue && UsersController.set_main_phone(numberId.Value, obj.UserID.Value);
 
             responseText = result ? "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}" :
                 "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
@@ -2392,7 +2585,7 @@ namespace RaaiVan.Web.API
             }
 
             EmailAddress obj = !emailId.HasValue ? null : UsersController.get_email_address(emailId.Value);
-            Guid? mainId = obj == null ? null : UsersController.get_main_email(obj.UserID);
+            Guid? mainId = obj == null ? null : UsersController.get_main_email(obj.UserID.Value);
 
             if (mainId.HasValue && mainId == emailId)
             {
@@ -2485,25 +2678,30 @@ namespace RaaiVan.Web.API
             if (!paramsContainer.GBEdit) return;
 
             EmailAddress obj = !emailId.HasValue ? null : UsersController.get_email_address(emailId.Value);
-            Guid? curMainId = obj == null ? null : UsersController.get_main_email(obj.UserID);
+            Guid? curMainId = obj == null ? null : UsersController.get_main_email(obj.UserID.Value);
 
             if (curMainId.HasValue && curMainId == emailId)
             {
                 responseText = "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}";
                 return;
             }
-
-            if (obj == null || (obj.UserID != paramsContainer.CurrentUserID &&
+            else if (obj == null || (obj.UserID != paramsContainer.CurrentUserID &&
                 !PublicMethods.is_system_admin(paramsContainer.Tenant.Id, paramsContainer.CurrentUserID.Value)))
             {
                 responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";
                 return;
             }
-            
+            else if (UsersController.get_email_owners(paramsContainer.ApplicationID, new List<string>() { obj.Address })
+                    .Any(e => e.UserID != obj.UserID && e.IsMain.HasValue && e.IsMain.Value))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
+                return;
+            }
+
             if (!VerificationCode.process_request(paramsContainer.Tenant.Id,
                 obj.Address, null, verificationToken, code, ref responseText)) return;
 
-            bool result = emailId.HasValue && UsersController.set_main_email(emailId.Value, obj.UserID);
+            bool result = emailId.HasValue && UsersController.set_main_email(emailId.Value, obj.UserID.Value);
 
             responseText = result ? "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}" :
                 "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";

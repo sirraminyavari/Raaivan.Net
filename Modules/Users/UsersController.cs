@@ -130,7 +130,7 @@ namespace RaaiVan.Modules.Users
             return DataProvider.GetUsersCount(applicationId, creationDateLowerThreshold, creationDateUpperThreshold);
         }
 
-        public static List<Guid> get_user_ids(Guid? applicationId, ref List<string> usernames)
+        public static List<Guid> get_user_ids(Guid? applicationId, List<string> usernames)
         {
             List<Guid> lst = new List<Guid>();
             DataProvider.GetUserIDs(applicationId, ref lst, ref usernames);
@@ -139,9 +139,27 @@ namespace RaaiVan.Modules.Users
 
         public static Guid? get_user_id(Guid? applicationId, string username)
         {
-            List<string> uns = new List<string>();
-            uns.Add(username);
-            List<Guid> ids = get_user_ids(applicationId, ref uns);
+            List<Guid> ids = get_user_ids(applicationId, new List<string>() { username });
+
+            if (!string.IsNullOrEmpty(username) && (ids == null || ids.Count == 0) && RaaiVanSettings.SAASBasedMultiTenancy)
+            {
+                bool isEmail = PublicMethods.is_email(username);
+                bool isNumber = PublicMethods.parse_long(username).HasValue;
+
+                if (isEmail)
+                {
+                    List<EmailAddress> emails = UsersController.get_email_owners(applicationId, new List<string>() { username })
+                        .Where(x => x.IsMain.HasValue && x.IsMain.Value).ToList();
+                    if (emails != null && emails.Count == 1 && emails.First().UserID.HasValue) ids.Add(emails.First().UserID.Value);
+                }
+                else if (isNumber)
+                {
+                    List<PhoneNumber> numbers = UsersController.get_phone_owners(applicationId, new List<string>() { username })
+                        .Where(x => x.IsMain.HasValue && x.IsMain.Value).ToList();
+                    if (numbers != null && numbers.Count == 1 && numbers.First().UserID.HasValue) ids.Add(numbers.First().UserID.Value);
+                }
+            }
+
             return ids != null && ids.Count == 1 ? (Guid?)ids[0] : null;
         }
 
@@ -178,13 +196,13 @@ namespace RaaiVan.Modules.Users
 
         public static List<User> get_users(Guid? applicationId, List<string> usernames)
         {
-            List<Guid> userIds = UsersController.get_user_ids(applicationId, ref usernames);
+            List<Guid> userIds = UsersController.get_user_ids(applicationId, usernames);
             List<User> lst = new List<User>();
             DataProvider.GetUsers(applicationId, ref lst, userIds);
             return lst;
         }
 
-        public static User get_user(Guid applicationId, string username)
+        public static User get_user(Guid? applicationId, string username)
         {
             return get_users(applicationId, new List<string>() { username }).FirstOrDefault();
         }
@@ -626,12 +644,20 @@ namespace RaaiVan.Modules.Users
             return emailsList;
         }
 
+        public static List<PhoneNumber> get_phone_owners(Guid? applicationId, List<string> numbers)
+        {
+            List<PhoneNumber> numbersList = new List<PhoneNumber>();
+            DataProvider.GetPhoneOwners(applicationId, ref numbersList, numbers);
+            return numbersList;
+        }
+
         public static Guid get_email_owner_id(Guid? applicationId, string email)
         {
             List<string> emails = new List<string>();
             emails.Add(email);
             List<EmailAddress> retEmailsList = new List<EmailAddress>();
-            return get_email_owners(applicationId, emails).Select(e => e.UserID).ToList<Guid>().FirstOrDefault();
+            return get_email_owners(applicationId, emails).Where(e => e.UserID.HasValue)
+                .Select(e => e.UserID.Value).ToList<Guid>().FirstOrDefault();
         }
 
         public static Guid? get_main_email(Guid userId)

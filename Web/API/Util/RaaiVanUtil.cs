@@ -425,9 +425,10 @@ namespace RaaiVan.Web.API
             ref Guid? userId, ref HttpContext context, ref string authCookie)
         {
             if (!RaaiVanSettings.SAASBasedMultiTenancy && !applicationId.HasValue) return false;
-            
+
             /* Usernames like 'username@domain' or 'domain\username' or 'domain/username' are not allowed */
-            if (!string.IsNullOrEmpty(username)) {
+            if (!string.IsNullOrEmpty(username) && !RaaiVanSettings.SAASBasedMultiTenancy)
+            {
                 if (username.IndexOf("@") >= 0) username = username.Substring(0, username.IndexOf("@"));
                 if (username.LastIndexOf("/") >= 0) username = username.Substring(username.LastIndexOf("/") + 1);
                 if (username.LastIndexOf("\\") >= 0) username = username.Substring(username.LastIndexOf("\\") + 1);
