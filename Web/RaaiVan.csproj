@@ -372,6 +372,7 @@
     <Content Include="CSS\foundation-fix.css" />
     <Content Include="CSS\pdf.css" />
     <Content Include="CSS\theme-template.css" />
+    <Content Include="CSS\Themes\Blue_2b7be4.css" />
     <Content Include="CSS\Themes\Blue_0072ae.css" />
     <Content Include="CSS\Themes\Blue_1cbbb4.css" />
     <Content Include="CSS\Themes\Blue_2160d3.css" />

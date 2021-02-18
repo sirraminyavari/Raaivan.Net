@@ -9,6 +9,7 @@ using RaaiVan.Modules.QA;
 using RaaiVan.Modules.Sharing;
 using RaaiVan.Modules.GlobalUtilities;
 using RaaiVan.Modules.Users;
+using RaaiVan.Modules.Log;
 
 namespace RaaiVan.Modules.NotificationCenter
 {
@@ -598,54 +599,65 @@ namespace RaaiVan.Modules.NotificationCenter
 
         private static void _send_notification_message(Guid applicationId, List<Pair> users, Notification not)
         {
-            if (!not.SubjectType.HasValue || !not.Action.HasValue) return;
-
-            EmailTemplates.Initialize(applicationId);
-
-            List<NotificationMessage> messageLst = NotificationController._get_notification_messages_info(
-                applicationId, users, not.SubjectType.Value, not.Action.Value);
-            List<EmailAddress> emailList = UsersController.get_users_main_email(messageLst.Select(
-                p => (Guid)p.ReceiverUserID).Distinct().ToList<Guid>());
-            List<PhoneNumber> phoneList = UsersController.get_users_main_phone(messageLst.Select(
-                p => (Guid)p.ReceiverUserID).Distinct().ToList<Guid>());
-            List<NotificationMessage> sentMessages = new List<NotificationMessage>();
-
-            SortedSet<Guid> emailSentTo = new SortedSet<Guid>();
-            SortedSet<Guid> smsSentTo = new SortedSet<Guid>();
-
-            foreach (NotificationMessage m in messageLst)
+            try
             {
-                m.Subject = Expressions.replace(m.Subject, ref not.ReplacementDic, Expressions.Patterns.AutoTag);
-                m.Text = Expressions.replace(m.Text, ref not.ReplacementDic, Expressions.Patterns.AutoTag);
+                if (not == null || !not.SubjectType.HasValue || !not.Action.HasValue) return;
 
-                if (m.Media == Media.Email && 
-                    !emailSentTo.Any(u => u == m.ReceiverUserID) && emailList.Any(e => e.UserID == m.ReceiverUserID))
-                {
-                    m.Action = not.Action.Value;
-                    m.RefItemID = not.RefItemID.Value;
-                    m.SubjectType = not.SubjectType.Value;
-                    m.UserStatus = 
-                        users.Where(u => (Guid)u.First == m.ReceiverUserID).Select(u => (UserStatus)u.Second).First();
-                    m.EmailAddress = emailList.Where(e => e.UserID == m.ReceiverUserID).First();
+                EmailTemplates.Initialize(applicationId);
 
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(m.send_email), applicationId);
+                List<NotificationMessage> messageLst = NotificationController._get_notification_messages_info(
+                    applicationId, users, not.SubjectType.Value, not.Action.Value);
 
-                    emailSentTo.Add(m.ReceiverUserID.Value);
-                }
+                List<Guid> receiverIds = messageLst.Where(m => m != null && m.ReceiverUserID.HasValue)
+                    .Select(m => m.ReceiverUserID.Value).Distinct().ToList();
 
-                if (m.Media == Media.SMS && 
-                    !smsSentTo.Any(u => u == m.ReceiverUserID) && phoneList.Any(p => p.UserID == m.ReceiverUserID))
-                {
-                    m.Action = not.Action.Value;
-                    m.RefItemID = not.RefItemID.Value;
-                    m.SubjectType = not.SubjectType.Value;
-                    m.UserStatus = 
-                        users.Where(u => (Guid)u.First == m.ReceiverUserID).Select(u => (UserStatus)u.Second).First();
-                    m.PhoneNumber = phoneList.Where(p => p.UserID == m.ReceiverUserID).First();
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(m.send_sms));
+                List<EmailAddress> emailList = UsersController.get_users_main_email(receiverIds);
+                List<PhoneNumber> phoneList = UsersController.get_users_main_phone(receiverIds);
 
-                    smsSentTo.Add(m.ReceiverUserID.Value);
-                }
+                List<NotificationMessage> sentMessages = new List<NotificationMessage>();
+
+                SortedSet<Guid> emailSentTo = new SortedSet<Guid>();
+                SortedSet<Guid> smsSentTo = new SortedSet<Guid>();
+
+                messageLst.Where(m => m.ReceiverUserID.HasValue).ToList()
+                    .ForEach(m =>
+                    {
+                        m.Subject = Expressions.replace(m.Subject, ref not.ReplacementDic, Expressions.Patterns.AutoTag);
+                        m.Text = Expressions.replace(m.Text, ref not.ReplacementDic, Expressions.Patterns.AutoTag);
+
+                        if (m.Media == Media.Email &&
+                            !emailSentTo.Any(u => u == m.ReceiverUserID) && emailList.Any(e => e.UserID == m.ReceiverUserID))
+                        {
+                            m.Action = not.Action.Value;
+                            m.RefItemID = not.RefItemID.Value;
+                            m.SubjectType = not.SubjectType.Value;
+                            m.UserStatus =
+                                users.Where(u => (Guid)u.First == m.ReceiverUserID).Select(u => (UserStatus)u.Second).First();
+                            m.EmailAddress = emailList.Where(e => e.UserID == m.ReceiverUserID).First();
+
+                            ThreadPool.QueueUserWorkItem(new WaitCallback(m.send_email), applicationId);
+
+                            emailSentTo.Add(m.ReceiverUserID.Value);
+                        }
+
+                        if (m.Media == Media.SMS &&
+                            !smsSentTo.Any(u => u == m.ReceiverUserID) && phoneList.Any(p => p.UserID == m.ReceiverUserID))
+                        {
+                            m.Action = not.Action.Value;
+                            m.RefItemID = not.RefItemID.Value;
+                            m.SubjectType = not.SubjectType.Value;
+                            m.UserStatus =
+                                users.Where(u => (Guid)u.First == m.ReceiverUserID).Select(u => (UserStatus)u.Second).First();
+                            m.PhoneNumber = phoneList.Where(p => p.UserID == m.ReceiverUserID).First();
+                            ThreadPool.QueueUserWorkItem(new WaitCallback(m.send_sms));
+
+                            smsSentTo.Add(m.ReceiverUserID.Value);
+                        }
+                    });
+            }
+            catch (Exception ex)
+            {
+                LogController.save_error_log(applicationId, null, "send_notification_messages", ex, ModuleIdentifier.NTFN);
             }
         }
 

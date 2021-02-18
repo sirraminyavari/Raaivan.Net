@@ -865,10 +865,11 @@ namespace RaaiVan.Modules.GlobalUtilities
 
                 string sourceAddress = get_real_address(applicationId);
 
-                if (string.IsNullOrEmpty(sourceAddress)) return false;
-
                 if (newGuidName.HasValue && newGuidName.Value != Guid.Empty) FileID = newGuidName;
                 FolderName = destination;
+
+                if (string.IsNullOrEmpty(sourceAddress))
+                    return !string.IsNullOrEmpty(get_real_address(applicationId));
 
                 if (CephMode)
                 {

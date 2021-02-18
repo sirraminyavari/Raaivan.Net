@@ -1313,6 +1313,7 @@
             RemovingDashboardsFailed: "خطا در خارج کردن از کارتابل",
             RequestTimedOut: "پاسخی از سرور دریافت نشد",
             RetrievingUserFailed: "خطا در بازیابی کاربر",
+            SavingFilesFailed: "خطا در ذخیره کردن فایل ها",
             SendingTwoStepAuthenticationCodeFailed: "خطا در ارسال کد احراز هویت دو مرحله ای",
             SendingVerificationCodeFailed: "خطا در ارسال کد تایید",
             SettingNodeOwnerFailed: "خطا در تعیین دارنده مالکیت معنوی",

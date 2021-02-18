@@ -14,6 +14,25 @@ namespace RaaiVan.Web
             new Dictionary<string, Dictionary<string, string>>();
 
         private static string TemplateContent;
+        private static Dictionary<string, string> TemplateVariables = new Dictionary<string, string>();
+
+        private static Dictionary<string, string> extract_variables(string content)
+        {
+            Dictionary<string, string> vars = new Dictionary<string, string>();
+
+            if (string.IsNullOrEmpty(content)) return vars;
+
+            Expressions.get_matches_string(content, Expressions.Patterns.CSSVariable)
+                .Where(v => !string.IsNullOrEmpty(v)).ToList()
+                .ForEach(v =>
+                {
+                    List<string> pair = v.Replace(";", "").Split(':').ToList();
+                    if (pair.Count == 2 && !string.IsNullOrEmpty(pair[0].Trim()) && !string.IsNullOrEmpty(pair[1].Trim()))
+                        vars[pair[0].Trim()] = pair[1].Trim();
+                });
+
+            return vars;
+        }
 
         private static Dictionary<string, string> get_theme_content(Guid? applicationId, string name)
         {
@@ -29,18 +48,9 @@ namespace RaaiVan.Web
                 FolderName = FolderNames.Themes
             }.get_text_content(applicationId);
 
-            Dictionary<string, string> vars = new Dictionary<string, string>();
-
             if (string.IsNullOrEmpty(thm)) return null;
 
-            Expressions.get_matches_string(thm, Expressions.Patterns.CSSVariable)
-                .Where(v => !string.IsNullOrEmpty(v)).ToList()
-                .ForEach(v =>
-                {
-                    List<string> pair = v.Replace(";", "").Split(':').ToList();
-                    if (pair.Count == 2 && !string.IsNullOrEmpty(pair[0].Trim()) && !string.IsNullOrEmpty(pair[1].Trim()))
-                        vars[pair[0].Trim()] = pair[1].Trim();
-                });
+            Dictionary<string, string> vars = extract_variables(thm);
 
             if (!PublicMethods.is_dev()) ThemeContent[name] = vars;
 
@@ -57,6 +67,9 @@ namespace RaaiVan.Web
             if (File.Exists(path))
             {
                 content = File.ReadAllText(path);
+
+                TemplateVariables = extract_variables(content.Substring(0, content.IndexOf('}'))); 
+
                 if (!PublicMethods.is_dev()) TemplateContent = content;
             }
 
@@ -72,6 +85,10 @@ namespace RaaiVan.Web
                 
             dic.Keys.ToList().ForEach(k => {
                 template = template.Replace("var(" + k + ")", dic[k]);
+            });
+
+            if(TemplateVariables != null) TemplateVariables.Keys.ToList().ForEach(k => {
+                template = template.Replace("var(" + k + ")", TemplateVariables[k]);
             });
 
             return template;

@@ -44,6 +44,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         PotentialCSRFAttackDetected,
         PotentialReplayAttackDetected,
         RetrievingUserFailed,
+        SavingFilesFailed,
         SendingTwoStepAuthenticationCodeFailed,
         SendingVerificationCodeFailed,
         SystemHasBeenExpired,

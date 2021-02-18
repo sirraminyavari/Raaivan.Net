@@ -272,7 +272,7 @@ namespace RaaiVan.Web.API
                 {
                     if (input.ParamsContainer.IsAuthenticated)
                         input.set_redirect_to_teams();
-                    else input.set_redirect_to_home();
+                    else input.set_redirect_to_login();
                 }
                 else input.set_no_application_found();
 

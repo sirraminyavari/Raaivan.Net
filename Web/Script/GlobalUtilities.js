@@ -124,7 +124,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
     })(),
 
     transform_rotate: (function () {
-        var str = String("-ms-transform: rotate(45deg); -webkit-transform: rotate(VALUEdeg); -moz-transform: rotate(VALUEdeg);" +
+        var str = String("-ms-transform: rotate(VALUEdeg); -webkit-transform: rotate(VALUEdeg); -moz-transform: rotate(VALUEdeg);" +
             "-op-transform: rotate(VALUEdeg); transform: rotate(VALUEdeg);")
         var regExp = new RegExp("VALUE", 'g');
         return function (value) { return str.replace(regExp, String(value)); }
@@ -206,6 +206,11 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
             return GlobalUtilities.is_element_in_document(elem);
         }
     })(),
+
+    after_fade_out: function (callback) {
+        if (GlobalUtilities.get_type(callback) == "function")
+            setTimeout(callback, 200);
+    },
 
     get_fixed_parent: function (element) {
         while (element) {
@@ -334,7 +339,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
         var actualWidth = sticker[0].offsetWidth;
         var actualHeight = sticker[0].offsetHeight;
-        var dir = align === 'autotop' ? (pos.top > (jQuery(document).scrollTop() + jQuery(window).height() / 2) ? 't' : 'b') :
+        var dir = align == 'a' ? (pos.top > (jQuery(document).scrollTop() + jQuery(window).height() / 2) ? 't' : 'b') :
             (pos.left > (jQuery(document).scrollLeft() + jQuery(window).width() / 2) ? 'l' : 'r');
 
         sticker.css({ top: pos.top + pos.height, left: pos.left + pos.width / 2 - actualWidth / 2 });
@@ -578,7 +583,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
     },
 
     scrolltop: function (element, value) {
-        var isTopElem = element == window || element == document || element == document.body;
+        var isTopElem = !element || (element == window) || (element == document) || (element == document.body);
         var obj = jQuery(isTopElem ? 'html, body' : element);
 
         if (GlobalUtilities.get_type(value) == "number") obj.animate({ scrollTop: isNaN(value) ? 0 : value }, 'slow');

@@ -12,6 +12,20 @@
     --rv-color-verytransparentwarm: rgba(193, 235, 9, 0.1);
     --rv-color-mediumtransparentwarm: rgba(193, 235, 9, 0.5);
     --rv-color-transparentwarm: rgba(193, 235, 9, 0.7);
+    /* New Theme Colors */
+    --rv-color-lightwarm: hsl(214,91%,73%);
+    --rv-color-distant: #bac9dc;
+    /* Theme Independent Colors */
+    --rv-white-color: #ffffff;
+    --rv-black-color: #000000;
+    --rv-gray-color: #707070;
+    --rv-gray-color-dark: #2b2727;
+    --rv-gray-color-light: #fcfcfc;
+    --rv-red-color: hsl(346,85%,89%);
+    --rv-red-color-soft: hsl(346,12%,98%);
+    --rv-red-color-verysoft: hsl(338,4%,98%);
+    --rv-red-color-lightwarm: hsl(346,90%,89%);
+    --rv-red-color-warm: hsl(346,95%,89%);
 }
 
 body {
@@ -36,29 +50,27 @@ input::-ms-clear { display:none; }
 
 p { margin: 0px 0px 0px 0px; }
 
-blockquote
-{
-    border:solid 0px #A7A7A7;
-    border-right-width:4px;
-    margin-right:30px;
-    padding-right:20px;
-    font-size:10px;
-    font-style:italic;
-    color:#9F9F9F;
+blockquote {
+    border: solid 0px var(--rv-gray-color);
+    border-right-width: 4px;
+    margin-right: 30px;
+    padding-right: 20px;
+    font-size: 10px;
+    font-style: italic;
+    color: var(--rv-gray-color);
 }
 
-pre > code
-{
-    width:100% !important;
-    max-height:500px;
-    min-height:20px;
-    display:block;
-    background-color:#EFEFEF;
-    border:2px solid #C5C5C5;
-    padding:4px;
-    margin:6px auto 6px auto;
-    overflow:auto;
-    float:left;
+pre > code {
+    width: 100% !important;
+    max-height: 500px;
+    min-height: 20px;
+    display: block;
+    background-color: var(--rv-gray-color);
+    border: 2px solid var(--rv-gray-color-dark);
+    padding: 4px;
+    margin: 6px auto 6px auto;
+    overflow: auto;
+    float: left;
 }
 
 /* end of Customized */
@@ -70,7 +82,7 @@ pre > code
     border-color:transparent;
 }
         
-.DashedAutoHideBorder:hover { border-color:rgb(150,150,150); }
+.DashedAutoHideBorder:hover { border-color: var(--rv-gray-color); }
         
 .NormalPadding { padding:4px; }
 
@@ -117,7 +129,7 @@ pre > code
 }
 
 .FadeContainer:hover .Fade {
-    -webkit-animation: Opacity 0.8s; /* Chrome, Safari, Opera */
+    -webkit-animation: fadeIn 0.8s; /* Chrome, Safari, Opera */
     -webkit-animation-fill-mode: forwards;  /* Chrome, Safari, Opera */
     
     animation: Opacity 0.8s;
@@ -129,14 +141,34 @@ pre > code
     opacity:0;
 }
 
-@-webkit-keyframes Opacity {
-    from { opacity:0;}
-    to{opacity: 1;}
+@-webkit-keyframes fadeIn {
+    from { opacity:0; }
+    to{ opacity: 1; }
 }
 
-@keyframes Opacity {
-    from {opacity:0;}
-    to {opacity:1;}
+@keyframes fadeIn {
+    from { opacity:0; }
+    to { opacity:1; }
+}
+
+@-webkit-keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.rv-fade-in {
+    -webkit-animation: fadeIn .5s linear forwards;
+    animation: fadeIn .5s linear forwards;
+}
+
+.rv-fade-out {
+    -webkit-animation: fadeOut .2s linear forwards;
+    animation: fadeOut .2s linear forwards;
 }
 
 @font-face {
@@ -203,7 +235,7 @@ pre > code
 }
 
 .RedBorder {
-    border: solid 1px rgb(226,35,79) !important;
+    border: solid 1px var(--rv-red-color) !important;
 }
 
 .Color {
@@ -215,7 +247,7 @@ pre > code
 }
 
 .RedColor {
-    color: rgb(226,35,79) !important;
+    color: var(--rv-red-color) !important;
 }
 
 .WarmBackgroundColor {
@@ -233,27 +265,7 @@ pre > code
 }
 
 .ColdBackgroundColor {
-    background-color: #fff;
-}
-
-.TextInput {
-    height: 24px;
-    font-size: 18px;
-    border-width: 1px;
-    border-style: solid;
-    border-color: rgb(172, 172, 172) rgb(197, 197, 197) rgb(197, 197, 197);
-    border-radius: 3px;
-    /* font: 81.25%/1 tahoma,helvetica,sans-serif; */
-    font: 81.25%/1 IRANSans;
-    color: rgb(51, 51, 51);
-}
-
-.TextInput:hover {
-    border-color: rgb(122, 122, 122) rgb(147, 147, 147) rgb(147, 147, 147);
-}
-
-.TextInput:focus {
-    border-color: var(--rv-color-warm);
+    background-color: var(--rv-white-color);
 }
 
 .ActionButton {
@@ -262,15 +274,14 @@ pre > code
     text-align: center;
     border: 1px solid var(--rv-color-warmborder);
     padding: 0.2rem 0.5rem;
-    /*font: 13px/100% Tahoma;*/
     font: 13px/100%;
     color: rgb(255, 255, 255);
     text-shadow: 0 1px 1px rgba(0,0,0,.3);
     background-color: var(--rv-color-actionbutton);
     background-image: -moz-linear-gradient(center top, var(--rv-color-actionbutton), var(--rv-color-actionbutton));
-    border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
+    border-radius: 0.5rem;
+    -webkit-border-radius: 0.5rem;
+    -moz-border-radius: 0.5rem;
 }
 
 .ActionButton:hover {
@@ -280,30 +291,6 @@ pre > code
 }
 
 .ActionButton:active {
-    box-shadow: 2px 2px 2px rgba(95, 95, 95, 0.5);
-    -moz-box-shadow: 2px 2px 2px rgba(95, 95, 95, 0.5);
-    -webkit-box-shadow: 2px 2px 2px rgba(95, 95, 95, 0.5);
-}
-
-.AppButton {
-    cursor: pointer;
-    border-bottom: 1px solid var(--rv-color-warmborder);
-    padding: 4px;
-    font: 11px/100% IRANSans;
-    text-shadow: 0 2px 2px rgba(95,95,95,.3);
-    color: #000000;
-    border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-}
-
-.AppButton:hover {
-    box-shadow: 1px 1px 1px rgba(95, 95, 95, 0.5);
-    -moz-box-shadow: 1px 1px 1px rgba(95, 95, 95, 0.5);
-    -webkit-box-shadow: 1px 1px 1px rgba(95, 95, 95, 0.5);
-}
-
-.AppButton:active {
     box-shadow: 2px 2px 2px rgba(95, 95, 95, 0.5);
     -moz-box-shadow: 2px 2px 2px rgba(95, 95, 95, 0.5);
     -webkit-box-shadow: 2px 2px 2px rgba(95, 95, 95, 0.5);
@@ -410,15 +397,15 @@ pre > code
 }
 
 .rv-gray {
-    color:rgb(120,120,120) !important;
+    color: var(--rv-gray-color) !important;
 }
 
 .rv-dark-gray {
-    color:rgb(50,50,50) !important;
+    color: var(--rv-gray-color-dark) !important;
 }
 
 .rv-light-gray {
-    color:rgb(220,220,220) !important;
+    color: var(--rv-gray-color-light) !important;
 }
 
 .rv-green {
@@ -426,7 +413,7 @@ pre > code
 }
 
 .rv-red {
-    color:red !important;
+    color:var(--rv-red-color) !important;
 }
 
 .rv-selectable-title {
@@ -454,7 +441,7 @@ pre > code
     padding-bottom:1rem;
 	border-bottom-style:solid;
 	border-bottom-width:1px;
-	border-bottom-color:rgb(200,200,200);
+	border-bottom-color: var(--rv-gray-color-light);
 	padding-left:12vw;
 	padding-right:12vw;
 }
@@ -470,12 +457,12 @@ pre > code
 }
 
 .rv-flat-label {
-    color: rgb(100,100,100);
+    color: var(--rv-gray-color);
     font-size: 0.8rem;
 }
 
 .rv-input {
-    color: rgb(51, 51, 51);
+    color: var(--rv-gray-color-dark);
     padding: 0.3rem;
     border-width: 1px;
     border-color: var(--rv-color-soft) var(--rv-color-soft) var(--rv-color-soft);
@@ -495,15 +482,15 @@ pre > code
 }
 
 .rv-input-invalid {
-    border-color: red !important;
-    background-color:rgb(255,242,240) !important;
+    border-color: var(--rv-red-color) !important;
+    background-color: var(--rv-red-color-verysoft) !important;
 }
 
 .rv-input-simple {
-    color: rgb(51, 51, 51);
+    color: var(--rv-gray-color-dark);
     padding: 0 0.3rem;
     border-width: 0 0 1px 0;
-    border-color: rgb(240, 240, 240);
+    border-color: var(--rv-gray-color-light);
     border-style: solid;
     background-color: transparent;
     outline:none;
@@ -518,8 +505,113 @@ pre > code
 }
 
 .rv-input-simple-invalid {
-    border-color: red !important;
-    color: red !important;
+    border-color: var(--rv-red-color) !important;
+    color: var(--rv-red-color) !important;
+}
+
+.rv-action-button-base {
+    text-transform: capitalize;
+    cursor: pointer;
+    text-align: center;
+    border-width: 1px;
+    border-style: solid;
+    padding: 0.5rem;
+    font: 13px/100%;
+}
+
+.rv-action-button-base:hover {
+    box-shadow: 1px 1px 1px rgba(95, 95, 95, 0.5);
+    -moz-box-shadow: 1px 1px 1px rgba(95, 95, 95, 0.5);
+    -webkit-box-shadow: 1px 1px 1px rgba(95, 95, 95, 0.5);
+}
+
+.rv-action-button-base:active {
+    box-shadow: 2px 2px 2px rgba(95, 95, 95, 0.5);
+    -moz-box-shadow: 2px 2px 2px rgba(95, 95, 95, 0.5);
+    -webkit-box-shadow: 2px 2px 2px rgba(95, 95, 95, 0.5);
+}
+
+.rv-action-button {
+    color: var(--rv-white-color);
+    border-color: var(--rv-color);
+    background-color: var(--rv-color);
+}
+
+.rv-action-button:hover {
+    border-color: var(--rv-color-lightwarm);
+    background-color: var(--rv-color-lightwarm);
+}
+
+.rv-action-button:active {
+    border-color: var(--rv-color-warm);
+    background-color: var(--rv-color-warm);
+}
+
+.rv-action-button-o {
+    color: var(--rv-color);
+    border-color: var(--rv-color);
+    background-color: var(--rv-white-color);
+}
+
+.rv-action-button-o:hover {
+    background-color: var(--rv-color-verysoft);
+}
+
+.rv-action-button-o:active {
+    background-color: var(--rv-color-soft);
+}
+
+.rv-action-button-secondary {
+    color: var(--rv-color);
+    border-color: var(--rv-white-color);
+    background-color: var(--rv-white-color);
+}
+
+.rv-action-button-secondary:hover {
+    color: var(--rv-color);
+    border-color: var(--rv-color);
+}
+
+.rv-action-button-secondary:active {
+    color: var(--rv-color-warm);
+    border-color: var(--rv-color-warm);
+}
+
+.rv-action-button-negative {
+    color: var(--rv-white-color);
+    border-color: var(--rv-red-color);
+    background-color: var(--rv-red-color);
+}
+
+.rv-action-button-negative:hover {
+    border-color: var(--rv-red-color-lightwarm);
+    background-color: var(--rv-red-color-lightwarm);
+}
+
+.rv-action-button-negative:active {
+    border-color: var(--rv-red-color-warm);
+    background-color: var(--rv-red-color-warm);
+}
+
+.rv-action-button-negative-o {
+    color: var(--rv-red-color);
+    border-color: var(--rv-red-color);
+    background-color: var(--rv-white-color);
+}
+
+.rv-action-button-negative-o:hover {
+    background-color: var(--rv-red-color-verysoft);
+}
+
+.rv-action-button-negative-o:active {
+    background-color: var(--rv-red-color-soft);
+}
+
+.rv-action-button-disabled {
+    color: var(--rv-color-distant);
+    border-color: var(--rv-color-distant);
+    background-color: var(--rv-white-color);
+    cursor: not-allowed;
 }
 
 .rv-icon-button {
@@ -551,7 +643,7 @@ pre > code
 }
 
 .rv-air-button:hover {
-    color: white;
+    color: var(--rv-white-color);
     background-color: var(--rv-color-mediumtransparentwarm);
 }
 
@@ -564,7 +656,7 @@ pre > code
     text-align: center;
     cursor: pointer;
     padding: 0.2rem 0.5rem;
-    color: black;
+    color: var(--rv-black-color);
     border-style: solid;
     border-color: transparent;
     border-width: 0.1rem;
@@ -826,6 +918,13 @@ pre > code
 .rv-link:hover 
 {
     color: blue;
+}
+
+.rv-text-color {
+    color: #2b2727;
+}
+
+.rv-text-color-gray {
 }
 
 .rv-color-soft-warm {

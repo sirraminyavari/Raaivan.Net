@@ -1410,8 +1410,11 @@ namespace RaaiVan.Web.API
                 e.AttachedFiles.ForEach(f => f.OwnerID = e.ElementID);
             });
 
-            if(attachedFiles != null)
-                attachedFiles.ForEach(f => f.move(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles, FolderNames.Attachments));
+            if (attachedFiles != null &&
+                attachedFiles.Any(f => !f.move(paramsContainer.Tenant.Id, FolderNames.TemporaryFiles, FolderNames.Attachments))) {
+                responseText = "{\"ErrorText\":\"" + Messages.SavingFilesFailed + "\"}";
+                return false;
+            }
 
             string errorMessage = string.Empty;
 
