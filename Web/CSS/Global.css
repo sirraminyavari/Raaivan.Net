@@ -13,7 +13,7 @@
     --rv-color-mediumtransparentwarm: rgba(193, 235, 9, 0.5);
     --rv-color-transparentwarm: rgba(193, 235, 9, 0.7);
     /* New Theme Colors */
-    --rv-color-lightwarm: hsl(214,91%,73%);
+    --rv-color-lightwarm: rgb(16,88,188);
     --rv-color-distant: #bac9dc;
     /* Theme Independent Colors */
     --rv-white-color: #ffffff;
@@ -21,11 +21,11 @@
     --rv-gray-color: #707070;
     --rv-gray-color-dark: #2b2727;
     --rv-gray-color-light: #fcfcfc;
-    --rv-red-color: hsl(346,85%,89%);
-    --rv-red-color-soft: hsl(346,12%,98%);
-    --rv-red-color-verysoft: hsl(338,4%,98%);
-    --rv-red-color-lightwarm: hsl(346,90%,89%);
-    --rv-red-color-warm: hsl(346,95%,89%);
+    --rv-red-color: rgb(226,35,79);
+    --rv-red-color-soft: rgb(249,219,227);
+    --rv-red-color-verysoft: rgb(250,241,244);
+    --rv-red-color-lightwarm: rgb(206,28,68);
+    --rv-red-color-warm: rgb(188,24,62);
 }
 
 body {
@@ -510,6 +510,10 @@ pre > code {
 }
 
 .rv-action-button-base {
+    display: flex;
+    flex-flow:row;
+    align-items: center;
+    justify-content: center;
     text-transform: capitalize;
     cursor: pointer;
     text-align: center;
@@ -517,18 +521,6 @@ pre > code {
     border-style: solid;
     padding: 0.5rem;
     font: 13px/100%;
-}
-
-.rv-action-button-base:hover {
-    box-shadow: 1px 1px 1px rgba(95, 95, 95, 0.5);
-    -moz-box-shadow: 1px 1px 1px rgba(95, 95, 95, 0.5);
-    -webkit-box-shadow: 1px 1px 1px rgba(95, 95, 95, 0.5);
-}
-
-.rv-action-button-base:active {
-    box-shadow: 2px 2px 2px rgba(95, 95, 95, 0.5);
-    -moz-box-shadow: 2px 2px 2px rgba(95, 95, 95, 0.5);
-    -webkit-box-shadow: 2px 2px 2px rgba(95, 95, 95, 0.5);
 }
 
 .rv-action-button {
@@ -561,18 +553,18 @@ pre > code {
     background-color: var(--rv-color-soft);
 }
 
-.rv-action-button-secondary {
+.rv-action-button-secondary-o {
     color: var(--rv-color);
     border-color: var(--rv-white-color);
     background-color: var(--rv-white-color);
 }
 
-.rv-action-button-secondary:hover {
+.rv-action-button-secondary-o:hover {
     color: var(--rv-color);
     border-color: var(--rv-color);
 }
 
-.rv-action-button-secondary:active {
+.rv-action-button-secondary-o:active {
     color: var(--rv-color-warm);
     border-color: var(--rv-color-warm);
 }
