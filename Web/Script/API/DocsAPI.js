@@ -24,7 +24,8 @@
             (params.Category ? "&Category=" + params.Category : "") +
             (params.CoverID ? "&CoverID=" + params.CoverID : "") +
             (params.Meta ? "&Meta=" + params.Meta : "") +
-            (params.Password ? "&PS=" + params.Password : "");
+            (params.Password ? "&PS=" + params.Password : "") +
+            (params.Download === false ? "&dl=false" : "");
     },
 
     UploadPicture: function (params) {

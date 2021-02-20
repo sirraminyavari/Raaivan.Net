@@ -132,8 +132,8 @@
             this.ImagesArea.style.display = "block";
             //////////
 
-            var downloadLink = item.DownloadLink || "";
-            var fullFileName = this.get_full_file_name(item);
+            var downloadLink = item.DownloadLink;
+            var imageDownloadLink = item.ImageDownloadLink;
 
             var options = this._get_options(params, false);
 
@@ -143,18 +143,37 @@
                     Style: "display:inline-block; position:relative; padding:0.2rem; width:8rem; height:8rem; margin:0.2rem;",
                     Childs: [
                         {
-                            Type: "div", Class: "SoftBorder rv-circle",
+                            Type: "div", Class: "SoftBorder rv-circle SurroundingShadow",
                             Style: "position:absolute; top:-0.4rem;" + RV_Float + ":-0.4rem; padding:0.2rem;" +
-                                "background-color:white; width:1.6rem; height:1.6rem; text-align:center;" +
+                                "background-color:white; width:1.6rem; height:1.6rem; text-align:center; border-color:rgb(200,200,200);" +
                                 ((options || []).length ? "" : "display:none;"),
                             Childs: options
                         },
                         {
-                            Type: "div", Class: "small-12 medium-12 large-12 rv-border-radius-half SoftBorder",
+                            Type: "div",
+                            Class: "small-12 medium-12 large-12 rv-border-radius-half SoftBorder SurroundingShadow",
                             Style: "background-image:url(" + downloadLink + "); background-repeat:no-repeat;" +
-                                "background-position:center top; background-size:cover; height:8rem; cursor:pointer;",
+                                "background-position:center top; background-size:cover; height:8rem; cursor:pointer;" +
+                                "border-color:rgb(200,200,200);",
                             Properties: [{ Name: "onclick", Value: function (e) { GlobalUtilities.show_image(downloadLink, e); } }]
-                        }
+                        },
+                        (!imageDownloadLink || !downloadLink ? null : {
+                            Type: "div", Style: "position:absolute; bottom:0.2rem;" + RV_Float + ":0.5rem;",
+                            Childs: [
+                                {
+                                    Type: "div", Class: "rv-air-button-base rv-air-button-black rv-circle",
+                                    Style: "display:inline-block; padding:0.1rem; width:1.5rem; height:1.5rem;",
+                                    Properties: [{ Name: "onclick", Value: function () { GlobalUtilities.submit_form({ URL: downloadLink, Method: "post" }); } }],
+                                    Childs: [{ Type: "i", Class: "fa fa-download" }]
+                                },
+                                {
+                                    Type: "div", Class: "rv-air-button-base rv-air-button-black rv-circle",
+                                    Style: "display:inline-block; padding:0.1rem; width:1.5rem; height:1.5rem; margin-" + RV_Float + ":0.3rem;",
+                                    Properties: [{ Name: "onclick", Value: function () { window.open(imageDownloadLink); } }],
+                                    Childs: [{ Type: "i", Class: "fa fa-arrows-alt" }]
+                                }
+                            ]
+                        })
                     ]
                 }
             ], this.ImagesArea);

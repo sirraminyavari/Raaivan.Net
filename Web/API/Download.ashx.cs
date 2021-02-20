@@ -94,7 +94,8 @@ namespace RaaiVan.Web.API
 
                 DocFileInfo ownerNode = !AttachFile.FileID.HasValue ? null :
                     DocumentsController.get_file_owner_node(paramsContainer.Tenant.Id, AttachFile.FileID.Value);
-                if (ownerNode != null) {
+                if (ownerNode != null)
+                {
                     AttachFile.OwnerNodeID = ownerNode.OwnerNodeID;
                     AttachFile.OwnerNodeName = ownerNode.OwnerNodeName;
                     AttachFile.OwnerNodeType = ownerNode.OwnerNodeType;
@@ -147,15 +148,21 @@ namespace RaaiVan.Web.API
                     if (pdfCover == null || string.IsNullOrEmpty(pdfCover.Extension) || pdfCover.Extension.ToLower() != "pdf") pdfCover = null;
                 }
 
+                bool dl = !isImage || PublicMethods.parse_bool(context.Request.Params["dl"], defaultValue: true) == true;
+                string contentType = !dl && isImage ? PublicMethods.get_mime_type_by_extension(ext) : null;
+
                 send_file(AttachFile, !isImage, addPDFCover: true,
                     addPDFFooter: addFooter.HasValue && addFooter.Value,
                     pdfCover: pdfCover == null ? null : pdfCover.toByteArray(paramsContainer.ApplicationID),
-                    pdfPassword: pdfPassword);
+                    pdfPassword: pdfPassword,
+                    contentType: contentType,
+                    isAttachment: dl);
             }
         }
 
         protected void send_file(DocFileInfo file, bool logNeeded, 
-            bool addPDFCover = false, bool addPDFFooter = false, byte[] pdfCover = null, string pdfPassword = null)
+            bool addPDFCover = false, bool addPDFFooter = false, byte[] pdfCover = null, string pdfPassword = null, 
+            string contentType = null, bool isAttachment = true)
         {
             byte[] fileContent = file.toByteArray(paramsContainer.ApplicationID);
 
@@ -239,8 +246,9 @@ namespace RaaiVan.Web.API
                 if (!string.IsNullOrEmpty(pdfPassword)) fileContent = PDFUtil.set_password(fileContent, pdfPassword);
             }
 
-            paramsContainer.file_response(fileContent,
-                file.FileName + (string.IsNullOrEmpty(file.Extension) ? string.Empty : "." + file.Extension));
+            string retFileName = file.FileName + (string.IsNullOrEmpty(file.Extension) ? string.Empty : "." + file.Extension);
+
+            paramsContainer.file_response(fileContent, retFileName, contentType: contentType, isAttachment: isAttachment);
         }
 
         protected void send_empty_response()

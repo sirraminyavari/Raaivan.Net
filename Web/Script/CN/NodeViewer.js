@@ -2624,7 +2624,8 @@
 
             var _clarify = function (_attachedFile) {
                 _attachedFile.FileName = Base64.decode(_attachedFile.FileName);
-                _attachedFile.DownloadLink = DocsAPI.GetDownloadLink({ FileID: _attachedFile.FileID });
+                _attachedFile.DownloadLink = DocsAPI.GetDownloadLink({ FileID: _attachedFile.FileID, Download: true });
+                _attachedFile.ImageDownloadLink = DocsAPI.GetDownloadLink({ FileID: _attachedFile.FileID, Download: false });
                 _attachedFile.Extension = Base64.decode(_attachedFile.Extension);
                 return _attachedFile;
             };
