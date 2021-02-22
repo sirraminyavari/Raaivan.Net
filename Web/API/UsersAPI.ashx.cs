@@ -454,6 +454,15 @@ namespace RaaiVan.Web.API
                     get_password_policy(ref responseText);
                     break;
                 case "CreateUserToken":
+                    string captcha = PublicMethods.parse_string(context.Request.Params["Captcha"], decode: false);
+                    bool hasValidCaptcha = string.IsNullOrEmpty(captcha) || Captcha.check(HttpContext.Current, captcha);
+
+                    if (!hasValidCaptcha)
+                    {
+                        responseText = "{\"ErrorText\":\"" + Messages.CaptchaIsNotValid.ToString() + "\"}";
+                        break;
+                    }
+
                     create_user_token(PublicMethods.parse_string(context.Request.Params["UserName"]),
                         PublicMethods.parse_string(context.Request.Params["FirstName"]),
                         PublicMethods.parse_string(context.Request.Params["LastName"]),

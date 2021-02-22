@@ -128,7 +128,8 @@
             (params.LastName ? "&LastName=" + params.LastName : "") +
             (params.Contact ? "&Contact=" + params.Contact : "") +
             (params.Password ? "&Password=" + params.Password : "") +
-            (params.InvitationID ? "&InvitationID=" + params.InvitationID : "");
+            (params.InvitationID ? "&InvitationID=" + params.InvitationID : "") +
+            (params.Captcha ? "&Captcha=" + params.Captcha : "");
         return UsersAPI._send(url, params, queryString);
     },
 

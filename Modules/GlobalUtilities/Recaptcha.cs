@@ -6,17 +6,36 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.Web;
+using System.Collections.Specialized;
 
 namespace RaaiVan.Modules.GlobalUtilities
 {
     public class Captcha
     {
+        private static string ReCaptchaVerificationURL = "https://www.google.com/recaptcha/api/siteverify";
+        private static string Secret = "6Ld2wGIaAAAAAPkMabLnafcIgV22cN-9ZJMDMRVJ";
+
         private static string _SessionVariableName = "CaptchaString";
 
         public static bool check(HttpContext context, string input)
         {
-            try { return context.Session[_SessionVariableName].ToString() == input.ToLower(); }
-            catch { return false; }
+            if (RaaiVanSettings.SAASBasedMultiTenancy)
+            {
+                if (string.IsNullOrEmpty(input)) return false;
+
+                NameValueCollection data = new NameValueCollection();
+                data.Add("secret", Secret);
+                data.Add("response", input);
+
+                Dictionary<string, object> res = PublicMethods.fromJSON(PublicMethods.web_request(ReCaptchaVerificationURL, data));
+
+                return PublicMethods.get_dic_value<bool>(res, "success", defaultValue: false);
+            }
+            else
+            {
+                try { return context.Session[_SessionVariableName].ToString() == input.ToLower(); }
+                catch { return false; }
+            }
         }
 
         public static void generate(HttpContext context, int width, int height)
