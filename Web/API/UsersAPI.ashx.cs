@@ -455,7 +455,7 @@ namespace RaaiVan.Web.API
                     break;
                 case "CreateUserToken":
                     string captcha = PublicMethods.parse_string(context.Request.Params["Captcha"], decode: false);
-                    bool hasValidCaptcha = string.IsNullOrEmpty(captcha) || Captcha.check(HttpContext.Current, captcha);
+                    bool hasValidCaptcha = !string.IsNullOrEmpty(captcha) && Captcha.check(HttpContext.Current, captcha);
 
                     if (!hasValidCaptcha)
                     {
