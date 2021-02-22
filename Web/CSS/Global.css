@@ -3,6 +3,7 @@
     --rv-color-reverse: #4d2cde;
     --rv-color-verysoft: #eef7c9;
     --rv-color-soft: #e0f09d;
+    --rv-color-lightwarm: #a9c820;
     --rv-color-warm: #9fbd1e;
     --rv-color-verywarm: #7a9117;
     --rv-color-warmborder: #9bae46;
@@ -12,10 +13,8 @@
     --rv-color-verytransparentwarm: rgba(193, 235, 9, 0.1);
     --rv-color-mediumtransparentwarm: rgba(193, 235, 9, 0.5);
     --rv-color-transparentwarm: rgba(193, 235, 9, 0.7);
-    /* New Theme Colors */
-    --rv-color-lightwarm: rgb(16,88,188);
-    --rv-color-distant: #bac9dc;
     /* Theme Independent Colors */
+    --rv-color-distant: #bac9dc;
     --rv-white-color: #ffffff;
     --rv-black-color: #000000;
     --rv-gray-color: #707070;
@@ -251,13 +250,7 @@ pre > code {
 }
 
 .WarmBackgroundColor {
-    background: var(--rv-color-warm);
-    /*
-	background: -webkit-gradient(linear, left top, left bottom, from(var(--rv-color-soft)), to(var(--rv-color-warm)));
-	background: -moz-linear-gradient(top,  var(--rv-color-soft),  var(--rv-color-warm));
-    */
-    background: -webkit-gradient(linear, left top, left bottom, from(var(--rv-color-warm)), to(var(--rv-color-warm)));
-    background: -moz-linear-gradient(top, var(--rv-color-warm), var(--rv-color-warm));
+    background-color: var(--rv-color-warm);
 }
 
 .SoftBackgroundColor {
@@ -396,6 +389,14 @@ pre > code {
     -webkit-border-radius:100rem;
 }
 
+.rv-warm {
+    color: var(--rv-color-warm);
+}
+
+.rv-white {
+    color: var(--rv-white-color);
+}
+
 .rv-gray {
     color: var(--rv-gray-color) !important;
 }
@@ -414,6 +415,14 @@ pre > code {
 
 .rv-red {
     color:var(--rv-red-color) !important;
+}
+
+.rv-color-soft-warm {
+    color: var(--rv-color-soft);
+}
+
+.rv-color-soft-warm:hover {
+    color: var(--rv-color-warm);
 }
 
 .rv-selectable-title {
@@ -561,12 +570,10 @@ pre > code {
 
 .rv-action-button-secondary-o:hover {
     color: var(--rv-color);
-    border-color: var(--rv-color);
 }
 
 .rv-action-button-secondary-o:active {
     color: var(--rv-color-warm);
-    border-color: var(--rv-color-warm);
 }
 
 .rv-action-button-negative {
@@ -845,6 +852,22 @@ pre > code {
     border-width: 0.1rem;
 }
 
+.rv-bg-color-warm {
+    background-color: var(--rv-color-warm);
+}
+
+.rv-bg-color-verywarm {
+    background-color: var(--rv-color-verywarm);
+}
+
+.rv-bg-color-white {
+    background-color: var(--rv-white-color);
+}
+
+.rv-bg-color-lightgray {
+    background-color: var(--rv-gray-color-light);
+}
+
 .rv-bg-color-trans-white
 {
     background-color: transparent;
@@ -852,7 +875,7 @@ pre > code {
 
 .rv-bg-color-trans-white:hover, .rv-bg-color-trans-white:active
 {
-    background-color: white;
+    background-color: var(--rv-white-color);
 }
 
 .rv-bg-color-trans-white-opaque {
@@ -910,21 +933,6 @@ pre > code {
 .rv-link:hover 
 {
     color: blue;
-}
-
-.rv-text-color {
-    color: #2b2727;
-}
-
-.rv-text-color-gray {
-}
-
-.rv-color-soft-warm {
-    color: var(--rv-color-soft);
-}
-
-.rv-color-soft-warm:hover {
-    color: var(--rv-color-warm);
 }
 
 .rv-placeholder-align-center::-webkit-input-placeholder { text-align:center; }

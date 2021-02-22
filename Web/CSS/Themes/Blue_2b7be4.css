@@ -4,6 +4,7 @@ Codes: {
     "reverse": "#d4841b",
     "verysoft": "rgb(241,246,252)",
     "soft": "rgb(223,233,245)",
+    "lightwarm": "rgb(16,88,188)";
     "warm": "#2b388f",
     "verywarm": "#15113c",
     "warmborder": "#4f80c0",
@@ -21,6 +22,7 @@ Codes: {
     --rv-color-reverse: #d4841b;
     --rv-color-verysoft: rgb(241,246,252);
     --rv-color-soft: rgb(223,233,245);
+    --rv-color-lightwarm: rgb(16,88,188);
     --rv-color-warm: #2b388f;
     --rv-color-verywarm: #15113c;
     --rv-color-warmborder: #4f80c0;

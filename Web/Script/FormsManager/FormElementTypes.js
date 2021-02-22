@@ -4075,7 +4075,8 @@
                         for (var i = 0; i < ((p || {}).Files || []).length; ++i) {
                             files.push(GlobalUtilities.extend({}, p.Files[i], {
                                 FileName: Base64.decode(p.Files[i].FileName || ""),
-                                DownloadLink: DocsAPI.GetDownloadLink({ FileID: p.Files[i].FileID || "" }),
+                                DownloadLink: DocsAPI.GetDownloadLink({ FileID: p.Files[i].FileID, Download: true }),
+                                ImageDownloadLink: DocsAPI.GetDownloadLink({ FileID: p.Files[i].FileID, Download: false }),
                                 Extension: Base64.decode(p.Files[i].Extension || "")
                             }));
                         }
