@@ -64,8 +64,6 @@ namespace RaaiVan.Modules.GlobalUtilities
         PreventConcurrentSessions,
         FileEncryption,
 
-        GATrackingID,
-
         IgnoreActiveDirectoryUserCheck,
         RestrictPasswordsToActiveDirectory,
         EnableTwoStepAuthenticationViaEmail,
@@ -83,6 +81,14 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         ReauthenticationForSettingsAdminPage,
         ReauthenticationForUsersAdminPage,
+
+        CaptchaURL,
+        CaptchaSiteKey,
+        CaptchaSecretKey,
+        CaptchaValidationURL,
+
+        GATrackingID,
+        GoogleSignInClientID,
 
         SSOEnabled,
         SSOAutoRedirect,
@@ -751,11 +757,6 @@ namespace RaaiVan.Modules.GlobalUtilities
             return get_value(applicationId, RVSettingsItem.FileEncryption).ToLower() == "true";
         }
 
-        public static string GATrackingID(Guid? applicationId) //TrackingID for Google Analytics Account
-        {
-            return get_value(applicationId, RVSettingsItem.GATrackingID).ToLower();
-        }
-
         public static bool RealTime(Guid? applicationId)
         {
             return RaaiVanConfig.Modules.RealTime(applicationId) && !RaaiVanSettings.SAASBasedMultiTenancy &&
@@ -923,6 +924,61 @@ namespace RaaiVan.Modules.GlobalUtilities
                 public static bool NonAlphaNumeric(Guid? applicationId)
                 {
                     return get_value(applicationId, RVSettingsItem.PasswordPolicyNonAlphaNumeric).ToLower() != "false";
+                }
+            }
+        }
+
+        public static class Google {
+            public static string GATrackingID //TrackingID for Google Analytics Account
+            {
+                get
+                {
+                    return get_value(null, RVSettingsItem.GATrackingID).ToLower();
+                }
+            }
+
+            public static string SignInClientID
+            {
+                get
+                {
+                    return get_value(null, RVSettingsItem.GoogleSignInClientID);
+                }
+            }
+
+            public static class Captcha
+            {
+                public static string URL
+                {
+                    get
+                    {
+                        if (string.IsNullOrEmpty(SiteKey)) return string.Empty;
+                        string ret = get_value(null, RVSettingsItem.CaptchaURL).Trim(); ;
+                        return string.IsNullOrEmpty(ret) ? ret : ret.Replace("[SiteKey]", SiteKey);
+                    }
+                }
+
+                public static string SiteKey
+                {
+                    get
+                    {
+                        return get_value(null, RVSettingsItem.CaptchaSiteKey).Trim();
+                    }
+                }
+
+                public static string SecretKey
+                {
+                    get
+                    {
+                        return get_value(null, RVSettingsItem.CaptchaSecretKey).Trim();
+                    }
+                }
+
+                public static string ValidationURL
+                {
+                    get
+                    {
+                        return get_value(null, RVSettingsItem.CaptchaValidationURL).Trim();
+                    }
                 }
             }
         }

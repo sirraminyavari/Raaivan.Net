@@ -27,6 +27,12 @@ namespace RaaiVan.Web.Page.View
             
             if (RaaiVanSettings.IgnoreReturnURLOnLogin(paramsContainer.ApplicationID) && !string.IsNullOrEmpty(returnUrl))
                 Response.Redirect(PublicConsts.LoginPage);
+
+            if (!string.IsNullOrEmpty(RaaiVanSettings.Google.Captcha.URL))
+            {
+                Page.Header.Controls.Add(new LiteralControl("<script type='text/javascript' src='" +
+                    RaaiVanSettings.Google.Captcha.URL + "'></script>"));
+            }
         }
     }
 }

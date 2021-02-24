@@ -21,15 +21,17 @@ namespace RaaiVan.Web.API
         public void ProcessRequest(HttpContext context)
         {
             paramsContainer = new ParamsContainer(context, nullTenantResponse: false);
-            
-            if (ProcessTenantIndependentRequest(context)) return;
+
+            bool wasAsync = false;
+
+            if (ProcessTenantIndependentRequest(context, isAsync: ref wasAsync) || wasAsync) return;
 
             if (!paramsContainer.ApplicationID.HasValue)
             {
                 paramsContainer.return_response(PublicConsts.NullTenantResponse);
                 return;
             }
-
+            
             string responseText = string.Empty;
             string command = PublicMethods.parse_string(context.Request.Params["Command"], false);
 
@@ -427,8 +429,10 @@ namespace RaaiVan.Web.API
             paramsContainer.return_response(PublicConsts.BadRequestResponse);
         }
 
-        public bool ProcessTenantIndependentRequest(HttpContext context)
+        public bool ProcessTenantIndependentRequest(HttpContext context, ref bool isAsync)
         {
+            isAsync = false;
+
             if (!RaaiVanSettings.SAASBasedMultiTenancy && !paramsContainer.ApplicationID.HasValue)
             {
                 paramsContainer.return_response(PublicConsts.NullTenantResponse);
@@ -454,12 +458,9 @@ namespace RaaiVan.Web.API
                     get_password_policy(ref responseText);
                     break;
                 case "CreateUserToken":
-                    string captcha = PublicMethods.parse_string(context.Request.Params["Captcha"], decode: false);
-                    bool hasValidCaptcha = string.IsNullOrEmpty(captcha) || Captcha.check(HttpContext.Current, captcha);
-
-                    if (!hasValidCaptcha)
+                    if (!Captcha.check(context, PublicMethods.parse_string(context.Request.Params["Captcha"], decode: false)))
                     {
-                        responseText = "{\"ErrorText\":\"" + Messages.CaptchaIsNotValid.ToString() + "\"}";
+                        responseText = "{\"ErrorText\":\"" + Messages.CaptchaIsNotValid + "\"}";
                         break;
                     }
 
@@ -476,6 +477,21 @@ namespace RaaiVan.Web.API
                         PublicMethods.parse_long(context.Request.Params["Code"]),
                         PublicMethods.parse_bool(context.Request.Params["Login"]),
                         ref responseText);
+                    break;
+                case "SignInWithGoogle":
+                    {
+                        if (!Captcha.check(context, PublicMethods.parse_string(context.Request.Params["Captcha"], decode: false)))
+                        {
+                            responseText = "{\"ErrorText\":\"" + Messages.CaptchaIsNotValid + "\"}";
+                            break;
+                        }
+
+                        sign_in_with_google(PublicMethods.parse_string(context.Request.Params["GoogleToken"], false),
+                            PublicMethods.parse_guid(context.Request.Params["InvitationID"]),
+                            HttpContext.Current,
+                            callback: res => paramsContainer.return_response(res));
+                        isAsync = true;
+                    }
                     break;
                 case "CreateTemporaryUser":
                     if (!Captcha.check(context, PublicMethods.parse_string(context.Request.Params["Captcha"])))
@@ -885,6 +901,94 @@ namespace RaaiVan.Web.API
             string phone = PublicMethods.get_dic_value(dic, "Phone");
             Guid? invitationId = PublicMethods.parse_guid(PublicMethods.get_dic_value(dic, "InvitationID"));
 
+            finalize_user_sign_up(username: PublicMethods.get_dic_value(dic, "UserName"),
+                email: email,
+                phone: phone,
+                firstName: PublicMethods.get_dic_value(dic, "FirstName"),
+                lastName: PublicMethods.get_dic_value(dic, "LastName"),
+                password: PublicMethods.get_dic_value(dic, "Password"),
+                invitationId: invitationId,
+                login: login,
+                context: HttpContext.Current,
+                responseText: ref responseText);
+        }
+
+        public async void sign_in_with_google(string token, Guid? invitationId, HttpContext context, Action<string> callback)
+        {
+            //Privacy Check: OK
+            if (!RaaiVanSettings.UserSignUp(paramsContainer.ApplicationID) &&
+                !RaaiVanSettings.SignUpViaInvitation(paramsContainer.ApplicationID)) return;
+
+            Google.Apis.Auth.GoogleJsonWebSignature.Payload payload = null;
+
+            try
+            {
+                payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(token);
+            }
+            catch(Exception ex) {
+                string strEx = ex.ToString();
+            }
+
+            if (payload == null)
+            {
+                callback("{\"ErrorText\":\"" + Messages.TokenValidationFailed.ToString() + "\"}");
+                return;
+            }
+
+            string email = payload.Email;
+            string firstName = payload.Name ?? payload.GivenName;
+            string lastName = payload.FamilyName ?? payload.GivenName;
+
+            if (string.IsNullOrEmpty(email))
+            {
+                callback("{\"ErrorText\":\"" + Messages.EmailIsNotValid.ToString() + "\"}");
+                return;
+            }
+            else if (!payload.EmailVerified)
+            {
+                callback("{\"ErrorText\":\"" + Messages.EmailIsNotVerified.ToString() + "\"}");
+                return;
+            }
+
+            EmailAddress address = UsersController.get_email_owners(paramsContainer.ApplicationID, new List<string>() { email })
+                .Where(e => e.IsMain.HasValue && e.IsMain.Value).FirstOrDefault();
+
+            string responseText = string.Empty;
+
+            //if address is null, then this is a sign up
+            if (address == null)
+            {
+                if (string.IsNullOrEmpty(firstName)) firstName = email.Substring(0, email.IndexOf('@'));
+                if (string.IsNullOrEmpty(lastName)) lastName = email.Substring(0, email.IndexOf('@'));
+
+                finalize_user_sign_up(username: PublicMethods.random_string(8).ToLower(),
+                    email: email,
+                    phone: null,
+                    firstName: firstName,
+                    lastName: lastName,
+                    password: PublicMethods.random_string(10),
+                    invitationId: invitationId,
+                    login: true,
+                    context: context,
+                    responseText: ref responseText);
+            }
+            else {
+                Guid? appId = paramsContainer.ApplicationID.HasValue ? paramsContainer.ApplicationID :
+                    (!invitationId.HasValue ? null : UsersController.get_invitation_application_id(invitationId.Value, checkIfNotUsed: true));
+
+                if (appId.HasValue && !GlobalController.add_user_to_application(appId.Value, address.UserID.Value))
+                    appId = null;
+
+                user_sign_up_is_complete(applicationId: appId, userId: address.UserID,
+                    succeed: true, login: true, context: context, responseText: ref responseText);
+            }
+
+            callback(responseText);
+        }
+
+        private void finalize_user_sign_up(string username, string email, string phone, string firstName, 
+            string lastName, string password, Guid? invitationId, bool? login, HttpContext context, ref string responseText)
+        {
             if (!string.IsNullOrEmpty(email) &&
                 UsersController.get_email_owners(paramsContainer.ApplicationID, new List<string>() { email })
                     .Any(e => e.IsMain.HasValue && e.IsMain.Value))
@@ -903,10 +1007,10 @@ namespace RaaiVan.Web.API
             User newUser = new User()
             {
                 UserID = Guid.NewGuid(),
-                UserName = PublicMethods.get_dic_value(dic, "UserName"),
-                FirstName = PublicMethods.get_dic_value(dic, "FirstName"),
-                LastName = PublicMethods.get_dic_value(dic, "LastName"),
-                Password = PublicMethods.get_dic_value(dic, "Password"),
+                UserName = username,
+                FirstName = firstName,
+                LastName = lastName,
+                Password = password,
                 Emails = string.IsNullOrEmpty(email) ? new List<EmailAddress>() :
                     new List<EmailAddress>() { new EmailAddress() { Address = email } },
                 PhoneNumbers = string.IsNullOrEmpty(phone) ? new List<PhoneNumber>() :
@@ -930,16 +1034,20 @@ namespace RaaiVan.Web.API
 
             bool succeed = UsersController.create_user(appId, newUser, passAutoGenerated: false);
 
+            user_sign_up_is_complete(applicationId: appId, userId: newUser.UserID, 
+                succeed: succeed, login: login.HasValue && login.Value, context: context, responseText: ref responseText);
+        }
+
+        private void user_sign_up_is_complete(Guid? applicationId, Guid? userId, bool succeed, bool login, 
+            HttpContext context, ref string responseText) {
             string authCookie = string.Empty;
 
-            if (succeed && login.HasValue && login.Value)
+            if (succeed && login)
             {
-                HttpContext curContext = HttpContext.Current;
-
-                RaaiVanUtil.after_login_procedures(appId, newUser.UserID.Value, rememberMe: false,
-                    invitationId: null, loggedInWithActiveDirectory: false, ref curContext, ref authCookie);
+                RaaiVanUtil.after_login_procedures(applicationId, userId.Value, rememberMe: false,
+                    invitationId: null, loggedInWithActiveDirectory: false, ref context, ref authCookie);
             }
-
+            
             responseText = !succeed ? "{\"ErrorText\":\"" + Messages.UserCreationFailed + "\"}" :
                 "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" +
                 (string.IsNullOrEmpty(authCookie) ? string.Empty : ",\"AuthCookie\":" + authCookie) +
