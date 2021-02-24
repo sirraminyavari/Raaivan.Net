@@ -936,8 +936,8 @@ namespace RaaiVan.Web.API
             }
 
             string email = payload.Email;
-            string firstName = payload.Name ?? payload.GivenName;
-            string lastName = payload.FamilyName ?? payload.GivenName;
+            string firstName = string.IsNullOrEmpty(payload.Name) ? payload.GivenName : payload.Name;
+            string lastName = string.IsNullOrEmpty(payload.FamilyName) ? payload.GivenName : payload.FamilyName;
 
             if (string.IsNullOrEmpty(email))
             {
