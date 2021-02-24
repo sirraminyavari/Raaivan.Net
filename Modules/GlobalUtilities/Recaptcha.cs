@@ -12,22 +12,21 @@ namespace RaaiVan.Modules.GlobalUtilities
 {
     public class Captcha
     {
-        private static string ReCaptchaVerificationURL = "https://www.google.com/recaptcha/api/siteverify";
-        private static string Secret = "6Ld2wGIaAAAAAPkMabLnafcIgV22cN-9ZJMDMRVJ";
-
         private static string _SessionVariableName = "CaptchaString";
 
         public static bool check(HttpContext context, string input)
         {
             if (RaaiVanSettings.SAASBasedMultiTenancy)
             {
-                if (string.IsNullOrEmpty(input)) return false;
+                if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(RaaiVanSettings.Google.Captcha.SecretKey) || 
+                    string.IsNullOrEmpty(RaaiVanSettings.Google.Captcha.ValidationURL)) return false;
 
                 NameValueCollection data = new NameValueCollection();
-                data.Add("secret", Secret);
+                data.Add("secret", RaaiVanSettings.Google.Captcha.SecretKey);
                 data.Add("response", input);
 
-                Dictionary<string, object> res = PublicMethods.fromJSON(PublicMethods.web_request(ReCaptchaVerificationURL, data));
+                Dictionary<string, object> res = 
+                    PublicMethods.fromJSON(PublicMethods.web_request(RaaiVanSettings.Google.Captcha.ValidationURL, data));
 
                 return PublicMethods.get_dic_value<bool>(res, "success", defaultValue: false);
             }

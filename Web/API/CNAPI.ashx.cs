@@ -2029,7 +2029,7 @@ namespace RaaiVan.Web.API
         {
             //Privacy Check: OK
             if (!paramsContainer.GBView) return;
-
+            
             if (archive.HasValue && archive.Value &&
                 !AuthorizationManager.has_right(AccessRoleName.ManageOntology, paramsContainer.CurrentUserID))
             {

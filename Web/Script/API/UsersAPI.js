@@ -143,6 +143,16 @@
         return UsersAPI._send(url, params, queryString);
     },
 
+    SignInWithGoogle: function (params) {
+        params = params || {};
+
+        var url = UsersAPI.ResponseURL + "/SignInWithGoogle?timeStamp=" + new Date().getTime();
+        var queryString = (params.GoogleToken ? "&GoogleToken=" + params.GoogleToken : "") +
+            (params.Captcha ? "&Captcha=" + params.Captcha : "") +
+            (params.InvitationID ? "&InvitationID=" + params.InvitationID : "");
+        return UsersAPI._send(url, params, queryString);
+    },
+
     CreateTemporaryUser: function (params) {
         params = params || {};
 

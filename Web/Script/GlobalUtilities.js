@@ -483,7 +483,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
             elems["arrow"].setAttribute("style", "width:0.8rem; height:0.8rem; opacity:1;" +
                 GlobalUtilities.transform_rotate(45) + arrowDivStyle + params.Style);
-            
+
             contentDiv.setAttribute("style", "padding:0.7rem; opacity:1;" + contentDivStyle + params.Style);
 
             var stk = GlobalUtilities.stick(container, elems["container"], params);
@@ -632,12 +632,12 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         var scrollTop = 0;
         if (params.Container) scrollTop = jQuery(params.Container).scrollTop() - jQuery('html, body').scrollTop();
         //A: end
-        
+
         var offset = params.Offset === 0 ? 0 : params.Offset || 100;
         var containerOffset = params.ConsiderContainerOffset ? jQuery(params.Container).offset().top : 0;
-        
+
         scrollTop = scrollTop + jQuery(_elem).offset().top - offset - containerOffset;
-        
+
         jQuery(params.Container || 'html, body').animate({ scrollTop: scrollTop }, 'slow', params.Done);
     },
 
@@ -725,7 +725,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
             var elems = GlobalUtilities.create_nested_elements([
                 {
                     Type: "div", Name: "container",
-                    Style: "display:inline-block; padding-bottom:0.6rem; padding-" + RV_Float + ":0.6rem; z-index:1000;", 
+                    Style: "display:inline-block; padding-bottom:0.6rem; padding-" + RV_Float + ":0.6rem; z-index:1000;",
                     Childs: [
                         {
                             Type: "i", Class: "fa fa-chevron-circle-up fa-3x rv-icon-button", Name: "btn", Style: "display:none;",
@@ -747,7 +747,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
     submit_form: function (params) {
         params = params || {};
-        
+
         var url = params.URL || "";
         var requestParams = params.RequestParams || {};
         var method = params.Method || "post";
@@ -851,7 +851,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
                             Attributes: !params.IsPassword ? null : [{ Name: "type", Value: "password" }]
                         }]
                     },
-                    { Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-bottom:1rem;", Name: "content"},
+                    { Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-bottom:1rem;", Name: "content" },
                     { Type: "div", Class: sideClass },
                     {
                         Type: "div", Class: "small-4 medium-4 large-4 rv-air-button rv-circle", Name: "confirm",
@@ -912,7 +912,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
             if (_div) {
                 if (GlobalUtilities.is_element_in_document(_div)) return;
-                
+
                 showedDiv = GlobalUtilities.show(_div, {
                     OnShow: function () { if ((_obj || {}).clear) _obj.clear(); }
                 });
@@ -944,7 +944,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
     sortable: function (container, options) {
         options = options || {};
-        
+
         GlobalUtilities.load_files(["jQuery/jquery.dad.js"], {
             OnLoad: function () {
                 var counter = 0;
@@ -981,7 +981,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         var bodyScroll = window.BODYSCROLL = GlobalUtilities.get_type(window.BODYSCROLL) == "undefined" ?
             document.body.style.overflow : window.BODYSCROLL;
         document.body.style.overflow = "hidden";
-        
+
         var elems = GlobalUtilities.create_nested_elements([
             {
                 Type: "div", Class: "RevDirection", Name: "container",
@@ -1043,7 +1043,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
             if (_div) jQuery(_div).fadeOut(500, function () { _dispose(tools); });
             else _dispose(tools);
         };
-        
+
         var tls = GlobalUtilities.add_to_escape_queue(elems["container"], function (tools) { hide(tools); }, { Stick: params.Stick });
 
         return { Close: function () { hide(tls); } }
@@ -1314,14 +1314,14 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
     is_search_match: function (text, searchText) {
         if ((GlobalUtilities.get_type(text) != "string") || (GlobalUtilities.get_type(searchText) != "string")) return false;
-        
+
         text = GlobalUtilities.trim(text);
         searchText = GlobalUtilities.trim(searchText);
 
         if (!searchText) return true;
 
         searchText = searchText.split(" ").filter(function (val) { return !!val; });
-        
+
         return text.split(" ")
             .filter(function (val) { return !!val; })
             .some(function (val) {
@@ -1345,6 +1345,20 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
     escape4regexp: function (str) { return String(str).replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1"); },
 
     is_url: function (str) { return /((([hH][tT][tT][pP][sS]?)|([fF][tT][pP])):\/\/[^\s<>]+)/g.test(str); },
+
+    is_js: function (url) {
+        if (!url) return false;
+        else url = String(url);
+
+        var qi = url.indexOf('?');
+        var hi = url.indexOf('#');
+        
+        if (qi > 0) url = url.substr(0, qi);
+        if (hi > 0) url = url.substr(0, hi);
+
+        var extension = url.substring(url.lastIndexOf(".") + 1, url.length);
+        return extension.toLowerCase() !== String("css");
+    },
 
     add_timestamp: function (url) {
         if (!url) return "";
@@ -1569,7 +1583,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
     help_request: function (e, name) {
         var helpEntries = window.HELPENTRIES = window.HELPENTRIES || {};
-        
+
         if (helpEntries[name]) {
             if (helpEntries[name].Showed) helpEntries[name].Showed.Close();
             return (helpEntries[name].Showed = GlobalUtilities.show(helpEntries[name]));
@@ -1599,10 +1613,10 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         var hasFunctionDataSource = GlobalUtilities.get_type(params.AjaxDataSource) == "function";
         var hasAjaxDataSource = !hasFunctionDataSource && params.AjaxDataSource &&
             params.ResponseParser && !(params.ArrayDataSource || []).length;
-        var hasArrayDataSource = !hasAjaxDataSource && (params.ArrayDataSource || []).length  ;
+        var hasArrayDataSource = !hasAjaxDataSource && (params.ArrayDataSource || []).length;
         var hasSelectOptions = (hasAjaxDataSource || hasArrayDataSource) && (params.SelectOptions !== false);
         var removeButton = !!params.OnRemove;
-        
+
         var elems = GlobalUtilities.create_nested_elements([{
             Type: "div", Class: "small-12 medium-12 large-12", Style: "position:relative;",
             Childs: [
@@ -1670,7 +1684,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
                 });
             }
         }
-        
+
         if (elems["expandButton"]) elems["expandButton"].onclick = params.OnSelectButtonClick || function () {
             if (suggestUrl && (lastUsedUrl != suggestUrl) && listViewer) {
                 listViewer.clear();
@@ -1815,13 +1829,13 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
         //Config
         CKEDITOR.config.plugins = 'bbcode,dialogui,dialog,dialogadvtab,basicstyles,' +
-                'bidi,blockquote,clipboard,button,panelbutton,panel,floatpanel,colorbutton,colordialog,' +
-                'templates,menu,contextmenu,div,resize,toolbar,elementspath,enterkey,entities,popup,' +
-                'find,fakeobjects,flash,floatingspace,listblock,richcombo,font,forms,format,' +
-                'horizontalrule,htmlwriter,iframe,wysiwygarea,indent,indentblock,indentlist,smiley,justify,' +
-                'menubutton,language,link,list,liststyle,magicline,maximize,newpage,pagebreak,pastetext,pastefromword,pastefromexcel,' +
-                'preview,removeformat,selectall,showblocks,showborders,specialchar,scayt,' +
-                'tab,table,tabletools,tableresize,undo,wsc,autogrow';
+            'bidi,blockquote,clipboard,button,panelbutton,panel,floatpanel,colorbutton,colordialog,' +
+            'templates,menu,contextmenu,div,resize,toolbar,elementspath,enterkey,entities,popup,' +
+            'find,fakeobjects,flash,floatingspace,listblock,richcombo,font,forms,format,' +
+            'horizontalrule,htmlwriter,iframe,wysiwygarea,indent,indentblock,indentlist,smiley,justify,' +
+            'menubutton,language,link,list,liststyle,magicline,maximize,newpage,pagebreak,pastetext,pastefromword,pastefromexcel,' +
+            'preview,removeformat,selectall,showblocks,showborders,specialchar,scayt,' +
+            'tab,table,tabletools,tableresize,undo,wsc,autogrow';
         CKEDITOR.config.allowedContent = { a: { attributes: 'href' }, img: { attributes: 'src', styles: 'width,height' } };
         CKEDITOR.config.skin = 'moono';
         //end of Config
@@ -2012,12 +2026,12 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
         var _change = function (p, e, value) {
             p = p || {};
-            
+
             if (processing) return;
-            
+
             img.Checked = img.checked = threeState && (value === null) ? null : !!value;
             _set_icon();
-            
+
             if (!p.StopOnChange) onchange(e);
         };
 
@@ -2160,7 +2174,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         var placeholderBGColor = (params.PlaceholderStyle || {}).BackgroundColor || { Default: null, Inactive: null, Active: null };
         var placeholderColor = (params.PlaceholderStyle || {}).Color || { Default: null, Inactive: null, Active: null };
         var placeholderFontSize = (params.PlaceholderStyle || {}).FontSize || { Default: null, Active: null };
-        
+
         var elems = GlobalUtilities.create_nested_elements([{
             Type: "div", Class: "input-anim-label-container", Name: "container",
             Childs: [{
@@ -2206,7 +2220,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
                     "background-color": placeholderBGColor.Default ? placeholderBGColor.Default : "",
                     "color": placeholderColor.Default || "rgb(150,150,150)",
                     "font-size": placeholderFontSize.Default ? placeholderFontSize.Default : ""
-                }); 
+                });
             }
         };
 
@@ -2218,7 +2232,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         if ((window.Object || {}).getOwnPropertyDescriptor) {
             var descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
             var originalSet = descriptor.set;
-            
+
             descriptor.set = function (val) {
                 originalSet.apply(this, arguments);
                 set_state();
@@ -2226,7 +2240,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
 
             Object.defineProperty(elems["input"], "value", descriptor);
         }
-        
+
         elems["container"].Input = elems["input"];
 
         if (params.Value) elems["input"].value = params.Value;
@@ -2299,7 +2313,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
             retJson.to_view_mode();
             if (GlobalUtilities.get_type(params.Save) == "function") params.Save(title);
         };
-        
+
         if (editable) {
             jQuery(elems["input"]).on('blur', save);
 
@@ -2357,12 +2371,12 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
             (params.HideChannel ? '' : '<path style="fill:none; stroke:' + (params.ChannelColor || '#eee') + '; stroke-width:3.8;" ' +
                 'd="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />') +
             '<path id="' + lineId + '" style="fill:none; stroke-width:2.8; stroke-linecap:round; stroke:' + (params.Color || "#ff9f00") + ';' +
-                (params.Animate ? 'animation: progress ' + (params.Duration || '1') + 's ease-out forwards;' : '') + '" ' +
-                'd="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" ' +
-                'stroke-dasharray="' + get_value(params.Value || "0") + ', 100" />' +
+            (params.Animate ? 'animation: progress ' + (params.Duration || '1') + 's ease-out forwards;' : '') + '" ' +
+            'd="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" ' +
+            'stroke-dasharray="' + get_value(params.Value || "0") + ', 100" />' +
             '<text id="' + labelId + '" x="18" y="' + (RV_RTL ? '22' : '20.35') + '" ' +
-                'style="fill:' + (params.TextColor || '#666') + '; ' +
-                'font-size:' + (params.TextSize) + 'rem; text-anchor: middle;">' + lbl + '</text>' +
+            'style="fill:' + (params.TextColor || '#666') + '; ' +
+            'font-size:' + (params.TextSize) + 'rem; text-anchor: middle;">' + lbl + '</text>' +
             '</svg></div>';
 
         return {
@@ -2371,6 +2385,90 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
                 jQuery("#" + labelId).html(GlobalUtilities.convert_numbers_to_persian(label));
             }
         };
+    },
+
+    append_google_login_button: function (container, options) {
+        options = options || {};
+
+        if (!(RVGlobal || {}).GoogleSignInClientID) return;
+
+        var doSignIn = function (idToken, captchaToken) {
+            UsersAPI.SignInWithGoogle({
+                GoogleToken: idToken, Captcha: captchaToken, InvitationID: options.InvitationID, ParseResults: true,
+                ResponseHandler: function (result) {
+                    if (result.ErrorText) alert(RVDic.MSG[result.ErrorText] || result.ErrorText);
+                    else {
+                        GlobalUtilities.logged_in(result);
+                        window.location.href = window.location.href;
+                    }
+                }
+            });
+        };
+
+        var processing = false;
+
+        var onLoad = function (recaptchaObj) {
+            var btn = GlobalUtilities.create_nested_elements([{
+                Type: "div", Class: "rv-action-button-base rv-action-button-o rv-border-radius-quarter rv-red",
+                Style: "height:3rem;", Name: "btn",
+                Childs: [
+                    {
+                        Type: "i", Class: "fa fa-google", Style: "margin-" + RV_RevFloat + ":0.5rem;",
+                        Attributes: [{ Name: "aria-hidden", Value: true }]
+                    },
+                    { Type: "text", TextValue: RVDic.SignInWithGoogle }
+                ]
+            }], container)["btn"];
+
+            btn.onclick = function () {
+                if (processing) return;
+                processing = true;
+
+                var settings = {
+                    client_id: RVGlobal.GoogleSignInClientID,
+                    scope: 'email profile',
+                    response_type: 'id_token permission'
+                };
+
+                gapi.auth2.authorize(settings, function (result) {
+                    if (result.error)
+                        alert(RVDic.MSG.LoginFailed);
+                    else {
+                        if ((recaptchaObj || {}).getToken)
+                            recaptchaObj.getToken(token => doSignIn(result.id_token, token));
+                        else doSignIn(result.id_token);
+                    }
+
+                    processing = false;
+                });
+            };
+        };
+
+        GlobalUtilities.load_files(["API/UsersAPI.js", "https://apis.google.com/js/platform.js"], {
+            OnLoad: () => gapi.load('auth2', () => GlobalUtilities.init_recaptcha(onLoad))
+        });
+    },
+
+    init_recaptcha: function (callback) {
+        if (GlobalUtilities.get_type(callback) != "function") callback = function () { };
+
+        if (!(window.RVGlobal || {}).CaptchaSiteKey || !(window.RVGlobal || {}).CaptchaURL)
+            return callback(null);
+
+        GlobalUtilities.load_files([RVGlobal.CaptchaURL], {
+            OnLoad: function () {
+                callback({
+                    getToken: function (done) {
+                        if (GlobalUtilities.get_type(done) != "function") done = function () { };
+
+                        grecaptcha.ready(function () {
+                            grecaptcha.execute(RVGlobal.CaptchaSiteKey, { action: 'submit' })
+                                .then(token => done(token));
+                        });
+                    }
+                });
+            }
+        });
     },
 
     get_side_panel: function (rev, done) {
@@ -2785,6 +2883,12 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         window.open(page + requestParams);
     },
 
+    logged_in: function (data) {
+        window.IsAuthenticated = true;
+        RVAPI.LoggedIn();
+        GlobalUtilities.set_auth_cookie((data || {}).AuthCookie);
+    },
+
     set_auth_cookie: function (authCookie) {
         var name = Base64.decode((authCookie || {}).Name);
         var value = Base64.decode((authCookie || {}).Value);
@@ -3017,27 +3121,25 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
                 }
             });
         };
-
+        
         files.forEach(f => GlobalUtilities.get_type(f) == "json" ? _tree2array(f) : _newFiles.push(f));
         
         files = _newFiles.map(f => {
             var _fname = String(f).toLowerCase();
-            var isJs = _fname.substring(_fname.lastIndexOf(".") + 1, _fname.length) !== String("css");
-
+            
             if (!GlobalUtilities.is_url(_fname) && !_prefixRegExp().test(_fname))
-                return isJs ? GlobalUtilities.js(f) : GlobalUtilities.css(f);
+                return GlobalUtilities.is_js(_fname) ? GlobalUtilities.js(f) : GlobalUtilities.css(f);
             else return f;
         });
         //end of clarify files
-
-
+        
         if (params.LoadSequential && (files.length > 1)) {
             return GlobalUtilities.load_files([files[0]], GlobalUtilities.extend({}, params || {}, {
                 LoadSequential: false,
                 OnLoad: function () { GlobalUtilities.load_files(files.filter((f, ind) => ind > 0), params); }
             }));
         }
-
+        
         var onLoadCalled = false;
 
         var check_file = function (file, loaded) {
@@ -3053,15 +3155,12 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
             if (file && !loaded) console.error("Loading file '" + file + "' failed!");
             return false;
         };
-
+        
         if (check_file()) return;
-
+        
         files.map(f => (f || {}).File || f).forEach(f => {
-            var extension = f.substring(f.lastIndexOf(".") + 1, f.length);
-            var isJs = extension.toLowerCase() !== String("css");
-
-            isJs ? DynamicFileUtilities.load_js(f, (r) => check_file(f, r)) :
-                DynamicFileUtilities.load_css(f, (r) => check_file(f, r));
+            if (GlobalUtilities.is_js(f)) DynamicFileUtilities.load_js(f, (r) => check_file(f, r));
+            else DynamicFileUtilities.load_css(f, (r) => check_file(f, r));
         });
     }
 };
@@ -3125,19 +3224,13 @@ if (!window.DynamicFileUtilities) window.DynamicFileUtilities = {
 
         DynamicFileUtilities.AddedFiles[fileName] = { Exists: false, Error: false };
 
-        if (GlobalUtilities.is_url(fileName)) {
-            document.getElementsByTagName("head")[0].appendChild(DynamicFileUtilities._create_js_file_object(fileName));
-            callback(true);
-        }
-        else {
-            document.getElementsByTagName("head")[0]
-                .appendChild(DynamicFileUtilities._create_js_file_object(fileName, null, function (loaded) {
-                    if (loaded) DynamicFileUtilities.AddedFiles[fileName].Exists = true;
-                    else DynamicFileUtilities.AddedFiles[fileName].Error = true;
+        document.getElementsByTagName("head")[0]
+            .appendChild(DynamicFileUtilities._create_js_file_object(fileName, null, function (loaded) {
+                if (loaded) DynamicFileUtilities.AddedFiles[fileName].Exists = true;
+                else DynamicFileUtilities.AddedFiles[fileName].Error = true;
 
-                    callback(loaded);
-                }));
-        }
+                callback(loaded);
+            }));
     },
 
     load_css: function (fileName, callback) {

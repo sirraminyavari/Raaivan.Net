@@ -4,19 +4,24 @@
     window.UserSignUp = function () {
         var that = this;
 
+        this.Objects = {
+            ReCaptcha: null
+        };
+
         GlobalUtilities.load_files(["API/UsersAPI.js", "API/CNAPI.js", "USR/ChangePasswordDialog.js"], {
             OnLoad: function () {
                 UsersAPI.GetPasswordPolicy({
                     ParseResults: true,
                     ResponseHandler: function (result) {
-                        that.initialize(result);
+                        GlobalUtilities.init_recaptcha(function (obj) {
+                            that.Objects.ReCaptcha = obj;
+                            that.initialize(result);
+                        });
                     }
                 });
             }
         });
     }
-
-    var __UserNames = {};
 
     UserSignUp.prototype = {
         initialize: function (passwordPolicy) {
@@ -144,29 +149,35 @@
                 GlobalUtilities.block(elems["signUpButton"]);
                 _processing = true;
 
-                var reqParams = GlobalUtilities.request_params();
-                
-                UsersAPI.CreateUserToken({
-                    FirstName: Base64.encode(firstname),
-                    LastName: Base64.encode(lastname),
-                    Contact: email,
-                    Password: Base64.encode(password),
-                    InvitationID: reqParams.get_value("inv"),
-                    ParseResults: true,
-                    ResponseHandler: function (results) {
-                        if (results.ErrorText) alert(RVDic.MSG[results.ErrorText] || results.ErrorText, { Timeout: 20000 });
-                        else if (results.VerificationCode) {
-                            confirmationToken = results.VerificationCode.Token;
-                            confirmationCodeLength = results.VerificationCode.Length;
+                var _do_get_token = function (captchaToken) {
+                    var reqParams = GlobalUtilities.request_params();
+                    
+                    UsersAPI.CreateUserToken({
+                        FirstName: Base64.encode(firstname),
+                        LastName: Base64.encode(lastname),
+                        Contact: email,
+                        Password: Base64.encode(password),
+                        Captcha: captchaToken,
+                        InvitationID: reqParams.get_value("inv"),
+                        ParseResults: true,
+                        ResponseHandler: function (results) {
+                            if (results.ErrorText) alert(RVDic.MSG[results.ErrorText] || results.ErrorText, { Timeout: 20000 });
+                            else if (results.VerificationCode) {
+                                confirmationToken = results.VerificationCode.Token;
+                                confirmationCodeLength = results.VerificationCode.Length;
 
-                            jQuery(elems["dataSection"]).fadeOut(200, function () { jQuery(elems["codeSection"]).fadeIn(500); });
+                                jQuery(elems["dataSection"]).fadeOut(200, function () { jQuery(elems["codeSection"]).fadeIn(500); });
+                            }
+
+                            GlobalUtilities.unblock(elems["signUpButton"]);
+                            _processing = false;
                         }
+                    });
+                };
 
-                        GlobalUtilities.unblock(elems["signUpButton"]);
-                        _processing = false;
-                    }
-                });
-            }
+                if (!that.Objects.ReCaptcha) _do_get_token();
+                else that.Objects.ReCaptcha.getToken(token => _do_get_token(token));
+            };
 
             elems["confirmButton"].onclick = function () {
                 if (_processing) return;
@@ -183,8 +194,7 @@
                         console.log(result);
                         if (result.ErrorText) alert(RVDic.MSG[result.ErrorText] || result.ErrorText);
                         else if (result.AuthCookie) {
-                            RVAPI.LoggedIn();
-                            GlobalUtilities.set_auth_cookie(result.AuthCookie);
+                            GlobalUtilities.logged_in(result);
                             window.location.href = window.location.href;
                         }
                     }

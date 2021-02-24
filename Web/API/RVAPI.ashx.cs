@@ -232,7 +232,7 @@ namespace RaaiVan.Web.API
                                 "window.IsAuthenticated = " + paramsContainer.IsAuthenticated.ToString().ToLower() + "; " +
                                 "document.title = Base64.decode(window.RVGlobal.SystemTitle); ";
 
-                            if (!string.IsNullOrEmpty(RaaiVanSettings.GATrackingID(paramsContainer.ApplicationID)))
+                            if (!string.IsNullOrEmpty(RaaiVanSettings.Google.GATrackingID))
                             {
                                 responseText += "(function (i, s, o, g, r, a, m) {" +
                                     "i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {" +
@@ -240,7 +240,7 @@ namespace RaaiVan.Web.API
                                     "}, i[r].l = 1 * new Date(); a = s.createElement(o)," +
                                     "m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)" +
                                     "})(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');" +
-                                    "ga('create', 'UA-" + RaaiVanSettings.GATrackingID(paramsContainer.ApplicationID) + "', 'auto');" +
+                                    "ga('create', 'UA-" + RaaiVanSettings.Google.GATrackingID + "', 'auto');" +
                                     "ga('send', 'pageview');";
                             }
                         }
@@ -558,6 +558,16 @@ namespace RaaiVan.Web.API
             response["LogoMiniURL"] = RaaiVanSettings.LogoMiniURL;
 
             response["IsDev"] = PublicMethods.is_dev();
+
+            if (!string.IsNullOrEmpty(RaaiVanSettings.Google.Captcha.SiteKey) && 
+                !string.IsNullOrEmpty(RaaiVanSettings.Google.Captcha.URL))
+            {
+                response["CaptchaURL"] = RaaiVanSettings.Google.Captcha.URL;
+                response["CaptchaSiteKey"] = RaaiVanSettings.Google.Captcha.SiteKey;
+            }
+
+            if (!string.IsNullOrEmpty(RaaiVanSettings.Google.SignInClientID))
+                response["GoogleSignInClientID"] = RaaiVanSettings.Google.SignInClientID;
 
             if (isAuthenticated)
             {

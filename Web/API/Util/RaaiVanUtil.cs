@@ -249,9 +249,9 @@ namespace RaaiVan.Web.API
             int sessionTimeout = (RaaiVanSettings.MaxAllowedInactiveTimeInSeconds(applicationId) / 60);
             context.Session.Timeout = sessionTimeout == 0 ? 1440 : sessionTimeout; //1440 minutes equals a day
             
-            AccessTokenList.new_token(HttpContext.Current); //When someone logs in, at least one token must exist
+            AccessTokenList.new_token(context); //When someone logs in, at least one token must exist
 
-            still_logged_in(applicationId, userId, HttpContext.Current, true);
+            still_logged_in(applicationId, userId, context, true);
 
             set_session_expiration_time(context, authCookieLifeTime);
         }

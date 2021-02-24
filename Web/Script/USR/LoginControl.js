@@ -191,7 +191,7 @@
                             Style: "margin:1rem 0 0.5rem 0; overflow:hidden; height:3rem; font-size:1.2rem;",
                             Childs: [
                                 {
-                                    Type: "div", Style: "text-align-center; margin:0 auto; height:100%;",
+                                    Type: "div", Style: "margin:0 auto; height:100%;",
                                     Class: (!ssoUrl ? "small-12 medium-12 large-12" : "small-6 medium-6 large-6"),
                                     Childs: [
                                         {
@@ -220,6 +220,9 @@
                                 })
                             ]
                         },
+                        (!(window.RVGlobal || {}).GoogleSignInClientID ? null : {
+                            Type: "div", Class: "small-12 medium-12 large-12", Name: "loginWithGoogle", Style: "margin-top:0.5rem;"
+                        }),
                         {
                             Type: "div", Class: "small-12 medium-12 large-12 row", Style: "margin:0rem; font-size:0.8rem;",
                             Childs: [
@@ -250,6 +253,12 @@
             that.Interface.UserName = elems["usernameInput"].Input;
             that.Interface.Password = elems["passwordInput"].Input;
             that.Interface.Captcha = elems["captcha"];
+
+            if (elems["loginWithGoogle"]) {
+                GlobalUtilities.append_google_login_button(elems["loginWithGoogle"], {
+                    InvitationID: that.Objects.InvitationID
+                });
+            }
 
             if (that.Options.UseCaptcha) {
                 that.Objects.Captcha = that.Objects.Captcha = new CaptchaImage(that.Interface.Captcha, {
@@ -399,11 +408,7 @@
         logged_in: function (data) {
             var that = this;
 
-            window.IsAuthenticated = true;
-
-            RVAPI.LoggedIn();
-
-            GlobalUtilities.set_auth_cookie(data.AuthCookie);
+            GlobalUtilities.logged_in(data);
 
             that.on_login(data, function () {
                 window.location.href = that.Options.ReturnURL || window.location.href;
