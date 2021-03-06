@@ -6,6 +6,7 @@
             PotentialCSRFAttack: "حمله احتمالی CSRF",
             PotentialReplayAttack: "حمله احتمالی تکرار",
             JobStarted: "آغاز پردازش دوره ای",
+            JobDone: "پردازش دوره ای انجام شد",
             //////////--> end of RV <--//////////
 
             //////////--> CN <--//////////

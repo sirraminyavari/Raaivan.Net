@@ -780,8 +780,22 @@ namespace RaaiVan.Modules.GlobalUtilities
         public static RVLang get_current_language(Guid? applicationId = null)
         {
             object l = null;
-            if (HttpContext.Current != null && HttpContext.Current.Session != null)
+
+            //get lang from cookie
+            if (HttpContext.Current != null && HttpContext.Current.Request != null &&
+                HttpContext.Current.Request.Cookies != null)
+            {
+                RVLang lng = RVLang.none;
+                HttpCookie ck = HttpContext.Current.Request.Cookies.Get(PublicConsts.LanguageSessionVariableName);
+
+                if (ck != null && Enum.TryParse<RVLang>(ck.Value, out lng) && lng != RVLang.none) l = lng;
+                else l = null;
+            }
+
+            //get lang from session
+            if (l == null && HttpContext.Current != null && HttpContext.Current.Session != null)
                 l = HttpContext.Current.Session[PublicConsts.LanguageSessionVariableName];
+
             return l != null && l.GetType() == typeof(RVLang) ? (RVLang)l : RaaiVanSettings.DefaultLang(applicationId);
         }
 

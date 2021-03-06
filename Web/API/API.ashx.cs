@@ -766,7 +766,7 @@ namespace RaaiVan.Web.API
             
             if (!appId.HasValue || appId == Guid.Empty || options == null || string.IsNullOrEmpty(name)) return;
 
-            switch (((string)options["name"]).ToLower())
+            switch (name.ToLower())
             {
                 case "extract_file_contents":
                     {
@@ -804,9 +804,31 @@ namespace RaaiVan.Web.API
                 case "remove_temporary_files":
                     (new DocsAPI()).remove_temporary_files(appId.Value);
                     break;
+                default:
+                    name = null;
+                    break;
             }
 
-            responseText = "{\"result\":\"ok\"}";
+            if (string.IsNullOrEmpty(name))
+                responseText = "{\"result\":\"nok\",\"message\":\"job not found\"}";
+            else {
+                responseText = "{\"result\":\"ok\"}";
+
+                if (appId.HasValue)
+                {
+                    LogController.save_log(appId, new Log()
+                    {
+                        UserID = paramsContainer.CurrentUserID.Value,
+                        Date = DateTime.Now,
+                        HostAddress = PublicMethods.get_client_ip(HttpContext.Current),
+                        HostName = PublicMethods.get_client_host_name(HttpContext.Current),
+                        Action = Modules.Log.Action.JobDone,
+                        SubjectID = appId.Value,
+                        Info = "{\"Name\":\"" + name + "\"}",
+                        ModuleIdentifier = ModuleIdentifier.RV
+                    });
+                }
+            }
         }
         
         public bool IsReusable

@@ -127,6 +127,14 @@
             this.post(this.EndPoints.API + "get_nodes", data, callback);
         },
 
+        get_all_applications: function (data, callback) {
+            RAPI.post(RAPI.EndPoints.API + "get_all_applications", data, callback);
+        },
+
+        run_job: function (data, callback) {
+            RAPI.post(RAPI.EndPoints.API + "run_job", data, callback);
+        },
+
         //Knowledge EndPoint
 
         send_node_to_admin: function (data, callback) {

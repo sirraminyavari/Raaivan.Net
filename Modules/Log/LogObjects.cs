@@ -42,6 +42,7 @@ namespace RaaiVan.Modules.Log
         PotentialCSRFAttack,
         PotentialReplayAttack,
         JobStarted,
+        JobDone,
         CreateApplication,
         ModifyApplication,
         RemoveApplication,
