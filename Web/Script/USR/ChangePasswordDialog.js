@@ -160,11 +160,11 @@
             }].concat([
                 (!settings.MinLength ? null : {
                     Name: "pwdMinLength",
-                    Title: RVDic.PasswordPolicyMinLength.replace("n", settings.MinLength || "0")
+                    Title: RVDic.PasswordPolicyMinLength.replace("[n]", settings.MinLength || "0")
                 }),
                 (isFirstPassword || !settings.NewCharacters || (settings.NewCharacters < 2) ? null : {
                     Name: "pwdNewCharacters",
-                    Title: RVDic.PasswordPolicyNewCharacters.replace("n", settings.NewCharacters || "0")
+                    Title: RVDic.PasswordPolicyNewCharacters.replace("[n]", settings.NewCharacters || "0")
                 }),
                 (!settings.UpperLower ? null : { Name: "pwdUpperLower", Title: RVDic.PasswordPolicyUpperLower }),
                 (!settings.NonAlphabetic ? null : { Name: "pwdNonAlphabetic", Title: RVDic.PasswordPolicyNonAlphabetic }),
