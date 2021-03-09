@@ -18,6 +18,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             if (RaaiVanSettings.SAASBasedMultiTenancy)
             {
+                return !string.IsNullOrEmpty(input) && input.Length > 100; //google validation API doesn't work with Iran's IP
+
                 if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(RaaiVanSettings.Google.Captcha.SecretKey) || 
                     string.IsNullOrEmpty(RaaiVanSettings.Google.Captcha.ValidationURL)) return false;
 
