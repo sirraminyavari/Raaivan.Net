@@ -767,6 +767,7 @@
         User: "کاربر",
         UserConfidentialities: "سطوح محرمانگی کاربران",
         UserName: "نام کاربری",
+        UserNameOrEmail: "نام کاربری یا پست الکترونیکی",
         Users: "کاربران",
         UserSelect: "انتخاب کاربر",
         UsersSelect: "انتخاب کاربران",

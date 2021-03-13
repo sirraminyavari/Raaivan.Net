@@ -179,6 +179,8 @@ namespace RaaiVan.Modules.Users
         
         public static bool check_password_policy(Guid? applicationId, string password, string oldPassword, ref string errorMessage)
         {
+            if (string.IsNullOrEmpty(password)) password = string.Empty;
+
             bool meetsLength = password.Length >= Math.Max(1, RaaiVanSettings.Users.PasswordPolicy.MinLength(applicationId));
             bool meetsNewCharacters = oldPassword == null || PublicMethods.diff(password, oldPassword).Length >= 
                 RaaiVanSettings.Users.PasswordPolicy.NewCharacters(applicationId);
@@ -526,6 +528,14 @@ namespace RaaiVan.Modules.Users
         public string Number;
         public PhoneType PhoneType;
         public bool? IsMain;
+
+        public string toJson() {
+            return "{\"NumberID\":\"" + (!NumberID.HasValue ? string.Empty : NumberID.ToString()) + "\"" +
+                ",\"Number\":\"" + Base64.encode(Number) + "\"" +
+                ",\"Type\":\"" + (PhoneType == PhoneType.NotSet ? string.Empty : PhoneType.ToString()) + "\"" +
+                (!IsMain.HasValue || !IsMain.Value ? string.Empty : ",\"IsMain\":" + IsMain.ToString().ToLower()) +
+                "}";
+        }
     }
 
     public class EmailAddress
@@ -534,6 +544,13 @@ namespace RaaiVan.Modules.Users
         public Guid? UserID;
         public string Address;
         public bool? IsMain;
+
+        public string toJson() {
+            return "{\"EmailID\":\"" + (!EmailID.HasValue ? string.Empty : EmailID.ToString()) + "\"" +
+                ",\"Email\":\"" + Base64.encode(Address) + "\"" +
+                (!IsMain.HasValue || !IsMain.Value ? string.Empty : ",\"IsMain\":" + IsMain.ToString().ToLower()) +
+                "}";
+        }
     }
 
     public class EmailContactStatus

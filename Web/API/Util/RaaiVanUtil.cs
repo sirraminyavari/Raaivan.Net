@@ -491,7 +491,7 @@ namespace RaaiVan.Web.API
             }
 
             after_login_procedures(applicationId, userId.Value, rememberMe.HasValue && rememberMe.Value,
-                invitationId, loggedInWithActiveDirectory, ref context, ref authCookie);
+                invitationId, loggedInWithActiveDirectory, context, ref authCookie);
 
             return true;
         }
@@ -515,13 +515,13 @@ namespace RaaiVan.Web.API
             userId = twoStepToken.UserID.Value;
 
             after_login_procedures(applicationId, twoStepToken.UserID.Value, rememberMe.HasValue && rememberMe.Value,
-                invitationId, !twoStepToken.WasNormalUserPassLogin, ref context, ref authCookie);
+                invitationId, !twoStepToken.WasNormalUserPassLogin, context, ref authCookie);
 
             return true;
         }
 
         public static void after_login_procedures(Guid? tenantId, Guid userId, bool rememberMe, Guid? invitationId,
-            bool loggedInWithActiveDirectory, ref HttpContext context, ref string authCookie) {
+            bool loggedInWithActiveDirectory, HttpContext context, ref string authCookie) {
             bool isSystemAdmin = PublicMethods.is_system_admin(tenantId, userId, true);
 
             logged_in(tenantId, context, userId, rememberMe, isSystemAdmin, ref authCookie);

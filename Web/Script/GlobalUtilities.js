@@ -2151,7 +2151,7 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         var _check = function (item) {
             var obj = item.Input || item;
 
-            if (obj.value.length == 0 || obj.value == (item.InnerTitle || "")) obj.style.backgroundColor = "rgba(255, 231, 231, 1)";
+            if (obj.value.length == 0) obj.style.backgroundColor = "rgba(255, 231, 231, 1)";
             else obj.style.backgroundColor = "white";
         }
 

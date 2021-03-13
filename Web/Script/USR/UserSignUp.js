@@ -191,7 +191,6 @@
                 UsersAPI.ValidateUserCreation({
                     VerificationToken: confirmationToken, Code: code, Login: true, ParseResults: true,
                     ResponseHandler: function (result) {
-                        console.log(result);
                         if (result.ErrorText) alert(RVDic.MSG[result.ErrorText] || result.ErrorText);
                         else if (result.AuthCookie) {
                             GlobalUtilities.logged_in(result);

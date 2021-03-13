@@ -505,187 +505,185 @@
         show_forget_password_form: function () {
             var that = this;
 
-            var userNameInnerTitle = ((window.RVDic || {}).UserName || "UserName") + "...";
-            var emailInnerTitle = ((window.RVDic || {}).Email || "Email") + "...";
+            var dlg = that.SHOWED_PASS_RESET_DIALOG = that.SHOWED_PASS_RESET_DIALOG || { Container: null, Showed: null };
 
-            var elems = GlobalUtilities.create_nested_elements([{
-                Type: "div", Name: "container",
-                Class: "small-10 medium-6 large-4 rv-border-radius-1 SoftBackgroundColor",
-                Style: "margin:0rem auto; padding:1rem;",
-                Childs: [
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12",
-                        Style: "font-weight:bold; text-align:center;",
-                        Childs: [{ Type: "text", TextValue: window.RVDic["ResendPassword"] || "ResendPassword" }]
-                    },
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:1rem;",
-                        Childs: [
-                            {
-                                Type: "input", Class: "rv-input", Style: "width:100%;",
-                                InnerTitle: userNameInnerTitle, Name: "userNameInput",
-                                Attributes: [{ Name: "type", Value: "text" }]
-                            }
-                        ]
-                    },
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:1rem;",
-                        Childs: [
-                            {
-                                Type: "input", Name: "emailInput", Class: "rv-input", Style: "width:100%;",
-                                InnerTitle: emailInnerTitle,
-                                Attributes: [{ Name: "type", Value: "text" }],
-                                Properties: [
-                                    {
-                                        Name: "onkeyup",
-                                        Value: function () { this.style.direction = (GlobalUtilities.textdirection(this.value) || ''); }
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        Type: "div", Name: "sendButton",
-                        Class: "small-10 medium-8 large-6 ActionButton",
-                        Style: "margin:1rem auto 0rem auto; font-weight:bold;",
-                        Properties: [{ Name: "onclick", Value: function () { sendTicket(); } }],
-                        Childs: [{ Type: "text", TextValue: ((window.RVDic || {}).Send || "Send") }]
-                    }
-                ]
-            }]);
+            if (dlg.Container) {
+                dlg.Showed = GlobalUtilities.show(dlg.Container);
+                return;
+            }
+
+            var _div = dlg.Container = GlobalUtilities.create_nested_elements([{
+                Type: "div", Class: "small-10 medium-6 large-4 rv-border-radius-1 SoftBackgroundColor",
+                Style: "margin:0 auto; padding:1rem;", Name: "_div"
+            }])["_div"];
+
+            GlobalUtilities.loading(_div);
+            dlg.Showed = GlobalUtilities.show(_div);
+
+            GlobalUtilities.load_files(["USR/ChangePasswordDialog.js"], {
+                OnLoad: function () {
+                    UsersAPI.GetPasswordPolicy({
+                        ParseResults: true,
+                        ResponseHandler: function (passwordPolicy) {
+                            _div.innerHTML = "";
+
+                            that._show_forget_password_form(_div, passwordPolicy, () => {
+                                dlg.Showed.Close();
+                            });
+                        }
+                    });
+                }
+            });
+        },
+
+        _show_forget_password_form: function (container, passwordPolicy, close) {
+            var that = this;
+
+            var elems = GlobalUtilities.create_nested_elements([
+                {
+                    Type: "div", Class: "small-12 medium-12 large-12",
+                    Style: "font-weight:bold; text-align:center;",
+                    Childs: [{ Type: "text", TextValue: window.RVDic["ResendPassword"] || "ResendPassword" }]
+                },
+                {
+                    Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:1rem;",
+                    Childs: [{
+                        Type: "input", Class: "rv-input", Style: "width:100%;",
+                        InnerTitle: RVDic.UserNameOrEmail, Name: "userNameInput"
+                    }]
+                },
+                {
+                    Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:1rem;",
+                    Childs: [{
+                        Type: "input", Name: "passwordInput", Class: "rv-input", Style: "width:100%;", InnerTitle: RVDic.NewPassword,
+                        Attributes: [{ Name: "type", Value: "password" }]
+                    }]
+                },
+                {
+                    Type: "div", Class: "small-12 medium-12 large-12 row", Name: "policyContainer",
+                    Style: "margin:0.5rem 0 0 0; display:none;",
+                    Childs: [{ Type: "div", Name: "passPolicy", Style: "padding-" + RV_Float + ":0.5rem;" }]
+                },
+                {
+                    Type: "div", Name: "sendButton",
+                    Class: "small-10 medium-8 large-6 ActionButton",
+                    Style: "margin:1rem auto 0rem auto; font-weight:bold;",
+                    Properties: [{ Name: "onclick", Value: function () { sendTicket(); } }],
+                    Childs: [{ Type: "text", TextValue: RVDic.GetConfirmationCode }]
+                }
+            ], container);
 
             var sendButton = elems["sendButton"];
             var userNameInput = elems["userNameInput"];
-            var emailInput = elems["emailInput"];
+            var passwordInput = elems["passwordInput"];
 
-            GlobalUtilities.necessary_input({ Input: userNameInput, InnerTitle: userNameInnerTitle });
-            var showedDiv = GlobalUtilities.show(elems["container"]);
+            GlobalUtilities.necessary_input({ Input: userNameInput });
+
+            //Check Password Policy
+            var policyChecker = (new ChangePasswordDialog()).password_policy_checker(elems["passPolicy"], passwordPolicy, true);
+
+            jQuery(passwordInput).focus(function () {
+                if (elems["policyContainer"].style.display == "none")
+                    jQuery(elems["policyContainer"]).animate({ 'height': 'toggle' }, 500);
+            });
+
+            jQuery(passwordInput).focusout(function () {
+                if (elems["policyContainer"].style.display != "none")
+                    jQuery(elems["policyContainer"]).animate({ 'height': 'toggle' }, 500);
+            });
+
+            jQuery(passwordInput).keyup(function () {
+                var val = passwordInput.value;
+                var isValid = policyChecker.check(val);
+
+                passwordInput.classList[isValid ? "remove" : "add"]("rv-input-invalid");
+            });
+            //end of Check Password Policy
 
             var sendTicket = function () {
                 var username = GlobalUtilities.trim(userNameInput.value);
-                var email = GlobalUtilities.trim(emailInput.value);
+                var password = GlobalUtilities.trim(passwordInput.value);
 
                 if (!username) return alert(RVDic.Checks.PleaseEnterYourUserName);
                 else {
                     GlobalUtilities.block(sendButton);
 
+                    that.send_pass_reset_request(username, password, (succeed) => {
+                        GlobalUtilities.unblock(sendButton);
+                        if (succeed) close();
+                    });
+                }
+            };
+        },
+
+        send_pass_reset_request: function (username, password, callback) {
+            var that = this;
+
+            var succeed = false;
+
+            GlobalUtilities.init_recaptcha(function (captcha) {
+                captcha.getToken(token => {
                     UsersAPI.SetPasswordResetTicket({
                         UserName: Base64.encode(GlobalUtilities.secure_string(username)),
-                        Email: Base64.encode(GlobalUtilities.secure_string(email)), ParseResults: true,
+                        Password: Base64.encode(GlobalUtilities.secure_string(password)),
+                        InvitationID: that.Options.InvitationID,
+                        Captcha: token,
+                        ParseResults: true,
                         ResponseHandler: function (result) {
                             if (result.ErrorText) alert(RVDic.MSG[result.ErrorText] || result.ErrorText);
-                            else if (result.Succeed) {
-                                showedDiv.Close();
-                                alert(RVDic.MSG["AnEmailContainingPasswordResetLinkSentToYou"]);
+                            else if (result.VerificationCode) {
+                                succeed = true;
+                                that.show_reset_password_form(result.VerificationCode);
                             }
-                            GlobalUtilities.unblock(sendButton);
+                            else if (result.Email && result.Phone) {
+                                that.pass_reset_contact_select(result, (contact) => {
+                                    if (!contact) callback(false);
+                                    else that.send_pass_reset_request(contact, password, callback);
+                                });
+                            }
+
+                            callback(succeed);
+                        }
+                    });
+                });
+            });
+        },
+
+        pass_reset_contact_select: function (data, callback) {
+            var that = this;
+
+            //implement later
+            callback();
+        },
+
+        show_reset_password_form: function (verificationCode) {
+            var that = this;
+
+            var vcd = GlobalUtilities.verification_code_dialog(verificationCode, {
+                Message: RVDic.MSG.AnAuthenticationCodeHasBeenSentToYourNWithValueM,
+                HideCancelButton: true,
+                Callback: function (d, done) {
+                    if (!d) return;
+                    
+                    UsersAPI.SetPassword({
+                        VerificationToken: d.Token, Code: d.Code, Login: true, ParseResults: true,
+                        ResponseHandler: function (result) {
+                            if (result.ErrorText) {
+                                alert(RVDic.MSG[result.ErrorText] || result.ErrorText, null, function () {
+                                    that.clear();
+                                    done(false);
+                                    if (result.CodeDisposed) vcd.Close();
+                                });
+                            }
+                            else if (result.Succeed) {
+                                GlobalUtilities.logged_in(result);
+                                window.location.href = window.location.href;
+                                done(true);
+                            }
                         }
                     });
                 }
-            }
-        },
-
-        show_reset_password_form: function (passwordTicket, userName) {
-            var that = this;
-            if (!passwordTicket || !userName) return;
-
-            var elems = GlobalUtilities.create_nested_elements([{
-                Type: "div", Name: "container",
-                Class: "small-10 medium-8 large-4 rv-border-radius-1 SoftBackgroundColor",
-                Style: "margin:0rem auto; padding:1rem;",
-                Childs: [
-                    {
-                        Type: "div", Class: "small-12 meidium-12 large-12",
-                        Style: "font-weight:bold; text-align:center;",
-                        Childs: [{ Type: "text", TextValue: RVDic["ResetPassword"] || "ResetPassword" }]
-                    },
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:1rem;",
-                        Childs: [
-                            {
-                                Type: "input", Class: "rv-input", Style: "width:100%;",
-                                InnerTitle: passwordInnerTitle, Name: "passwordInput",
-                                Attributes: [{ Name: "type", Value: "text" }]
-                            }
-                        ]
-                    },
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:1rem;",
-                        Childs: [
-                            {
-                                Type: "input", Class: "rv-input", Style: "width:100%;",
-                                InnerTitle: passwordInnerTitle, Name: "passwordConfirmInput",
-                                Attributes: [{ Name: "type", Value: "text" }]
-                            }
-                        ]
-                    },
-                    {
-                        Type: "div", Name: "setPasswordButton",
-                        Class: "small-10 medium-8 large-6 ActionButton",
-                        Style: "margin:1rem auto 0rem auto; font-weight:bold;",
-                        Childs: [{ Type: "text", TextValue: ((window.RVDic || {}).Save || "Save") }]
-                    }
-                ]
-            }]);
-
-            var setPasswordButton = elems["setPasswordButton"];
-            var passwordInput = elems["passwordInput"];
-            var passwordConfirmInput = elems["passwordConfirmInput"];
-            var passwordInnerTitle = RVDic["Password"] + "...";
-            var passwordConfirmInnerTitle = RVDic["PasswordConfirm"] + "...";
-
-            GlobalUtilities.set_inner_title(passwordInput, passwordInnerTitle);
-            GlobalUtilities.set_inner_title(passwordConfirmInput, passwordConfirmInnerTitle);
-
-            jQuery(passwordInput).focus(function () { passwordInput.setAttribute("type", "password"); });
-            jQuery(passwordConfirmInput).focus(function () { passwordConfirmInput.setAttribute("type", "password"); });
-
-            var sendButton = elems["sendButton"];
-            var showedDiv = GlobalUtilities.show(elems["container"]);
-
-            var _checkPassConfirm = function () {
-                var pass = GlobalUtilities.trim(passwordInput.value);
-                var passConfirm = GlobalUtilities.trim(passwordConfirmInput.value);
-
-                if (passConfirm != passwordConfirmInnerTitle) passwordConfirmInput.style.color = "black";
-                passwordConfirmInput.style.backgroundColor = "white";
-
-                if (!pass || !passConfirm) return;
-
-                passwordConfirmInput.style.color = pass == passConfirm ? "green" : "red";
-                passwordConfirmInput.style.backgroundColor = pass == passConfirm ? "rgba(160, 251, 160, 0.47)" : "#FCDDFB";
-            };
-
-            passwordConfirmInput.onkeyup = passwordInput.onkeyup = _checkPassConfirm;
-
-            setPasswordButton.onclick = function () {
-                var password = GlobalUtilities.trim(passwordInput.value);
-                var passwordConfirm = GlobalUtilities.trim(passwordConfirmInput.value);
-
-                if (!password) return alert(RVDic.Checks.PleaseEnterYourPassword);
-                else if (!passwordConfirm) return alert(RVDic.Checks.PleaseEnterYourPasswordConfirm);
-                else if (String(password).length < 5) return alert(RVDic.Checks.PasswordLengthMustBeGreaterThanN.replace("[n]", 4));
-                else if (password != passwordConfirm) return alert(RVDic.Checks.PasswordsDoesntMatch);
-
-                GlobalUtilities.block(setPasswordButton);
-
-                UsersAPI.SetPassword({
-                    UserName: userName, Ticket: passwordTicket, //The username is already Base64 encoded
-                    Password: Base64.encode(GlobalUtilities.secure_string(password)), ParseResults: true,
-                    ResponseHandler: function (result) {
-                        if (result.ErrorText) alert(RVDic.MSG[result.ErrorText] || result.ErrorText);
-
-                        if (result.Succeed) {
-                            passwordInput.value = "";
-                            passwordConfirmInput.value = "";
-                            showedDiv.Close();
-                            alert(RVDic.MSG[result.Succeed] || result.Succeed);
-                        }
-
-                        GlobalUtilities.unblock(setPasswordButton);
-                    }
-                });
-            }
+            });
         }
     }
 })();

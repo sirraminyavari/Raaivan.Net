@@ -767,6 +767,7 @@
         User: "user",
         UserConfidentialities: "user confidentiality levels",
         UserName: "username",
+        UserNameOrEmail: "username or email",
         Users: "users",
         UserSelect: "select user",
         UsersSelect: "select users",

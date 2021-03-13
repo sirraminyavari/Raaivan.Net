@@ -539,9 +539,15 @@ namespace RaaiVan.Web.API
                         ref responseText);
                     break;
                 case "SetPasswordResetTicket":
-                    set_password_reset_ticket(PublicMethods.parse_guid(context.Request.Params["UserID"]),
-                        PublicMethods.parse_string(context.Request.Params["UserName"]),
-                        PublicMethods.parse_string(context.Request.Params["Email"]),
+                    if (!Captcha.check(context, PublicMethods.parse_string(context.Request.Params["Captcha"], decode: false)))
+                    {
+                        responseText = "{\"ErrorText\":\"" + Messages.CaptchaIsNotValid + "\"}";
+                        break;
+                    }
+
+                    set_password_reset_ticket(PublicMethods.parse_string(context.Request.Params["UserName"]),
+                        PublicMethods.parse_string(context.Request.Params["Password"]),
+                        PublicMethods.parse_guid(context.Request.Params["InvitationID"]),
                         ref responseText);
                     break;
                 case "ChangePassword":
@@ -553,10 +559,9 @@ namespace RaaiVan.Web.API
                     validate_password(PublicMethods.parse_string(context.Request.Params["Password"]), ref responseText);
                     break;
                 case "SetPassword":
-                    set_password(PublicMethods.parse_guid(context.Request.Params["UserID"]),
-                        PublicMethods.parse_string(context.Request.Params["UserName"]),
-                        PublicMethods.parse_guid(context.Request.Params["PasswordTicket"]),
-                        PublicMethods.parse_string(context.Request.Params["Password"]),
+                    set_password(PublicMethods.parse_string(context.Request.Params["VerificationToken"], false),
+                        PublicMethods.parse_long(context.Request.Params["Code"]),
+                        PublicMethods.parse_bool(context.Request.Params["Login"]),
                         ref responseText);
                     break;
                 case "SetTheme":
@@ -869,7 +874,7 @@ namespace RaaiVan.Web.API
             customData["Password"] = password;
             if (invitationId.HasValue) customData["InvitationID"] = invitationId.Value;
 
-            bool result = VerificationCode.process_request(paramsContainer.ApplicationID, emailAddress: email, 
+            VerificationCode.process_request(paramsContainer.ApplicationID, emailAddress: email, 
                 phoneNumber: phone, responseText: ref responseText, customData: PublicMethods.toJSON(customData));
         }
 
@@ -1045,7 +1050,7 @@ namespace RaaiVan.Web.API
             if (succeed && login)
             {
                 RaaiVanUtil.after_login_procedures(applicationId, userId.Value, rememberMe: false,
-                    invitationId: null, loggedInWithActiveDirectory: false, ref context, ref authCookie);
+                    invitationId: null, loggedInWithActiveDirectory: false, context, ref authCookie);
             }
             
             responseText = !succeed ? "{\"ErrorText\":\"" + Messages.UserCreationFailed + "\"}" :
@@ -1348,73 +1353,63 @@ namespace RaaiVan.Web.API
             responseText += "]}";
         }
 
-        public void set_password_reset_ticket(Guid? userId, string username, string email, ref string responseText)
+        public void set_password_reset_ticket(string username, string password, Guid? invitationId, ref string responseText)
         {
             //Privacy Check: OK
 
-            if (!userId.HasValue && !string.IsNullOrEmpty(username))
-                userId = UsersController.get_user_id(paramsContainer.ApplicationID, username);
-            else if (!userId.HasValue && !string.IsNullOrEmpty(email))
-                userId = UsersController.get_email_owner_id(paramsContainer.ApplicationID, email);
+            Guid? userId = UsersController.get_user_id(paramsContainer.ApplicationID, username);
             User user = !userId.HasValue ? null : UsersController.get_user(paramsContainer.ApplicationID, userId.Value);
 
-            if (user == null)
-            {
+            if (user == null) {
                 responseText = "{\"ErrorText\":\"" + Messages.UserNotFound + "\"}";
                 return;
             }
 
-            if (string.IsNullOrEmpty(username)) username = user.UserName;
-
-            if (string.IsNullOrEmpty(email))
+            //Check Password Policy
+            if (!UserUtilities.check_password_policy(paramsContainer.ApplicationID, password, string.Empty))
             {
-                Guid? mainEmailId = UsersController.get_main_email(userId.Value);
-                List<EmailAddress> emails = UsersController.get_email_addresses(userId.Value);
+                responseText = "{\"ErrorText\":\"" + Messages.PasswordPolicyDidntMeet.ToString() + "\"}";
+                return;
+            }
+            //end of Check Password Policy
 
-                if (string.IsNullOrEmpty(email))
-                    email = emails.Where(u => u.EmailID == mainEmailId).Select(v => v.Address).FirstOrDefault();
+            password = PublicMethods.verify_string(password);
 
-                if (string.IsNullOrEmpty(email))
-                {
-                    responseText = "{\"ErrorText\":\"" + Messages.EmailIsNotDetermined + "\"}";
-                    return;
-                }
-                else if (!emails.Any(u => u.Address.ToLower() == email.ToLower()))
-                {
-                    responseText = "{\"ErrorText\":\"" + Messages.EmailIsNotValid + "\"}";
-                    return;
-                }
+            EmailAddress mainEmail = UsersController.get_users_main_email(new List<Guid>() { userId.Value })
+                .Where(e => !string.IsNullOrEmpty(e.Address)).FirstOrDefault();
+
+            PhoneNumber mainPhone = UsersController.get_users_main_phone(new List<Guid>() { userId.Value })
+                .Where(n => !string.IsNullOrEmpty(n.Number)).FirstOrDefault();
+
+            bool isEmail = (mainEmail != null && username.ToLower() == mainEmail.Address.ToLower()) || 
+                (mainEmail != null && mainPhone == null);
+            bool isNumber = (mainPhone != null && username.ToLower() == mainPhone.Number.ToLower()) ||
+                (mainEmail == null && mainPhone != null);
+
+            string email = isEmail ? mainEmail.Address : string.Empty;
+            string phone = isNumber ? mainPhone.Number : string.Empty;
+
+            if (!isEmail && !isNumber)
+            {
+                responseText = "{\"Email\":" + (mainEmail != null ? mainEmail.toJson() : "null") +
+                    ",\"Phone\":" + (mainPhone != null ? mainPhone.toJson() : "null") +
+                    "}";
+                return;
             }
 
-            Guid ticket = Guid.NewGuid();
+            Dictionary<string, object> customData = new Dictionary<string, object>();
+            customData["UserID"] = userId.Value;
+            customData["UserName"] = user.UserName;
+            customData["Password"] = password;
+            customData["FirstName"] = user.FirstName;
+            customData["LastName"] = user.LastName;
+            customData["Email"] = email;
+            customData["Phone"] = phone;
+            customData["IsPasswordReset"] = true;
+            if (invitationId.HasValue) customData["InvitationID"] = invitationId.Value;
 
-            Dictionary<string, string> dic = new Dictionary<string, string>();
-
-            DateTime now = DateTime.Now;
-            string gDate = now.Month.ToString() + "/" + now.Day.ToString() + "/" + now.Year.ToString();
-            string pDate = PublicMethods.get_local_date(now);
-
-            dic.Add("UserName", user.UserName);
-            dic.Add("UserNameBase64", Base64.encode(user.UserName));
-            dic.Add("FirstName", user.FirstName);
-            dic.Add("LastName", user.LastName);
-            dic.Add("FullName", user.FirstName + " " + user.LastName);
-            dic.Add("Ticket", ticket.ToString());
-            dic.Add("SystemURL", RaaiVanSettings.RaaiVanURL(paramsContainer.ApplicationID));
-            dic.Add("LoginURL", PublicConsts.LoginPage.Replace("~", dic["SystemURL"]));
-            dic.Add("Now", gDate);
-            dic.Add("GNow", gDate);
-            dic.Add("PNow", pDate);
-
-            string emailSubject = EmailTemplates.get_email_subject_template(paramsContainer.ApplicationID, 
-                EmailTemplateType.PasswordReset, dic);
-            string emailBody = EmailTemplates.get_email_template(paramsContainer.ApplicationID, EmailTemplateType.PasswordReset, dic);
-
-            bool result = !string.IsNullOrEmpty(email) &&
-                UsersController.set_pass_reset_ticket(paramsContainer.ApplicationID, userId.Value, ticket, email, emailSubject, emailBody);
-
-            responseText = result ? "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}" :
-                "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
+            VerificationCode.process_request(paramsContainer.ApplicationID, emailAddress: email,
+                phoneNumber: phone, responseText: ref responseText, customData: PublicMethods.toJSON(customData));
         }
 
         public void change_password(string oldPassword, string newPassword, ref string responseText)
@@ -1484,37 +1479,59 @@ namespace RaaiVan.Web.API
                 _validate_password(paramsContainer.CurrentUserID.Value, password).ToString().ToLower() + "}";
         }
 
-        public void set_password(Guid? userId, string username, Guid? ticket, string password, ref string responseText)
+        public void set_password(string token, long? code, bool? login, ref string responseText)
         {
             //Privacy Check: OK
 
+            if (string.IsNullOrEmpty(token) || !code.HasValue)
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.InvalidInput + "\"}";
+                return;
+            }
+
+            string customData = string.Empty;
+
+            bool result = VerificationCode.process_request(paramsContainer.ApplicationID, token: token, code: code, ref customData);
+
+            if (!result)
+            {
+                responseText = customData;
+                return;
+            }
+
+            Dictionary<string, object> dic = PublicMethods.fromJSON(customData);
+
+            if (!PublicMethods.get_dic_value<bool>(dic, "IsPasswordReset", defaultValue: false)) {
+                responseText = "";
+                return;
+            }
+
+            Guid? userId = PublicMethods.parse_guid(PublicMethods.get_dic_value(dic, "UserID"));
+            Guid? invitationId = PublicMethods.parse_guid(PublicMethods.get_dic_value(dic, "InvitationID"));
+
+            string password = PublicMethods.get_dic_value(dic, "Password");
+
             string errorMessage = string.Empty;
 
-            if (!ticket.HasValue)
-            {
-                responseText = "{\"ErrorText\":\"" + Messages.PasswordResetTicketIsNotValid + "\"}";
-                return;
-            }
+            bool succeed = userId.HasValue && UsersController.set_password(paramsContainer.ApplicationID,
+                userId.Value, password, false, false, ref errorMessage);
 
-            //Check Password Policy
-            if (!UserUtilities.check_password_policy(paramsContainer.ApplicationID, password, string.Empty))
-            {
-                responseText = "{\"ErrorText\":\"" + Messages.PasswordPolicyDidntMeet.ToString() + "\"}";
-                return;
-            }
-            //end of Check Password Policy
-
-            password = PublicMethods.verify_string(password);
-
-            if (!userId.HasValue) userId = UsersController.get_user_id(paramsContainer.ApplicationID, username);
-
-            bool result = userId.HasValue && UsersController.set_password(paramsContainer.ApplicationID,
-                userId.Value, ticket.Value, password, false, false, ref errorMessage);
-
-            responseText = result ? "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}" :
+            responseText = succeed ? "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}" :
                 "{\"ErrorText\":\"" + (string.IsNullOrEmpty(errorMessage) ? Messages.OperationFailed.ToString() : errorMessage) + "\"}";
 
-            if (result) RaaiVanUtil.password_change_not_needed(HttpContext.Current);
+            if (succeed) RaaiVanUtil.password_change_not_needed(HttpContext.Current);
+
+            if(succeed && login.HasValue && login.Value)
+            {
+                string authCookie = string.Empty;
+
+                RaaiVanUtil.after_login_procedures(tenantId: null, userId.Value, rememberMe: false,
+                    invitationId: invitationId, loggedInWithActiveDirectory: false, HttpContext.Current, ref authCookie);
+
+                responseText = "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" +
+                    (string.IsNullOrEmpty(authCookie) ? string.Empty : ",\"AuthCookie\":" + authCookie) +
+                    "}";
+            }
         }
 
         public void set_random_password(Guid? userId, ref string responseText)
@@ -1709,40 +1726,15 @@ namespace RaaiVan.Web.API
                     user.UserID.Value) + "\"" +
                 ",\"HighQualityImageURL\":\"" + DocumentUtilities.get_personal_image_address(paramsContainer.Tenant.Id,
                     user.UserID.Value, false, true) + "\"" +
-                ",\"PhoneNumbers\":[";
-
-            bool isFirst = true;
-            foreach (PhoneNumber n in numbers)
-            {
-                responseText += (isFirst ? string.Empty : ",") + "{\"NumberID\":\"" + n.NumberID.ToString() + "\"" +
-                    ",\"Number\":\"" + Base64.encode(n.Number) + "\"" + ",\"Type\":\"" + n.PhoneType.ToString() + "\"}";
-                isFirst = false;
-            }
-
-            responseText += "],\"Emails\":[";
-
-            isFirst = true;
-            foreach (EmailAddress e in emails)
-            {
-                responseText += (isFirst ? string.Empty : ",") +
-                    "{\"EmailID\":\"" + e.EmailID.ToString() + "\"" + ",\"Email\":\"" + Base64.encode(e.Address) + "\"}";
-                isFirst = false;
-            }
-
-            responseText += "],\"Nodes\":[";
-
-            isFirst = true;
-            foreach (NodeMember nm in membershipAreas)
-            {
-                responseText += (isFirst ? string.Empty : ",") +
-                    "{\"NodeID\":\"" + nm.Node.NodeID.ToString() + "\"" +
-                    ",\"Name\":\"" + Base64.encode(nm.Node.Name) + "\"" +
-                    ",\"NodeTypeID\":\"" + nm.Node.NodeTypeID.ToString() + "\"" +
-                    "}";
-                isFirst = false;
-            }
-
-            responseText += "]}";
+                ",\"PhoneNumbers\":[" + string.Join(",", numbers.Select(n => n.toJson())) + "]" + 
+                ",\"Emails\":[" + string.Join(",", emails.Select(e => e.toJson())) + "]" + 
+                ",\"Nodes\":[" + string.Join(",", membershipAreas.Select(nm => {
+                        return "{\"NodeID\":\"" + nm.Node.NodeID.ToString() + "\"" +
+                            ",\"Name\":\"" + Base64.encode(nm.Node.Name) + "\"" +
+                            ",\"NodeTypeID\":\"" + nm.Node.NodeTypeID.ToString() + "\"" +
+                            "}";
+                    })) + "]" + 
+                "}";
         }
 
         protected void set_theme(string theme, ref string responseText)

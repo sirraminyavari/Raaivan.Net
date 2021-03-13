@@ -227,9 +227,9 @@
         params = params || {};
 
         var url = UsersAPI.ResponseURL + "/SetPasswordResetTicket?timeStamp=" + new Date().getTime();
-        var queryString = (params.UserID ? "&UserID=" + params.UserID : "") +
-            (params.UserName ? "&UserName=" + params.UserName : "") +
-            (params.Email ? "&Email=" + params.Email : "");
+        var queryString = (params.UserName ? "&UserName=" + params.UserName : "") +
+            (params.Password ? "&Password=" + params.Password : "") +
+            (params.Captcha ? "&Captcha=" + params.Captcha : "");
         return UsersAPI._send(url, params, queryString);
     },
 
@@ -255,10 +255,9 @@
         params = params || {};
 
         var url = UsersAPI.ResponseURL + "/SetPassword?timeStamp=" + new Date().getTime();
-        var queryString = (params.UserID ? "&UserID=" + params.UserID : "") +
-            (params.UserName ? "&UserName=" + params.UserName : "") +
-            (params.Ticket ? "&PasswordTicket=" + params.Ticket : "") +
-            (params.Password ? "&Password=" + params.Password : "");
+        var queryString = (params.VerificationToken ? "&VerificationToken=" + params.VerificationToken : "") +
+            (params.Code ? "&Code=" + params.Code : "") +
+            (params.Login ? "&Login=" + params.Login : "");
         return UsersAPI._send(url, params, queryString);
     },
 
