@@ -229,6 +229,7 @@
         var url = UsersAPI.ResponseURL + "/SetPasswordResetTicket?timeStamp=" + new Date().getTime();
         var queryString = (params.UserName ? "&UserName=" + params.UserName : "") +
             (params.Password ? "&Password=" + params.Password : "") +
+            (params.InvitationID ? "&InvitationID=" + params.InvitationID : "") +
             (params.Captcha ? "&Captcha=" + params.Captcha : "");
         return UsersAPI._send(url, params, queryString);
     },

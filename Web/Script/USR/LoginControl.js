@@ -220,7 +220,7 @@
                                 })
                             ]
                         },
-                        (!(window.RVGlobal || {}).GoogleSignInClientID ? null : {
+                        (!(window.RVGlobal || {}).GoogleSignInClientID || !(window.RVGlobal || {}).IsDev ? null : {
                             Type: "div", Class: "small-12 medium-12 large-12", Name: "loginWithGoogle", Style: "margin-top:0.5rem;"
                         }),
                         {
