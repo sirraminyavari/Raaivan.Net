@@ -134,6 +134,7 @@
         Count: "count",
         CourseTitle: "course title",
         Coworkers: "coworkers",
+        CreateAccount: "create account",
         CreateNewUser: "create new user",
         CreatingReport: "creating report",
         CreationDate: "creation date",

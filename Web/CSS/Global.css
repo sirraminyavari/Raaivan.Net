@@ -393,6 +393,10 @@ pre > code {
     color: var(--rv-color-warm);
 }
 
+.rv-distant {
+    color: var(--rv-color-distant);
+}
+
 .rv-white {
     color: var(--rv-white-color);
 }
@@ -492,7 +496,8 @@ pre > code {
 
 .rv-input-invalid {
     border-color: var(--rv-red-color) !important;
-    background-color: var(--rv-red-color-verysoft) !important;
+    border-width: 1.5px;
+    /* background-color: var(--rv-red-color-verysoft) !important; */
 }
 
 .rv-input-simple {

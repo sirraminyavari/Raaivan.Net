@@ -5267,7 +5267,7 @@ namespace RaaiVan.Web.API
                     CNController.get_creator_nodes(paramsContainer.Tenant.Id, itemId.Value));
                 List<Friend> friendUsers =
                     friends.HasValue && friends.Value ? UsersController.get_friends(paramsContainer.Tenant.Id,
-                    itemId.Value, false, null, null, ref totalCount, null) : new List<Friend>();
+                    itemId.Value, false, null, null, ref totalCount, areFriends: true) : new List<Friend>();
 
                 responseText = _get_map_user_json(user, nodeMembers, expertiseDomains,
                     favoriteNodes, createdNodes, friendUsers);

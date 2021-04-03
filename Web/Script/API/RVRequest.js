@@ -77,8 +77,10 @@
                         if (window.RVGlobal) window.RVGlobal.IsAuthenticated = false;
                         if (window.GlobalUtilities) GlobalUtilities.login_dialog();
                     }
-                    else if (j.NoApplicationFound)
-                        alert(((window.RVDic || {}).MSG || {}).NoApplicationFound || "no application found");
+                    else if (j.NoApplicationFound) {
+                        if (!(window.RVGlobal || {}).SAASBasedMultiTenancy)
+                            alert(((window.RVDic || {}).MSG || {}).NoApplicationFound || "no application found");
+                    }
                     else if (j.AppID && (window.RVGlobal || {}).ApplicationID && (j.AppID != window.RVGlobal.ApplicationID)) {
                         window.DIFF_TEAM_RESPONSE = window.DIFF_TEAM_RESPONSE || GlobalUtilities.create_nested_elements([{
                             Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1 SoftBackgroundColor",

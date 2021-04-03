@@ -54,7 +54,7 @@
             var that = this;
 
             if (!window.RVGlobal.EnableThemes) return container.parentNode.removeChild(container);
-
+            
             if (that.__Themes)
                 that._select_theme(that.__Themes);
             else {
@@ -72,13 +72,11 @@
             var that = this;
 
             var themes = that.__Themes;
-
-            var container = GlobalUtilities.create_nested_elements([
-                {
-                    Type: "div", Class: "small-10 medium-8 large-5 rv-border-radius-1 SoftBackgroundColor",
-                    Style: "margin:0rem auto 0rem auto; padding:1rem;", Name: "container"
-                }
-            ])["container"];
+            
+            var container = GlobalUtilities.create_nested_elements([{
+                Type: "div", Class: "small-10 medium-8 large-5 rv-border-radius-1 SoftBackgroundColor",
+                Style: "margin:0rem auto 0rem auto; padding:1rem;", Name: "container"
+            }])["container"];
 
             var showedDiv = GlobalUtilities.show(container);
 
@@ -171,10 +169,10 @@
                     arr = temp;
                 }
             }
-
+            
             for (var i = 0, lnt = (themes || []).length; i < lnt; ++i)
                 _add(themes[i]);
-
+            
             var elems = GlobalUtilities.create_nested_elements([
                 {
                     Type: "div", Class: "small-12 medium-12 large-12",
