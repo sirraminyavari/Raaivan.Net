@@ -48,6 +48,7 @@
                     var sm = new SharingManager({
                         Container: _div, OwnerObjectID: that.Objects.User.UserID, InitialFill: true,
                         OwnerType: "User", Permissions: { AddPost: true }, NewPostArea: "Advanced", News: true,
+                        HidePrivacyOptions: !!(window.RVGlobal || {}).SAASBasedMultiTenancy,
                         OnLoad: function () {
                             GlobalUtilities.onscrollend(document, { Offset: 10 }, function () { sm.get_posts(); });
                         }

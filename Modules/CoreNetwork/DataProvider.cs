@@ -879,7 +879,7 @@ namespace RaaiVan.Modules.CoreNetwork
                 if (Info.ParentID == Guid.Empty) Info.ParentID = null;
                 
                 return ProviderUtil.succeed(ProviderUtil.execute_reader(spName, applicationId, Info.NodeTypeID, 
-                    Info.NodeTypeAdditionalID, Info.Name, Info.ParentID, Info.CreatorUserID, Info.CreationDate));
+                    Info.NodeTypeAdditionalID, Info.Name, Info.ParentID, Info.CreatorUserID, DateTime.Now));
             }
             catch (Exception ex)
             {

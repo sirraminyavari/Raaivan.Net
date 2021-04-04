@@ -1994,6 +1994,7 @@
     <Compile Include="API\UsersAPI.ashx.cs">
       <DependentUpon>UsersAPI.ashx</DependentUpon>
     </Compile>
+    <Compile Include="API\Util\Template.cs" />
     <Compile Include="API\Util\ThemeUtil.cs" />
     <Compile Include="API\Util\VerificationCode.cs" />
     <Compile Include="API\WFAPI.ashx.cs">

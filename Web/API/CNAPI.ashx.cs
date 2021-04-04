@@ -233,7 +233,7 @@ namespace RaaiVan.Web.API
         {
             paramsContainer = new ParamsContainer(context, nullTenantResponse: true);
             if (!paramsContainer.ApplicationID.HasValue) return;
-            PublicMethods.send_sms("", "");
+            
             string responseText = string.Empty;
             string command = PublicMethods.parse_string(context.Request.Params["Command"], false);
 
@@ -1392,6 +1392,14 @@ namespace RaaiVan.Web.API
 
                     set_contributors(PublicMethods.parse_guid(context.Request.Params["NodeID"]), _contributors,
                         PublicMethods.parse_guid(context.Request.Params["OwnerID"]), ref responseText);
+                    _return_response(ref context, ref responseText);
+                    return;
+                case "GetTemplateJSON":
+                    get_template_json(PublicMethods.parse_guid(context.Request.Params["NodeTypeID"]), ref responseText);
+                    _return_response(ref context, ref responseText);
+                    return;
+                case "ActivateTemplate":
+                    activate_template(PublicMethods.parse_string(context.Request.Params["Template"]), ref responseText);
                     _return_response(ref context, ref responseText);
                     return;
             }
@@ -8153,6 +8161,28 @@ namespace RaaiVan.Web.API
         }
 
         /* end of Service */
+
+        protected void get_template_json(Guid? nodeTypeId, ref string responseText)
+        {
+            responseText = PublicMethods.toJSON_typed<Template>(new Template(nodeTypeId));
+        }
+
+        protected void activate_template(string templateContent, ref string responseText) {
+            //Privacy Check: OK
+            if (!paramsContainer.GBEdit) return;
+
+            if (!PublicMethods.is_system_admin(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value)) {
+                responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";
+                return;
+            }
+
+            Template template = PublicMethods.fromJSON<Template>(templateContent);
+
+            bool result = template != null && template.activate(paramsContainer.Tenant.Id, paramsContainer.CurrentUserID.Value);
+
+            responseText = result ? "{\"ErrorText\":\"" + Messages.OperationCompletedSuccessfully + "\"}" : 
+                "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
+        }
 
         public bool IsReusable
         {

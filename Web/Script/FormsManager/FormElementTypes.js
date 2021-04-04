@@ -3301,7 +3301,6 @@
                     Get: function () {
                         var nodeTypes = (!as ? null : as.get_items()) || [];
 
-
                         if (!isNode) return { MultiSelect: multiSelect.checked };
                         else {
                             return !nodeTypes.length ? false : {
@@ -4602,12 +4601,10 @@
             searchfilters: function (params) {
                 params = params || {};
 
-                var elems = GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div", Class: "small-12 medium-12 large-12 rv-air-button", Name: "container",
-                        Childs: [{ Type: "text", TextValue: "click me!" }]
-                    }
-                ]);
+                var elems = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: "small-12 medium-12 large-12 rv-air-button", Name: "container",
+                    Childs: [{ Type: "text", TextValue: "click me!" }]
+                }]);
 
                 var formId = (params.Info || {}).FormID;
                 var formName = Base64.decode((params.Info || {}).FormName);
@@ -4635,12 +4632,10 @@
                 elems["container"].onclick = function () {
                     if (formContainer) return (showed = GlobalUtilities.show(formContainer));
 
-                    formContainer = GlobalUtilities.create_nested_elements([
-                        {
-                            Type: "div", Class: "small-10 medium-9 large-8 rv-border-radius-1 SoftBackgroundColor",
-                            Style: "margin:0rem auto; padding:1rem;", Name: "_div"
-                        }
-                    ])["_div"];
+                    formContainer = GlobalUtilities.create_nested_elements([{
+                        Type: "div", Class: "small-10 medium-9 large-8 rv-border-radius-1 SoftBackgroundColor",
+                        Style: "margin:0rem auto; padding:1rem;", Name: "_div"
+                    }])["_div"];
 
                     GlobalUtilities.loading(formContainer);
                     showed = GlobalUtilities.show(formContainer);

@@ -1324,13 +1324,6 @@ namespace RaaiVan.Modules.GlobalUtilities
             return markupText;
         }
 
-        public static string toJSON(dynamic json, string defaultValue = "")
-        {
-            if (json == null) return defaultValue;
-            try { return new JavaScriptSerializer().Serialize(json); }
-            catch { return defaultValue; }
-        }
-        
         public static string image_to_base64(Image image, System.Drawing.Imaging.ImageFormat format) {
             if (image == null) return string.Empty;
 
@@ -1377,11 +1370,46 @@ namespace RaaiVan.Modules.GlobalUtilities
             catch { return null; }
         }
 
+        public static string toJSON(dynamic json, string defaultValue = "")
+        {
+            if (json == null) return defaultValue;
+            try { return new JavaScriptSerializer().Serialize(json); }
+            catch (Exception ex)
+            {
+                string strEx = ex.ToString();
+                return defaultValue;
+            }
+        }
+
+        public static string toJSON_typed<T>(T data)
+        {
+            if (data == null || !data.GetType().IsSerializable) return null;
+
+            try
+            {
+                JsonSerializerSettings settings = new JsonSerializerSettings() { ContractResolver = new RVJsonContractResolver() };
+                return JsonConvert.SerializeObject(data, settings);
+            }
+            catch { return null; }
+        }
+
         public static Dictionary<string, object> fromJSON(string json)
         {
             if (string.IsNullOrEmpty(json)) return new Dictionary<string, object>();
             try { return new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(json); }
             catch { return new Dictionary<string, object>(); }
+        }
+
+        public static T fromJSON<T>(string data)
+        {
+            if (string.IsNullOrEmpty(data)) return default(T);
+
+            try
+            {
+                JsonSerializerSettings settings = new JsonSerializerSettings() { ContractResolver = new RVJsonContractResolver() };
+                return JsonConvert.DeserializeObject<T>(data, settings);
+            }
+            catch { return default(T); }
         }
 
         public static Dictionary<string, string> json2dictionary(string json)

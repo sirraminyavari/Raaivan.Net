@@ -550,7 +550,7 @@ namespace RaaiVan.Modules.FormGenerator
             try
             {
                 return ProviderUtil.succeed(ProviderUtil.execute_reader(spName, applicationId,
-                    Info.FormID, Info.Title, Info.Creator.UserID, Info.CreationDate));
+                    Info.FormID, Info.Title, Info.Creator.UserID, DateTime.Now));
             }
             catch(Exception ex)
             {
