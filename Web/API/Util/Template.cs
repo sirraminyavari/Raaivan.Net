@@ -30,6 +30,18 @@ namespace RaaiVan.Web.API
 
         [JsonProperty("form_id")]
         public string FormID;
+
+        [JsonProperty("enable_contribution")]
+        public bool? EnableContribution;
+
+        [JsonProperty("disable_abstract_and_keywords")]
+        public bool? DisableAbstractAndKeywords;
+
+        [JsonProperty("disable_file_upload")]
+        public bool? DisableFileUpload;
+
+        [JsonProperty("disable_related_nodes_select")]
+        public bool? DisableRelatedNodesSelect;
     }
 
     [Serializable]
@@ -201,6 +213,8 @@ namespace RaaiVan.Web.API
             if (nodeType == null || string.IsNullOrEmpty(nodeType.Name)) return;
 
             Service service = CNController.get_service(appId, ntId);
+            if (service == null) service = new Service();
+
             List<Extension> extensions = CNController.get_extensions(appId, ntId)
                 .Where(ex => !ex.Disabled.HasValue || !ex.Disabled.Value).ToList();
             FormType form = FGController.get_owner_form(appId, ntId);
@@ -215,10 +229,14 @@ namespace RaaiVan.Web.API
             TemplateNodeType newNodeType = new TemplateNodeType() {
                 ID = newNtId,
                 Name = nodeType.Name,
-                IsService = service != null && !string.IsNullOrEmpty(service.Title),
+                IsService = !string.IsNullOrEmpty(service.Title),
                 HasForm = hasFormExt,
                 HasWiki = hasWikiExt,
-                FormID = !hasForm ? null : IDs.resolve(form.FormID)
+                FormID = !hasForm ? null : IDs.resolve(form.FormID),
+                EnableContribution = service.EnableContribution,
+                DisableAbstractAndKeywords = service.DisableAbstractAndKeywords,
+                DisableFileUpload = service.DisableFileUpload,
+                DisableRelatedNodesSelect = service.DisableRelatedNodesSelect
             };
 
             if (hasForm)
@@ -337,16 +355,29 @@ namespace RaaiVan.Web.API
 
             if(!CNController.add_node_type(applicationId, nodeType)) return null;
 
+            CNController.initialize_extensions(applicationId, nodeType.NodeTypeID.Value, currentUserId, ignoreDefault: true);
+            CNController.initialize_service(applicationId, nodeType.NodeTypeID.Value);
+
             if (tempNodeType.HasForm.HasValue && tempNodeType.HasForm.Value)
                 CNController.enable_extension(applicationId, nodeType.NodeTypeID.Value, ExtensionType.Form, currentUserId);
 
             if (tempNodeType.HasWiki.HasValue && tempNodeType.HasWiki.Value)
                 CNController.enable_extension(applicationId, nodeType.NodeTypeID.Value, ExtensionType.Wiki, currentUserId);
 
-            if (tempNodeType.IsService.HasValue && tempNodeType.IsService.Value) {
-                CNController.initialize_service(applicationId, nodeType.NodeTypeID.Value);
+            if (tempNodeType.IsService.HasValue && tempNodeType.IsService.Value)
                 CNController.set_service_title(applicationId, nodeType.NodeTypeID.Value, nodeType.Name);
-            }
+
+            if (tempNodeType.EnableContribution.HasValue && tempNodeType.EnableContribution.Value)
+                CNController.enable_contribution(applicationId, nodeType.NodeTypeID.Value, true);
+
+            if (tempNodeType.DisableAbstractAndKeywords.HasValue && tempNodeType.DisableAbstractAndKeywords.Value)
+                CNController.abstract_and_keywords_disabled(applicationId, nodeType.NodeTypeID.Value, true);
+
+            if (tempNodeType.DisableFileUpload.HasValue && tempNodeType.DisableFileUpload.Value)
+                CNController.file_upload_disabled(applicationId, nodeType.NodeTypeID.Value, true);
+
+            if (tempNodeType.DisableRelatedNodesSelect.HasValue && tempNodeType.DisableRelatedNodesSelect.Value)
+                CNController.related_nodes_select_disabled(applicationId, nodeType.NodeTypeID.Value, true);
 
             if (tempNodeType.HasForm.HasValue && tempNodeType.HasForm.Value)
             {
@@ -364,7 +395,7 @@ namespace RaaiVan.Web.API
 
             FormType form = new FormType() {
                 FormID = IDs.new_id(id),
-                Title = tempForm.Title,
+                Title = tempForm.Title + " " + PublicMethods.get_random_number().ToString(),
                 Creator = new User() { UserID = currentUserId }
             };
 

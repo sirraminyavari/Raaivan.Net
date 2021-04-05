@@ -1849,9 +1849,9 @@ namespace RaaiVan.Modules.CoreNetwork
                 relatedNodesCount, likeStatus).FirstOrDefault();
         }
 
-        public static bool initialize_extensions(Guid applicationId, Guid ownerId, Guid currentUserId)
+        public static bool initialize_extensions(Guid applicationId, Guid ownerId, Guid currentUserId, bool ignoreDefault = false)
         {
-            return DataProvider.InitializeExtensions(applicationId, ownerId, currentUserId);
+            return DataProvider.InitializeExtensions(applicationId, ownerId, currentUserId, ignoreDefault);
         }
 
         public static bool enable_extension(Guid applicationId, 

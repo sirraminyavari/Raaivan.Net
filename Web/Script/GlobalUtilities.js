@@ -2811,6 +2811,9 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         _div.classList.remove("clearfix");
         _div.classList.add("clearfix");
 
+        if ((params.IsHTML !== true) && !!text)
+            text = GlobalUtilities.secure_string(text);
+
         var richText = new RegExp("<.*?>", "g").test(text || " ");
 
         AdvancedTextArea.replace_markups(text, {

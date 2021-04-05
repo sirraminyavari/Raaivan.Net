@@ -3600,13 +3600,13 @@ namespace RaaiVan.Modules.CoreNetwork
             }
         }
 
-        public static bool InitializeExtensions(Guid applicationId, Guid ownerId, Guid currentUserId)
+        public static bool InitializeExtensions(Guid applicationId, Guid ownerId, Guid currentUserId, bool ignoreDefault)
         {
             string spName = GetFullyQualifiedName("InitializeExtensions");
 
             try
             {
-                List<Extension> lst = CNUtilities.extend_extensions(applicationId, new List<Extension>());
+                List<Extension> lst = CNUtilities.extend_extensions(applicationId, new List<Extension>(), ignoreDefault);
 
                 List<ExtensionType> enabledExtensions = lst.Where(u => !u.Disabled.HasValue || u.Disabled == false).Select(
                     u => u.ExtensionType).ToList();

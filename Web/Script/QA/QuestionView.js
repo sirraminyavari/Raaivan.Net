@@ -752,7 +752,7 @@
             var descriptionInput = null;
 
             var _set_data = function () {
-                GlobalUtilities.append_markup_text(viewArea, description);
+                GlobalUtilities.append_markup_text(viewArea, description, { IsHTML: true });
                 if (descriptionInput) descriptionInput.set_data(description);
             }
 
@@ -874,7 +874,7 @@
             var inputCreated = false;
 
             var _set_data = function () {
-                GlobalUtilities.append_markup_text(viewArea, bodyText);
+                GlobalUtilities.append_markup_text(viewArea, bodyText, { IsHTML: true });
                 if (bodyTextInput) bodyTextInput.set_data(bodyText);
             }
 

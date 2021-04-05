@@ -262,15 +262,18 @@ namespace RaaiVan.Modules.CoreNetwork
             return types;
         }
 
-        public static List<Extension> extend_extensions(Guid applicationId, List<Extension> extensions)
+        public static List<Extension> extend_extensions(Guid applicationId, List<Extension> extensions, bool ignoreDefault = false)
         {
-            foreach (string ext in RaaiVanSettings.CoreNetwork.DefaultCNExtensions(applicationId))
+            if (!ignoreDefault)
             {
-                ExtensionType extType = new ExtensionType();
-                if (!Enum.TryParse<ExtensionType>(ext, out extType) || extType == ExtensionType.NotSet ||
-                    extensions.Any(u => u.ExtensionType == extType)) continue;
+                foreach (string ext in RaaiVanSettings.CoreNetwork.DefaultCNExtensions(applicationId))
+                {
+                    ExtensionType extType = new ExtensionType();
+                    if (!Enum.TryParse<ExtensionType>(ext, out extType) || extType == ExtensionType.NotSet ||
+                        extensions.Any(u => u.ExtensionType == extType)) continue;
 
-                extensions.Add(new Extension() { ExtensionType = extType, Disabled = false, Initialized = false });
+                    extensions.Add(new Extension() { ExtensionType = extType, Disabled = false, Initialized = false });
+                }
             }
 
             List<ExtensionType> extensionTypes = CNUtilities.get_extension_types();

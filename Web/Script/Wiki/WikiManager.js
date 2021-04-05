@@ -1029,6 +1029,7 @@
                 }
 
                 GlobalUtilities.append_markup_text(bodyTextContainer, change.BodyText || "", {
+                    IsHTML: true,
                     Done: function () { GlobalUtilities.remove_empty_tags(bodyTextContainer); }
                 });
             }
@@ -1709,6 +1710,7 @@
                                 bodyTextContainer.innerHTML = "";
 
                                 GlobalUtilities.append_markup_text(bodyTextContainer, _bodyText, {
+                                    IsHTML: true,
                                     Done: function (txt, p) {
                                         GlobalUtilities.remove_empty_tags(bodyTextContainer);
                                         that.check_existing_files((p || {}).Tags);
@@ -1823,6 +1825,7 @@
             }
 
             GlobalUtilities.append_markup_text(bodyTextContainer, paragraph.BodyText || "", {
+                IsHTML: true,
                 Done: function (txt, p) {
                     GlobalUtilities.remove_empty_tags(bodyTextContainer);
                     that.check_existing_files((p || {}).Tags);
@@ -1851,6 +1854,7 @@
                     titleLabel.innerHTML = paragraph.Title || "";
 
                     GlobalUtilities.append_markup_text(bodyTextContainer, paragraph.BodyText || "", {
+                        IsHTML: true,
                         Done: function () { GlobalUtilities.remove_empty_tags(bodyTextContainer); }
                     });
 
@@ -2165,6 +2169,7 @@
                     titleArea.innerHTML = GlobalUtilities.secure_string(changeObj.Title);
 
                     GlobalUtilities.append_markup_text(bodyArea, changeObj.BodyText, {
+                        IsHTML: true,
                         Done: function () { GlobalUtilities.remove_empty_tags(bodyArea); }
                     });
                 }
@@ -2178,6 +2183,7 @@
                         titleArea.innerHTML = changeObj.Title;
 
                         GlobalUtilities.append_markup_text(bodyArea, changeObj.BodyText, {
+                            IsHTML: true,
                             Done: function () { GlobalUtilities.remove_empty_tags(bodyArea); }
                         });
                     }

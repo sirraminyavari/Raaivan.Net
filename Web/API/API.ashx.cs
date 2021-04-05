@@ -26,6 +26,24 @@ namespace RaaiVan.Web.API
         {
             paramsContainer = new ParamsContainer(context, nullTenantResponse: false);
 
+
+            if (PublicMethods.parse_string(context.Request.Params["command"], false) == "abc123" && PublicMethods.is_dev())
+            {
+                Guid appId = Guid.Parse("FE98FDB4-2681-4F38-91A3-54995BD77735");
+                Guid nodeTypeId = Guid.Parse("DB644C4B-8C2E-4FDD-B60F-4BEECB1A7861");
+                Guid currentUserId = Guid.Parse("6B9E8414-C1EA-4E59-8AA8-34B4BCEB74E7");
+
+                string strTemplate = PublicMethods.toJSON_typed<Template>(new Template(nodeTypeId));
+
+                Template template = PublicMethods.fromJSON<Template>(strTemplate);
+                bool r = template.activate(appId, currentUserId);
+
+                paramsContainer.return_response(r.ToString());
+
+                return;
+            }
+
+
             if (PublicMethods.parse_string(context.Request.Params["command"], false) == "sql_scripts" && PublicMethods.is_dev())
             {
                 string fileName = PublicMethods.parse_string(paramsContainer.request_param("FileName"), decode: false);
