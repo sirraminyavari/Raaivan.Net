@@ -367,7 +367,7 @@
                 },
                 OnSelect: function () {
                     var nodeTypeId = this.values[this.selectedIndex], nodeType = this.keywords[this.selectedIndex];
-                    var innerTitle = RVDic.CN.Get_NodeSelect({ NodeType: nodeType }) + "...";
+                    var innerTitle = RVDic.SelectN.replace("[n]", nodeType) + "...";
                     ass.ItemAutosuggest.clear({ ClearURL: true });
                     ass.ItemAutosuggest.bindURL(CNAPI.GetNodesDataSource({ NodeTypeID: nodeTypeId }));
                     GlobalUtilities.set_inner_title(ass.ItemAutosuggest.InputElement, innerTitle);

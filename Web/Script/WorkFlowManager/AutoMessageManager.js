@@ -249,7 +249,7 @@
                     var nodeTypeId = this.values[index];
                     var nodeType = this.keywords[index];
                     nodeSelect.bindURL(CNAPI.GetNodesDataSource({ NodeTypeID: nodeTypeId }));
-                    GlobalUtilities.set_inner_title(nodeSelect.InputElement, RVDic.CN.Get_NodeSelect({ NodeType: nodeType }));
+                    GlobalUtilities.set_inner_title(nodeSelect.InputElement, RVDic.SelectN.replace("[n]", nodeType));
                 }
             });
 
@@ -346,7 +346,7 @@
                         nodeTypeSelect.set_item(item.NodeTypeID, Base64.decode(item.NodeType));
                         nodeSelect.bindURL(CNAPI.GetNodesDataSource({ NodeTypeID: item.NodeTypeID }));
                         GlobalUtilities.set_inner_title(nodeSelect.InputElement,
-                            RVDic.CN.Get_NodeSelect({ NodeType: Base64.decode(item.NodeType) }));
+                            RVDic.CN.SelectN.replace("[n]", Base64.decode(item.NodeType)));
                     }
 
                     if (item.NodeID) nodeSelect.set_item(item.NodeID, Base64.decode(item.NodeName));
@@ -375,7 +375,7 @@
                     var nodeId = index < 0 ? item.NodeID : nodeSelect.values[index];
                     var nodeName = index < 0 ? Base64.decode(item.NodeName) : nodeSelect.keywords[index];
                     if (!nodeSelect.InputElement.value) nodeId = nodeTypeId = "";
-                    if ((audienceType == "SpecificNode") && !nodeId) return alert(RVDic.Checks.Get_PleaseSelectNode());
+                    if ((audienceType == "SpecificNode") && !nodeId) return alert(RVDic.Checks.PleaseSelectN.replace("[n]", RVDic.Node));
 
                     var admin = audienceType == "SpecificNode" ? adminCheckbox.Checked : item.Admin === true;
 

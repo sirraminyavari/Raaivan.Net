@@ -57,7 +57,7 @@
 
             var as = GlobalUtilities.append_autosuggest(elems["nodeSelect"], {
                 InputStyle: "width:100%; font-size:0.7rem;",
-                InnerTitle: RVDic.CN.Get_NodeSelect({ NodeType: that.Objects.NodeType }) + "...",
+                InnerTitle: RVDic.SelectN.replace("[n]", that.Objects.NodeType) + "...",
                 AjaxDataSource: CNAPI.GetNodesDataSource({ NodeTypeID: that.Objects.NodeTypeID }),
                 ResponseParser: function (responseText) {
                     var _nds = JSON.parse(responseText).Nodes || [];

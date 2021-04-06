@@ -79,7 +79,7 @@
                     var nodeType = this.keywords[this.selectedIndex];
                     that.Objects.NodeSelect.bindURL(CNAPI.GetNodesDataSource({ NodeTypeID: nodeTypeId }));
                     GlobalUtilities.set_inner_title(that.Objects.NodeSelect.InputElement,
-                    RVDic.CN.Get_NodeSelect({ NodeType: nodeType }) + "...");
+                        RVDic.SelectN.replace("[n]", nodeType) + "...");
                 }
             });
             
@@ -119,7 +119,7 @@
                     that.Objects.MembershipNodeSelect.clear();
                     that.Objects.MembershipNodeSelect.bindURL(CNAPI.GetNodesDataSource({ NodeTypeID: nodeTypeId }));
                     GlobalUtilities.set_inner_title(that.Objects.MembershipNodeSelect.InputElement,
-                        RVDic.CN.Get_NodeSelect({ NodeType: nodeType }) + "...");
+                        RVDic.SelectN.replace("[n]", nodeType) + "...");
                 }
             });
 

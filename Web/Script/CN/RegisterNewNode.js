@@ -1140,7 +1140,7 @@
 
                         var successMessage = Base64.decode(result.SuccessMessage);
                         if (!successMessage) successMessage =
-                            RVDic.MSG.Get_RegistrationCompletedSuccessfully({ AdditionalID: result.AdditionalID });
+                            RVDic.MSG.RegistrationCompletedSuccessfully.replace("[n]", "'" + result.AdditionalID + "'");
 
                         alert(successMessage, { Timeout: 20000 });
 

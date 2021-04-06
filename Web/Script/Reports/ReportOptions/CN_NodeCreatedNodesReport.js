@@ -171,7 +171,7 @@
                     var nodeType = this.keywords[this.selectedIndex];
                     that.Objects.CreatorNodeSelect.bindURL(CNAPI.GetNodesDataSource({ NodeTypeID: nodeTypeId }));
                     GlobalUtilities.set_inner_title(that.Objects.CreatorNodeSelect.InputElement,
-                        RVDic.CN.Get_NodeSelect({ NodeType: nodeType }) + "...");
+                        RVDic.SelectN.replace("[n]", nodeType) + "...");
                 }
             });
 

@@ -804,7 +804,7 @@
                         },
                         {
                             Type: "div", Name: "visitsCountId",
-                            Childs: [{ Type: "text", TextValue: GlobalUtilities.convert_numbers_to_persian(RVDic.CN.Get_VisitsCount({ Count: visitsCount })) }]
+                            Childs: [{ Type: "text", TextValue: GlobalUtilities.convert_numbers_to_persian(RVDic.NVisits.replace("[n]", visitsCount)) }]
                         }
                     ]
                 }
@@ -848,7 +848,7 @@
             var countArea = elems["likesCountId"];
 
             var _set_count = function () {
-                countArea.innerHTML = GlobalUtilities.convert_numbers_to_persian(RVDic.CN.Get_LikesCount({ Count: likesCount }));
+                countArea.innerHTML = GlobalUtilities.convert_numbers_to_persian(RVDic.NLikes.replace("[n]", likesCount));
             };
 
             _set_count();
@@ -1427,7 +1427,7 @@
                     var index = this.selectedIndex;
                     var nodeTypeId = this.values[index];
                     var nodeType = newNodeType = this.keywords[index];
-                    GlobalUtilities.set_inner_title(nodeSelect.InputElement, RVDic.CN.Get_NodeSelect({ NodeType: nodeType }) + "...");
+                    GlobalUtilities.set_inner_title(nodeSelect.InputElement, RVDic.SelectN.replace("[n]", nodeType) + "...");
                     nodeSelect.bindURL(CNAPI.GetNodesDataSource({ NodeTypeID: nodeTypeId }));
                 }
             });
@@ -1804,7 +1804,7 @@
             var typeSelect = GlobalUtilities.append_autosuggest(elems["typeSelect"], {
                 InputClass: "rv-input",
                 InputStyle: "width:100%; font-size:0.8rem; padding-top:0.1rem; padding-bottom:0.1rem;",
-                InnerTitle: RVDic.CN.Get_NodeSelect({ NodeType: nodeType.Name }) + "...",
+                InnerTitle: RVDic.SelectN.replace("[n]", nodeType.Name) + "...",
                 AjaxDataSource: CNAPI.GetNodesDataSource({ NodeTypeID: (((params || {}).NodeType || {}).Value || {}).ID }),
                 ResponseParser: function (responseText) {
                     var nodes = JSON.parse(responseText).Nodes || [];

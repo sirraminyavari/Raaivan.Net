@@ -319,7 +319,7 @@
                     var nodeTypeId = this.values[this.selectedIndex];
                     var nodeType = this.keywords[this.selectedIndex];
                     nodeSelect.bindURL(CNAPI.GetNodesDataSource({ NodeTypeID: nodeTypeId }));
-                    GlobalUtilities.set_inner_title(nodeSelect.InputElement, RVDic.CN.Get_NodeSelect({ NodeType: nodeType }) + "...");
+                    GlobalUtilities.set_inner_title(nodeSelect.InputElement, RVDic.SelectN.replace("[n]", nodeType) + "...");
                 }
             });
 
@@ -361,7 +361,7 @@
                         nodeSelect.bindURL(CNAPI.GetNodesDataSource({ NodeTypeID: dr.NodeTypeID }));
 
                         GlobalUtilities.set_inner_title(nodeSelect.InputElement,
-                            RVDic.CN.Get_NodeSelect({ NodeType: Base64.decode(dr.NodeType) }) + "...");
+                            RVDic.SelectN.replace("[n]", Base64.decode(dr.NodeType)) + "...");
                     }
 
                     if (dr.Admin) elems["chbAdmin"].Check({ StopOnChange: true });

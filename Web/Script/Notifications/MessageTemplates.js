@@ -313,7 +313,7 @@
                     var index = nodeSelect.selectedIndex;
                     var _nid = index < 0 ? item.NodeID || "" : nodeSelect.values[index];
 
-                    if ((audienceType == "SpecificNode") && !_nid) return alert(RVDic.Checks.Get_PleaseSelectNode());
+                    if ((audienceType == "SpecificNode") && !_nid) return alert(RVDic.Checks.PleaseSelectN.replace("[n]", RVDic.Node));
 
                     var _nName = index < 0 ? "" : nodeSelect.keywords[index];
 

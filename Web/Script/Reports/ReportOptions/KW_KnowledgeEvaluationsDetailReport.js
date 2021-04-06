@@ -276,7 +276,7 @@
                     var nodeType = this.keywords[this.selectedIndex];
                     that.Objects.KnowledgeSelect.bindURL(CNAPI.GetNodesDataSource({ NodeTypeID: nodeTypeId }));
                     GlobalUtilities.set_inner_title(that.Objects.KnowledgeSelect.InputElement,
-                        RVDic.CN.Get_NodeSelect({ NodeType: nodeType }) + "...");
+                        RVDic.SelectN.replace("[n]", nodeType) + "...");
                 }
             });
 

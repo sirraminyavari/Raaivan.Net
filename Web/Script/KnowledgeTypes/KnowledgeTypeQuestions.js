@@ -200,7 +200,7 @@
 
                     relatedNodeSelect.bindURL(CNAPI.GetNodesDataSource({ NodeTypeID: nodeTypeId }));
                     GlobalUtilities.set_inner_title(relatedNodeSelect.InputElement,
-                        RVDic.CN.Get_NodeSelect({ NodeType: nodeType }) + "...");
+                        RVDic.SelectN.replace("[n]", nodeType) + "...");
                 }
             });
 

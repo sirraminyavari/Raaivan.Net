@@ -142,7 +142,7 @@
                     var nodeType = this.keywords[index];
 
                     that.Objects.NodesList.bind_data_source(CNAPI.GetNodesDataSource({ NodeTypeID: nodeTypeId }));
-                    GlobalUtilities.set_inner_title(that.Objects.NodesList.Objects.Autosuggest.InputElement, RVDic.CN.Get_NodeSelect({ NodeType: nodeType }) + "...");
+                    GlobalUtilities.set_inner_title(that.Objects.NodesList.Objects.Autosuggest.InputElement, RVDic.SelectN.replace("[n]", nodeType) + "...");
 
                     that.Objects.ListsList.bind_data_source(CNAPI.GetLists({ NodeTypeID: nodeTypeId }));
                     GlobalUtilities.set_inner_title(that.Objects.ListsList.Objects.Autosuggest.InputElement, RVDic.ComplexSelect + "...");

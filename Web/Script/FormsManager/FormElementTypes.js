@@ -3482,7 +3482,7 @@
                         var nodeTypes = (info.NodeTypes || [info]).filter(function (val) { return !!val.NodeTypeID; })
                             .map(function (x) { return { NodeTypeID: x.NodeTypeID, NodeType: Base64.decode(x.NodeType) }; });
                         innerTitle = RVDic.NodeSelect + "...";
-                        if (nodeTypes.length == 1) innerTitle = RVDic.CN.Get_NodeSelect({ NodeType: Base64.decode(nodeTypes[0].NodeType) }) + "...";
+                        if (nodeTypes.length == 1) innerTitle = RVDic.SelectN.replace("[n]", Base64.decode(nodeTypes[0].NodeType)) + "...";
                         dataSource = CNAPI.GetNodesDataSource({
                             NodeTypeIDs: nodeTypes.map(function (val) { return val.NodeTypeID; }).join("|"),
                             UseNodeTypeHierarchy: true
@@ -3675,7 +3675,7 @@
                         var nodeTypes = (info.NodeTypes || [info]).filter(function (val) { return !!val.NodeTypeID; });
                         //var nodeTypeId = info.NodeTypeID, nodeType = Base64.decode(info.NodeType);
                         innerTitle = RVDic.NodeSelect + "...";
-                        if (nodeTypes.length == 1) innerTitle = RVDic.CN.Get_NodeSelect({ NodeType: Base64.decode(nodeTypes[0].NodeType) }) + "...";
+                        if (nodeTypes.length == 1) innerTitle = RVDic.SelectN.replace("[n]", Base64.decode(nodeTypes[0].NodeType)) + "...";
 
                         dataSource = CNAPI.GetNodesDataSource({
                             NodeTypeIDs: nodeTypes.map(function (val) { return val.NodeTypeID; }).join("|"),

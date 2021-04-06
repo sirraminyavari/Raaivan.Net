@@ -87,7 +87,7 @@
                 var nodeTypeId = nodeTypeSelect.values[nodeTypeSelect.selectedIndex];
                 var nodeType = nodeTypeSelect.keywords[nodeTypeSelect.selectedIndex];
                 nodeSelect.bindURL(CNAPI.GetNodesDataSource({ NodeTypeID: nodeTypeId }));
-                GlobalUtilities.set_inner_title(nodeSelect.InputElement, RVDic.CN.Get_NodeSelect({ NodeType: nodeType }) + "...");
+                GlobalUtilities.set_inner_title(nodeSelect.InputElement, RVDic.SelectN.replace("[n]", nodeType) + "...");
             }
 
             var nodeTypeSelect = GlobalUtilities.append_autosuggest(elems["nodeTypeSelect"], {

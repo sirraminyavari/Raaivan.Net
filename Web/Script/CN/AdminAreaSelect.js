@@ -198,7 +198,7 @@
 
             if (force || !that.Options.SelectConfirmation) return that.set(node);
 
-            GlobalUtilities.confirm(RVDic.CN.Get_AdminAreaSelect({ NodeName: node.Name, NodeType: node.NodeType }), function (r) {
+            GlobalUtilities.confirm(RVDic.CN.DoYouWantToSelectNOfTypeM.replace("[n]", "'" + node.Name + "'").replace("[m]", node.NodeType), function (r) {
                 if (!r) that.show();
                 else that.set(node);
             });
