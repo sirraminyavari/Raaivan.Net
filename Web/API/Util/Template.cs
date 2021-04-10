@@ -19,20 +19,32 @@ namespace RaaiVan.Web.API
         [JsonProperty("name")]
         public string Name;
 
-        [JsonProperty("is_service")]
-        public bool? IsService;
+        [JsonProperty("children_ids")]
+        public List<string> ChildrenIDs;
 
-        [JsonProperty("has_form")]
-        public bool? HasForm;
+        [JsonProperty("extensions")]
+        public List<Extension> Extensions;
 
-        [JsonProperty("has_wiki")]
-        public bool? HasWiki;
+        [JsonProperty("service_title")]
+        public string ServiceTitle;
+
+        [JsonProperty("service_description")]
+        public string ServiceDescription;
 
         [JsonProperty("form_id")]
         public string FormID;
 
+        [JsonProperty("no_content")]
+        public bool? NoContent;
+
+        [JsonProperty("is_tree")]
+        public bool? IsTree;
+
         [JsonProperty("enable_contribution")]
         public bool? EnableContribution;
+
+        [JsonProperty("enable_previous_version_select")]
+        public bool? EnablePreviousVersionSelect;
 
         [JsonProperty("disable_abstract_and_keywords")]
         public bool? DisableAbstractAndKeywords;
@@ -42,6 +54,11 @@ namespace RaaiVan.Web.API
 
         [JsonProperty("disable_related_nodes_select")]
         public bool? DisableRelatedNodesSelect;
+
+        public TemplateNodeType() {
+            ChildrenIDs = new List<string>();
+            Extensions = new List<Extension>();
+        }
     }
 
     [Serializable]
@@ -116,6 +133,11 @@ namespace RaaiVan.Web.API
             }
         }
 
+        public Guid? get_id_from_template(string id)
+        {
+            return PublicMethods.parse_guid(Dic.Keys.Where(k => Dic[k] == id).FirstOrDefault());
+        }
+
         public Guid? get_existing_id(string id) {
             return string.IsNullOrEmpty(id) || UseExistingObjects == null || !UseExistingObjects.ContainsKey(id) ?
                 null : (Guid?)UseExistingObjects[id];
@@ -156,23 +178,13 @@ namespace RaaiVan.Web.API
         public Template(Guid? nodeTypeId) {
             //Initilization
             IDs = new TemplateIDs();
+            RootIDs = new List<string>() { IDs.resolve(nodeTypeId) };
             NodeTypes = new Dictionary<string, TemplateNodeType>();
             Forms = new Dictionary<string, TemplateForm>();
             Dependencies = new Dictionary<string, ArrayList>();
             //end of Initialization
-
-
-            //Calculation
-            List<NodeType> children = !nodeTypeId.HasValue || !RefAppID.HasValue ? new List<NodeType>() :
-                CNController.get_child_node_types(RefAppID.Value, nodeTypeId.Value);
-
-            List<Guid> root = (children.Count > 0 ? children.Select(c => c.NodeTypeID).ToList() : new List<Guid?>() { nodeTypeId })
-                .Where(id => id.HasValue).Select(id => id.Value).ToList();
-
-            root.ForEach(r => add_node_type(r));
-
-            RootIDs = root.Select(r => IDs.resolve(r)).ToList();
-            //Calculation
+            
+            add_node_type(nodeTypeId);
         }
 
         [JsonIgnore]
@@ -221,28 +233,34 @@ namespace RaaiVan.Web.API
             List<FormElement> formElements = form == null || !form.FormID.HasValue ? new List<FormElement>() :
                 FGController.get_form_elements(appId, form.FormID.Value);
 
-            bool hasFormExt = extensions.Any(e => e.ExtensionType == ExtensionType.Form) && formElements.Count > 0;
-            bool hasWikiExt = extensions.Any(e => e.ExtensionType == ExtensionType.Wiki);
-
-            bool hasForm = formElements.Count > 0 && (hasFormExt || hasWikiExt);
-
             TemplateNodeType newNodeType = new TemplateNodeType() {
                 ID = newNtId,
                 Name = nodeType.Name,
-                IsService = !string.IsNullOrEmpty(service.Title),
-                HasForm = hasFormExt,
-                HasWiki = hasWikiExt,
-                FormID = !hasForm ? null : IDs.resolve(form.FormID),
+                ServiceTitle = service.Title,
+                ServiceDescription = service.Description,
+                Extensions = extensions,
+                FormID = form == null ? null : IDs.resolve(form.FormID),
+                NoContent = service.NoContent,
+                IsTree = service.IsTree,
                 EnableContribution = service.EnableContribution,
+                EnablePreviousVersionSelect = service.EnablePreviousVersionSelect,
                 DisableAbstractAndKeywords = service.DisableAbstractAndKeywords,
                 DisableFileUpload = service.DisableFileUpload,
                 DisableRelatedNodesSelect = service.DisableRelatedNodesSelect
             };
 
-            if (hasForm)
+            if (form != null && form.FormID.HasValue)
             {
                 add_dependency(ntId, form.FormID);
                 add_form(form, formElements);
+            }
+
+            List<NodeType> children = CNController.get_child_node_types(appId, nodeTypeId.Value);
+            
+            if (children != null && children.Count > 0)
+            {
+                newNodeType.ChildrenIDs = children.Select(c => IDs.resolve(c.NodeTypeID)).ToList();
+                children.ForEach(c => add_node_type(c.NodeTypeID));
             }
 
             NodeTypes[newNtId] = newNodeType;
@@ -342,7 +360,7 @@ namespace RaaiVan.Web.API
                 .Select(id => activate_node_type(applicationId, currentUserId, id) != null).Count() > 0;
         }
 
-        private NodeType activate_node_type(Guid applicationId, Guid currentUserId, string id)
+        private NodeType activate_node_type(Guid applicationId, Guid currentUserId, string id, Guid? parentNodeTypeId = null)
         {
             TemplateNodeType tempNodeType = !NodeTypes.ContainsKey(id) ? null : NodeTypes[id];
             if (tempNodeType == null) return null;
@@ -350,25 +368,37 @@ namespace RaaiVan.Web.API
             NodeType nodeType = new NodeType() {
                 NodeTypeID = IDs.new_id(tempNodeType.ID),
                 Name = tempNodeType.Name,
+                ParentID = parentNodeTypeId,
                 CreatorUserID = currentUserId
             };
-
+            
             if(!CNController.add_node_type(applicationId, nodeType)) return null;
 
-            CNController.initialize_extensions(applicationId, nodeType.NodeTypeID.Value, currentUserId, ignoreDefault: true);
+            if (tempNodeType.Extensions != null && tempNodeType.Extensions.Count > 0)
+            {
+                CNController.initialize_extensions(applicationId, nodeType.NodeTypeID.Value, currentUserId, ignoreDefault: true);
+                CNController.save_extensions(applicationId, nodeType.NodeTypeID.Value, tempNodeType.Extensions, currentUserId);
+            }
+
             CNController.initialize_service(applicationId, nodeType.NodeTypeID.Value);
 
-            if (tempNodeType.HasForm.HasValue && tempNodeType.HasForm.Value)
-                CNController.enable_extension(applicationId, nodeType.NodeTypeID.Value, ExtensionType.Form, currentUserId);
+            if (!string.IsNullOrEmpty(tempNodeType.ServiceTitle))
+                CNController.set_service_title(applicationId, nodeType.NodeTypeID.Value, tempNodeType.ServiceTitle);
 
-            if (tempNodeType.HasWiki.HasValue && tempNodeType.HasWiki.Value)
-                CNController.enable_extension(applicationId, nodeType.NodeTypeID.Value, ExtensionType.Wiki, currentUserId);
+            if (!string.IsNullOrEmpty(tempNodeType.ServiceDescription))
+                CNController.set_service_description(applicationId, nodeType.NodeTypeID.Value, tempNodeType.ServiceDescription);
 
-            if (tempNodeType.IsService.HasValue && tempNodeType.IsService.Value)
-                CNController.set_service_title(applicationId, nodeType.NodeTypeID.Value, nodeType.Name);
+            if (tempNodeType.NoContent.HasValue && tempNodeType.NoContent.Value)
+                CNController.no_content_service(applicationId, nodeType.NodeTypeID.Value, true);
+
+            if (tempNodeType.IsTree.HasValue && tempNodeType.IsTree.Value)
+                CNController.is_tree(applicationId, nodeType.NodeTypeID.Value, true);
 
             if (tempNodeType.EnableContribution.HasValue && tempNodeType.EnableContribution.Value)
                 CNController.enable_contribution(applicationId, nodeType.NodeTypeID.Value, true);
+
+            if (tempNodeType.EnablePreviousVersionSelect.HasValue && tempNodeType.EnablePreviousVersionSelect.Value)
+                CNController.enable_previous_version_select(applicationId, nodeType.NodeTypeID.Value, true);
 
             if (tempNodeType.DisableAbstractAndKeywords.HasValue && tempNodeType.DisableAbstractAndKeywords.Value)
                 CNController.abstract_and_keywords_disabled(applicationId, nodeType.NodeTypeID.Value, true);
@@ -379,11 +409,19 @@ namespace RaaiVan.Web.API
             if (tempNodeType.DisableRelatedNodesSelect.HasValue && tempNodeType.DisableRelatedNodesSelect.Value)
                 CNController.related_nodes_select_disabled(applicationId, nodeType.NodeTypeID.Value, true);
 
-            if (tempNodeType.HasForm.HasValue && tempNodeType.HasForm.Value)
+            if (!string.IsNullOrEmpty(tempNodeType.FormID) && tempNodeType.Extensions.Any(e => e.ExtensionType == ExtensionType.Form))
             {
                 FormType form = activate_form(applicationId, currentUserId, tempNodeType.FormID);
                 if (form != null) FGController.set_form_owner(applicationId, nodeType.NodeTypeID.Value, form.FormID.Value, currentUserId);
             }
+
+            if (tempNodeType.ChildrenIDs != null && tempNodeType.ChildrenIDs.Count > 0)
+            {
+                tempNodeType.ChildrenIDs
+                    .ForEach(cId => activate_node_type(applicationId, currentUserId, cId, parentNodeTypeId: nodeType.NodeTypeID));
+            }
+
+            activate_node_type_icon(applicationId, id);
 
             return nodeType;
         }
@@ -477,6 +515,34 @@ namespace RaaiVan.Web.API
             FGController.save_form_elements(applicationId, form.FormID.Value, null, null, null, elements, currentUserId);
 
             return form;
+        }
+
+        private void activate_node_type_icon(Guid applicationId, string id)
+        {
+            Guid? templateNodeTypeId = IDs.get_id_from_template(id);
+
+            if (templateNodeTypeId.HasValue) return;
+
+            DocFileInfo pic = new DocFileInfo() {
+                FileID = templateNodeTypeId,
+                Extension = "jpg",
+                FileName = templateNodeTypeId.ToString(),
+                FolderName = FolderNames.Icons
+            };
+
+            byte[] fileContent = pic.toByteArray(RaaiVanSettings.ReferenceTenantID);
+
+            if (fileContent.Length == 0) return;
+
+            Guid? newFileId = IDs.new_id(id);
+
+            DocFileInfo newPic = new DocFileInfo() {
+                FileID = newFileId,
+                Extension = "jpg",
+                FileName = newFileId.ToString(),
+            };
+
+            newPic.store(applicationId, fileContent);
         }
     }
 }

@@ -3681,6 +3681,52 @@ namespace RaaiVan.Modules.CoreNetwork
             }
         }
 
+        public static bool SaveExtensions(Guid applicationId, Guid ownerId, List<Extension> extensions, Guid currentUserId)
+        {
+            SqlConnection con = new SqlConnection(ProviderUtil.ConnectionString);
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = con;
+
+            //Add Extensions
+            DataTable extensionsTable = new DataTable();
+            extensionsTable.Columns.Add("OwnerID", typeof(Guid));
+            extensionsTable.Columns.Add("Extension", typeof(string));
+            extensionsTable.Columns.Add("Title", typeof(string));
+            extensionsTable.Columns.Add("SequenceNumber", typeof(int));
+            extensionsTable.Columns.Add("Disabled", typeof(bool));
+
+            int seq = 1;
+
+            extensions.ForEach(ex => extensionsTable.Rows.Add(null, ex.ExtensionType.ToString(), ex.Title, seq++, ex.Disabled));
+
+            SqlParameter extensionsParam = new SqlParameter("@Extensions", SqlDbType.Structured);
+            extensionsParam.TypeName = "[dbo].[CNExtensionTableType]";
+            extensionsParam.Value = extensionsTable;
+            //end of Add Extensions
+
+            cmd.Parameters.AddWithValue("@ApplicationID", applicationId);
+            cmd.Parameters.AddWithValue("@OwnerID", ownerId);
+            cmd.Parameters.Add(extensionsParam);
+            cmd.Parameters.AddWithValue("@CurrentUserID", currentUserId);
+            cmd.Parameters.AddWithValue("@Now", DateTime.Now);
+
+            string spName = GetFullyQualifiedName("SaveExtensions");
+
+            string sep = ", ";
+            string arguments = "@ApplicationID" + sep + "@OwnerID" + sep + 
+                "@Extensions" + sep + "@CurrentUserID" + sep + "@Now";
+            cmd.CommandText = ("EXEC" + " " + spName + " " + arguments);
+
+            con.Open();
+            try { return ProviderUtil.succeed((IDataReader)cmd.ExecuteReader()); }
+            catch (Exception ex)
+            {
+                LogController.save_error_log(applicationId, null, spName, ex, ModuleIdentifier.CN);
+                return false;
+            }
+            finally { con.Close(); }
+        }
+
         public static void GetExtensions(Guid applicationId, ref List<Extension> retExtensions, Guid ownerId)
         {
             string spName = GetFullyQualifiedName("GetExtensions");

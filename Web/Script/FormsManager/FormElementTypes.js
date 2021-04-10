@@ -4025,7 +4025,7 @@
                 maxCount = isNaN(maxCount) || (Math.floor(maxCount) <= 0) ? null : Math.floor(maxCount);
                 
                 var _uploadParams = {
-                    UploadDataSource: DocsAPI.GetUploadLink({ OwnerType: "FormElement" }),
+                    UploadDataSource: DocsAPI.GetUploadLink(),
                     Removable: true,
                     MaxSize: maxSize,
                     TotalSize: totalSize,

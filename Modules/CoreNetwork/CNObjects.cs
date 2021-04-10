@@ -37,6 +37,7 @@ namespace RaaiVan.Modules.CoreNetwork
         Registerer
     }
 
+    [Serializable]
     public enum ExtensionType
     {
         NotSet,
@@ -1008,6 +1009,7 @@ namespace RaaiVan.Modules.CoreNetwork
         }
     }
 
+    [Serializable]
     public class Extension
     {
         public Guid? OwnerID;

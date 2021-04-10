@@ -3190,6 +3190,8 @@ if (!window.DynamicFileUtilities) window.DynamicFileUtilities = {
 
         if (data) scriptTag.innerHTML = data;
         else {
+            fileName += (fileName.indexOf("?") < 0 ? "?" : "&") + "timeStamp=" + (new Date()).getTime();
+
             scriptTag.onload = scriptTag.onreadystatechange = function () { callback(true); };
             scriptTag.onerror = function () { callback(false); };
             scriptTag.setAttribute("src", fileName);

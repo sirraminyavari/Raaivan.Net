@@ -1878,6 +1878,11 @@ namespace RaaiVan.Modules.CoreNetwork
             return DataProvider.MoveExtension(applicationId, ownerId, extensionType, moveDown);
         }
 
+        public static bool save_extensions(Guid applicationId, Guid ownerId, List<Extension> extensions, Guid currentUserId)
+        {
+            return DataProvider.SaveExtensions(applicationId, ownerId, extensions, currentUserId);
+        }
+
         public static List<Extension> get_extensions(Guid applicationId, Guid ownerId)
         {
             List<Extension> retList = new List<Extension>();

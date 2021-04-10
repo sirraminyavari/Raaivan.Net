@@ -63,7 +63,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                         Key = fileName,
                         InputStream = stream,
                         StorageClass = S3StorageClass.Standard,
-                        PartSize = 4194304 //4MB
+                        PartSize = 8388608 //8MB
                     };
 
                     if (isPublic) request.CannedACL = S3CannedACL.PublicRead;

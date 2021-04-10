@@ -345,6 +345,8 @@ namespace RaaiVan.Web.API
                 __ie_response(applicationId, context.Request.Files[0], fileInfo, ref responseText, ref fileContent, dontStore) :
                 __other_browsers_response(applicationId, context.Request.InputStream, fileInfo, ref responseText, ref fileContent, dontStore);
 
+            if (!result) return false;
+
             if (applicationId.HasValue && paramsContainer.CurrentUserID.HasValue && 
                 fileInfo.OwnerID.HasValue && fileInfo.OwnerID != Guid.Empty && fileInfo.FileID != null)
             {
@@ -411,7 +413,11 @@ namespace RaaiVan.Web.API
                 using (BinaryReader reader = new BinaryReader(st))
                 {
                     fileContent = reader.ReadBytes(Convert.ToInt32(st.Length));
-                    if(!dontStore) fi.store(applicationId, fileContent);
+                    if (!dontStore && !fi.store(applicationId, fileContent))
+                    {
+                        responseText = "{\"success\":false}";
+                        return false;
+                    }
                 }
 
                 responseText = "{\"success\":" + true.ToString().ToLower() + 

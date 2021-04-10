@@ -103,17 +103,15 @@
 
             that.ContainerDiv.innerHTML = "";
 
-            var uploadContainer = GlobalUtilities.create_nested_elements([
-                {
-                    Type: "div", Class: "rv-border-radius-quarter", Name: "uploadContainer",
-                    Style: "font-size:0.7rem; border-style:dashed; border-color:transparent; padding:0.3rem; cursor:pointer;" +
-                        (that.Options.MinWidth > 0 ? "min-width:" + that.Options.MinWidth + "px;" : "") +
-                        (that.Options.MinHeight > 0 ? "min-height:" + that.Options.MinHeight + "px;" : "") +
-                        (that.Options.Width > 0 ? "width:" + that.Options.Width + "px;" : "") +
-                        (that.Options.Height > 0 ? "height:" + that.Options.Height + "px;" : "") // +
-                    //"background-image:url('../../images/DragDrop.png'); background-repeat:no-repeat; background-position:center;"
-                }
-            ], that.ContainerDiv)["uploadContainer"];
+            var uploadContainer = GlobalUtilities.create_nested_elements([{
+                Type: "div", Class: "rv-border-radius-quarter", Name: "uploadContainer",
+                Style: "font-size:0.7rem; border-style:dashed; border-color:transparent; padding:0.3rem; cursor:pointer;" +
+                    (that.Options.MinWidth > 0 ? "min-width:" + that.Options.MinWidth + "px;" : "") +
+                    (that.Options.MinHeight > 0 ? "min-height:" + that.Options.MinHeight + "px;" : "") +
+                    (that.Options.Width > 0 ? "width:" + that.Options.Width + "px;" : "") +
+                    (that.Options.Height > 0 ? "height:" + that.Options.Height + "px;" : "") // +
+                //"background-image:url('../../images/DragDrop.png'); background-repeat:no-repeat; background-position:center;"
+            }], that.ContainerDiv)["uploadContainer"];
 
             that.Interface.UploadArea = uploadContainer;
 
@@ -201,7 +199,10 @@
                     file.__ProgressBar.PercentageLabel.parentNode.removeChild(file.__ProgressBar.PercentageLabel);
                 },
                 success: function (file, responseText, e) {
-                    var result = (!responseText || responseText == "") ? {} : JSON.parse(responseText);
+                    var result = GlobalUtilities.to_json(responseText) || {};
+
+                    if (!result.AttachedFile) return file.error();
+
                     file.UploadResponse = result;
                     that.Objects.Files.push(file);
                     if (that.Options.OnUpload) that.Options.OnUpload(file, result);
@@ -251,56 +252,50 @@
                 name = Base64.decode(file.FileName) + (file.Extension ? "." + Base64.decode(file.Extension) : "");
             if (!name) name = file.FileID;
 
-            var elems = GlobalUtilities.create_nested_elements([
-                {
-                    Type: "div", Name: "item",
-                    Class: "small-12 medium-12 large-12 rv-border-radius-quarter SoftBorder",
-                    Style: "padding:0.3rem; border-width:0.1rem; margin-bottom:0.3rem; background-color:white; cursor:default;",
-                    Childs: [
-                        {
-                            Type: "div", Class: "small-12 medium-12 large-12",
-                            Style: "position:relative; padding-" + RV_RevFloat + ":4rem;",
-                            Childs: [
-                                {
-                                    Type: "div",
-                                    Style: "position:absolute; top:0rem;" + RV_RevFloat + ":0rem;" +
-                                        "width:1.5rem; text-align:center;" +
-                                        "display:" + (that.Options.Removable ? "block" : "none") + ";",
-                                    Childs: [
-                                        {
-                                            Type: "i", Class: "fa fa-times fa-lg rv-icon-button",
-                                            Name: "removeButton", Tooltip: RVDic.Remove,
-                                            Attributes: [{ Name: "aria-hidden", Value: true }]
-                                        }
-                                    ]
-                                },
-                                {
-                                    Type: "div", Name: "percentageLabel",
-                                    Style: "position:absolute; text-align:center; width:2rem; color:green; top:0rem;" +
-                                        RV_RevFloat + ":" + (that.Options.Removable ? "1.5" : "0") + "rem;"
-                                },
-                                {
-                                    Type: "div", Class: "small-12 medium-12 large-12 TextAlign",
-                                    Attributes: [{ Name: "title", Value: name }],
-                                    Childs: [{ Type: "text", TextValue: name }]
-                                }
-                            ]
-                        },
-                        {
-                            Type: "div", Name: "progressArea",
-                            Class: "small-12 medium-12 large-12 rv-circle WarmBorder",
-                            Style: "padding:0.1rem; height:0.9rem; border-width:0.1rem; margin-top:0.3rem;" +
-                                "direction:ltr; text-align:left;" + (params.ProgressBar ? "" : "display:none;"),
-                            Childs: [
-                                {
-                                    Type: "span", Class: "rv-circle WarmBackgroundColor", Name: "percentage",
-                                    Style: "display:block; padding:0.1rem; height:0.6rem; width:0%;"
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ], that.Interface.UploadArea);
+            var elems = GlobalUtilities.create_nested_elements([{
+                Type: "div", Name: "item",
+                Class: "small-12 medium-12 large-12 rv-border-radius-quarter SoftBorder",
+                Style: "padding:0.3rem; border-width:0.1rem; margin-bottom:0.3rem; background-color:white; cursor:default;",
+                Childs: [
+                    {
+                        Type: "div", Class: "small-12 medium-12 large-12",
+                        Style: "position:relative; padding-" + RV_RevFloat + ":4rem;",
+                        Childs: [
+                            {
+                                Type: "div",
+                                Style: "position:absolute; top:0rem;" + RV_RevFloat + ":0rem;" +
+                                    "width:1.5rem; text-align:center;" +
+                                    "display:" + (that.Options.Removable ? "block" : "none") + ";",
+                                Childs: [{
+                                    Type: "i", Class: "fa fa-times fa-lg rv-icon-button",
+                                    Name: "removeButton", Tooltip: RVDic.Remove,
+                                    Attributes: [{ Name: "aria-hidden", Value: true }]
+                                }]
+                            },
+                            {
+                                Type: "div", Name: "percentageLabel",
+                                Style: "position:absolute; text-align:center; width:2rem; color:green; top:0rem;" +
+                                    RV_RevFloat + ":" + (that.Options.Removable ? "1.5" : "0") + "rem;"
+                            },
+                            {
+                                Type: "div", Class: "small-12 medium-12 large-12 TextAlign",
+                                Attributes: [{ Name: "title", Value: name }],
+                                Childs: [{ Type: "text", TextValue: name }]
+                            }
+                        ]
+                    },
+                    {
+                        Type: "div", Name: "progressArea",
+                        Class: "small-12 medium-12 large-12 rv-circle WarmBorder",
+                        Style: "padding:0.1rem; height:0.9rem; border-width:0.1rem; margin-top:0.3rem;" +
+                            "direction:ltr; text-align:left;" + (params.ProgressBar ? "" : "display:none;"),
+                        Childs: [{
+                            Type: "span", Class: "rv-circle WarmBackgroundColor", Name: "percentage",
+                            Style: "display:block; padding:0.1rem; height:100%; width:0%;"
+                        }]
+                    }
+                ]
+            }], that.Interface.UploadArea);
 
             elems["item"].IsFile = true;
             elems["item"].FileObject = file;
@@ -311,6 +306,11 @@
                 Container: elems["progressArea"],
                 Percentage: elems["percentage"],
                 PercentageLabel: elems["percentageLabel"]
+            };
+
+            file.error = function () {
+                elems["item"].style.borderColor = "red";
+                elems["item"].style.backgroundColor = "rgba(255,0,0,0.1)";
             };
 
             elems["removeButton"].addEventListener("click", function (e) {

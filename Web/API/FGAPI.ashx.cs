@@ -1407,7 +1407,12 @@ namespace RaaiVan.Web.API
 
             elements.Where(u => u != null && u.AttachedFiles != null && u.AttachedFiles.Count > 0).ToList().ForEach(e => {
                 attachedFiles.AddRange(e.AttachedFiles);
-                e.AttachedFiles.ForEach(f => f.OwnerID = e.ElementID);
+
+                e.AttachedFiles.ForEach(f =>
+                {
+                    f.OwnerID = e.ElementID;
+                    f.OwnerType = FileOwnerTypes.FormElement;
+                });
             });
 
             if (attachedFiles != null &&
