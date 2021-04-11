@@ -23,6 +23,7 @@
         };
 
         this.Options = {
+            User: params.User,
             ActiveTab: String(params.ActiveTab).toLowerCase()
         };
 
@@ -164,11 +165,11 @@
             that.__RelatedInited = true;
 
             GlobalUtilities.loading(that.Interface.RelatedArea);
-
+            
             GlobalUtilities.load_files(["CN/RelatedNodesViewer.js"], {
                 OnLoad: function () {
                     new RelatedNodesViewer(that.Interface.RelatedArea, {
-                        ObjectID: RVGlobal.UserID || RVGlobal.CurrentUserID, Editable: false
+                        ObjectID: (that.Options.User || {}).UserID || RVGlobal.CurrentUserID, Editable: false
                     });
                 }
             });

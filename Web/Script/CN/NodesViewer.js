@@ -563,7 +563,7 @@
                                         {
                                             Type: "img", Class: "rv-border-radius-quarter",
                                             Style: "width:2.5rem; height:2.5rem; margin:0.1rem 0;",
-                                            Attributes: [{ Name: "src", Value: nodeIcon }]
+                                            Attributes: [{ Name: "src", Value: GlobalUtilities.add_timestamp(nodeIcon) }]
                                         },
                                         (!item.CreationDate ? null : {
                                             Type: "div", Class: "rv-border-radius-quarter",

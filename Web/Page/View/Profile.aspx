@@ -12,7 +12,7 @@
 
     <script type="text/javascript">
         (function () {
-            var initialJson = JSON.parse(document.getElementById("initialJson").value);
+            var initialJson = JSON.parse(document.getElementById("initialJson").value) || {};
             var modules = (window.RVGlobal || {}).Modules || {};
 
             //Set document title
@@ -63,6 +63,7 @@
             GlobalUtilities.load_files(["USR/PersonalPageInitializer.js"], {
                 OnLoad: function () {
                     new PersonalPageInitializer("profileArea", {
+                        User: initialJson.User,
                         Modules: (window.RVGlobal || {}).Modules,
                         ActiveTab: initialJson.ActiveTab,
                         EmploymentTypes: initialJson.EmploymentTypes,

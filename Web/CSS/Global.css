@@ -225,7 +225,7 @@ pre > code {
 		 url('../../fonts/ttf/IRANSansWeb.ttf') format('truetype');
 }
 
-.WarmBorder {
+.rv-warm-border, .WarmBorder {
     border: solid 1px var(--rv-color-warm);
 }
 

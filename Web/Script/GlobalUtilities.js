@@ -1361,8 +1361,10 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
     },
 
     add_timestamp: function (url) {
+        var ts = window.__TIMESTAMP = window.__TIMESTAMP || (new Date()).getTime();
+
         if (!url) return "";
-        return url + (url.indexOf("?") >= 0 ? "&" : "?") + "timeStamp=" + (new Date()).getTime()
+        return url + (url.indexOf("?") >= 0 ? "&" : "?") + "timeStamp=" + ts;
     },
 
     is_base64: function (str) {
@@ -2811,7 +2813,8 @@ if (!window.GlobalUtilities) window.GlobalUtilities = {
         _div.classList.remove("clearfix");
         _div.classList.add("clearfix");
 
-        if ((params.IsHTML !== true) && !!text)
+        //this code is necessary for Security Certificate
+        if ((params.IsHTML !== true) && !!text && false)
             text = GlobalUtilities.secure_string(text);
 
         var richText = new RegExp("<.*?>", "g").test(text || " ");
@@ -3190,11 +3193,9 @@ if (!window.DynamicFileUtilities) window.DynamicFileUtilities = {
 
         if (data) scriptTag.innerHTML = data;
         else {
-            fileName += (fileName.indexOf("?") < 0 ? "?" : "&") + "timeStamp=" + (new Date()).getTime();
-
             scriptTag.onload = scriptTag.onreadystatechange = function () { callback(true); };
             scriptTag.onerror = function () { callback(false); };
-            scriptTag.setAttribute("src", fileName);
+            scriptTag.setAttribute("src", GlobalUtilities.add_timestamp(fileName));
         }
 
         return scriptTag;

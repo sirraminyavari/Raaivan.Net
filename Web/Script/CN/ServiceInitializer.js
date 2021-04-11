@@ -295,7 +295,7 @@
                                     Type: "middle",
                                     Childs: [{
                                         Type: "img", Style: "width:60%; height:60%;",
-                                        Attributes: [{ Name: "src", Value: iconUrl }]
+                                        Attributes: [{ Name: "src", Value: GlobalUtilities.add_timestamp(iconUrl) }]
                                     }]
                                 }]
                             }]
