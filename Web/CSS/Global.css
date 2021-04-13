@@ -301,6 +301,10 @@ pre > code {
     border-radius: 3px;
 }
 
+.rv-font-default {
+    font-family: IRANSans;
+}
+
 .rv-text-shadow {
     text-shadow: 0 1px 2px rgba(95,95,95,.4);
 }

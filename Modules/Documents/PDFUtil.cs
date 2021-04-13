@@ -150,6 +150,9 @@ namespace RaaiVan.Modules.Documents
                 string tempDir = PublicMethods.map_path(PublicConsts.TempDirectory, localPath: true);
                 if (!Directory.Exists(tempDir)) Directory.CreateDirectory(tempDir);
                 MagickNET.SetTempDirectory(tempDir);
+
+                if (!string.IsNullOrEmpty(RaaiVanSettings.GhostScriptDirectory))
+                    MagickNET.SetGhostscriptDirectory(RaaiVanSettings.GhostScriptDirectory);
             }
             catch (Exception ex)
             {

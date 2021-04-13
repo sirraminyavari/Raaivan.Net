@@ -1400,7 +1400,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             catch { return new Dictionary<string, object>(); }
         }
 
-        public static T fromJSON<T>(string data)
+        public static T fromJSON_typed<T>(string data)
         {
             if (string.IsNullOrEmpty(data)) return default(T);
 

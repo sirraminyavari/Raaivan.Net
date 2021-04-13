@@ -8176,7 +8176,7 @@ namespace RaaiVan.Web.API
                 return;
             }
 
-            Template template = PublicMethods.fromJSON<Template>(templateContent);
+            Template template = PublicMethods.fromJSON_typed<Template>(templateContent);
 
             bool result = template != null && template.activate(paramsContainer.Tenant.Id, paramsContainer.CurrentUserID.Value);
 

@@ -81,6 +81,9 @@ namespace RaaiVan.Web.API
 
         [JsonProperty("info")]
         public Dictionary<string, object> Info;
+
+        [JsonProperty("help")]
+        public string Help;
     }
 
     [Serializable]
@@ -285,7 +288,8 @@ namespace RaaiVan.Web.API
                     Title = elem.Title,
                     Type = elem.Type.Value.ToString(),
                     Weight = !elem.Weight.HasValue ? 0 : elem.Weight.Value,
-                    Info = PublicMethods.fromJSON(elem.Info)
+                    Info = PublicMethods.fromJSON(elem.Info),
+                    Help = elem.Help
                 };
 
                 newForm.Elements.Add(newFormElement);
@@ -445,8 +449,11 @@ namespace RaaiVan.Web.API
                     ElementID = IDs.new_id(e.ID),
                     Name = e.Code,
                     Title = e.Title,
-                    Weight = e.Weight
+                    Weight = e.Weight,
+                    Help = e.Help
                 };
+
+                e.Info = PublicMethods.fromJSON(PublicMethods.toJSON_typed(e.Info));
 
                 FormElementTypes tp = FormElementTypes.Text;
                 if (!Enum.TryParse<FormElementTypes>(e.Type, out tp)) return null;
@@ -521,7 +528,7 @@ namespace RaaiVan.Web.API
         {
             Guid? templateNodeTypeId = IDs.get_id_from_template(id);
 
-            if (templateNodeTypeId.HasValue) return;
+            if (!templateNodeTypeId.HasValue) return;
 
             DocFileInfo pic = new DocFileInfo() {
                 FileID = templateNodeTypeId,
@@ -540,6 +547,7 @@ namespace RaaiVan.Web.API
                 FileID = newFileId,
                 Extension = "jpg",
                 FileName = newFileId.ToString(),
+                FolderName = FolderNames.Icons
             };
 
             newPic.store(applicationId, fileContent);

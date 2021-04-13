@@ -132,6 +132,8 @@ namespace RaaiVan.Modules.GlobalUtilities
         RealTime,
         Explorer,
 
+        GhostScriptDirectory,
+
         FileContents,
         FileContentExtractionInterval,
         FileContentExtractionBatchSize,
@@ -767,6 +769,14 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             return RaaiVanConfig.Modules.Explorer(applicationId) &&
                 get_value(applicationId, RVSettingsItem.Explorer).ToLower() != "false";
+        }
+
+        public static string GhostScriptDirectory
+        {
+            get
+            {
+                return get_value(null, RVSettingsItem.GhostScriptDirectory);
+            }
         }
 
         public static class SSO
