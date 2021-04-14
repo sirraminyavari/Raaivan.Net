@@ -38,7 +38,7 @@
                     ], document.getElementById("appsArea").parentNode);
 
                     var editor = new RVEditor(elems["editor"], {
-                        OwnerID: "6d2466d0-69a3-4c46-a9ab-ddd760b6dd24",
+                        OwnerID: "47df3696-1d59-46d0-865e-49df23f28b08",
                         UploadOwnerType: "Node",
                         OnInit: function (obj) { editor = obj; }
                     });

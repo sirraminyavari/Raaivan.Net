@@ -591,7 +591,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             get
             {
                 List<FolderNames> nameItems = new[] { FolderNames.EmailTemplates, FolderNames.PDFImages, FolderNames.Themes }.ToList();
-                return FileID.HasValue ? FileID.ToString() : (nameItems.Any(n => FolderName == n) ? FileName : string.Empty);
+                return nameItems.Any(n => FolderName == n) ? FileName : (FileID.HasValue ? FileID.ToString() : string.Empty);
             }
         }
 
