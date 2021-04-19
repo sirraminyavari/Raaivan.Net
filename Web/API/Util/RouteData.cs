@@ -462,7 +462,11 @@ namespace RaaiVan.Web.API
 
         private static void admin_map(RouteActionParams input)
         {
-            Guid? formId = RaaiVanSettings.NodeTypeIdentityFormID(input.ParamsContainer.ApplicationID);
+            Guid? formId = RaaiVanSettings.NodeTypeIdentityFormID;
+
+            if (formId.HasValue && (!input.ParamsContainer.ApplicationID.HasValue ||
+                input.ParamsContainer.ApplicationID != RaaiVanSettings.ReferenceTenantID)) formId = null;
+
             if (formId.HasValue) input.Data["IdentityFormID"] = formId;
         }
 

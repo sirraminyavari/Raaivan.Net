@@ -109,7 +109,7 @@
                 OnLoad: function () {
                     that.Objects.SharingManager = new SharingManager({
                         Container: that.Interface.SocialArea,
-                        OwnerObjectID: RVGlobal.UserID || RVGlobal.CurrentUserID, InitialFill: true,
+                        OwnerObjectID: (that.Options.User || {}).UserID || RVGlobal.CurrentUserID, InitialFill: true,
                         OwnerType: "User", NewPostArea: "Advanced", Permissions: { AddPost: true },
                         EnableImageUpload: true, HidePrivacyOptions: true,
                         OnLoad: function () { that.Objects.SharingManager.__Loaded = true; }
@@ -129,10 +129,10 @@
             GlobalUtilities.load_files(["USR/Resume.js"], {
                 OnLoad: function () {
                     var rs = new Resume(that.Interface.ResumeArea, {
-                        UserID: RVGlobal.UserID,
+                        UserID: (that.Options.User || {}).UserID,
                         CurrentUserID: RVGlobal.CurrentUserID,
                         IsSystemAdmin: RVGlobal.IsSystemAdmin === true,
-                        Editable: RVGlobal.UserID == RVGlobal.CurrentUserID || RVGlobal.IsSystemAdmin === true,
+                        Editable: ((that.Options.User || {}).UserID == RVGlobal.CurrentUserID) || RVGlobal.IsSystemAdmin === true,
                         EnableProfileImage: !RVGlobal.Modules.SocialNetwork,
                         EmploymentTypes: that.Objects.EmploymentTypes,
                         PhoneNumberTypes: that.Objects.PhoneNumberTypes
@@ -152,7 +152,7 @@
             GlobalUtilities.load_files(["Wiki/WikiManager.js",], {
                 OnLoad: function () {
                     var wm = new WikiManager(that.Interface.WikiContent, {
-                        OwnerID: RVGlobal.UserID || RVGlobal.CurrentUserID, OwnerType: "User", Downloadable: true
+                        OwnerID: (that.Options.User || {}).UserID || RVGlobal.CurrentUserID, OwnerType: "User", Downloadable: true
                     });
                 }
             });

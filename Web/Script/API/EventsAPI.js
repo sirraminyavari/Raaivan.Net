@@ -2,10 +2,12 @@
     ResponseURL: "../../api/event",
 
     _send: function (url, params, queryString) {
+        params = params || {};
+
         if (queryString && (queryString[0] == "&")) queryString = queryString.substring(1);
 
         if (!params.ResponseHandler) return url + (!queryString ? "" : "&" + queryString);
-        else send_post_request(url, queryString, params.ResponseHandler, null, null, null, params.ParseResults, params);
+        else (params.RequestHandler || RVRequest).post_request(url, queryString, params.ResponseHandler, params, params.ParseResults);
     },
 
     NewEvent: function (params) {
@@ -52,4 +54,4 @@
         var queryString = (params.EventID ? "&CalenderID=" + params.EventID : "");
         return EventsAPI._send(url, params, queryString);
     }
-}
+};

@@ -2,10 +2,12 @@
     ResponseURL: "../../api/social",
 
     _send: function (url, params, queryString) {
+        params = params || {};
+
         if (queryString && (queryString[0] == "&")) queryString = queryString.substring(1);
 
         if (!params.ResponseHandler) return url + (!queryString ? "" : "&" + queryString);
-        else send_post_request(url, queryString, params.ResponseHandler, null, null, null, params.ParseResults, params);
+        else (params.RequestHandler || RVRequest).post_request(url, queryString, params.ResponseHandler, params, params.ParseResults);
     },
 
     PostPageURL: function (params) {
@@ -160,4 +162,4 @@
         var queryString = (params.PostID ? "&PostID=" + params.PostID : "");
         return SharingAPI._send(url, params, queryString);
     }
-}
+};

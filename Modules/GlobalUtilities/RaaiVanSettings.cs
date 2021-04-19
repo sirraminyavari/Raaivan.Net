@@ -281,10 +281,13 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        public static Guid? NodeTypeIdentityFormID(Guid? applicationId)
+        public static Guid? NodeTypeIdentityFormID
         {
-            return !applicationId.HasValue || !ReferenceTenantID.HasValue || ReferenceTenantID != applicationId ? null :
-                PublicMethods.parse_guid(get_value(null, RVSettingsItem.NodeTypeIdentityFormID));
+            get
+            {
+                return !ReferenceTenantID.HasValue ? null : 
+                    PublicMethods.parse_guid(get_value(null, RVSettingsItem.NodeTypeIdentityFormID));
+            }
         }
 
         public static bool USBToken

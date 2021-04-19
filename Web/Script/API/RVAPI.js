@@ -3,10 +3,12 @@
     RSSResponseURL: "../../rss",
 
     _send: function (url, params, queryString) {
+        params = params || {};
+
         if (queryString && (queryString[0] == "&")) queryString = queryString.substring(1);
 
         if (!params.ResponseHandler) return url + (!queryString ? "" : "&" + queryString);
-        else send_post_request(url, queryString, params.ResponseHandler, null, null, null, params.ParseResults, params);
+        else (params.RequestHandler || RVRequest).post_request(url, queryString, params.ResponseHandler, params, params.ParseResults);
     },
 
     RemoteAuthenticationURL: function () {
@@ -440,11 +442,11 @@
 
     WebRequest: function (params) {
         params = params || {};
-        
+
         var data = [];
         for (var d in (params.Data || {}))
             data.push(Base64.encode(d) + ":" + Base64.encode(String(params.Data[d])));
-        
+
         var url = RVAPI.ResponseURL + "/WebRequest?timeStamp=" + new Date().getTime();
         var queryString = (params.URL ? "&RequestURL=" + Base64.encode(params.URL) : "") +
             (data.length > 0 ? "&Data=" + data.join('|') : "");
@@ -573,4 +575,4 @@
         var url = RVAPI.ResponseURL + "/GetAllNotifications?timeStamp=" + new Date().getTime();
         return RVAPI._send(url, params, "");
     }
-}
+};

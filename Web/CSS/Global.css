@@ -573,8 +573,8 @@ pre > code {
 
 .rv-action-button-secondary-o {
     color: var(--rv-color);
-    border-color: var(--rv-white-color);
-    background-color: var(--rv-white-color);
+    border-color: transparent;
+    background-color: transparent;
 }
 
 .rv-action-button-secondary-o:hover {
@@ -613,6 +613,20 @@ pre > code {
 
 .rv-action-button-negative-o:active {
     background-color: var(--rv-red-color-soft);
+}
+
+.rv-action-button-negative-so {
+    color: var(--rv-red-color);
+    border-color: transparent;
+    background-color: transparent;
+}
+
+.rv-action-button-negative-so:hover {
+    color: var(--rv-red-color-lightwarm);
+}
+
+.rv-action-button-secondary-o:active {
+    color: var(--rv-red-color-warm);
 }
 
 .rv-action-button-disabled {

@@ -1394,6 +1394,10 @@ namespace RaaiVan.Web.API
                         PublicMethods.parse_guid(context.Request.Params["OwnerID"]), ref responseText);
                     _return_response(ref context, ref responseText);
                     return;
+                case "GetTemplates":
+                    get_templates(ref responseText);
+                    _return_response(ref context, ref responseText);
+                    return;
                 case "GetTemplateJSON":
                     get_template_json(PublicMethods.parse_guid(context.Request.Params["NodeTypeID"]), ref responseText);
                     _return_response(ref context, ref responseText);
@@ -8161,6 +8165,81 @@ namespace RaaiVan.Web.API
         }
 
         /* end of Service */
+
+        protected void get_templates(ref string responseText) {
+            //Constants
+            string TAG_CLASS_CODE = "tag";
+            string TAG_ELEMENT_CODE = "template_tags";
+            //end of Constants
+
+            Guid? refAppId = RaaiVanSettings.ReferenceTenantID;
+            Guid? templateFormId = RaaiVanSettings.NodeTypeIdentityFormID;
+
+            if (!refAppId.HasValue) {
+                responseText = "{\"Templates\":[]}";
+                return;
+            }
+
+            long totalCount = 0;
+
+            List<NodeType> nodeTypes = CNController.get_node_types(refAppId.Value, searchText: null, extensions: null, 
+                isKnowledge: null, isDocument: null, archive: false, count: 1000, lowerBoundary: null, totalCount: ref totalCount)
+                .Where(nt => !string.IsNullOrEmpty(nt.NodeTypeAdditionalID) &&
+                (nt.NodeTypeAdditionalID.ToLower().StartsWith("final_") || nt.NodeTypeAdditionalID.ToLower().EndsWith("_final"))).ToList();
+
+            nodeTypes.Where(nt => nt.ParentID.HasValue && !nodeTypes.Any(x => x.NodeTypeID == nt.ParentID))
+                .ToList().ForEach(nt => nt.ParentID = null);
+
+            Guid? tagClassId = CNController.get_node_type_id(refAppId.Value, TAG_CLASS_CODE);
+
+            List<Node> tags = !tagClassId.HasValue ? new List<Node>() :
+                CNController.get_nodes(refAppId.Value, tagClassId.Value, count: 1000);
+
+            List<FormType> forms = !templateFormId.HasValue ? new List<FormType>() :
+                FGController.get_owner_form_instances(refAppId.Value,
+                    nodeTypes.Select(nt => nt.NodeTypeID.Value).ToList(), templateFormId.Value);
+
+            List<FormElement> elements =
+                FGController.get_form_instance_elements(refAppId.Value, forms.Select(f => f.InstanceID.Value).ToList());
+
+            Dictionary<Guid, List<Guid>> templateTags = new Dictionary<Guid, List<Guid>>();
+            
+            elements
+                .Where(e => e.Type == FormElementTypes.Node && !string.IsNullOrEmpty(e.Name) &&
+                    e.Name.ToLower() == TAG_ELEMENT_CODE.ToLower())
+                .ToList()
+                .ForEach(e =>
+                {
+                    Expressions.get_tagged_items(e.TextValue, "Node")
+                        .Where(i => i.ID.HasValue && tags.Any(t => t.NodeID == i.ID))
+                        .ToList()
+                        .ForEach(i =>
+                        {
+                            NodeType template = forms.Where(f => f.InstanceID == e.FormInstanceID && f.OwnerID.HasValue)
+                                .Select(f => nodeTypes.Where(nt => nt.NodeTypeID == f.OwnerID).FirstOrDefault()).FirstOrDefault();
+
+                            Node tag = tags.Where(t => t.NodeID == i.ID.Value).FirstOrDefault();
+
+                            if (template == null || tag == null) return;
+
+                            if (!templateTags.ContainsKey(template.NodeTypeID.Value))
+                                templateTags[template.NodeTypeID.Value] = new List<Guid>();
+
+                            if (!templateTags[template.NodeTypeID.Value].Any(k => k == tag.NodeID.Value))
+                                templateTags[template.NodeTypeID.Value].Add(tag.NodeID.Value);
+                        });
+                });
+
+            responseText = "{\"Templates\":[" + 
+                    string.Join(",", NodeType.toTree(nodeTypes).Select(nt => nt.toJson(refAppId, iconUrl: true))) + "]" +
+                ",\"Tags\":[" + string.Join(",", tags.Select(
+                    t => t.toJson())) + "]" +
+                ",\"TemplateTags\":{" + string.Join(",", templateTags.Keys.Select(
+                    k => "\"" + k.ToString() + "\":" + 
+                        "[" + string.Join(",", templateTags[k].Select(t => "\"" + t.ToString() + "\"")) + "]")) + 
+                    "}" +
+                "}";
+        }
 
         protected void get_template_json(Guid? nodeTypeId, ref string responseText)
         {

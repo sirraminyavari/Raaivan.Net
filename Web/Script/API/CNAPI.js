@@ -2,10 +2,12 @@
     ResponseURL: "../../api/network",
 
     _send: function (url, params, queryString) {
+        params = params || {};
+
         if (queryString && (queryString[0] == "&")) queryString = queryString.substring(1);
 
         if (!params.ResponseHandler) return url + (!queryString ? "" : "&" + queryString);
-        else send_post_request(url, queryString, params.ResponseHandler, null, null, null, params.ParseResults, params);
+        else (params.RequestHandler || RVRequest).post_request(url, queryString, params.ResponseHandler, params, params.ParseResults);
     },
 
     TestAdditionalIDPattern: function (pattern) {
@@ -33,7 +35,7 @@
 
     GetTagsDataSource: function (params) {
         params = params || {};
-        return CNAPI.ResponseURL + "/SearchTags?timeStamp=" + new Date().getTime() + 
+        return CNAPI.ResponseURL + "/SearchTags?timeStamp=" + new Date().getTime() +
             (params.Count ? "&Count=" + params.Count : "") +
             (params.LowerBoundary ? "&LowerBoundary=" + params.LowerBoundary : "") + "&SearchText=";
     },
@@ -113,7 +115,7 @@
         params = params || {};
 
         if (typeof (params.Archive) == "undefined") params.Archive = false;
-        
+
         var url = CNAPI.ResponseURL + "/GetNodeTypes?timeStamp=" + new Date().getTime();
         var queryString = (params.NodeTypeIDs ? "&NodeTypeIDs=" + params.NodeTypeIDs : "") +
             (GlobalUtilities.get_type(params.GrabSubNodeTypes) == "boolean" ? "&GrabSubNodeTypes=" + params.GrabSubNodeTypes : "") +
@@ -658,7 +660,7 @@
 
         var url = CNAPI.ResponseURL + "/GetFavoriteNodesCount?timeStamp=" + new Date().getTime();
         var queryString = (params.NodeTypeID ? "&NodeTypeID=" + params.NodeTypeID : "") +
-            (params.UserID ? "&UserID=" + params.UserID : "") + 
+            (params.UserID ? "&UserID=" + params.UserID : "") +
             (GlobalUtilities.get_type(params.IsDocument) == "boolean" ? "&IsDocument=" + params.IsDocument : "");
         return CNAPI._send(url, params, queryString);
     },
@@ -1008,7 +1010,7 @@
 
         var url = CNAPI.ResponseURL + "/GetIntellectualPropertiesCount?timeStamp=" + new Date().getTime();
         var queryString = (params.NodeTypeID ? "&NodeTypeID=" + params.NodeTypeID : "") +
-            (params.UserID ? "&UserID=" + params.UserID : "") + 
+            (params.UserID ? "&UserID=" + params.UserID : "") +
             (GlobalUtilities.get_type(params.IsDocument) == "boolean" ? "&IsDocument=" + params.IsDocument : "");
         return CNAPI._send(url, params, queryString);
     },
@@ -1071,7 +1073,7 @@
         var queryString = (params.NodeTypeID ? "&NodeTypeID=" + params.NodeTypeID : "") +
             (params.Dic ? "&Dic=" + params.Dic : "");
         return CNAPI._send(url, params, queryString);
-    }, 
+    },
 
     ImportNodesFromExcel: function (params) {
         params = params || {};
@@ -1474,6 +1476,14 @@
 
     /* end of Service */
 
+    GetTemplates: function (params) {
+        params = params || {};
+
+        var url = CNAPI.ResponseURL + "/GetTemplates?timeStamp=" + new Date().getTime();
+        var queryString = "";
+        return CNAPI._send(url, params, queryString);
+    },
+
     GetTemplateJSON: function (params) {
         params = params || {};
 
@@ -1489,4 +1499,4 @@
         var queryString = (params.Template ? "&Template=" + params.Template : "");
         return CNAPI._send(url, params, queryString);
     }
-}
+};

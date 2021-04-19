@@ -49,11 +49,11 @@
             User: null,
             UserProfileObject: null
         };
-
+        
         this.Options = {
             ProfileImage: params.EnableProfileImage === true
         };
-
+        
         GlobalUtilities.load_files([{ Root: "API/", Ext: "js", Childs: ["UsersAPI", "CNAPI"] }, "USR/UserProfile.js"], {
             OnLoad:
             function () { that._preinit(params); }
@@ -117,7 +117,7 @@
         _initialize: function (params) {
             var that = this;
             that.ContainerDiv.innerHTML = "";
-
+            
             var selectedItemColor = "rgb(90, 90, 90)";
             var notSelectedItemColor = "rgb(190, 190, 190)";
 
@@ -391,13 +391,13 @@
 
         reset: function (userId, Divs) {
             var that = this;
-
+            
             that.__InterfaceDivs = Divs || that.__InterfaceDivs;
             Divs = that.__InterfaceDivs;
 
             if ((that.Objects.UserID || "") != "" && that.Objects.UserID == userId) return;
             that.Objects.UserID = userId || that.Objects.UserID;
-
+            
             that.Objects.Editable = that.Objects.IsSystemAdmin === true ||
                 (String(that.Objects.CurrentUserID || "").toLowerCase() == String(that.Objects.UserID || "").toLowerCase());
 
@@ -419,7 +419,7 @@
                 that.Interface.AddLanguageButton.style.display = "block";
             }
             //end of edited
-
+            
             that.Interface.JobExperiencesArea.innerHTML = "";
             that.Interface.EducationExperiencesArea.innerHTML = "";
             that.Interface.InstituteEducationExperiencesArea.innerHTML = "";
@@ -438,7 +438,7 @@
                         for (var i = 0; i < result.JobExperiences.length; i++)
                             that.set_job_experiences(that.Interface.JobExperiencesArea, result.JobExperiences[i], false);
                     }
-
+                    
                     if (!that.Objects.Editable && result.SchoolEducationCount == 0) {
                         Divs.educationDiv.style.display = "none";
                         that.Interface.EducationalExperienceMenu.style.display = "none";
@@ -461,7 +461,7 @@
                                 that.set_institute_education_experiences(that.Interface.InstituteEducationExperiencesArea, result.EducationalExperiences[i], false);
                         }
                     }
-
+                    
                     if (!that.Objects.Editable && result.HonorsAndAwards.length == 0) {
                         Divs.honorDiv.style.display = "none";
                         that.Interface.HonorsAndAwardsMenu.style.display = "none";

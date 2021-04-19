@@ -4,10 +4,12 @@
     DownloadHandler: "../../download",
 
     _send: function (url, params, queryString) {
+        params = params || {};
+
         if (queryString && (queryString[0] == "&")) queryString = queryString.substring(1);
 
         if (!params.ResponseHandler) return url + (!queryString ? "" : "&" + queryString);
-        else send_post_request(url, queryString, params.ResponseHandler, null, null, null, params.ParseResults, params);
+        else (params.RequestHandler || RVRequest).post_request(url, queryString, params.ResponseHandler, params, params.ParseResults);
     },
 
     GetUploadLink: function (params) {
@@ -178,7 +180,7 @@
 
     GetTreeNodes: function (params) {
         params = params || {};
-        
+
         var url = DocsAPI.DocsHandler + "/GetTreeNodes?timeStamp=" + new Date().getTime();
         var queryString = (params.TreeID ? "&TreeID=" + params.TreeID : "");
         return DocsAPI._send(url, params, queryString);
@@ -213,7 +215,7 @@
 
     RemoveFile: function (params) {
         params = params || {};
-        
+
         var url = DocsAPI.UploadHandler + "/RemoveFile?timeStamp=" + new Date().getTime();
         var queryString = (params.OwnerID ? "&OwnerID=" + params.OwnerID : "") +
             (params.FileID ? "&FileID=" + params.FileID : "");
@@ -396,4 +398,4 @@
         var queryString = (params.OwnerID ? "&OwnerID=" + params.OwnerID : "");
         return DocsAPI._send(url, params, queryString);
     }
-}
+};

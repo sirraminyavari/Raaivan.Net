@@ -2,10 +2,12 @@
     ResponseURL: "../../api/workflow",
 
     _send: function (url, params, queryString) {
+        params = params || {};
+
         if (queryString && (queryString[0] == "&")) queryString = queryString.substring(1);
 
         if (!params.ResponseHandler) return url + (!queryString ? "" : "&" + queryString);
-        else send_post_request(url, queryString, params.ResponseHandler, null, null, null, params.ParseResults, params);
+        else (params.RequestHandler || RVRequest).post_request(url, queryString, params.ResponseHandler, params, params.ParseResults);
     },
 
     GetStatesDataSource: function (params) {
@@ -434,7 +436,7 @@
 
     GetOwnerHistory: function (params) {
         params = params || {};
-        
+
         var url = WFAPI.ResponseURL + "/GetOwnerHistory?timeStamp=" + new Date().getTime();
         var queryString = (params.OwnerID ? "&OwnerID=" + params.OwnerID : "") +
             (params.LastOnly ? "&LastOnly=" + params.LastOnly : "") +
@@ -542,4 +544,4 @@
             (params.WorkFlowID ? "&WorkFlowID=" + params.WorkFlowID : "");
         return WFAPI._send(url, params, queryString);
     }
-}
+};

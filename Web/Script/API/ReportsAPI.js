@@ -2,10 +2,12 @@
     ResponseURL: "../../api/report",
 
     _send: function (url, params, queryString) {
+        params = params || {};
+
         if (queryString && (queryString[0] == "&")) queryString = queryString.substring(1);
 
         if (!params.ResponseHandler) return url + (!queryString ? "" : "&" + queryString);
-        else send_post_request(url, queryString, params.ResponseHandler, null, null, null, params.ParseResults, params);
+        else (params.RequestHandler || RVRequest).post_request(url, queryString, params.ResponseHandler, params, params.ParseResults);
     },
 
     Reports: {
@@ -17,7 +19,8 @@
 
                 Get: function (params) {
                     params = params || {};
-                    params.Parameters = { BeginDate: params.BeginDate || "", FinishDate: params.FinishDate || "",
+                    params.Parameters = {
+                        BeginDate: params.BeginDate || "", FinishDate: params.FinishDate || "",
                         ParamsOrder: "BeginDate:DateTime|FinishDate:DateTime"
                     };
 
@@ -113,7 +116,8 @@
 
                 Get: function (params) {
                     params = params || {};
-                    params.Parameters = { EmploymentType: params.EmploymentType || "", SearchText: params.SearchText || "",
+                    params.Parameters = {
+                        EmploymentType: params.EmploymentType || "", SearchText: params.SearchText || "",
                         LowerBirthDateLimit: params.LowerBirthDateLimit || "", UpperBirthDateLimit: params.UpperBirthDateLimit || "",
                         LowerCreationDateLimit: params.LowerCreationDateLimit || "",
                         UpperCreationDateLimit: params.UpperCreationDateLimit || "",
@@ -129,7 +133,8 @@
 
                 Get: function (params) {
                     params = params || {};
-                    params.Parameters = { ItemType: params.ItemType || "", NodeTypeID: params.NodeTypeID || "",
+                    params.Parameters = {
+                        ItemType: params.ItemType || "", NodeTypeID: params.NodeTypeID || "",
                         Count: params.Count || "", BeginDate: params.BeginDate || "", FinishDate: params.FinishDate || "",
                         ParamsOrder: "ItemType:String|NodeTypeID:Guid|Count:int|BeginDate:DateTime|FinishDate:DateTime"
                     };
@@ -244,7 +249,7 @@
                         Delimiter: "|", BeginDate: params.BeginDate, FinishDate: params.FinishDate,
                         CompensatePerScore: params.CompensatePerScore || "", CompensationVolume: params.CompensationVolume || "",
                         ScoreItems: params.ScoreItems || "", InnerDelimiter: ":",
-                        ParamsOrder: "UserIDs:String|NodeIDs:String|ListIDs:String|KnowledgeTypeIDs:String|Delimiter:Char|" + 
+                        ParamsOrder: "UserIDs:String|NodeIDs:String|ListIDs:String|KnowledgeTypeIDs:String|Delimiter:Char|" +
                             "BeginDate:DateTime|FinishDate:DateTime|CompensatePerScore:bool|CompensationVolume:Double|" +
                             "ScoreItems:String|InnerDelimiter:Char"
                     };
@@ -280,7 +285,8 @@
 
                 Get: function (params) {
                     params = params || {};
-                    params.Parameters = { Count: params.Count || "",
+                    params.Parameters = {
+                        Count: params.Count || "",
                         NodeTypeID: params.NodeTypeID || "",
                         BeginDate: params.BeginDate || "",
                         FinishDate: params.FinishDate || "",
@@ -310,7 +316,8 @@
 
                 Get: function (params) {
                     params = params || {};
-                    params.Parameters = { NodeTypeID: params.NodeTypeID || "", UserIDs: params.UserIDs || "",
+                    params.Parameters = {
+                        NodeTypeID: params.NodeTypeID || "", UserIDs: params.UserIDs || "",
                         NodeIDs: params.NodeIDs || "", Delimiter: '|', ShowPersonalItems: params.ShowPersonalItems,
                         LowerCreationDateLimit: params.LowerCreationDateLimit || "",
                         UpperCreationDateLimit: params.UpperCreationDateLimit || "",
@@ -326,7 +333,8 @@
 
                 Get: function (params) {
                     params = params || {};
-                    params.Parameters = { NodeTypeID: params.NodeTypeID || "", UserID: params.UserID || "",
+                    params.Parameters = {
+                        NodeTypeID: params.NodeTypeID || "", UserID: params.UserID || "",
                         ShowPersonalItems: params.ShowPersonalItems,
                         LowerCreationDateLimit: params.LowerCreationDateLimit || "",
                         UpperCreationDateLimit: params.UpperCreationDateLimit || "",
@@ -342,7 +350,8 @@
 
                 Get: function (params) {
                     params = params || {};
-                    params.Parameters = { NodeTypeID: params.NodeTypeID || "",
+                    params.Parameters = {
+                        NodeTypeID: params.NodeTypeID || "",
                         CreatorNodeTypeID: params.CreatorNodeTypeID || "",
                         NodeIDs: params.NodeIDs || "", Delimiter: '|',
                         ShowPersonalItems: params.ShowPersonalItems,
@@ -360,7 +369,8 @@
 
                 Get: function (params) {
                     params = params || {};
-                    params.Parameters = { NodeTypeID: params.NodeTypeID || "",
+                    params.Parameters = {
+                        NodeTypeID: params.NodeTypeID || "",
                         CreatorNodeID: params.CreatorNodeID || "",
                         Status: params.Status,
                         ShowPersonalItems: params.ShowPersonalItems,
@@ -379,7 +389,8 @@
 
                 Get: function (params) {
                     params = params || {};
-                    params.Parameters = { NodeTypeID: params.NodeTypeID || "",
+                    params.Parameters = {
+                        NodeTypeID: params.NodeTypeID || "",
                         CreatorNodeTypeID: params.CreatorNodeTypeID || "",
                         NodeIDs: params.NodeIDs || "", Delimiter: '|',
                         LowerCreationDateLimit: params.LowerCreationDateLimit || "",
@@ -396,7 +407,8 @@
 
                 Get: function (params) {
                     params = params || {};
-                    params.Parameters = { NodeTypeID: params.NodeTypeID || "",
+                    params.Parameters = {
+                        NodeTypeID: params.NodeTypeID || "",
                         CreatorNodeID: params.CreatorNodeID || "",
                         LowerCreationDateLimit: params.LowerCreationDateLimit || "",
                         UpperCreationDateLimit: params.UpperCreationDateLimit || "",
@@ -587,7 +599,8 @@
 
                 Get: function (params) {
                     params = params || {};
-                    params.Parameters = { NodeTypeID: params.NodeTypeID || "", WorkFlowID: params.WorkFlowID || "",
+                    params.Parameters = {
+                        NodeTypeID: params.NodeTypeID || "", WorkFlowID: params.WorkFlowID || "",
                         LowerCreationDateLimit: params.LowerCreationDateLimit, UpperCreationDateLimit: params.UpperCreationDateLimit,
                         ParamsOrder: "NodeTypeID:Guid|WorkFlowID:Guid|LowerCreationDateLimit:DateTime|UpperCreationDateLimit:DateTime"
                     };
@@ -600,7 +613,8 @@
 
                 Get: function (params) {
                     params = params || {};
-                    params.Parameters = { NodeTypeID: params.NodeTypeID || "",
+                    params.Parameters = {
+                        NodeTypeID: params.NodeTypeID || "",
                         WorkFlowID: params.WorkFlowID || "", StateID: params.StateID,
                         TagID: params.TagID, CurrentState: params.CurrentState || "",
                         LowerCreationDateLimit: params.LowerCreationDateLimit || "",
@@ -629,7 +643,7 @@
         params.Parameters.PageNumber = params.PageNumber;
         params.Parameters.PageSize = params.PageSize;
         params.Parameters.PS = params.Password;
-        
+
         var url = ReportsAPI.ResponseURL + "/GetReport?timeStamp=" + new Date().getTime();
         var queryString = "";
 
@@ -657,11 +671,11 @@
                     }
                 }
             }
-            
+
             params.Parameters.Dictionary = dic;
             GlobalUtilities.submit_form({ URL: url, Method: "post", RequestParams: params.Parameters });
         }
         else
             return ReportsAPI._send(url, params, queryString);
     }
-}
+};

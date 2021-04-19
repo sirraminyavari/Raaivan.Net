@@ -2,10 +2,12 @@
     ResponseURL: "../../api/forms",
 
     _send: function (url, params, queryString) {
+        params = params || {};
+
         if (queryString && (queryString[0] == "&")) queryString = queryString.substring(1);
 
         if (!params.ResponseHandler) return url + (!queryString ? "" : "&" + queryString);
-        else send_post_request(url, queryString, params.ResponseHandler, null, null, null, params.ParseResults, params);
+        else (params.RequestHandler || RVRequest).post_request(url, queryString, params.ResponseHandler, params, params.ParseResults);
     },
 
     GetFormsDataSource: function (params) {
@@ -24,7 +26,7 @@
 
             var files = [];
             jQuery.each(elements[i].Files || [], function (ind, val) { if (val.toString) files.push(val.toString()); });
-            
+
             retVal.Elements.push({
                 ElementID: elements[i].ElementID ? elements[i].ElementID : "",
                 InstanceID: elements[i].InstanceID ? elements[i].InstanceID : "",
@@ -214,7 +216,7 @@
         var queryString = (params.FormID ? "&FormID=" + params.FormID : "") +
             (params.OwnerID ? "&OwnerID=" + params.OwnerID : "") +
             (params.DirectorID ? "&DirectorID=" + params.DirectorID : "") +
-            (params.Admin ? "&Admin=" + params.Admin : "") + 
+            (params.Admin ? "&Admin=" + params.Admin : "") +
             (params.IsTemporary ? "&IsTemporary=" + params.IsTemporary : "");
         return FGAPI._send(url, params, queryString);
     },
@@ -238,7 +240,7 @@
 
     GetFormInstance: function (params) {
         params = params || {};
-        
+
         var url = FGAPI.ResponseURL + "/GetFormInstance?timeStamp=" + new Date().getTime();
         var queryString = (params.InstanceID ? "&InstanceID=" + params.InstanceID : "") +
             (params.LimitOwnerID ? "&LimitOwnerID=" + params.LimitOwnerID : "") +
@@ -327,7 +329,7 @@
 
     SetFormOwner: function (params) {
         params = params || {};
-        
+
         var url = FGAPI.ResponseURL + "/SetFormOwner?timeStamp=" + new Date().getTime();
         var queryString = (params.OwnerID ? "&OwnerID=" + params.OwnerID : "") +
             (params.FormID ? "&FormID=" + params.FormID : "");
@@ -416,7 +418,7 @@
     },
 
     //Polls
-    
+
     GetPolls: function (params) {
         params = params || {};
 
@@ -565,4 +567,4 @@
     }
 
     //end of Polls
-}
+};

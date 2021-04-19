@@ -2,10 +2,12 @@
     ResponseURL: "../../api/wiki",
 
     _send: function (url, params, queryString) {
+        params = params || {};
+
         if (queryString && (queryString[0] == "&")) queryString = queryString.substring(1);
 
         if (!params.ResponseHandler) return url + (!queryString ? "" : "&" + queryString);
-        else send_post_request(url, queryString, params.ResponseHandler, null, null, null, params.ParseResults, params);
+        else (params.RequestHandler || RVRequest).post_request(url, queryString, params.ResponseHandler, params, params.ParseResults);
     },
 
     AddTitle: function (params) {
@@ -195,4 +197,4 @@
             (params.Password ? "&PS=" + params.Password : "");
         return WikiAPI._send(url, params, queryString);
     }
-}
+};

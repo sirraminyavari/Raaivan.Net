@@ -25,7 +25,7 @@ namespace RaaiVan.Web.API
             if (!paramsContainer.ApplicationID.HasValue) return;
 
             string responseText = string.Empty;
-
+            
             string command = PublicMethods.parse_string(context.Request.Params["Command"], false);
             if (string.IsNullOrEmpty(command)) return;
 
