@@ -365,6 +365,10 @@ namespace RaaiVan.Web.API
             //end of Check Reauthentication
 
 
+            Application currApp = PublicMethods.get_current_application();
+            if (currApp != null) actionParams.Data["Application"] = PublicMethods.fromJSON(currApp.toJson(icon: true));
+
+
             Action?.Invoke(actionParams);
 
             return actionParams.Data;

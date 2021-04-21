@@ -139,7 +139,7 @@
                             }]
                         },
                         {
-                            Type: "div", Class: "small-12 medium-12 large-12 rv-border-radius-half SoftBackgroundColor SoftBorder", 
+                            Type: "div", Class: "small-12 medium-12 large-12 rv-border-radius-half SoftBackgroundColor SoftBorder",
                             Style: "display:none; margin-bottom:1rem; padding:1rem; border-color:rgb(200,200,200);", Name: "filters",
                             Childs: [
                                 {
@@ -263,7 +263,7 @@
                                     Childs: [
                                         {
                                             Type: "div", Style: "flex:0 0 auto; padding-" + RV_RevFloat + ":0.5rem;",
-                                            Childs: [{Type: "text", TextValue: RVDic.GroupBy + ":"}]
+                                            Childs: [{ Type: "text", TextValue: RVDic.GroupBy + ":" }]
                                         },
                                         {
                                             Type: "div", Style: "flex:1 1 auto;",
@@ -297,7 +297,7 @@
             that.Objects.SearchInput = _elems["textInput"];
             that.Objects.MatchAllCheckbox = _elems["matchAllFilters"];
             that.Objects.MineCheckbox = _elems["mine"];
-            
+
             GlobalUtilities.set_onchangeorenter(that.Objects.SearchInput, function () {
                 if (that.Objects.ListViewer) that.Objects.ListViewer.reset();
             });
@@ -367,7 +367,7 @@
                 if (that.Objects.ListViewer) that.Objects.ListViewer.reset();
 
                 _elems["selectedTitle"].innerHTML = "";
-                
+
                 GlobalUtilities.create_nested_elements([
                     (item.NodeID ? null : {
                         Type: "i", Class: "fa fa-user", Style: "margin-" + RV_RevFloat + ":0.5rem;",
