@@ -18,11 +18,12 @@ namespace RaaiVan.Modules.GlobalUtilities
         public string Name;
         public string Title;
         public string Description;
+        public string AvatarName;
         public Guid? CreatorUserID;
 
         public Tenant toTenant()
         {
-            return !ApplicationID.HasValue ? null : new Tenant(ApplicationID.Value, Name, Title, string.Empty, string.Empty);
+            return !ApplicationID.HasValue ? null : new Tenant(ApplicationID.Value, Name, Title, string.Empty, string.Empty, string.Empty);
         }
 
         public string toJson(Guid? currentUserId = null, bool icon = false, bool highQualityIcon = false)
@@ -35,6 +36,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             return "{\"ApplicationID\":\"" + (!ApplicationID.HasValue ? string.Empty : ApplicationID.ToString()) + "\"" +
                 ",\"Title\":\"" + Base64.encode(string.IsNullOrEmpty(Title) ? Name : Title) + "\"" +
                 ",\"Description\":\"" + Base64.encode(Description) + "\"" +
+                (string.IsNullOrEmpty(AvatarName) ? string.Empty : ",\"AvatarName\":\"" + AvatarName + "\"") +
                 (!icon ? string.Empty : ",\"IconURL\":\"" + (string.IsNullOrEmpty(iconUrl) ? "" : iconUrl) + "\"") +
                 (!highQualityIcon ? string.Empty : ",\"HighQualityIconURL\":\"" + highQualityIconUrl + "\"") +
                 (!currentUserId.HasValue ? string.Empty :

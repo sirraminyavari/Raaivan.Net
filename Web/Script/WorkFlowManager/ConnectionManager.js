@@ -407,7 +407,7 @@
             var nodeTypeSelect = GlobalUtilities.append_autosuggest(elems["nodeTypeSelect"], {
                 InputClass: "rv-input",
                 InputStyle: "width:100%; font-size:0.7rem;",
-                InnerTitle: RVDic.NodeTypeSelect + "...",
+                InnerTitle: RVDic.NodeTypeSelect + " (" + RVDic.WF.Director + ")" + "...",
                 AjaxDataSource: CNAPI.GetNodeTypesDataSource(),
                 ResponseParser: function (responseText) {
                     var nodeTypes = JSON.parse(responseText).NodeTypes || [];

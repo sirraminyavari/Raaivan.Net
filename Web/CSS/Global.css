@@ -398,36 +398,212 @@ pre > code {
     -webkit-border-radius:100rem;
 }
 
+.rv-default {
+    color: var(--rv-color);
+}
+
+.rv-bg-color-default {
+    background-color: var(--rv-color);
+}
+
+.rv-border-default {
+    border-color: var(--rv-color);
+}
+
+.rv-reverse {
+    color: var(--rv-color-reverse);
+}
+
+.rv-bg-color-reverse {
+    background-color: var(--rv-color-reverse);
+}
+
+.rv-border-reverse {
+    border-color: var(--rv-color-reverse);
+}
+
+.rv-soft {
+    color: var(--rv-color-soft);
+}
+
+.rv-bg-color-soft {
+    background-color: var(--rv-color-soft);
+}
+
+.rv-border-soft {
+    border-color: var(--rv-color-soft);
+}
+
+.rv-lightwarm {
+    color: var(--rv-color-lightwarm);
+}
+
+.rv-bg-color-lightwarm {
+    background-color: var(--rv-color-lightwarm);
+}
+
+.rv-border-lightwarm {
+    border-color: var(--rv-color-lightwarm);
+}
+
 .rv-warm {
     color: var(--rv-color-warm);
+}
+
+.rv-bg-color-warm {
+    background-color: var(--rv-color-warm);
+}
+
+.rv-border-warm {
+    border-color: var(--rv-color-warm);
+}
+
+.rv-verywarm {
+    color: var(--rv-color-verywarm);
+}
+
+.rv-bg-color-verywarm {
+    background-color: var(--rv-color-verywarm);
+}
+
+.rv-border-verywarm {
+    border-color: var(--rv-color-verywarm);
 }
 
 .rv-distant {
     color: var(--rv-color-distant);
 }
 
+.rv-bg-color-distant {
+    background-color: var(--rv-color-distant);
+}
+
+.rv-border-distant {
+    border-color: var(--rv-color-distant);
+}
+
 .rv-white {
     color: var(--rv-white-color);
+}
+
+.rv-bg-color-white {
+    background-color: var(--rv-white-color);
+}
+
+.rv-border-white {
+    border-color: var(--rv-white-color);
+}
+
+.rv-black {
+    color: var(--rv-black-color);
+}
+
+.rv-bg-color-black {
+    background-color: var(--rv-black-color);
+}
+
+.rv-border-black {
+    border-color: var(--rv-black-color);
 }
 
 .rv-gray {
     color: var(--rv-gray-color) !important;
 }
 
+.rv-bg-color-gray {
+    background-color: var(--rv-gray-color) !important;
+}
+
+.rv-border-gray {
+    border-color: var(--rv-gray-color) !important;
+}
+
 .rv-dark-gray {
     color: var(--rv-gray-color-dark) !important;
+}
+
+.rv-bg-color-dark-gray {
+    background-color: var(--rv-gray-color-dark);
+}
+
+.rv-border-dark-gray {
+    border-color: var(--rv-gray-color-dark);
 }
 
 .rv-light-gray {
     color: var(--rv-gray-color-light) !important;
 }
 
-.rv-green {
-    color:limegreen !important;
+.rv-bg-color-light-gray, .rv-bg-color-lightgray {
+    background-color: var(--rv-gray-color-light);
+}
+
+.rv-border-light-gray {
+    border-color: var(--rv-gray-color-light);
 }
 
 .rv-red {
-    color:var(--rv-red-color) !important;
+    color: var(--rv-red-color) !important;
+}
+
+.rv-bg-color-red {
+    background-color: var(--rv-red-color);
+}
+
+.rv-border-red {
+    border-color: var(--rv-red-color);
+}
+
+.rv-soft-red {
+    color: var(--rv-red-color-soft) !important;
+}
+
+.rv-bg-color-soft-red {
+    background-color: var(--rv-red-color-soft);
+}
+
+.rv-border-soft-red {
+    border-color: var(--rv-red-color-soft);
+}
+
+.rv-verysoft-red {
+    color: var(--rv-red-color-verysoft) !important;
+}
+
+.rv-bg-color-verysoft-red {
+    background-color: var(--rv-red-color-verysoft);
+}
+
+.rv-border-verysoft-red {
+    border-color: var(--rv-red-color-verysoft);
+}
+
+.rv-lightwarm-red {
+    color: var(--rv-red-color-lightwarm) !important;
+}
+
+.rv-bg-color-lightwarm-red {
+    background-color: var(--rv-red-color-lightwarm);
+}
+
+.rv-border-lightwarm-red {
+    border-color: var(--rv-red-color-lightwarm);
+}
+
+.rv-warm-red {
+    color: var(--rv-red-color-warm) !important;
+}
+
+.rv-bg-color-warm-red {
+    background-color: var(--rv-red-color-warm);
+}
+
+.rv-border-warm-red {
+    border-color: var(--rv-red-color-warm);
+}
+
+.rv-green {
+    color:limegreen !important;
 }
 
 .rv-color-soft-warm {
@@ -880,24 +1056,7 @@ pre > code {
     border-width: 0.1rem;
 }
 
-.rv-bg-color-warm {
-    background-color: var(--rv-color-warm);
-}
-
-.rv-bg-color-verywarm {
-    background-color: var(--rv-color-verywarm);
-}
-
-.rv-bg-color-white {
-    background-color: var(--rv-white-color);
-}
-
-.rv-bg-color-lightgray {
-    background-color: var(--rv-gray-color-light);
-}
-
-.rv-bg-color-trans-white
-{
+.rv-bg-color-trans-white {
     background-color: transparent;
 }
 

@@ -737,6 +737,7 @@
         "TemporarilySave": "save draft",
         "Terminated": "terminated",
         "TerminateWorkFlow": "terminate the process",
+        "TermsAndConditionsOfN": "terms and conditions of [n]",
         "Title": "title",
         "TitleCannotBeEmpty": "title cannot be empty",
         "Theme": "theme",
@@ -874,7 +875,7 @@
             "TitleConnotBeEmpty": "title cannot be empty",
             "UserNameShouldOnlyIncludeEnglishCharactersNumbersAndSpecialCharacters": "username is only allowed to contain english characters, numbers and these special characters: . - _ $ @ * !",
             "YouCannotShareWithTheSamePage": "you cannot share with the same page",
-            "YouMustAgreeWithTermsAndConditions": "by registering in [n], you agree with and accept the terms and conditions of [m]"
+            "YouMustAgreeWithTermsAndConditions": "by registering in [n], you agree with and accept the [m]"
         },
         "CN": {
             "Accepted": "accepted",
@@ -1101,6 +1102,7 @@
             "TextOptionsRevision": "reasons for sending back for revision",
             "TextOptionsRejectOrRevision": "reasons for rejection or sending back for revision",
             "TimeUnit": "hour",
+            "ValueMustBeANumberBetweenZeroAndTen": "value must be a number between 0 and 10",
             "ViewSelfEvaluationForm": "view self-evaluation form",
             "KnowledgeTypeSettings": {
                 "EditAssessmentQuestions": "edit evaluation questions",

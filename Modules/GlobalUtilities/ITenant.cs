@@ -44,6 +44,11 @@ namespace RaaiVan.Modules.GlobalUtilities
         string Title { get; }
 
         /// <summary>
+        /// Tenant's avatar
+        /// </summary>
+        string AvatarName { get; }
+
+        /// <summary>
         /// The Tenant domains
         /// </summary>
         string Domain { get; }
@@ -80,6 +85,11 @@ namespace RaaiVan.Modules.GlobalUtilities
         public string Title { get; private set; }
 
         /// <summary>
+        /// Tenant's avatar
+        /// </summary>
+        public string AvatarName { get; private set; }
+
+        /// <summary>
         /// The Tenant domains
         /// </summary>
         public string Domain { get; private set; }
@@ -100,11 +110,12 @@ namespace RaaiVan.Modules.GlobalUtilities
         /// <param name="id">The ID</param>
         /// <param name="name">The name</param>
         /// <param name="domain">The related Domain</param>
-        public Tenant(Guid id, string name, string title, string domain, string protocol)
+        public Tenant(Guid id, string name, string title, string domain, string protocol, string avatarName)
         {
             Id = id;
             Name = name;
             Title = title;
+            AvatarName = avatarName;
             Domain = domain;
             Protocol = protocol;
         }

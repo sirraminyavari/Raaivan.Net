@@ -36,7 +36,7 @@
                 case "KnowledgeAdmin":
                     return that.Options.SelectMode ? null : that.send();
                 case "Experts":
-                    return that.get_related_nodes("GetExperts");
+                    return that.get_related_nodes("GetExperts", { Hierarchy: true });
                 case "AdminMembers":
                     return that.get_related_nodes("GetMembers", { Admin: true });
                 case "Members":
@@ -309,7 +309,7 @@
                 GlobalUtilities.load_files(["API/CNAPI.js"], {
                     OnLoad: function () {
                         var outTags = (that.Objects.NodeSelectType != "Single") && (that.Objects.NodeSelectType != "Limited");
-
+                        
                         new CNAPI.GetRelatedNodes({
                             NodeID: that.Objects.NodeID, Out: true, OutTags: outTags, ParseResults: true,
                             ResponseHandler: function (result) { _parse_nodes(result.Nodes); }

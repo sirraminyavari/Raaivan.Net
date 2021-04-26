@@ -708,6 +708,7 @@ namespace RaaiVan.Web.API
 
                         get_experts(nodeIds, isBatch,
                             PublicMethods.parse_string(context.Request.Params["SearchText"]),
+                            PublicMethods.parse_bool(context.Request.Params["Hierarchy"]),
                             PublicMethods.parse_int(context.Request.Params["Count"]),
                             PublicMethods.parse_int(context.Request.Params["LowerBoundary"]), ref responseText);
                         _return_response(ref context, ref responseText);
@@ -4374,17 +4375,28 @@ namespace RaaiVan.Web.API
         }
 
         protected void get_experts(List<Guid> nodeIds, bool isBatch,
-            string searchText, int? count, long? lowerBoundary, ref string responseText)
+            string searchText, bool? hierarchy, int? count, long? lowerBoundary, ref string responseText)
         {
             if (!paramsContainer.GBView) return;
+
+            if (nodeIds.Count != 1) hierarchy = false;
 
             if (!string.IsNullOrEmpty(searchText) && searchText.Length > 100) searchText = searchText.Substring(0, 100);
 
             long totalCount = 0;
 
             List<Expert> experts = nodeIds.Count == 0 ? new List<Expert>() :
-                CNController.get_experts(paramsContainer.Tenant.Id, ref nodeIds, searchText, count, lowerBoundary, ref totalCount);
+                CNController.get_experts(paramsContainer.Tenant.Id, ref nodeIds, searchText, count, lowerBoundary, 
+                ref totalCount, hierarchy: hierarchy.HasValue && hierarchy.Value);
 
+            if (hierarchy.HasValue && hierarchy.Value)
+            {
+                experts.ForEach(ex => ex.Node.NodeID = nodeIds[0]);
+
+                experts = experts.Select(x => x.User.UserID).Distinct()
+                    .Select(id => experts.Where(e => e.User.UserID == id).FirstOrDefault()).ToList();
+            }
+            
             responseText = string.Join(",", nodeIds.Select(nid =>
                 "{\"NodeID\":\"" + nid.ToString() + "\"" +
                     ",\"TotalCount\":" + totalCount.ToString() +

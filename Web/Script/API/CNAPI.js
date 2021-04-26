@@ -519,6 +519,7 @@
         var queryString = (params.NodeID ? "&NodeID=" + params.NodeID : "") +
             (params.NodeIDs ? "&NodeIDs=" + params.NodeIDs : "") +
             (params.SearchText ? "&SearchText=" + params.SearchText : "") +
+            (params.Hierarchy ? "&Hierarchy=" + params.Hierarchy : "") +
             (params.Count ? "&Count=" + params.Count : "") +
             (params.LowerBoundary ? "&LowerBoundary=" + params.LowerBoundary : "");
         return CNAPI._send(url, params, queryString);

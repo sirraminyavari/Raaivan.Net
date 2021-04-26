@@ -111,9 +111,9 @@
             var that = this;
 
             evaluation.User = evaluation.User || {};
-
+            
             if ((that.__EmptyMessageDiv || {}).parentNode) that.__EmptyMessageDiv.parentNode.removeChild(that.__EmptyMessageDiv);
-
+            
             var showUser = that.Options.Editable || that.Objects.UnhideEvaluators;
 
             var fullname = !showUser ? RVDic.Anonymous : Base64.decode(evaluation.User.FirstName) + " " + Base64.decode(evaluation.User.LastName);
@@ -271,7 +271,14 @@
                                 NodeID: that.Objects.NodeID, UserIDs: arr.join("|"), ParseResults: true,
                                 ResponseHandler: function (result) {
                                     for (var _id in usrs)
-                                        that.add_item(GlobalUtilities.extend({ Removable: true }, usrs[_id]));
+                                        that.add_item(GlobalUtilities.extend({
+                                            Removable: true,
+                                            User: GlobalUtilities.extend(usrs[_id], {
+                                                UserName: Base64.encode(usrs[_id].UserName),
+                                                FirstName: Base64.encode(usrs[_id].FirstName),
+                                                LastName: Base64.encode(usrs[_id].LastName)
+                                            })
+                                        }));
                                 }
                             });
                         }

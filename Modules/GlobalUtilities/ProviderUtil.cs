@@ -16,7 +16,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                 if (string.IsNullOrEmpty(_connectionString))
                 {
                     string name = "EKMConnectionString";
-                    string env = PublicMethods.get_environment_variable("rv_" + name);
+                    string env = RaaiVanSettings.UseLocalVariables ? string.Empty : PublicMethods.get_environment_variable("rv_" + name);
                     _connectionString = !string.IsNullOrEmpty(env) ? env : 
                         System.Configuration.ConfigurationManager.ConnectionStrings[name].ConnectionString;
                 }

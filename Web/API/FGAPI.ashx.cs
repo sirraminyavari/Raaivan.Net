@@ -32,7 +32,7 @@ namespace RaaiVan.Web.API
 
             int? sequenceNumber = PublicMethods.parse_int(context.Request.Params["SequenceNumber"]);
             if (!sequenceNumber.HasValue) sequenceNumber = 1;
-
+            
             string searchText = PublicMethods.parse_string(context.Request.Params["SearchText"]);
             if (string.IsNullOrEmpty(searchText)) searchText = PublicMethods.parse_string(context.Request.Params["text"]);
             

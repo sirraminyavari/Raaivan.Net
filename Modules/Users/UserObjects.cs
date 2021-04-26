@@ -66,6 +66,14 @@ namespace RaaiVan.Modules.Users
         None
     }
 
+    public enum TwoStepAuthentication
+    {
+        None,
+        On,
+        Email,
+        SMS
+    }
+
     public static class UserUtilities
     {
         private static Dictionary<Guid, User> _SystemUsers = new Dictionary<Guid, User>();
@@ -319,6 +327,9 @@ namespace RaaiVan.Modules.Users
         public string SaltedPassword;
         public string FirstName;
         public string LastName;
+        public string AvatarName;
+        public TwoStepAuthentication TwoStepAuthentication;
+        public bool? EnableNewsLetter;
         public DateTime? Birthday;
         public string JobTitle;
         public EmploymentType EmploymentType;
@@ -332,6 +343,7 @@ namespace RaaiVan.Modules.Users
         
         public User()
         {
+            TwoStepAuthentication = TwoStepAuthentication.None;
             EmploymentType = EmploymentType.NotSet;
             PhoneNumbers = new List<PhoneNumber>();
             Emails = new List<EmailAddress>();
@@ -353,7 +365,7 @@ namespace RaaiVan.Modules.Users
         {
             string imageUrl = !profileImageUrl ? string.Empty :
                 DocumentUtilities.get_personal_image_address(applicationId, UserID.HasValue ? UserID.Value : Guid.Empty);
-
+            
             string hqImageUrl = !highQualityProfileImageUrl || !UserID.HasValue ? string.Empty :
                 DocumentUtilities.get_personal_image_address(applicationId, UserID.Value, highQuality: true);
 
@@ -361,8 +373,15 @@ namespace RaaiVan.Modules.Users
                 ",\"UserName\":\"" + Base64.encode(UserName) + "\"" +
                 ",\"FirstName\":\"" + Base64.encode(FirstName) + "\"" +
                 ",\"LastName\":\"" + Base64.encode(LastName) + "\"" +
+                (!EnableNewsLetter.HasValue || !EnableNewsLetter.Value ? string.Empty :
+                    ",\"EnableNewsLetter\":" + EnableNewsLetter.Value.ToString().ToLower()
+                ) +
+                (TwoStepAuthentication == TwoStepAuthentication.None ? string.Empty : 
+                    ",\"TwoStepAuthentication\":\"" + TwoStepAuthentication.ToString() + "\""
+                ) +
                 ",\"IncompleteProfile\":" + (!profileCompleted()).ToString().ToLower() +
                 (string.IsNullOrEmpty(JobTitle) ? string.Empty : ",\"JobTitle\":\"" + Base64.encode(JobTitle) + "\"") +
+                (string.IsNullOrEmpty(AvatarName) ? string.Empty : ",\"AvatarName\":\"" + AvatarName + "\"") +
                 (string.IsNullOrEmpty(imageUrl) ? string.Empty :
                     ",\"ProfileImageURL\":\"" + imageUrl + "\"" +
                     ",\"ImageURL\":\"" + imageUrl + "\""

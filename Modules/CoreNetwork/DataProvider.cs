@@ -3253,14 +3253,14 @@ namespace RaaiVan.Modules.CoreNetwork
         }
 
         public static void GetExperts(Guid applicationId, ref List<Expert> retExperts, List<Guid> nodeIds, 
-            string searchText, int? count, long? lowerBoundary, ref long totalCount)
+            string searchText, bool hierarchy, int? count, long? lowerBoundary, ref long totalCount)
         {
             string spName = GetFullyQualifiedName("GetExperts");
 
             try
             {
-                IDataReader reader = ProviderUtil.execute_reader(spName, applicationId,
-                    ProviderUtil.list_to_string<Guid>(nodeIds), ',', ProviderUtil.get_search_text(searchText), count, lowerBoundary);
+                IDataReader reader = ProviderUtil.execute_reader(spName, applicationId, ProviderUtil.list_to_string<Guid>(nodeIds), ',', 
+                    ProviderUtil.get_search_text(searchText), hierarchy, count, lowerBoundary);
                 totalCount = _parse_experts(ref reader, ref retExperts);
             }
             catch (Exception ex)

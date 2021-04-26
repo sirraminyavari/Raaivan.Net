@@ -35,8 +35,13 @@
                     Childs: [
                         {
                             Type: "div", Class: "small-12 medium-12 large-12", Name: "titleArea",
-                            Style: "margin-bottom:1rem; font-weight:bold; text-align:center;",
+                            Style: "margin-bottom:0.5rem; font-weight:bold; text-align:center;",
                             Childs: [{ Type: "text", TextValue: Base64.decode(params.QuestionBody) }]
+                        },
+                        {
+                            Type: "div", Class: "small-12 medium-12 large-12",
+                            Style: "margin-bottom:1rem; text-align:center; color:rgb(80,80,80); font-size:1rem;",
+                            Childs: [{ Type: "text", TextValue: RVDic.KW.ValueMustBeANumberBetweenZeroAndTen }]
                         },
                         { Type: "div", Class: "small-12 medium-12 large-12 rv-trim-vertical-margins", Name: "optionsArea" },
                         {

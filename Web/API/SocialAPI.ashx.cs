@@ -378,6 +378,29 @@ namespace RaaiVan.Web.API
             }
             //Save Tagged Items
 
+            //Send Notification
+            if (result)
+            {
+                Post oldPost = SharingController.get_post(paramsContainer.Tenant.Id, postId.Value, null);
+
+                if (oldPost != null && oldPost.OwnerID.HasValue && oldPost.OwnerType != PostOwnerType.WFHistory.ToString()) {
+                    Notification not = new Notification()
+                    {
+                        SubjectID = postInfo.PostID,
+                        RefItemID = oldPost.OwnerID,
+                        SubjectType = SubjectType.Post,
+                        Action = ActionType.Post,
+                        Description = description
+                    };
+
+                    if (oldPost.OwnerType == PostOwnerType.User.ToString()) not.UserID = oldPost.OwnerID;
+
+                    not.Sender.UserID = paramsContainer.CurrentUserID;
+                    NotificationController.send_notification(paramsContainer.Tenant.Id, not);
+                }
+            }
+            //end of Send Notification
+
             //Save Log
             if (result)
             {

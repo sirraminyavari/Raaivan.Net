@@ -294,6 +294,7 @@ namespace RaaiVan.Modules.FormGenerator
         public Guid? FormID;
         public Guid? FormInstanceID;
         public Guid? RefElementID;
+        public Guid? TemplateElementID;
         public long? ChangeID;
         public string Title;
         public string Name;
@@ -304,6 +305,7 @@ namespace RaaiVan.Modules.FormGenerator
         public FormElementTypes? Type;
         public string Info;
         public double? Weight;
+        public string InitialValue;
         public string TextValue;
         public double? FloatValue;
         public bool? BitValue;
@@ -378,6 +380,7 @@ namespace RaaiVan.Modules.FormGenerator
                 (!includeRefElementId ? string.Empty :
                     ",\"RefElementID\":\"" + (RefElementID.HasValue ? RefElementID.ToString() : string.Empty) + "\""
                 ) +
+                (!TemplateElementID.HasValue ? string.Empty : ",\"TemplateElementID\":\"" + TemplateElementID.Value.ToString() + "\"") +
                 ",\"FormID\":\"" + (FormID.HasValue ? FormID.ToString() : string.Empty) + "\"" +
                 (!ChangeID.HasValue ? string.Empty : ",\"ChangeID\":\"" + ChangeID.Value.ToString() + "\"") +
                 ",\"Title\":\"" + Base64.encode(Title) + "\"" +
@@ -389,6 +392,7 @@ namespace RaaiVan.Modules.FormGenerator
                 ",\"SequenceNumber\":" + (SequenceNumber.HasValue ? SequenceNumber.Value : 0).ToString() +
                 ",\"Info\":\"" + Base64.encode(Info) + "\"" +
                 (!Weight.HasValue ? string.Empty : ",\"Weight\":" + Weight.ToString()) +
+                (string.IsNullOrEmpty(InitialValue) ? string.Empty : ",\"InitialValue\":\"" + Base64.encode(InitialValue) + "\"") + 
                 ",\"TextValue\":\"" + Base64.encode(TextValue) + "\"" +
                 ",\"DateValue\":" + (!DateValue.HasValue ? "null" : "\"" + (persianDate ?
                     PublicMethods.get_local_date(DateValue.Value) : DateValue.ToString()) + "\"") +
@@ -423,6 +427,7 @@ namespace RaaiVan.Modules.FormGenerator
     public class FormType : ICloneable
     {
         public Guid? FormID;
+        public Guid? TemplateFormID;
         public Guid? InstanceID;
         public Guid? OwnerID;
         public Guid? DirectorID;
@@ -453,6 +458,7 @@ namespace RaaiVan.Modules.FormGenerator
         public string toJson() {
             return "{\"InstanceID\":\"" + (!InstanceID.HasValue ? string.Empty : InstanceID.Value.ToString()) + "\"" +
                 ",\"FormID\":\"" + (!FormID.HasValue ? string.Empty : FormID.Value.ToString()) + "\"" +
+                (!TemplateFormID.HasValue ? string.Empty : ",\"TemplateFormID\":\"" + TemplateFormID.Value.ToString() + "\"") +
                 ",\"OwnerID\":\"" + (OwnerID.HasValue ? OwnerID.Value.ToString() : string.Empty) + "\"" +
                 ",\"DirectorID\":\"" + (DirectorID.HasValue ? DirectorID.Value.ToString() : string.Empty) + "\"" +
                 ",\"IsTemporary\":" + (IsTemporary.HasValue && IsTemporary.Value).ToString().ToLower() +

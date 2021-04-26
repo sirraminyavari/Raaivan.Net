@@ -737,6 +737,7 @@
         "TemporarilySave": "ذخیره موقت",
         "Terminated": "پایان یافته",
         "TerminateWorkFlow": "پایان دادن به فرآیند",
+        "TermsAndConditionsOfN": "قوانین [n]",
         "Title": "عنوان",
         "TitleCannotBeEmpty": "عنوان نمی تواند خالی باشد",
         "Theme": "تم",
@@ -874,7 +875,7 @@
             "TitleConnotBeEmpty": "عنوان نمی تواند خالی باشد",
             "UserNameShouldOnlyIncludeEnglishCharactersNumbersAndSpecialCharacters": "نام کاربری تنها می تواند شامل حروف انگلیسی، اعداد و کاراکترهای . - _ $ @ * ! باشد",
             "YouCannotShareWithTheSamePage": "نمی توانید بر روی همین صفحه به اشتراک بگذارید",
-            "YouMustAgreeWithTermsAndConditions": "با ثبت نام در [n] شما می پذیرید که قوانین [m] را خوانده و به آن متعهد هستید"
+            "YouMustAgreeWithTermsAndConditions": "با ثبت نام در [n] شما می پذیرید که [m] را خوانده و به آن متعهد هستید"
         },
         "CN": {
             "Accepted": "تایید شده",
@@ -1101,6 +1102,7 @@
             "TextOptionsRevision": "دلایل ارجاع دانش",
             "TextOptionsRejectOrRevision": "دلایل رد یا ارجاع دانش",
             "TimeUnit": "ساعت",
+            "ValueMustBeANumberBetweenZeroAndTen": "ارزش باید عددی بین 0 و 10 باشد",
             "ViewSelfEvaluationForm": "مشاهده فرم خود ارزیابی",
             "KnowledgeTypeSettings": {
                 "EditAssessmentQuestions": "ویرایش پرسش های ارزیابی",

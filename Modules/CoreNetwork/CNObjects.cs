@@ -310,6 +310,7 @@ namespace RaaiVan.Modules.CoreNetwork
         public string Description;
         public string AdditionalIDPattern;
         public bool? HasDefaultPattern;
+        public string AvatarName;
         public Guid? CreatorUserID;
         public DateTime? CreationDate;
         public Guid? LastModifierUserID;
@@ -352,6 +353,7 @@ namespace RaaiVan.Modules.CoreNetwork
                     ",\"IsArchive\":" + Archive.Value.ToString().ToLower()) +
                 (!hasDefaultPattern ? string.Empty : 
                     ",\"HasDefaultPattern\":" + hasDefaultPattern.ToString().ToLower()) +
+                (string.IsNullOrEmpty(AvatarName) ? string.Empty : ",\"AvatarName\":" + AvatarName) +
                 (string.IsNullOrEmpty(IconURL) ? string.Empty : 
                     ",\"IconURL\":\"" + IconURL + "\"") +
                 (string.IsNullOrEmpty(HighQualityIconURL) ? string.Empty : 
@@ -576,6 +578,7 @@ namespace RaaiVan.Modules.CoreNetwork
         public string Name;
         public string Description;
         public string PublicDescription;
+        public string AvatarName;
         public User Creator;
         public DateTime? CreationDate;
         public Guid? LastModifierUserID;
@@ -639,6 +642,7 @@ namespace RaaiVan.Modules.CoreNetwork
                 ",\"NodeTypeID\":\"" + (!NodeTypeID.HasValue ? string.Empty : NodeTypeID.Value.ToString()) + "\"" +
                 ",\"Name\":\"" + Base64.encode(Name) + "\"" +
                 ",\"NodeType\":\"" + Base64.encode(NodeType) + "\"" +
+                (string.IsNullOrEmpty(AvatarName) ? string.Empty : ",\"AvatarName\":" + AvatarName) +
                 (simple ? string.Empty : 
                     ",\"CreationDate\":\"" + (CreationDate.HasValue ? PublicMethods.get_local_date(CreationDate.Value) : string.Empty) + "\"" +
                     ",\"Status\":\"" + (Status == Status.NotSet ? string.Empty : Status.ToString()) + "\"" +

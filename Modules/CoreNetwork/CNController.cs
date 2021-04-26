@@ -1633,31 +1633,31 @@ namespace RaaiVan.Modules.CoreNetwork
         }
 
         public static List<Expert> get_experts(Guid applicationId, 
-            ref List<Guid> nodeIds, string searchText, int? count, long? lowerBoundary, ref long totalCount)
+            ref List<Guid> nodeIds, string searchText, int? count, long? lowerBoundary, ref long totalCount, bool hierarchy = false)
         {
             List<Expert> retList = new List<Expert>();
-            DataProvider.GetExperts(applicationId, ref retList, nodeIds, searchText, count, lowerBoundary, ref totalCount);
+            DataProvider.GetExperts(applicationId, ref retList, nodeIds, searchText, hierarchy, count, lowerBoundary, ref totalCount);
             return retList;
         }
 
-        public static List<Expert> get_experts(Guid applicationId, ref List<Guid> nodeIds)
+        public static List<Expert> get_experts(Guid applicationId, ref List<Guid> nodeIds, bool hierarchy = false)
         {
             long totalCount = 0;
-            return CNController.get_experts(applicationId, ref nodeIds, null, null, null, ref totalCount);
+            return CNController.get_experts(applicationId, ref nodeIds, null, null, null, ref totalCount, hierarchy: hierarchy);
         }
 
         public static List<Expert> get_experts(Guid applicationId, 
-            Guid nodeId, string searchText, int? count, long? lowerBoundary, ref long totalCount)
+            Guid nodeId, string searchText, int? count, long? lowerBoundary, ref long totalCount, bool hierarchy = false)
         {
             List<Guid> _nIds = new List<Guid>();
             _nIds.Add(nodeId);
-            return CNController.get_experts(applicationId, ref _nIds, searchText, count, lowerBoundary, ref totalCount);
+            return CNController.get_experts(applicationId, ref _nIds, searchText, count, lowerBoundary, ref totalCount, hierarchy: hierarchy);
         }
 
-        public static List<Expert> get_experts(Guid applicationId, Guid nodeId)
+        public static List<Expert> get_experts(Guid applicationId, Guid nodeId, bool hierarchy = false)
         {
             long totalCount = 0;
-            return CNController.get_experts(applicationId, nodeId, null, null, null, ref totalCount);
+            return CNController.get_experts(applicationId, nodeId, null, null, null, ref totalCount, hierarchy: hierarchy);
         }
 
         public static List<NodesCount> get_expertise_domains_count(Guid applicationId, Guid userId, Guid? nodeTypeId,

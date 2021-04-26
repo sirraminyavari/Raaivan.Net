@@ -714,7 +714,7 @@
                 var hasStatus = params.Status && RVDic.CN[params.Status];
 
                 GlobalUtilities.create_nested_elements([
-                    { Type: "text", TextValue: GlobalUtilities.convert_numbers_to_persian(GlobalUtilities.secure_string(title)) },
+                    { Type: "text", TextValue: GlobalUtilities.convert_numbers_to_persian(title) },
                     {
                         Type: "div", Class: "rv-border-radius-quarter rv-air-button-base rv-air-button-black",
                         Style: "display:" + (hasStatus ? "inline-block" : "none") + "; font-size:0.6rem;" +

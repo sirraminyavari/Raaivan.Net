@@ -730,6 +730,10 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static Dictionary<RVSettingsItem, string> GetSystemSettings(Guid applicationId, List<RVSettingsItem> names)
         {
+            names = names.Where(n => n != RVSettingsItem.UseLocalVariables).ToList();
+
+            if (names.Count == 0) return new Dictionary<RVSettingsItem, string>();
+
             string spName = GetFullyQualifiedName("GetSystemSettings");
 
             try
@@ -740,7 +744,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                 _parse_setting_items(ref reader, ref items);
                 return items;
             }
-            catch (Exception ex) { return new Dictionary<GlobalUtilities.RVSettingsItem, string>(); }
+            catch (Exception ex) { return new Dictionary<RVSettingsItem, string>(); }
         }
 
         public static void GetLastContentCreators(Guid applicationId, ref ArrayList retList, int? count)
