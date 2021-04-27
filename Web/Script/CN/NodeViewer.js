@@ -965,7 +965,6 @@
                     _set_data();
                     viewArea.style.display = __Editing ? "none" : "inline-block";
                     editArea.style.display = __Editing ? "block" : "none";
-                    if (__Editing) jQuery(viewArea).mouseout();
                 }
 
                 if (__Editing === true) {
@@ -2312,7 +2311,6 @@
                     editArea.style.display = __Editing ? "block" : "none";
 
                     _set_data();
-                    if (__Editing) jQuery(itemsArea).mouseout();
                 }
 
                 if (__Editing === true) {
@@ -2723,7 +2721,8 @@
                         OwnerID: that.Objects.NodeID, OwnerType: "Node",
                         HasWorkFlowEditPermission: params.HasWorkFlowEditPermission,
                         Downloadable: that.Objects.UnlimitedDownloadAccess,
-                        HasConfidentiality: that.has_confidentiality(params)
+                        HasConfidentiality: that.has_confidentiality(params),
+                        Options: { PDFCovers: params.PDFCovers || [] }
                     });
                 }
             });

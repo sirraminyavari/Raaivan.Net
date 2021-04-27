@@ -307,6 +307,7 @@
         var url = FGAPI.ResponseURL + "/ExportAsPDF?timeStamp=" + new Date().getTime();
         var queryString = (params.InstanceID ? "&InstanceID=" + params.InstanceID : "") +
             (params.LimitOwnerID ? "&LimitOwnerID=" + params.LimitOwnerID : "") +
+            (params.CoverID ? "&CoverID=" + params.CoverID : "") +
             (params.Password ? "&PS=" + params.Password : "");
         return FGAPI._send(url, params, queryString);
     },

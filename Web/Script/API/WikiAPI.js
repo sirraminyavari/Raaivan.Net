@@ -194,6 +194,7 @@
         var url = WikiAPI.ResponseURL + "/ExportAsPDF?timeStamp=" + new Date().getTime();
         var queryString = (params.OwnerID ? "&OwnerID=" + params.OwnerID : "") +
             (params.OwnerType ? "&OwnerType=" + params.OwnerType : "") +
+            (params.CoverID ? "&CoverID=" + params.CoverID : "") +
             (params.Password ? "&PS=" + params.Password : "");
         return WikiAPI._send(url, params, queryString);
     }

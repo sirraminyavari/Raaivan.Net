@@ -33,7 +33,8 @@
             ParagraphInnerTitle: RVDic.Title + "...",
             Editable: null,
             History: true,
-            AutoScroll: true
+            AutoScroll: true,
+            PDFCovers: []
         }, params.Options || {});
 
         var that = this;
@@ -2597,15 +2598,22 @@
 
             var _do = function (password) {
                 if (that.__ProcessingPDF) return;
-                that.__ProcessingPDF = true;
 
-                setTimeout(function () { that.__ProcessingPDF = false; }, 5000);
+                that.select_cover(function (cover) {
+                    cover = cover || {};
 
-                var url = WikiAPI.ExportAsPDF({
-                    OwnerID: that.Objects.OwnerID, OwnerType: that.Objects.OwnerType, Password: Base64.encode(password)
+                    that.__ProcessingPDF = true;
+                    setTimeout(function () { that.__ProcessingPDF = false; }, 5000);
+
+                    var url = WikiAPI.ExportAsPDF({
+                        OwnerID: that.Objects.OwnerID,
+                        OwnerType: that.Objects.OwnerType,
+                        CoverID: cover.FileID,
+                        Password: Base64.encode(password)
+                    });
+
+                    GlobalUtilities.open_window({ URL: url });
                 });
-
-                GlobalUtilities.open_window({ URL: url });
             };
 
             if (!that.Objects.HasConfidentiality) _do();
@@ -2618,6 +2626,43 @@
                     }
                 });
             }
+        },
+
+        select_cover: function (callback) {
+            var that = this;
+
+            if (!(that.Options.PDFCovers || []).length) return callback(null);
+
+            var elems = GlobalUtilities.create_nested_elements([{
+                Type: "div", Class: "small-10 medium-7 large-4 rv-border-radius-1 SoftBackgroundColor",
+                Style: "margin:0 auto; padding:1rem;", Name: "container",
+                Childs: [
+                    {
+                        Type: "div", Class: "small-12 medium-12 large-12", Style: "font-weight:bold; margin-bottom:1rem; text-align:center;",
+                        Childs: [{ Type: "text", TextValue: RVDic.SelectN.replace("[n]", RVDic.DownloadMethod) }]
+                    },
+                    {
+                        Type: "div", Class: "small-12 medium-12 large-12 rv-trim-vertical-margins",
+                        Childs: [{}].concat(that.Options.PDFCovers).map(function (cvr) {
+                            return {
+                                Type: "div", Style: "margin:0.5rem 0; padding:0.5rem; text-align:center; cursor:pointer;",
+                                Class: "small-12 medium-12 large-12 rv-border-radius-quarter rv-bg-color-white-softer SoftShadow",
+                                Properties: [{ Name: "onclick", Value: function () { showed.Close(); callback(cvr); } }],
+                                Childs: [
+                                    { Type: "text", TextValue: (cvr || {}).FileName ? RVDic.DownloadWithCover : RVDic.Download },
+                                    (!(cvr || {}).FileName ? null : {
+                                        Type: "div", Class: "rv-border-radius-quarter rv-air-button-base rv-air-button-black",
+                                        Style: "display:inline-block; margin-" + RV_Float + ":0.5rem; font-size:0.6rem;",
+                                        Childs: [{ Type: "text", TextValue: Base64.decode(cvr.FileName) }]
+                                    })
+                                ]
+                            };
+                        })
+                    }
+                ]
+            }]);
+
+            var showed = GlobalUtilities.show(elems["container"]);
         }
     }
 })();

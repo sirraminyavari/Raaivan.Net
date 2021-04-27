@@ -7677,14 +7677,15 @@ namespace RaaiVan.Web.API
                 nodeTypeIdOrNodeId.Value, paramsContainer.CurrentUserID.Value)).ToString().ToLower();
         }
 
-        public Dictionary<string, string> get_replacement_dictionary(Guid nodeId, ref Node node, bool full = false)
+        public static Dictionary<string, string> get_replacement_dictionary(Guid applicationId, 
+            Guid currentUserId, Guid nodeId, ref Node node, bool full = false)
         {
             Dictionary<string, string> dic = new Dictionary<string, string>();
 
-            node = CNController.get_node(paramsContainer.Tenant.Id, nodeId, true);
+            node = CNController.get_node(applicationId, nodeId, true);
             if (node == null) return dic;
             
-            User currentUser = UsersController.get_user(paramsContainer.Tenant.Id, paramsContainer.CurrentUserID.Value);
+            User currentUser = UsersController.get_user(applicationId, currentUserId);
 
             dic.Add("NodeName", node.Name);
             dic.Add("Class", node.NodeType);
@@ -7703,7 +7704,7 @@ namespace RaaiVan.Web.API
                     PublicMethods.get_local_date(node.PublicationDate, false));
 
                 //Contirbutors
-                List<NodeCreator> contributors = CNController.get_node_creators(paramsContainer.Tenant.Id, node.NodeID.Value, full: true);
+                List<NodeCreator> contributors = CNController.get_node_creators(applicationId, node.NodeID.Value, full: true);
 
                 if (contributors.Count > 0)
                     contributors = contributors.Where(c => c.CollaborationShare.HasValue && c.CollaborationShare.Value > 0)
@@ -7718,10 +7719,10 @@ namespace RaaiVan.Web.API
                 //end of Contirbutors
 
                 //Evaluators
-                int? wfVersionId = KnowledgeController.get_last_history_version_id(paramsContainer.Tenant.Id, node.NodeID.Value);
+                int? wfVersionId = KnowledgeController.get_last_history_version_id(applicationId, node.NodeID.Value);
 
                 List<KnowledgeEvaluation> evaluations = 
-                    KnowledgeController.get_evaluations_done(paramsContainer.Tenant.Id, node.NodeID.Value, wfVersionId);
+                    KnowledgeController.get_evaluations_done(applicationId, node.NodeID.Value, wfVersionId);
 
                 if (evaluations.Count > 0) evaluations = evaluations.Where(e => e.Score.HasValue && e.Score.Value > 0)
                          .OrderByDescending(e => e.EvaluationDate.Value).ToList();
@@ -7737,14 +7738,14 @@ namespace RaaiVan.Web.API
                 //ConfirmedBy
                 if (node.Status == Status.Accepted)
                 {
-                    Dashboard dashboard = NotificationController.get_dashboards(paramsContainer.Tenant.Id,
+                    Dashboard dashboard = NotificationController.get_dashboards(applicationId,
                         null, null, node.NodeID.Value, null,
                         DashboardType.Knowledge, DashboardSubType.Admin, null, done: true, dateFrom: null,
                         dateTo: null, searchText: null, lowerBoundary: null, count: 10)
                         .OrderByDescending(d => d.ActionDate.Value).FirstOrDefault();
 
                     User dashUser = dashboard == null || !dashboard.UserID.HasValue ? null :
-                        UsersController.get_user(paramsContainer.Tenant.Id, dashboard.UserID.Value);
+                        UsersController.get_user(applicationId, dashboard.UserID.Value);
 
                     if (dashUser != null)
                     {
@@ -7755,7 +7756,7 @@ namespace RaaiVan.Web.API
                 }
                 //end of ConfirmedBy
 
-                Privacy privacy = PrivacyController.get_settings(paramsContainer.Tenant.Id, nodeId);
+                Privacy privacy = PrivacyController.get_settings(applicationId, nodeId);
                 if (privacy != null && privacy.Confidentiality != null && !string.IsNullOrEmpty(privacy.Confidentiality.Title))
                     dic.Add("Confidentiality", privacy.Confidentiality.Title);
             }
@@ -7763,10 +7764,11 @@ namespace RaaiVan.Web.API
             return dic;
         }
 
-        public Dictionary<string, string> get_replacement_dictionary(Guid nodeId, bool full = false)
+        public static Dictionary<string, string> get_replacement_dictionary(Guid applicationId,
+            Guid currentUserId, Guid nodeId, bool full = false)
         {
             Node node = new Node();
-            return get_replacement_dictionary(nodeId, ref node, full);
+            return get_replacement_dictionary(applicationId, currentUserId, nodeId, ref node, full);
         }
 
         public bool register_new_node(Guid? nodeId, Guid? nodeTypeId, Guid? parentNodeId, Guid? documentTreeNodeId,
@@ -7913,7 +7915,7 @@ namespace RaaiVan.Web.API
 
             Node node = new Node();
             Dictionary<string, string> dic = !result ? new Dictionary<string, string>() :
-                get_replacement_dictionary(nodeObject.NodeID.Value, ref node);
+                get_replacement_dictionary(paramsContainer.Tenant.Id, paramsContainer.CurrentUserID.Value, nodeObject.NodeID.Value, ref node);
 
             string successMessge = !result ? string.Empty : Expressions.replace(
                     CNController.get_service_success_message(paramsContainer.Tenant.Id, nodeTypeId.Value),

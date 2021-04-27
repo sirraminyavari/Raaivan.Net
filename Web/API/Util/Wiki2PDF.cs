@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using System.Diagnostics;
 using HtmlAgilityPack;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using iTextSharp.text.html;
-using iTextSharp.text.html.simpleparser;
 using itsXml = iTextSharp.tool.xml;
 using iTextSharp.tool.xml;
 using iTextSharp.tool.xml.css;
@@ -23,6 +20,7 @@ using System.Xml;
 using System.Web;
 using RaaiVan.Modules.GlobalUtilities;
 using RaaiVan.Modules.Documents;
+using RaaiVan.Modules.FormGenerator;
 
 namespace RaaiVan.Web.API
 {
@@ -98,62 +96,17 @@ namespace RaaiVan.Web.API
 
     public class Wiki2PDF
     {
-        public static byte[] export_as_pdf(Guid applicationId, bool isUser, DownloadedFileMeta meta,
-            string title, string description, List<string> keywords,
-            List<KeyValuePair<Guid, string>> wikiTitles,
-            Dictionary<Guid, List<KeyValuePair<string, string>>> wikiParagraphs,
-            Dictionary<string, string> metaData, List<string> authors, string password, HttpContext context)
+        public static byte[] export_as_pdf(Guid applicationId, Guid? currentUserId, bool isUser, DownloadedFileMeta meta,
+            string title, string description, List<string> keywords, List<KeyValuePair<Guid, string>> wikiTitles,
+            Dictionary<Guid, List<KeyValuePair<string, string>>> wikiParagraphs, Dictionary<string, string> metaData, 
+            List<string> authors, Guid? coverId, Guid? coverOwnerNodeId, string password, HttpContext context)
         {
-            if (metaData == null) metaData = new Dictionary<string, string>();
-            if (authors == null) authors = new List<string>();
+            bool hasCustomCover = coverId.HasValue && coverOwnerNodeId.HasValue && currentUserId.HasValue;
 
-            //////////
-            string coverTemplate = string.Empty;
+            List<WikiPDFText> wikiCover = hasCustomCover ? new List<WikiPDFText>() :
+                get_default_cover(applicationId, isUser, title, metaData, authors);
 
-            if (!isUser)
-            {
-                coverTemplate = "<div style=\"text-align: center;\">" +
-                    "<img src='~[[Logo]]' style='max-width:500px; max-height:400px;' /><br><br>عنوان:<br>" +
-                    "<br><strong>~[[Title]]</strong><br><br>طبقه بندی: <strong>~[[Confidentiality]]" +
-                    "</strong><br><br>نویسنده/نویسندگان:<br><br>~[[Authors]]<br>" +
-                    "<br>تاریخ انتشار: ~[[PublicationDate]]<br>تاریخ آخرین تغییرات: ~[[LastModificationDate]]<br>" +
-                    "<br><br>تهیه شده در: <strong>~[[RegistrationArea]]</strong><br></div>";
-            }
-            else
-            {
-                coverTemplate = "<div style=\"text-align: center;\">" +
-                    "<img src='~[[Logo]]' style='max-width:500px; max-height:400px;' /><br><br>عنوان:<br>" +
-                    "<br><strong>~[[Title]]</strong></div>";
-            }
-
-            metaData["Logo"] = RaaiVanSettings.Organization.Logo(applicationId) == null ? string.Empty :
-                "data:image/png;base64," + PublicMethods.image_to_base64(
-                RaaiVanSettings.Organization.Logo(applicationId), System.Drawing.Imaging.ImageFormat.Png);
-            metaData["Title"] = title;
-            if (metaData.ContainsKey("RegistrationArea") && !string.IsNullOrEmpty(metaData["RegistrationArea"]))
-            {
-                metaData["RegistrationArea"] = metaData["RegistrationArea"] +
-                    " (" + metaData["RegistrationAreaType"] + ")";
-            }
-            else
-                metaData["RegistrationArea"] = "__";
-
-            string strAutors = string.Empty;
-            for (int i = 0; i < authors.Count; ++i)
-            {
-                strAutors += authors.Count > 10 ? authors[i] + (i == authors.Count - 1 ? string.Empty : ", ") :
-                    "<strong>" + authors[i] + "</strong><br>";
-            }
-
-            metaData["Authors"] = string.IsNullOrEmpty(strAutors) ? "__" : strAutors;
-
-            coverTemplate = Expressions.replace(coverTemplate, ref metaData, Expressions.Patterns.AutoTag);
-            List<WikiPDFText> wikiCover = convert_div_to_p(applicationId, new List<WikiPDFText>() {
-                new WikiPDFText(applicationId, coverTemplate)
-            });
-            //////////
-
-            string strKeywords = ProviderUtil.list_to_string<string>(keywords.Select(u => " " + u + " ").ToList(), '-');
+            string strKeywords = string.Join(" - ", keywords);
 
             WikiPDFText wikiTitle = new WikiPDFText(applicationId,
                 @"<br><br><p style='text-align:center;'><strong><span style='color:DarkSlateGray;'>" + title + "</span></strong></p><br><br>");
@@ -283,9 +236,89 @@ namespace RaaiVan.Web.API
 
                     pdfDoc.Close();
 
-                    return string.IsNullOrEmpty(password) ? mem.ToArray() : PDFUtil.set_password(mem.ToArray(), password);
+                    byte[] finalContent = mem.ToArray();
+
+                    if (hasCustomCover) finalContent = add_custom_cover(applicationId, 
+                        currentUserId.Value, finalContent, coverId.Value, coverOwnerNodeId.Value);
+
+                    return string.IsNullOrEmpty(password) ? finalContent : PDFUtil.set_password(finalContent, password);
                 }
             }
+        }
+
+        private static List<WikiPDFText> get_default_cover(Guid applicationId, 
+            bool isUser, string title, Dictionary<string, string> metaData, List<string> authors)
+        {
+            if (metaData == null) metaData = new Dictionary<string, string>();
+            if (authors == null) authors = new List<string>();
+
+            string coverTemplate = string.Empty;
+
+            if (!isUser)
+            {
+                coverTemplate = "<div style=\"text-align: center;\">" +
+                    "<img src='~[[Logo]]' style='max-width:500px; max-height:400px;' /><br><br>عنوان:<br>" +
+                    "<br><strong>~[[Title]]</strong><br><br>طبقه بندی: <strong>~[[Confidentiality]]" +
+                    "</strong><br><br>نویسنده/نویسندگان:<br><br>~[[Authors]]<br>" +
+                    "<br>تاریخ انتشار: ~[[PublicationDate]]<br>تاریخ آخرین تغییرات: ~[[LastModificationDate]]<br>" +
+                    "<br><br>تهیه شده در: <strong>~[[RegistrationArea]]</strong><br></div>";
+            }
+            else
+            {
+                coverTemplate = "<div style=\"text-align: center;\">" +
+                    "<img src='~[[Logo]]' style='max-width:500px; max-height:400px;' /><br><br>عنوان:<br>" +
+                    "<br><strong>~[[Title]]</strong></div>";
+            }
+
+            metaData["Logo"] = RaaiVanSettings.Organization.Logo(applicationId) == null ? string.Empty :
+                "data:image/png;base64," + PublicMethods.image_to_base64(
+                RaaiVanSettings.Organization.Logo(applicationId), System.Drawing.Imaging.ImageFormat.Png);
+            metaData["Title"] = title;
+            if (metaData.ContainsKey("RegistrationArea") && !string.IsNullOrEmpty(metaData["RegistrationArea"]))
+            {
+                metaData["RegistrationArea"] = metaData["RegistrationArea"] +
+                    " (" + metaData["RegistrationAreaType"] + ")";
+            }
+            else
+                metaData["RegistrationArea"] = "__";
+
+            string strAutors = string.Empty;
+            for (int i = 0; i < authors.Count; ++i)
+            {
+                strAutors += authors.Count > 10 ? authors[i] + (i == authors.Count - 1 ? string.Empty : ", ") :
+                    "<strong>" + authors[i] + "</strong><br>";
+            }
+
+            metaData["Authors"] = string.IsNullOrEmpty(strAutors) ? "__" : strAutors;
+
+            coverTemplate = Expressions.replace(coverTemplate, ref metaData, Expressions.Patterns.AutoTag);
+
+            return convert_div_to_p(applicationId, new List<WikiPDFText>() { new WikiPDFText(applicationId, coverTemplate) });
+        }
+
+        public static byte[] add_custom_cover(Guid applicationId, Guid currentUserId, byte[] pdfContent, Guid coverId, Guid ownerNodeId)
+        {
+            DocFileInfo pdfCover = null;
+
+            pdfCover = DocumentsController.get_file(applicationId, coverId);
+            if (pdfCover == null || string.IsNullOrEmpty(pdfCover.Extension) || pdfCover.Extension.ToLower() != "pdf") pdfCover = null;
+
+            byte[] coverContent = pdfContent == null ? null : pdfCover.toByteArray(applicationId);
+
+            if (coverContent == null || coverContent.Length == 0) return pdfContent;
+
+            Dictionary<string, string> dic = CNAPI.get_replacement_dictionary(applicationId, currentUserId, ownerNodeId, true);
+
+            List<FormElement> tempElems = dic.Keys.ToList().Select(key => new FormElement()
+            {
+                Name = key,
+                Type = FormElementTypes.Text,
+                TextValue = dic[key]
+            }).ToList();
+
+            byte[] cover = PDFTemplates.fill_template(coverContent, tempElems);
+
+            return PDFUtil.merge_documents(new List<object>() { cover, pdfContent });
         }
 
         private static List<WikiPDFText> convert_div_to_p(Guid applicationId, List<WikiPDFText> strHTMLParagraphs)

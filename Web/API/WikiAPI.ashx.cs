@@ -126,6 +126,7 @@ namespace RaaiVan.Web.API
                     return;
                 case "ExportAsPDF":
                     if (!export_as_pdf(PublicMethods.parse_guid(context.Request.Params["OwnerID"]), ownerType,
+                        PublicMethods.parse_guid(context.Request.Params["CoverID"]),
                         PublicMethods.parse_string(context.Request.Params["PS"]), ref responseText))
                         _return_response(ref responseText);
                     return;
@@ -1354,7 +1355,7 @@ namespace RaaiVan.Web.API
                 ProviderUtil.list_to_string<string>(changes.Select(u => _get_change_json(u, false)).ToList()) + "]}";
         }
 
-        protected bool export_as_pdf(Guid? ownerId, WikiOwnerType ownerType, string password, ref string responseText)
+        protected bool export_as_pdf(Guid? ownerId, WikiOwnerType ownerType, Guid? coverId, string password, ref string responseText)
         {
             //Privacy Check: OK
             if (!paramsContainer.GBView) return false;
@@ -1521,9 +1522,22 @@ namespace RaaiVan.Web.API
             DownloadedFileMeta meta = new DownloadedFileMeta(PublicMethods.get_client_ip(HttpContext.Current),
                 currentUser.UserName, currentUser.FirstName, currentUser.LastName, null);
 
-            byte[] buffer = Wiki2PDF.export_as_pdf(paramsContainer.Tenant.Id, isUser, meta, title, description, tags,
-                titles.Select(t => new KeyValuePair<Guid, string>(t.TitleID.Value, t.Title)).ToList(),
-                wikiParagraphs, metaData, authorFullnames, password, HttpContext.Current);
+            byte[] buffer = Wiki2PDF.export_as_pdf(
+                applicationId: paramsContainer.Tenant.Id, 
+                currentUserId: paramsContainer.CurrentUserID,
+                isUser: isUser, 
+                meta: meta, 
+                title: title, 
+                description: description,
+                keywords: tags,
+                wikiTitles: titles.Select(t => new KeyValuePair<Guid, string>(t.TitleID.Value, t.Title)).ToList(),
+                wikiParagraphs: wikiParagraphs, 
+                metaData: metaData, 
+                authors: authorFullnames, 
+                coverId: coverId.HasValue && ownerType == WikiOwnerType.Node && ownerId.HasValue ? coverId : null,
+                coverOwnerNodeId: coverId.HasValue && ownerType == WikiOwnerType.Node && ownerId.HasValue ? ownerId : null,
+                password: password, 
+                context: HttpContext.Current);
 
             paramsContainer.file_response(buffer, title + ".pdf");
 

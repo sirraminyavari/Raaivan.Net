@@ -201,6 +201,7 @@ namespace RaaiVan.Web.API
                 case "ExportAsPDF":
                     if (!export_form(PublicMethods.parse_guid(context.Request.Params["InstanceID"]),
                         PublicMethods.parse_guid(context.Request.Params["LimitOwnerID"]),
+                        PublicMethods.parse_guid(context.Request.Params["CoverID"]),
                         PublicMethods.parse_string(context.Request.Params["PS"]), ref responseText))
                         _return_response(ref responseText);
                     return;
@@ -2419,7 +2420,7 @@ namespace RaaiVan.Web.API
             }
         }
 
-        protected bool export_form(Guid? instanceId, Guid? limitOwnerId, string password, ref string responseText)
+        protected bool export_form(Guid? instanceId, Guid? limitOwnerId, Guid? coverId, string password, ref string responseText)
         {
             if (!paramsContainer.GBView) return false;
 
@@ -2608,9 +2609,22 @@ namespace RaaiVan.Web.API
             }
             //end of meta data
 
-            byte[] buffer = Wiki2PDF.export_as_pdf(paramsContainer.Tenant.Id, false, meta, title, description, tags,
-                elements.Select(t => new KeyValuePair<Guid, string>(t.ElementID.Value, t.Title)).ToList(),
-                wikiParagraphs, metaData, contributors.Select(u => u.User.FullName).ToList(), password, HttpContext.Current);
+            byte[] buffer = Wiki2PDF.export_as_pdf(
+                applicationId: paramsContainer.Tenant.Id,
+                currentUserId: paramsContainer.CurrentUserID,
+                isUser: false,
+                meta: meta,
+                title: title,
+                description: description,
+                keywords: tags,
+                wikiTitles: elements.Select(t => new KeyValuePair<Guid, string>(t.ElementID.Value, t.Title)).ToList(),
+                wikiParagraphs: wikiParagraphs,
+                metaData: metaData,
+                authors: contributors.Select(u => u.User.FullName).ToList(),
+                coverId: coverId.HasValue && ownerNode != null && ownerNode.NodeID.HasValue ? coverId : null,
+                coverOwnerNodeId: coverId.HasValue && ownerNode != null && ownerNode.NodeID.HasValue ? ownerNode.NodeID : null,
+                password: password,
+                context: HttpContext.Current);
 
             paramsContainer.file_response(buffer, title + ".pdf");
 

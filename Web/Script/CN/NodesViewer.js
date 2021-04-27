@@ -500,9 +500,11 @@
 
                                 if (that.Options.SelectMode) done(nodes);
                                 else {
+                                    var isSaas = (window.RVGlobal || {}).SAASBasedMultiTenancy;
+
                                     CNAPI.GetNodeInfo({
-                                        NodeIDs: nodeIds.join("|"), Description: true, Creator: true,
-                                        LikesCount: false, VisitsCount: false, ParseResults: true,
+                                        NodeIDs: nodeIds.join("|"), Description: !isSaas, Creator: true,
+                                        LikesCount: !isSaas, VisitsCount: !isSaas, ParseResults: true,
                                         ResponseHandler: function (nodesInfo) {
                                             var retNodes = [];
 
@@ -521,11 +523,14 @@
                     },
                     ItemBuilder: function (container, item, params) {
                         var nodeId = item.NodeID;
+                        var additionalId = Base64.decode(item.AdditionalID);
 
                         var nodeIcon = item.IconURL;
                         var nodePageUrl = CNAPI.NodePageURL({ NodeID: nodeId });
                         var name = Base64.decode(item.Name);
                         var description = GlobalUtilities.get_text_begining(Base64.decode(item.Description), 200, "...");
+                        var likesCount = item.LikesCount;
+                        var viewsCount = item.VisitsCount;
                         var status = item.Status ? RVDic.CN[item.Status] : (item.WFState ? Base64.decode(item.WFState) : "");
                         var hasCreator = !!(item.Creator || {}).UserName && !item.HideCreators &&
                             (!item.Status || (item.Status == "Accepted"));
@@ -534,6 +539,12 @@
 
                         var showNodeType = ((that.Objects.NodeTypeIDs || []).length != 1) ||
                             that.Objects.NodeTypeIDs[0] != item.NodeTypeID;
+
+                        var details = [
+                            (!status ? null : { Value: status }),
+                            (!likesCount ? null : { Value: RVDic.NLikes.replace("[n]", likesCount) }),
+                            (!viewsCount ? null : { Value: RVDic.NVisits.replace("[n]", viewsCount) })
+                        ].filter(d => !!d);
 
                         var elems = GlobalUtilities.create_nested_elements([{
                             Type: "div", Name: "itemContainer",
@@ -573,10 +584,10 @@
                                     ]
                                 }),
                                 {
-                                    Type: "div", Style: "flex:1 1 auto;",
+                                    Type: "div", Style: "flex:1 1 auto; display:flex; flex-flow:column;",
                                     Childs: [
                                         {
-                                            Type: "div", Style: "small-12 medium-12 large-12",
+                                            Type: "div", Style: "flex:0 0 auto;",
                                             Link: that.Options.SelectMode ? null : nodePageUrl,
                                             Childs: [
                                                 {
@@ -589,6 +600,12 @@
                                                         Childs: [{ Type: "text", TextValue: name }]
                                                     }]
                                                 },
+                                                (!additionalId ? null : {
+                                                    Type: "div", Class: "rv-air-button-base rv-air-button-black rv-border-radius-quarter",
+                                                    Style: "display:inline-block; font-size:0.6rem; padding:0.1rem 0.3rem;" +
+                                                        "margin-" + RV_Float + ":0.5rem;",
+                                                    Childs: [{ Type: "text", TextValue: additionalId }]
+                                                }),
                                                 (!showNodeType ? null : {
                                                     Type: "div", Class: "rv-air-button rv-border-radius-quarter",
                                                     Style: "margin-" + RV_Float + ":0.5rem; padding:0.1rem 0.5rem;" +
@@ -599,24 +616,25 @@
                                             ]
                                         },
                                         (that.Options.SelectMode ? null : {
-                                            Type: "div", Class: "small-12 medium-12 large-12", Name: "description",
-                                            Style: "font-size:0.7rem; color:rgb(150,150,150); margin-top:0.2rem;" +
+                                            Type: "div", Name: "description",
+                                            Style: "flex:0 0 auto; font-size:0.7rem; color:rgb(150,150,150); margin-top:0.2rem;" +
                                                 "direction:" + GlobalUtilities.textdirection(description) || '' + ";" +
                                                 (!description ? "display:none;" : ""),
                                             Childs: [{ Type: "text", TextValue: description }]
                                         }),
-                                        (that.Options.SelectMode ? null : {
-                                            Type: "div", Class: "small-12 medium-12 large-12",
-                                            Style: "font-size:0.6rem; color:gray;",
-                                            Childs: [
-                                                {
+                                        (that.Options.SelectMode || !details.length ? null : {
+                                            Type: "div",
+                                            Style: "flex:1 1 auto; display:flex; flex-flow:column; justify-content:end;" +
+                                                "font-size:0.6rem; color:gray;",
+                                            Childs: [{
+                                                Type: "div",
+                                                Childs: details.map(d => ({
                                                     Type: "div", Class: "rv-border-radius-quarter",
-                                                    Style: "display:" + (status ? "inline-block" : "none") + ";" +
-                                                        "margin-" + RV_Float + ":0.5rem; padding:0.1rem 0.5rem;" +
-                                                        "margin-top:0.5rem; background-color:white;",
-                                                    Childs: [{ Type: "text", TextValue: status }]
-                                                }
-                                            ]
+                                                    Style: "display:inline-block; padding:0.1rem 0.5rem;" +
+                                                        "margin-top:0.5rem; background-color:white; margin-" + RV_RevFloat + ":0.5rem;",
+                                                    Childs: [{ Type: "text", TextValue: d.Value }]
+                                                }))
+                                            }]
                                         })
                                     ]
                                 },
@@ -631,15 +649,16 @@
                                                     Type: "div", Style: "flex:0 0 auto; padding-" + RV_Float + ":0.5rem;",
                                                     Childs: [{
                                                         Type: "img", Class: "rv-circle", Style: "width:1.5rem; height:1.5rem;",
-                                                        Tooltip: fullName, Link: RVAPI.UserPageURL({ UserID: (item.Creator || {}).UserID }),
+                                                        Link: RVAPI.UserPageURL({ UserID: (item.Creator || {}).UserID }),
                                                         Attributes: [{ Name: "src", Value: item.Creator.ProfileImageURL }]
                                                     }]
                                                 }),
-                                                (!item.AdditionalID ? null : {
+                                                (!hasCreator ? null : {
                                                     Type: "div", Class: "rv-circle SoftBackgroundColor WarmColor",
-                                                    Style: "flex:0 0 auto; padding:0.2rem 1rem 0 1rem; font-size:0.7rem;" +
+                                                    Style: "flex:0 0 auto; padding:0.1rem 1rem 0.1rem 1rem; font-size:0.7rem;" +
                                                         "min-width:5rem; text-align:center;",
-                                                    Childs: [{ Type: "text", TextValue: Base64.decode(item.AdditionalID) }]
+                                                    Link: RVAPI.UserPageURL({ UserID: (item.Creator || {}).UserID }),
+                                                    Childs: [{ Type: "text", TextValue: fullName }]
                                                 })
                                             ]
                                         }

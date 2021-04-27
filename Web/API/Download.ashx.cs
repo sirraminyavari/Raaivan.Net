@@ -141,28 +141,23 @@ namespace RaaiVan.Web.API
                     AttachFile.Extension.ToLower();
                 bool isImage = ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "gif" || ext == "bmp";
 
-                DocFileInfo pdfCover = null;
-                if (!string.IsNullOrEmpty(AttachFile.Extension) && AttachFile.Extension.ToLower() == "pdf" && coverId.HasValue)
-                {
-                    pdfCover = DocumentsController.get_file(paramsContainer.Tenant.Id, coverId.Value);
-                    if (pdfCover == null || string.IsNullOrEmpty(pdfCover.Extension) || pdfCover.Extension.ToLower() != "pdf") pdfCover = null;
-                }
+                if (string.IsNullOrEmpty(AttachFile.Extension) || AttachFile.Extension.ToLower() != "pdf")
+                    coverId = null;
 
                 bool dl = !isImage || PublicMethods.parse_bool(context.Request.Params["dl"], defaultValue: true) == true;
                 string contentType = !dl && isImage ? PublicMethods.get_mime_type_by_extension(ext) : null;
 
                 send_file(AttachFile, !isImage, addPDFCover: true,
                     addPDFFooter: addFooter.HasValue && addFooter.Value,
-                    pdfCover: pdfCover == null ? null : pdfCover.toByteArray(paramsContainer.ApplicationID),
+                    coverId: coverId,
                     pdfPassword: pdfPassword,
                     contentType: contentType,
                     isAttachment: dl);
             }
         }
 
-        protected void send_file(DocFileInfo file, bool logNeeded, 
-            bool addPDFCover = false, bool addPDFFooter = false, byte[] pdfCover = null, string pdfPassword = null, 
-            string contentType = null, bool isAttachment = true)
+        protected void send_file(DocFileInfo file, bool logNeeded, bool addPDFCover = false, bool addPDFFooter = false, 
+            Guid? coverId = null, string pdfPassword = null, string contentType = null, bool isAttachment = true)
         {
             byte[] fileContent = file.toByteArray(paramsContainer.ApplicationID);
 
@@ -190,7 +185,8 @@ namespace RaaiVan.Web.API
 
             if (file.Extension.ToLower() == "pdf")
             {
-                addPDFCover = addPDFCover && file.OwnerNodeID.HasValue && pdfCover != null && pdfCover.Length > 0;
+                addPDFCover = addPDFCover && file.OwnerNodeID.HasValue && coverId.HasValue &&
+                    paramsContainer.ApplicationID.HasValue && paramsContainer.CurrentUserID.HasValue;
 
                 if (addPDFFooter || addPDFCover)
                 {
@@ -227,21 +223,8 @@ namespace RaaiVan.Web.API
                     fileContent = PDFTemplates.append_footer(fileContent, meta.toString());
                 }
 
-                if (addPDFCover) {
-                    Dictionary<string, string> dic = new CNAPI() { paramsContainer = this.paramsContainer }
-                        .get_replacement_dictionary(file.OwnerNodeID.Value, true);
-
-                    List<FormElement> tempElems = dic.Keys.ToList().Select(key => new FormElement()
-                    {
-                        Name = key,
-                        Type = FormElementTypes.Text,
-                        TextValue = dic[key]
-                    }).ToList();
-
-                    byte[] cover = PDFTemplates.fill_template(pdfCover, tempElems);
-
-                    fileContent = PDFUtil.merge_documents(new List<object>() { cover, fileContent });
-                }
+                if (addPDFCover) fileContent = Wiki2PDF.add_custom_cover(paramsContainer.Tenant.Id, 
+                    paramsContainer.CurrentUserID.Value, fileContent, coverId.Value, file.OwnerNodeID.Value);
 
                 if (!string.IsNullOrEmpty(pdfPassword)) fileContent = PDFUtil.set_password(fileContent, pdfPassword);
             }
