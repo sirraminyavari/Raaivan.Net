@@ -69,6 +69,16 @@
         return DocsAPI._send(url, params, queryString);
     },
 
+    DeleteIcon: function (params) {
+        params = params || {};
+
+        var url = DocsAPI.UploadHandler + "/DeleteIcon?timeStamp=" + new Date().getTime();
+        var queryString = (params.IconID ? "&IconID=" + params.IconID : "") +
+            (params.UserID ? "&UserID=" + params.UserID : "") +
+            (params.Type ? "&Type=" + params.Type : "");
+        return DocsAPI._send(url, params, queryString);
+    },
+
     CropIcon: function (params) {
         params = params || {};
 

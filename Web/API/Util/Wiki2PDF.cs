@@ -366,9 +366,14 @@ namespace RaaiVan.Web.API
 
                         if (forceRTL || p.Text.StartsWith("<p dir=\"RTL\"")) p.set_is_rtl(true);
 
-                        xmlParagraphs.Add(p);
+                        bool hasNothing = !string.IsNullOrEmpty(p.Text) && p.Text.Trim().ToLower().StartsWith("<p>")
+                            && string.IsNullOrEmpty(firstChild.InnerXml.ToLower());
 
-                        toBeAdded = string.Empty;
+                        if (!hasNothing)
+                        {
+                            xmlParagraphs.Add(p);
+                            toBeAdded = string.Empty;
+                        }
                     }
                     else
                         toBeAdded += firstChild.OuterXml.ToString();

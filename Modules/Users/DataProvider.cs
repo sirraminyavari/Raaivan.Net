@@ -1045,7 +1045,7 @@ namespace RaaiVan.Modules.Users
         }
 
         public static void GetUsers(Guid applicationId, ref List<User> retUsers, string searchText, 
-            long? lowerBoundary, int? count, bool? searchAll, bool? isOnline, ref long totalCount)
+            long? lowerBoundary, int? count, bool? isOnline, ref long totalCount, bool? isApproved)
         {
             string spName = GetFullyQualifiedName("GetUsers");
 
@@ -1054,7 +1054,7 @@ namespace RaaiVan.Modules.Users
                 if (lowerBoundary < 0) lowerBoundary = null;
 
                 IDataReader reader = ProviderUtil.execute_reader(spName, applicationId,
-                    ProviderUtil.get_search_text(searchText), lowerBoundary, count, searchAll, isOnline, DateTime.Now);
+                    ProviderUtil.get_search_text(searchText), lowerBoundary, count, isOnline, isApproved, DateTime.Now);
                 _parse_users(ref reader, ref retUsers, ref totalCount);
             }
             catch (Exception ex)

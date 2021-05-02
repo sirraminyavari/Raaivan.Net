@@ -230,10 +230,6 @@ pre > code {
 		 url('../../fonts/ttf/IRANSansWeb.ttf') format('truetype');
 }
 
-.rv-warm-border, .WarmBorder {
-    border: solid 1px var(--rv-color-warm);
-}
-
 .SoftBorder {
     border: solid 1px var(--rv-color-softborder);
 }
@@ -407,7 +403,7 @@ pre > code {
 }
 
 .rv-border-default {
-    border-color: var(--rv-color);
+    border: solid 1px var(--rv-color);
 }
 
 .rv-reverse {
@@ -419,7 +415,7 @@ pre > code {
 }
 
 .rv-border-reverse {
-    border-color: var(--rv-color-reverse);
+    border: solid 1px var(--rv-color-reverse);
 }
 
 .rv-soft {
@@ -431,7 +427,7 @@ pre > code {
 }
 
 .rv-border-soft {
-    border-color: var(--rv-color-soft);
+    border: solid 1px var(--rv-color-soft);
 }
 
 .rv-lightwarm {
@@ -443,7 +439,7 @@ pre > code {
 }
 
 .rv-border-lightwarm {
-    border-color: var(--rv-color-lightwarm);
+    border: solid 1px var(--rv-color-lightwarm);
 }
 
 .rv-warm {
@@ -454,8 +450,8 @@ pre > code {
     background-color: var(--rv-color-warm);
 }
 
-.rv-border-warm {
-    border-color: var(--rv-color-warm);
+.rv-border-warm, .rv-warm-border, .WarmBorder {
+    border: solid 1px var(--rv-color-warm);
 }
 
 .rv-verywarm {
@@ -467,7 +463,7 @@ pre > code {
 }
 
 .rv-border-verywarm {
-    border-color: var(--rv-color-verywarm);
+    border: solid 1px var(--rv-color-verywarm);
 }
 
 .rv-distant {
@@ -479,7 +475,7 @@ pre > code {
 }
 
 .rv-border-distant {
-    border-color: var(--rv-color-distant);
+    border: solid 1px var(--rv-color-distant);
 }
 
 .rv-white {
@@ -491,7 +487,7 @@ pre > code {
 }
 
 .rv-border-white {
-    border-color: var(--rv-white-color);
+    border: solid 1px var(--rv-white-color);
 }
 
 .rv-black {
@@ -503,7 +499,7 @@ pre > code {
 }
 
 .rv-border-black {
-    border-color: var(--rv-black-color);
+    border: solid 1px var(--rv-black-color);
 }
 
 .rv-gray {
@@ -515,7 +511,7 @@ pre > code {
 }
 
 .rv-border-gray {
-    border-color: var(--rv-gray-color) !important;
+    border: solid 1px var(--rv-gray-color);
 }
 
 .rv-dark-gray {
@@ -527,7 +523,7 @@ pre > code {
 }
 
 .rv-border-dark-gray {
-    border-color: var(--rv-gray-color-dark);
+    border: solid 1px var(--rv-gray-color-dark);
 }
 
 .rv-light-gray {
@@ -539,7 +535,7 @@ pre > code {
 }
 
 .rv-border-light-gray {
-    border-color: var(--rv-gray-color-light);
+    border: solid 1px var(--rv-gray-color-light);
 }
 
 .rv-red {
@@ -551,7 +547,7 @@ pre > code {
 }
 
 .rv-border-red {
-    border-color: var(--rv-red-color);
+    border: solid 1px var(--rv-red-color);
 }
 
 .rv-soft-red {
@@ -563,7 +559,7 @@ pre > code {
 }
 
 .rv-border-soft-red {
-    border-color: var(--rv-red-color-soft);
+    border: solid 1px var(--rv-red-color-soft);
 }
 
 .rv-verysoft-red {
@@ -575,7 +571,7 @@ pre > code {
 }
 
 .rv-border-verysoft-red {
-    border-color: var(--rv-red-color-verysoft);
+    border: solid 1px var(--rv-red-color-verysoft);
 }
 
 .rv-lightwarm-red {
@@ -587,7 +583,7 @@ pre > code {
 }
 
 .rv-border-lightwarm-red {
-    border-color: var(--rv-red-color-lightwarm);
+    border: solid 1px var(--rv-red-color-lightwarm);
 }
 
 .rv-warm-red {
@@ -599,7 +595,7 @@ pre > code {
 }
 
 .rv-border-warm-red {
-    border-color: var(--rv-red-color-warm);
+    border: solid 1px var(--rv-red-color-warm);
 }
 
 .rv-green {

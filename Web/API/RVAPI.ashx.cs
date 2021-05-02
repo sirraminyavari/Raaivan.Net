@@ -1266,7 +1266,7 @@ namespace RaaiVan.Web.API
             List<User> users = !likedId.HasValue ? new List<User>() :
                 UsersController.get_users(paramsContainer.Tenant.Id,
                 GlobalController.get_fan_ids(paramsContainer.Tenant.Id, likedId.Value));
-
+            
             responseText = "{\"Users\":[" + ProviderUtil.list_to_string<string>(users.Select(
                 u => "{\"UserID\":\"" + u.UserID.ToString() + "\"" +
                 ",\"UserName\":\"" + Base64.encode(u.UserName) + "\"" +

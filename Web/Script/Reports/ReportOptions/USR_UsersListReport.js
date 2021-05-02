@@ -9,6 +9,7 @@
 
         this.Objects = {
             SearchTextInput: null,
+            IsApprovedCheckbox: null,
             LowerBirthDateLimit: null,
             UpperBirthDateLimit: null,
             LowerCreationDateLimit: null,
@@ -31,12 +32,21 @@
             var elems = GlobalUtilities.create_nested_elements([
                 {
                     Type: "div", Class: "small-12 medium-12 large-12",
+                    Childs: [{
+                        Type: "input", Class: "rv-input", Name: "searchTextInput",
+                        Style: "width:50%; font-size:0.7rem;", InnerTitle: that.Options.SearchTextInnerTitle,
+                        Attributes: [{ Name: "type", Value: "text" }]
+                    }]
+                },
+                {
+                    Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:1rem;",
                     Childs: [
                         {
-                            Type: "input", Class: "rv-input", Name: "searchTextInput",
-                            Style: "width:50%; font-size:0.7rem;", InnerTitle: that.Options.SearchTextInnerTitle,
-                            Attributes: [{ Name: "type", Value: "text" }]
-                        }
+                            Type: "checkbox", Name: "activeChb",
+                            Style: "width:1rem; height:1rem; cursor:pointer; margin-" + RV_RevFloat + ":0.5rem;",
+                            Params: { Checked: true }
+                        },
+                        { Type: "text", TextValue: RVDic.Active }
                     ]
                 },
                 {
@@ -80,6 +90,7 @@
             ], that.ContainerDiv);
 
             that.Objects.SearchTextInput = elems["searchTextInput"];
+            that.Objects.IsApprovedCheckbox = elems["activeChb"];
 
             GlobalUtilities.append_calendar(elems["lowerBirthDateLimit"], { ClearButton: true }, function (cal) {
                 that.Objects.LowerBirthDateLimit = cal;
@@ -107,6 +118,8 @@
             params = params || {};
 
             if (params.SearchText) that.Objects.SearchTextInput.value = params.SearchText;
+
+            that.Objects.IsApprovedCheckbox[params.IsApproved === false ? "uncheck" : "check"]();
 
             if (params.LowerBirthDateLimit) {
                 that.Objects.LowerBirthDateLimit.Set({
@@ -144,9 +157,10 @@
 
             var lowerCreationDateLimit = (that.Objects.LowerCreationDateLimit || { Get: function () { return {} } }).Get();
             var upperCreationDateLimit = (that.Objects.UpperCreationDateLimit || { Get: function () { return {} } }).Get();
-
+            
             return {
                 SearchText: Base64.encode(searchText),
+                IsApproved: that.Objects.IsApprovedCheckbox.Checked,
                 LowerBirthDateLimit: lowerBirthDateLimit.Value || "",
                 _Title_LowerBirthDateLimit: lowerBirthDateLimit.Label || "",
                 UpperBirthDateLimit: upperBirthDateLimit.Value || "",
@@ -162,6 +176,7 @@
             var that = this;
 
             this.Objects.SearchTextInput.value = "";
+            this.Objects.IsApprovedCheckbox.check();
             GlobalUtilities.set_inner_title(this.Objects.SearchTextInput, this.Options.SearchTextInnerTitle);
             if (this.Objects.LowerBirthDateLimit) this.Objects.LowerBirthDateLimit.Clear();
             if (this.Objects.UpperBirthDateLimit) this.Objects.UpperBirthDateLimit.Clear();

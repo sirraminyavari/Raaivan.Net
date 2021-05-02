@@ -149,21 +149,21 @@ namespace RaaiVan.Modules.Users
         }
 
         public static List<User> get_users(Guid applicationId, string searchText, 
-            long? lowerBoundary, int? count, bool? searchAll, bool? isOnline, ref long totalCount)
+            long? lowerBoundary, int? count, bool? isOnline, ref long totalCount, bool? isApproved = true)
         {
             List<User> lst = new List<User>();
             DataProvider.GetUsers(applicationId, ref lst, searchText, lowerBoundary, count, 
-                searchAll, isOnline, ref totalCount);
+                isOnline, ref totalCount, isApproved);
             return lst;
         }
 
         public static List<User> get_users(Guid applicationId, string searchText, long? lowerBoundary = null, 
-            int? count = null, bool? searchAll = null, bool? isOnline = null)
+            int? count = null, bool? isOnline = null, bool? isApproved = true)
         {
             List<User> lst = new List<User>();
             long totalCount = 0;
             DataProvider.GetUsers(applicationId, ref lst, searchText, lowerBoundary, count, 
-                searchAll, isOnline, ref totalCount);
+                isOnline, ref totalCount, isApproved);
             return lst;
         }
 

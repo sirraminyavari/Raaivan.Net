@@ -1151,13 +1151,18 @@
                     }
 
                     CNAPI[apiFunction]({
-                        NodeTypeID: relatedNodeTypeId, NodeTypeIDs: ntIds.join("|"),
-                        SearchText: Base64.encode(searchText), HasChild: true,
+                        NodeTypeID: relatedNodeTypeId,
+                        NodeTypeIDs: ntIds.join("|"),
+                        SearchText: Base64.encode(searchText),
+                        Searchable: true,
+                        HasChild: true,
                         IsDocument: that.Options.DocumentsOnly ? true : null,
                         FormFilters: !that.filters_count(relatedNodeTypeId) ? null :
                             Base64.encode(JSON.stringify(that.Objects.OwnerForms[relatedNodeTypeId].Filters)),
-                        MatchAllFilters: that.Objects.MatchAllFilters.Checked, UseNodeTypeHierarchy: true,
-                        Count: op.Count, LowerBoundary: op.LowerBoundary,
+                        MatchAllFilters: that.Objects.MatchAllFilters.Checked,
+                        UseNodeTypeHierarchy: true,
+                        Count: op.Count,
+                        LowerBoundary: op.LowerBoundary,
                         ResponseHandler: function (responseText) {
                             if (op.LowerBoundary <= 1)
                                 that.SearchResults[filterName][relatedNodeTypeId][searchText] = responseText;

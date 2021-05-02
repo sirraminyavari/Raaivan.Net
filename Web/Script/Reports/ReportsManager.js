@@ -480,7 +480,7 @@
                             reportArea.innerHTML = "<div style='text-align:center;'>" + RVDic.CreatingReport + "..." + "</div>";
                             GlobalUtilities.block(newPage);
                         }
-
+                        
                         ReportsAPI.Reports[moduleIdentifier][reportName].Get(requestParams);
                     }; //end of 'var _show = function...'
 

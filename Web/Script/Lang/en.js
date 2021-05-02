@@ -18,6 +18,7 @@
         "AccountManagement": "account management",
         "Action": "action",
         "ActionDate": "action date",
+        "ActionDelay": "action delay",
         "Active": "active",
         "Add": "add",
         "AddContentType": "add content type",
@@ -1987,6 +1988,7 @@
                     "_Title": "registered subjects by members of a specific group",
                     "Node": "title",
                     "AdditionalID": "code",
+                    "NodeType": "category",
                     "Classification": "classification",
                     "CreatorName": "creator name",
                     "CreatorUserName": "creator username",
@@ -2072,6 +2074,39 @@
             },
             "KW": {
                 "_Title": "knowledge flow processes",
+                "KnowledgeAdminsReport": {
+                    "_Title": "knowledge admins' performance summary",
+                    "FullName": "full name",
+                    "ItemsCount": "number of requests",
+                    "PendingCount": "number of pending audits",
+                    "DoneCount": "number of audits done",
+                    "NotSeenCount": "number of not-seen audits",
+                    "DoneDelayAverage": "average delay of audits",
+                    "DoneDelayMin": "minimum delay of audits",
+                    "DoneDelayMax": "maximum delay of audits",
+                    "NotDoneDelayAverage": "average delay of pending audits",
+                    "NotDoneDelayMin": "minimum delay of pending audits",
+                    "NotDoneDelayMax": "maximum delay of pending audits"
+                },
+                "KnowledgeAdminsDetailReport": {
+                    "_Title": "knowledge admins' performance report",
+                    "NodeName": "title",
+                    "NodeType": "category",
+                    "FullName": "full name",
+                    "SendDate": "send date",
+                    "ActionDate": "action date",
+                    "DoneStatus": "done status",
+                    "SeenStatus": "seen status",
+                    "ActionDelay": "action delay",
+                    "DoneStatus_Dic": {
+                        "Pending": "pending",
+                        "Done": "done"
+                    },
+                    "SeenStatus_Dic": {
+                        "Seen": "seen",
+                        "NotSeen": "not seen"
+                    }
+                },
                 "KnowledgeEvaluationsReport": {
                     "_Title": "evaluators' performance summary",
                     "FullName": "full name",

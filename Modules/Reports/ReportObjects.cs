@@ -44,6 +44,8 @@ namespace RaaiVan.Modules.Reports
             _ReportIDs.Add(new KeyValuePair<string, Guid>("CN_RelatedNodesCountReport", Guid.Parse("DFAAC83F-1D62-4C23-B786-5BEB35451E65")));
             _ReportIDs.Add(new KeyValuePair<string, Guid>("CN_RelatedNodesReport", Guid.Parse("56BCDE92-4EA6-4DC1-905C-85ABA63A46C6")));
             _ReportIDs.Add(new KeyValuePair<string, Guid>("CN_DownloadedFilesReport", Guid.Parse("5EEE9519-12E9-4302-B1F0-3200A936A44A")));
+            _ReportIDs.Add(new KeyValuePair<string, Guid>("KW_KnowledgeAdminsReport", Guid.Parse("265B8244-BA5E-4863-903A-00FFE69F3B6A")));
+            _ReportIDs.Add(new KeyValuePair<string, Guid>("KW_KnowledgeAdminsDetailReport", Guid.Parse("7ADC79EE-9145-4617-96C2-5226819B041D")));
             _ReportIDs.Add(new KeyValuePair<string, Guid>("KW_KnowledgeEvaluationsReport", Guid.Parse("59EEBA34-F70D-47F2-96F1-09F83269B2FC")));
             _ReportIDs.Add(new KeyValuePair<string, Guid>("KW_KnowledgeEvaluationsDetailReport", Guid.Parse("BB164254-ADC6-4F19-8E53-0AB24C201A58")));
             _ReportIDs.Add(new KeyValuePair<string, Guid>("KW_KnowledgeEvaluationsHistoryReport", Guid.Parse("80F82DAC-DD96-4D99-B4B4-DE004C0BDAF4")));

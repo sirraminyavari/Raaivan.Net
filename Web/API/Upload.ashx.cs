@@ -79,19 +79,6 @@ namespace RaaiVan.Web.API
                     remove_file(fileId, ref responseText);
                     _return_response(ref responseText);
                     return;
-                case "deleteprofileimage":
-                    {
-                        DocFileInfo file = new DocFileInfo()
-                        {
-                            FileID = PublicMethods.parse_guid(fileName.Substring(0, fileName.IndexOf("."))),
-                            Extension = "jpg",
-                            FolderName = FolderNames.ProfileImages
-                        };
-
-                        remove_file(file, ref responseText);
-                        _return_response(ref responseText);
-                        return;
-                    }
                 case "uploadpicture":
                     {
                         int maxWidth = 100, maxHeight = 100;
@@ -156,18 +143,6 @@ namespace RaaiVan.Web.API
                         _return_response(ref responseText);
                         return;
                     }
-                case "deleteicon":
-                    {
-                        DocFileInfo file = new DocFileInfo() {
-                            FileID = PublicMethods.parse_guid(fileName.Substring(0, fileName.IndexOf("."))),
-                            Extension = "jpg",
-                            FolderName = FolderNames.Icons
-                        };
-
-                        remove_file(file, ref responseText);
-                        _return_response(ref responseText);
-                    }
-                    return;
             }
 
             paramsContainer.return_response(PublicConsts.BadRequestResponse);
@@ -250,6 +225,61 @@ namespace RaaiVan.Web.API
 
                         break;
                     }
+                case "deleteicon":
+                    {
+                        Guid iconId = string.IsNullOrEmpty(context.Request.Params["IconID"]) ? Guid.Empty :
+                            Guid.Parse(context.Request.Params["IconID"]);
+
+                        IconType iconType = IconType.None;
+                        if (!Enum.TryParse<IconType>(context.Request.Params["Type"], true, out iconType))
+                            iconType = IconType.None;
+
+                        if (iconType == IconType.ApplicationIcon || (RaaiVanSettings.SAASBasedMultiTenancy &&
+                            (iconType == IconType.ProfileImage || iconType == IconType.CoverPhoto))) applicationId = null;
+                        else if (!applicationId.HasValue)
+                        {
+                            responseText = PublicConsts.NullTenantResponse;
+                            break;
+                        }
+
+                        if (iconType == IconType.ProfileImage && iconId == Guid.Empty) iconId = userId;
+
+                        FolderNames folderName = FolderNames.ProfileImages;
+                        FolderNames highQualityFolderName = FolderNames.HighQualityProfileImage;
+
+                        string defaultIconUrl = string.Empty;
+
+                        bool isValid = DocumentUtilities.get_icon_parameters(applicationId, iconType, 
+                            ref folderName, ref highQualityFolderName, ref defaultIconUrl);
+
+                        if (!isValid) {
+                            responseText = PublicConsts.NullTenantResponse;
+                            break;
+                        }
+
+                        new DocFileInfo()
+                        {
+                            FileID = iconId,
+                            Extension = "jpg",
+                            OwnerID = ownerId,
+                            OwnerType = ownerType,
+                            FolderName = folderName
+                        }.delete(paramsContainer.ApplicationID);
+
+                        new DocFileInfo()
+                        {
+                            FileID = iconId,
+                            Extension = "jpg",
+                            OwnerID = ownerId,
+                            OwnerType = ownerType,
+                            FolderName = highQualityFolderName
+                        }.delete(paramsContainer.ApplicationID);
+
+                        responseText = "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" +
+                            ",\"DefaultIconURL\":\"" + defaultIconUrl + "\"}";
+
+                        break;
+                    }
                 case "cropicon":
                     {
                         Guid iconId = string.IsNullOrEmpty(context.Request.Params["IconID"]) ? Guid.Empty :
@@ -273,7 +303,7 @@ namespace RaaiVan.Web.API
 
                         if (iconType == IconType.ProfileImage && iconId == Guid.Empty) iconId = userId;
 
-                        bool isValid = DocumentUtilities.get_icon_parameters(iconType,
+                        bool isValid = DocumentUtilities.get_icon_parameters(applicationId, iconType,
                             ref iconWidth, ref iconHeight, ref imageFolder, ref highQualityImageFolder);
 
                         if (!isValid) break;

@@ -9,6 +9,7 @@
 
     IconSelect.prototype = {
         _initialize: function (container, params) {
+            var that = this;
             params = params || {};
 
             var editable = params.Editable === true;
@@ -52,19 +53,32 @@
                         Childs: [
                             {
                                 Type: "div", Style: (editable && highQualityImageUrl ? "" : "display:none;"),
-                                Childs: [{
-                                    Type: "div", Name: "moveDiv",
-                                    Style: "position:absolute; " + RV_Float + ":2px; top:2px; z-index:1; display:none;",
-                                    Properties: [
-                                        { Name: "onmouseover", Value: function () { this.style.display = elems["changeButton"].style.display = "inline-block"; } },
-                                        { Name: "onmouseout", Value: function () { if (imageOut) this.style.display = elems["changeButton"].style.display = "none"; } },
-                                        { Name: "onclick", Value: function () { _move_image(); } }
-                                    ],
-                                    Childs: [{
-                                        Type: "img", Style: "cursor:pointer;",
-                                        Attributes: [{ Name: "src", Value: GlobalUtilities.icon("Move20.png") }]
-                                    }]
-                                }]
+                                Childs: [
+                                    {
+                                        Type: "div", Class: "rv-circle", Name: "moveDiv",
+                                        Style: "position:absolute; " + RV_Float + ":2px; top:2px; z-index:1; display:none;" +
+                                            "background-color:rgba(0,0,0,0.5); width:1.5rem; height:1.5rem; text-align:center;" +
+                                            "color:white; line-height:1.5rem; padding-top:1px; cursor:pointer;",
+                                        Properties: [
+                                            { Name: "onmouseover", Value: function () { this.style.display = elems["changeButton"].style.display = elems["removeDiv"].style.display = "inline-block"; } },
+                                            { Name: "onmouseout", Value: function () { if (imageOut) this.style.display = elems["changeButton"].style.display = elems["removeDiv"].style.display = "none"; } },
+                                            { Name: "onclick", Value: function () { _move_image(); } }
+                                        ],
+                                        Childs: [{ Type: "i", Class: "fa fa-arrows fa-lg" }]
+                                    },
+                                    {
+                                        Type: "div", Class: "rv-circle", Name: "removeDiv",
+                                        Style: "position:absolute; " + RV_RevFloat + ":2px; top:2px; z-index:1; display:none;" + 
+                                            "background-color:rgba(255,0,0,0.8); width:1.5rem; height:1.5rem; text-align:center;" +
+                                            "color:white; line-height:1.5rem; padding-top:1px; cursor:pointer;",
+                                        Properties: [
+                                            { Name: "onmouseover", Value: function () { this.style.display = elems["changeButton"].style.display = elems["moveDiv"].style.display = "inline-block"; } },
+                                            { Name: "onmouseout", Value: function () { if (imageOut) this.style.display = elems["changeButton"].style.display = elems["moveDiv"].style.display = "none"; } },
+                                            { Name: "onclick", Value: function () { _remove_image(); } }
+                                        ],
+                                        Childs: [{ Type: "i", Class: "fa fa-times fa-lg" }]
+                                    }
+                                ]
                             },
                             {
                                 Type: "div",
@@ -80,6 +94,7 @@
                                             Value: function () {
                                                 elems["changeButton"].style.display = "inline-block";
                                                 elems["moveDiv"].style.display = "inline-block";
+                                                elems["removeDiv"].style.display = "inline-block";
                                                 imageOut = false;
                                             }
                                         },
@@ -88,6 +103,7 @@
                                             Value: function () {
                                                 elems["changeButton"].style.display = "none";
                                                 elems["moveDiv"].style.display = "none";
+                                                elems["removeDiv"].style.display = "none";
                                                 imageOut = true;
                                             }
                                         }
@@ -98,12 +114,12 @@
                                 Type: "div", Style: (editable ? "" : "display:none;"),
                                 Childs: [{
                                     Type: "div", Class: "NormalBorder rv-border-radius-quarter", Name: "changeButton",
-                                    Style: "display:none; margin-top:-14px; cursor:pointer; padding:4px; font-size:x-small; font-weight:bold;" +
+                                    Style: "display:none; position:absolute; bottom:-14px; left:0; right:0; cursor:pointer; padding:4px; font-size:x-small; font-weight:bold;" +
                                         "color:white; background: rgba(0, 0, 0, 0.5);",
                                     Tooltip: RVDic.Checks.ImageDimensionsMusteBeAtLeastNPixels.replace("[n]", saveWidth).replace("[m]", saveHeight),
                                     Properties: [
-                                        { Name: "onmouseover", Value: function () { this.style.display = elems["moveDiv"].style.display = "inline-block"; } },
-                                        { Name: "onmouseout", Value: function () { if (imageOut) this.style.display = elems["moveDiv"].style.display = "none"; } },
+                                        { Name: "onmouseover", Value: function () { this.style.display = elems["moveDiv"].style.display = elems["removeDiv"].style.display = "inline-block"; } },
+                                        { Name: "onmouseout", Value: function () { if (imageOut) this.style.display = elems["moveDiv"].style.display = elems["removeDiv"].style.display = "none"; } },
                                         { Name: "onclick", Value: function (e) { e.stopPropagation(); if (uploader) uploader.browse(); } }
                                     ],
                                     Childs: [{ Type: "text", TextValue: RVDic.NewImage }]
@@ -127,18 +143,16 @@
             }
 
             var _move_image = function () {
-                var _div = GlobalUtilities.create_nested_elements([
-                    {
-                        Type: "div", Class: "SoftBackgroundColor BorderRadius4 NormalPadding", Name: "_div",
-                        Style: "width:756px; margin:0px auto 0px auto;"
-                    }
-                ])["_div"];
+                var _div = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: "SoftBackgroundColor BorderRadius4 NormalPadding", Name: "_div",
+                    Style: "width:756px; margin:0px auto 0px auto;"
+                }])["_div"];
 
                 GlobalUtilities.loading(_div);
                 var showedDiv = GlobalUtilities.show(_div, { OnClose: function () { if (_imageCrop) delete _imageCrop; } });
 
                 var _imageCrop = null;
-                
+
                 var _create_crop_object = function () {
                     _imageCrop = new ImageCrop(_div, {
                         ImageURL: GlobalUtilities.add_timestamp(highQualityImageUrl),
@@ -196,7 +210,26 @@
                         }
                     }
                 });
-            }
+            };
+
+            var _remove_image = function () {
+                if (that.__REMOVING_ICON) return;
+                that.__REMOVING_ICON = true;
+
+                DocsAPI.DeleteIcon({
+                    IconID: objectId, Type: iconType, ParseResults: true,
+                    ResponseHandler: function (result) {
+                        that.__REMOVING_ICON = false;
+
+                        if ((result || {}).DefaultIconURL) {
+                            imageUrl = result.DefaultIconURL;
+                            highQualityImageUrl = "";
+
+                            _set_image(result.DefaultIconURL);
+                        }
+                    }
+                });
+            };
 
             var uploader = null;
 

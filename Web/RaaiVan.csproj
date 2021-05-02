@@ -1163,7 +1163,9 @@
     <Content Include="Script\RemoteServers\RemoteSearch.js" />
     <Content Include="Script\Reports\ReportOptions\CN_RelatedNodesCountReport.js" />
     <Content Include="Script\Reports\ReportOptions\CN_RelatedNodesReport.js" />
+    <Content Include="Script\Reports\ReportOptions\KW_KnowledgeAdminsDetailReport.js" />
     <Content Include="Script\Reports\ReportOptions\KW_KnowledgeEvaluationsHistoryReport.js" />
+    <Content Include="Script\Reports\ReportOptions\KW_KnowledgeAdminsReport.js" />
     <Content Include="Script\Reports\ReportOptions\USR_ResumeEducationReport.js" />
     <Content Include="Script\Reports\ReportOptions\USR_ResumeCoursesReport.js" />
     <Content Include="Script\Reports\ReportOptions\USR_ResumeHonorsReport.js" />

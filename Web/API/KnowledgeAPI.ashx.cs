@@ -24,10 +24,10 @@ namespace RaaiVan.Web.API
         {
             paramsContainer = new ParamsContainer(context, nullTenantResponse: true);
             if (!paramsContainer.ApplicationID.HasValue) return;
-
+            
             string responseText = string.Empty;
             string command = PublicMethods.parse_string(context.Request.Params["Command"], false);
-
+            
             switch (command)
             {
                 case "AddKnowledgeType":

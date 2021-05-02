@@ -2596,36 +2596,36 @@
         export2pdf: function () {
             var that = this;
 
-            var _do = function (password) {
-                if (that.__ProcessingPDF) return;
+            if (that.__ProcessingPDF) return;
 
-                that.select_cover(function (cover) {
-                    cover = cover || {};
+            var _do = function (cover, password) {
+                cover = cover || {};
 
-                    that.__ProcessingPDF = true;
-                    setTimeout(function () { that.__ProcessingPDF = false; }, 5000);
+                that.__ProcessingPDF = true;
+                setTimeout(function () { that.__ProcessingPDF = false; }, 5000);
 
-                    var url = WikiAPI.ExportAsPDF({
-                        OwnerID: that.Objects.OwnerID,
-                        OwnerType: that.Objects.OwnerType,
-                        CoverID: cover.FileID,
-                        Password: Base64.encode(password)
-                    });
-
-                    GlobalUtilities.open_window({ URL: url });
+                var url = WikiAPI.ExportAsPDF({
+                    OwnerID: that.Objects.OwnerID,
+                    OwnerType: that.Objects.OwnerType,
+                    CoverID: cover.FileID,
+                    Password: Base64.encode(password)
                 });
+
+                GlobalUtilities.open_window({ URL: url });
             };
 
-            if (!that.Objects.HasConfidentiality) _do();
-            else {
-                new NameDialog({
-                    Title: RVDic.MSG.PasswordNeededToExportFile, InnerTitle: RVDic.Code, ModificationDetection: false,
-                    OnActionCall: function (name, callback) {
-                        if (name) _do(name);
-                        callback(true);
-                    }
-                });
-            }
+            that.select_cover(function (cover) {
+                if (!that.Objects.HasConfidentiality) _do(cover);
+                else {
+                    new NameDialog({
+                        Title: RVDic.MSG.PasswordNeededToExportFile, InnerTitle: RVDic.Code, ModificationDetection: false,
+                        OnActionCall: function (name, callback) {
+                            if (name) _do(cover, name);
+                            callback(true);
+                        }
+                    });
+                }
+            });
         },
 
         select_cover: function (callback) {

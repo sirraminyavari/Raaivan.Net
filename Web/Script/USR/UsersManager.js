@@ -56,7 +56,14 @@
                                     Style: "width:1rem; height:1rem; cursor:pointer; margin-" + RV_RevFloat + ":0.5rem;",
                                     Params: { OnChange: function () { _search(); }}
                                 },
-                                { Type: "text", TextValue: RVDic.Online }
+                                { Type: "text", TextValue: RVDic.Online },
+                                {
+                                    Type: "checkbox", Name: "activeChb",
+                                    Style: "width:1rem; height:1rem; cursor:pointer; margin-" + RV_RevFloat + ":0.5rem;" +
+                                        "margin-" + RV_Float + ":1rem;",
+                                    Params: { OnChange: function () { _search(); }, Checked: true }
+                                },
+                                { Type: "text", TextValue: RVDic.Active }
                             ]
                         },
                         {
@@ -100,7 +107,7 @@
                     OnDataRequest: function (options, done) {
                         UsersAPI.GetUsers(GlobalUtilities.extend(options || {}, {
                             SearchText: Base64.encode(get_search_text()), LockedStatus: true, ApprovedStatus: true,
-                            IsOnline: elems["onlineChb"].checked, ParseResults: true,
+                            IsOnline: elems["onlineChb"].checked, IsApproved: elems["activeChb"].checked,  ParseResults: true,
                             ResponseHandler: function (result) {
                                 elems["countArea"].innerHTML =
                                     GlobalUtilities.convert_numbers_to_persian(RVDic.NPeople.replace("[n]", result.TotalCount));

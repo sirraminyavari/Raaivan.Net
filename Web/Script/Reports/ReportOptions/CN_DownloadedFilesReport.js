@@ -27,8 +27,10 @@
             var that = this;
 
             var elems = GlobalUtilities.create_nested_elements([
-                { Type: "div", Class: "small-12 medium-12 large-12", Name: "nodeTypeSelect" },
-                { Type: "div", Class: "small-12 medium-12 large-12", Name: "userSelect", Style: "margin-top:1rem;" },
+                { Type: "div", Class: "small-12 medium-8 large-6", Name: "nodeTypeSelect" },
+                { Type: "div", Class: "small-12 medium-12 large-12" },
+                { Type: "div", Class: "small-12 medium-8 large-6", Name: "userSelect", Style: "margin-top:1rem;" },
+                { Type: "div", Class: "small-12 medium-12 large-12" },
                 {
                     Type: "div", Class: "small-12 medium-12 large-12", Style: "margin-top:1rem;",
                     Childs: [
@@ -50,6 +52,7 @@
                 InputClass: "rv-input",
                 InputStyle: "width:100%; font-size:0.7rem;",
                 InnerTitle: RVDic.NodeTypeSelect + "...",
+                NoButtons: true,
                 AjaxDataSource: CNAPI.GetNodeTypesDataSource(),
                 ResponseParser: function (responseText) {
                     var nodeTypes = JSON.parse(responseText).NodeTypes || [];
@@ -64,6 +67,7 @@
                 InputClass: "rv-input",
                 InputStyle: "width:100%; font-size:0.7rem;",
                 InnerTitle: RVDic.UserSelect + "...",
+                NoButtons: true,
                 AjaxDataSource: UsersAPI.GetUsers(),
                 ResponseParser: function (responseText) {
                     var users = JSON.parse(responseText).Users || [];

@@ -40,6 +40,7 @@
         var queryString = (params.All ? "&All=" + params.All : "") +
             (params.SearchText ? "&SearchText=" + params.SearchText : "") +
             (GlobalUtilities.get_type(params.IsOnline) == "boolean" ? "&IsOnline=" + params.IsOnline : "") +
+            (GlobalUtilities.get_type(params.IsApproved) == "boolean" ? "&IsApproved=" + params.IsApproved : "") +
             (params.UserIDs ? "&UserIDs=" + params.UserIDs : "") +
             (params.NodeTypeIDs ? "&NodeTypeIDs=" + params.NodeTypeIDs : "") +
             (params.Department ? "&Department=" + params.Department : "") +

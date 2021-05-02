@@ -369,7 +369,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             FolderNames imageFolder = FolderNames.ProfileImages,
                 highQualityImageFolder = FolderNames.HighQualityProfileImage;
 
-            bool isValid = DocumentUtilities.get_icon_parameters(iconType, ref width, ref height,
+            bool isValid = DocumentUtilities.get_icon_parameters(applicationId, iconType, ref width, ref height,
                 ref highQualityWidth, ref highQualityHeight, ref imageFolder, ref highQualityImageFolder);
 
             if (!isValid) return false;

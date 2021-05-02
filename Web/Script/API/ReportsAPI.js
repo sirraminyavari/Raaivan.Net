@@ -34,10 +34,11 @@
                 Get: function (params) {
                     params = params || {};
                     params.Parameters = {
-                        UserID: params.UserID || "", Actions: params.Actions || "", Level: params.Level || "",
+                        UserID: params.UserID || "", Actions: params.Actions || "",
+                        IPAddresses: params.IPAddresses || "", Level: params.Level || "",
                         NotAuthorized: params.NotAuthorized || "", Anonymous: params.Anonymous || "",
                         BeginDate: params.BeginDate || "", FinishDate: params.FinishDate || "",
-                        ParamsOrder: "UserID:Guid|Actions:Structure|Level:String|NotAuthorized:Bool|Anonymous:Bool" +
+                        ParamsOrder: "UserID:Guid|Actions:Structure|IPAddresses:Structure|Level:String|NotAuthorized:Bool|Anonymous:Bool" +
                             "|BeginDate:DateTime|FinishDate:DateTime|Count:Int|LowerBoundary:Double"
                     };
 
@@ -117,13 +118,14 @@
                 Get: function (params) {
                     params = params || {};
                     params.Parameters = {
-                        EmploymentType: params.EmploymentType || "", SearchText: params.SearchText || "",
+                        EmploymentType: params.EmploymentType || "", SearchText: params.SearchText || "", IsApproved: params.IsApproved,
                         LowerBirthDateLimit: params.LowerBirthDateLimit || "", UpperBirthDateLimit: params.UpperBirthDateLimit || "",
                         LowerCreationDateLimit: params.LowerCreationDateLimit || "",
                         UpperCreationDateLimit: params.UpperCreationDateLimit || "",
-                        ParamsOrder: "EmploymentType:String|SearchText:Base64|LowerBirthDateLimit:Datetime" +
+                        ParamsOrder: "EmploymentType:String|SearchText:Base64|IsApproved:bool|LowerBirthDateLimit:Datetime" +
                             "|UpperBirthDateLimit:Datetime|LowerCreationDateLimit:Datetime|UpperCreationDateLimit:Datetime"
                     };
+                    
                     ReportsAPI.GetReport(params);
                 }
             },
@@ -481,6 +483,61 @@
         KW: {
             _IconURL: "",
 
+            KnowledgeAdminsReport: {
+                _IconURL: "",
+
+                Get: function (params) {
+                    params = params || {};
+                    params.Parameters = {
+                        Now: "1",
+                        KnowledgeTypeID: params.KnowledgeTypeID || "",
+                        UserIDs: params.UserIDs || "",
+                        Delimiter: "~",
+                        MemberInNodeTypeID: params.MemberInNodeTypeID || "",
+                        SendDateFrom: params.SendDateFrom || "",
+                        SendDateTo: params.SendDateTo || "",
+                        ActionDateFrom: params.ActionDateFrom || "",
+                        ActionDateTo: params.ActionDateTo || "",
+                        DelayFrom: params.DelayFrom || "",
+                        DelayTo: params.DelayTo || "",
+                        Seen: params.Seen,
+                        Done: params.Done,
+                        ParamsOrder: "Now:Now|KnowledgeTypeID:Guid|UserIDs:String|Delimiter:Char|MemberInNodeTypeID:Guid" +
+                            "|SendDateFrom:Datetime|SendDateTo:Datetime|ActionDateFrom:Datetime|ActionDateTo:Datetime" +
+                            "|DelayFrom:Int|DelayTo:Int|Seen:Bool|Done:Bool"
+                    };
+                    ReportsAPI.GetReport(params);
+                }
+            },
+
+            KnowledgeAdminsDetailReport: {
+                _IconURL: "",
+
+                Get: function (params) {
+                    params = params || {};
+                    params.Parameters = {
+                        Now: "1",
+                        KnowledgeID: params.KnowledgeID || "",
+                        KnowledgeTypeID: params.KnowledgeTypeID || "",
+                        UserIDs: params.UserIDs || "",
+                        Delimiter: "~",
+                        MemberInNodeTypeID: params.MemberInNodeTypeID || "",
+                        SendDateFrom: params.SendDateFrom || "",
+                        SendDateTo: params.SendDateTo || "",
+                        ActionDateFrom: params.ActionDateFrom || "",
+                        ActionDateTo: params.ActionDateTo || "",
+                        DelayFrom: params.DelayFrom || "",
+                        DelayTo: params.DelayTo || "",
+                        Seen: params.Seen,
+                        Done: params.Done,
+                        ParamsOrder: "Now:Now|KnowledgeID:Guid|KnowledgeTypeID:Guid|UserIDs:String|Delimiter:Char" +
+                            "|MemberInNodeTypeID:Guid|SendDateFrom:Datetime|SendDateTo:Datetime|ActionDateFrom:Datetime" +
+                            "|ActionDateTo:Datetime|DelayFrom:Int|DelayTo:Int|Seen:Bool|Done:Bool"
+                    };
+                    ReportsAPI.GetReport(params);
+                }
+            },
+
             KnowledgeEvaluationsReport: {
                 _IconURL: "",
 
@@ -649,7 +706,8 @@
 
         var isFirst = true;
         for (var p in (params.Parameters || {})) {
-            queryString += (isFirst ? "" : "&") + p + "=" + (params.Parameters[p] || "");
+            queryString += (isFirst ? "" : "&") + p + "=" +
+                (GlobalUtilities.get_type(params.Parameters[p]) == "boolean" ? params.Parameters[p] : params.Parameters[p] || "");
             isFirst = false;
         }
 

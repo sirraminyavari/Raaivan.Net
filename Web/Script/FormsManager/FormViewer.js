@@ -600,36 +600,36 @@
             importButton.onclick = function () { that.import_dialog({ Elements: params.Elements }); };
 
             if (exportButton) exportButton.onclick = function () {
-                var _do = function (password) {
-                    if (that.__ProcessingPDF) return;
-                    
-                    that.select_cover(function (cover) {
-                        cover = cover || {};
+                if (that.__ProcessingPDF) return;
 
-                        that.__ProcessingPDF = true;
-                        setTimeout(function () { that.__ProcessingPDF = false; }, 5000);
+                var _do = function (cover, password) {
+                    cover = cover || {};
 
-                        var url = FGAPI.ExportAsPDF({
-                            InstanceID: that.Objects.InstanceID,
-                            LimitOwnerID: that.Objects.LimitOwnerID,
-                            CoverID: cover.FileID,
-                            Password: Base64.encode(password)
-                        });
+                    that.__ProcessingPDF = true;
+                    setTimeout(function () { that.__ProcessingPDF = false; }, 5000);
 
-                        GlobalUtilities.open_window({ URL: url });
+                    var url = FGAPI.ExportAsPDF({
+                        InstanceID: that.Objects.InstanceID,
+                        LimitOwnerID: that.Objects.LimitOwnerID,
+                        CoverID: cover.FileID,
+                        Password: Base64.encode(password)
                     });
+
+                    GlobalUtilities.open_window({ URL: url });
                 };
 
-                if (!that.Options.HasConfidentiality) _do();
-                else {
-                    new NameDialog({
-                        Title: RVDic.MSG.PasswordNeededToExportFile, InnerTitle: RVDic.Code, ModificationDetection: false,
-                        OnActionCall: function (name, callback) {
-                            if (name) _do(name);
-                            callback(true);
-                        }
-                    });
-                }
+                that.select_cover(function (cover) {
+                    if (!that.Options.HasConfidentiality) _do(cover);
+                    else {
+                        new NameDialog({
+                            Title: RVDic.MSG.PasswordNeededToExportFile, InnerTitle: RVDic.Code, ModificationDetection: false,
+                            OnActionCall: function (name, callback) {
+                                if (name) _do(cover, name);
+                                callback(true);
+                            }
+                        });
+                    }
+                });
             };
         },
 

@@ -50,6 +50,7 @@ namespace RaaiVan.Web.API
                             PublicMethods.parse_long(context.Request.Params["LowerBoundary"]),
                             PublicMethods.parse_int(context.Request.Params["Count"]),
                             PublicMethods.parse_bool(context.Request.Params["IsOnline"]),
+                            PublicMethods.parse_bool(context.Request.Params["IsApproved"]),
                             ListMaker.get_guid_items(context.Request.Params["UserIDs"], '|'),
                             PublicMethods.parse_bool(context.Request.Params["Department"]),
                             ListMaker.get_guid_items(context.Request.Params["NodeTypeIDs"], '|'),
@@ -620,7 +621,7 @@ namespace RaaiVan.Web.API
                 "}";
         }
 
-        protected void get_users(string searchText, long? lowerBoundary, int? count, bool? isOnline, List<Guid> userIds,
+        protected void get_users(string searchText, long? lowerBoundary, int? count, bool? isOnline, bool? isApproved, List<Guid> userIds,
             bool? department, List<Guid> nodeTypeIds, bool? lockedStatus, bool? approvedStatus, ref string responseText)
         {
             //Privacy Check: OK
@@ -633,12 +634,12 @@ namespace RaaiVan.Web.API
             if (!count.HasValue || count.Value <= 0) count = 20;
 
             long totalCount = (long)userIds.Count;
-            bool searchAll = lockedStatus.HasValue && lockedStatus.Value;
+            if(!lockedStatus.HasValue || !lockedStatus.Value) isApproved = true;
 
             List<User> Users = userIds.Count > 0 ?
                 UsersController.get_users(paramsContainer.Tenant.Id, userIds) :
                 UsersController.get_users(paramsContainer.Tenant.Id,
-                searchText, lowerBoundary, count, searchAll, isOnline, ref totalCount);
+                    searchText, lowerBoundary, count, isOnline, ref totalCount, isApproved);
 
             List<NodeMember> nodeMembers = nodeTypeIds.Count == 0 ?
                 (department.HasValue && department.Value ?
@@ -700,7 +701,7 @@ namespace RaaiVan.Web.API
             long totalCount = 0;
             
             List<User> users = UsersController.get_users(applicationId.Value,
-                searchText, lowerBoundary, count, null, null, ref totalCount);
+                searchText, lowerBoundary, count, null, ref totalCount);
 
             responseText = "{\"TotalCount\":" + totalCount.ToString() + ",\"Users\":[" +
                 string.Join(",", users.Select(u => u.toJson(applicationId.Value, true))) + "]}";

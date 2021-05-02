@@ -476,6 +476,12 @@
             //////////--> end of SRCH <--//////////
 
             //////////--> USR <--//////////
+            CreateApplication: "ایجاد تیم جدید",
+            ModifyApplication: "ویرایش مشخصات تیم",
+            RemoveApplication: "حذف تیم",
+            RecycleApplication: "بازگردانی تیم",
+            RemoveUserFromApplication: "حذف کاربر از تیم",
+            UnsubscribeFromApplication: "منفک شدن از تیم",
             AcceptFriendRequest: "تایید درخواست همکاری",
             RejectFriendRequest: "رد درخواست همکاری",
             CreateUserGroup: "ایجاد گروه کاربری",

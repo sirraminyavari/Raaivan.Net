@@ -18,6 +18,7 @@
         "AccountManagement": "مدیریت حساب",
         "Action": "اقدام",
         "ActionDate": "تاریخ اقدام",
+        "ActionDelay": "تاخیر در اقدام",
         "Active": "فعال",
         "Add": "افزودن",
         "AddContentType": "افزودن نوع محتوا",
@@ -1906,7 +1907,7 @@
                 "NodesListReport": {
                     "_Title": "لیست موضوعات",
                     "Name": "عنوان",
-                    "NodeType": "نوع",
+                    "NodeType": "کلاس",
                     "Classification": "طبقه بندی",
                     "AdditionalID": "کد رهگیری",
                     "Description": "شرح",
@@ -1987,6 +1988,7 @@
                     "_Title": "دارایی های فکری ثبت شده توسط اعضای گروهی مشخص",
                     "Node": "عنوان",
                     "AdditionalID": "کد رهگیری",
+                    "NodeType": "کلاس",
                     "Classification": "طبقه بندی",
                     "CreatorName": "نام ثبت کننده",
                     "CreatorUserName": "نام کاربری ثبت کننده",
@@ -2052,8 +2054,59 @@
                     "DownloadsCount": "تعداد دفعات دانلود"
                 }
             },
+            "FG": {
+                "_Title": "فرم ها",
+                "FormsListReport": {
+                    "_Title": "لیست فرم ها",
+                    "CreationDate": "تاریخ ایجاد",
+                    "CreatorName": "ثبت کننده",
+                    "CreatorUserName": "نام کاربری ثبت کننده"
+                },
+                "PollDetailReport": {
+                    "_Title": "جزییات تکمیل نظرسنجی",
+                    "Title": "عنوان",
+                    "FullName": "نام و نام خانوادگی",
+                    "UserName": "نام کاربری",
+                    "NodeName": "نام گروه",
+                    "Value": "پاسخ",
+                    "NumberValue": "مقدار عددی پاسخ"
+                }
+            },
             "KW": {
                 "_Title": "فرآیندهای ارزیابی دانش",
+                "KnowledgeAdminsReport": {
+                    "_Title": "گزارش خلاصه وضعیت عملکرد مسئولان دانش",
+                    "FullName": "نام",
+                    "ItemsCount": "تعداد درخواست ها",
+                    "PendingCount": "تعداد بررسی های در انتظار انجام",
+                    "DoneCount": "تعداد بررسی های انجام شده",
+                    "NotSeenCount": "تعداد بررسی های مشاهده نشده",
+                    "DoneDelayAverage": "میانگین تاخیر بررسی های انجام شده",
+                    "DoneDelayMin": "کمترین میزان تاخیر بررسی های انجام شده",
+                    "DoneDelayMax": "بیشترین میزان تاخیر بررسی های انجام شده",
+                    "NotDoneDelayAverage": "میانگین تاخیر بررسی های در انتظار انجام",
+                    "NotDoneDelayMin": "کمترین میزان تاخیر بررسی های در انتظار انجام",
+                    "NotDoneDelayMax": "بیشترین میزان تاخیر بررسی های در انتظار انجام"
+                },
+                "KnowledgeAdminsDetailReport": {
+                    "_Title": "گزارش وضعیت عملکرد مسئولان دانش",
+                    "NodeName": "عنوان",
+                    "NodeType": "کلاس",
+                    "FullName": "نام",
+                    "SendDate": "تاریخ ارسال",
+                    "ActionDate": "تاریخ اقدام",
+                    "DoneStatus": "وضعیت انجام",
+                    "SeenStatus": "وضعیت مشاهده",
+                    "ActionDelay": "تاخیر در اقدام",
+                    "DoneStatus_Dic": {
+                        "Pending": "در انتظار انجام",
+                        "Done": "انجام شده"
+                    },
+                    "SeenStatus_Dic": {
+                        "Seen": "دیده شده",
+                        "NotSeen": "دیده نشده"
+                    }
+                },
                 "KnowledgeEvaluationsReport": {
                     "_Title": "گزارش خلاصه وضعیت عملکرد ارزیابان دانش",
                     "FullName": "نام",
@@ -2114,24 +2167,6 @@
                         "Rejected": "رد شده",
                         "Accepted": "تایید شده"
                     }
-                }
-            },
-            "FG": {
-                "_Title": "فرم ها",
-                "FormsListReport": {
-                    "_Title": "لیست فرم ها",
-                    "CreationDate": "تاریخ ایجاد",
-                    "CreatorName": "ثبت کننده",
-                    "CreatorUserName": "نام کاربری ثبت کننده"
-                },
-                "PollDetailReport": {
-                    "_Title": "جزییات تکمیل نظرسنجی",
-                    "Title": "عنوان",
-                    "FullName": "نام و نام خانوادگی",
-                    "UserName": "نام کاربری",
-                    "NodeName": "نام گروه",
-                    "Value": "پاسخ",
-                    "NumberValue": "مقدار عددی پاسخ"
                 }
             },
             "WF": {

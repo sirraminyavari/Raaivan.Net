@@ -421,6 +421,9 @@ namespace RaaiVan.Modules.GlobalUtilities
             ",\"InvalidTicket\":" + true.ToString().ToLower() + 
             "}";
 
+        public static string DefaultProfileImageURL = "../../Images/unknown.jpg";
+        public static string DefaultCoverPhotoURL = "../../Images/DefaultCoverPhoto.jpg";
+
         public static string get_complete_url(Guid? applicationId, string page)
         {
             return page.Replace("~", RaaiVanSettings.RaaiVanURL(applicationId));

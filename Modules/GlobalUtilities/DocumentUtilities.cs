@@ -238,13 +238,13 @@ namespace RaaiVan.Modules.GlobalUtilities
         }
 
         public static string get_personal_image_address(Guid? applicationId, 
-            Guid userId, bool networkAddress = false, bool highQuality = false)
+            Guid? userId, bool networkAddress = false, bool highQuality = false)
         {
             if (RaaiVanSettings.SAASBasedMultiTenancy) applicationId = null;
 
-            if (userId == Guid.Empty)
+            if (!userId.HasValue || userId == Guid.Empty)
             {
-                string addr = "../../Images/unknown.jpg";
+                string addr = PublicConsts.DefaultProfileImageURL;
 
                 return highQuality ? string.Empty :
                     (networkAddress ? addr.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : addr);
@@ -259,7 +259,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             };
 
             string address = !fi.exists(applicationId) ? 
-                (highQuality ? string.Empty : "../../Images/unknown.jpg") : fi.url(applicationId);
+                (highQuality ? string.Empty : PublicConsts.DefaultProfileImageURL) : fi.url(applicationId);
 
             return networkAddress ? address.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : address;
         }
@@ -277,8 +277,10 @@ namespace RaaiVan.Modules.GlobalUtilities
             return fi.exists(applicationId);
         }
 
-        public static bool get_icon_parameters(IconType iconType, ref int width, ref int height, 
-            ref int highQualityWidth, ref int highQualityHeight, ref FolderNames folder, ref FolderNames highQualityFolder) {
+        private static bool get_icon_parameters(Guid? applicationId, IconType iconType, ref int width, ref int height, 
+            ref int highQualityWidth, ref int highQualityHeight, ref FolderNames folder, 
+            ref FolderNames highQualityFolder, ref string defaultIconUrl)
+        {
             switch (iconType)
             {
                 case IconType.ProfileImage:
@@ -286,6 +288,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                     highQualityWidth = highQualityHeight = 600;
                     folder = FolderNames.ProfileImages;
                     highQualityFolder = FolderNames.HighQualityProfileImage;
+                    defaultIconUrl = get_personal_image_address(applicationId, null);
                     break;
                 case IconType.CoverPhoto:
                     width = 900;
@@ -294,18 +297,21 @@ namespace RaaiVan.Modules.GlobalUtilities
                     highQualityHeight = 600;
                     folder = FolderNames.CoverPhoto;
                     highQualityFolder = FolderNames.HighQualityCoverPhoto;
+                    defaultIconUrl = get_cover_photo_url(applicationId, null);
                     break;
                 case IconType.Icon:
                     width = height = 100;
                     highQualityWidth = highQualityHeight = 600;
                     folder = FolderNames.Icons;
                     highQualityFolder = FolderNames.HighQualityIcon;
+                    defaultIconUrl = get_icon_url(applicationId, DefaultIconTypes.Node);
                     break;
                 case IconType.ApplicationIcon:
                     width = height = 100;
                     highQualityWidth = highQualityHeight = 600;
                     folder = FolderNames.ApplicationIcons;
                     highQualityFolder = FolderNames.HighQualityApplicationIcon;
+                    defaultIconUrl = get_application_icon_url(null);
                     break;
                 default:
                     return false;
@@ -314,15 +320,31 @@ namespace RaaiVan.Modules.GlobalUtilities
             return true;
         }
 
-        public static bool get_icon_parameters(IconType iconType, ref int width, ref int height,
+        public static bool get_icon_parameters(Guid? applicationId, IconType iconType, ref int width, ref int height, 
+            ref int highQualityWidth, ref int highQualityHeight, ref FolderNames folder, ref FolderNames highQualityFolder) {
+            string defaultIconUrl = string.Empty;
+
+            return get_icon_parameters(applicationId, iconType, ref width, ref height, ref highQualityWidth, 
+                ref highQualityHeight, ref folder, ref highQualityFolder, ref defaultIconUrl);
+        }
+
+        public static bool get_icon_parameters(Guid? applicationId, IconType iconType, ref int width, ref int height,
             ref FolderNames folder, ref FolderNames highQualityFolder)
         {
             int highQualityWidth = 0, highQualityHeight = 0;
-            return get_icon_parameters(iconType, ref width, ref height,
+            return get_icon_parameters(applicationId, iconType, ref width, ref height,
                 ref highQualityWidth, ref highQualityHeight, ref folder, ref highQualityFolder);
         }
 
-        public static string get_icon_url(Guid applicationId, DefaultIconTypes defaultIcon, 
+        public static bool get_icon_parameters(Guid? applicationId, IconType iconType, ref FolderNames folder, 
+            ref FolderNames highQualityFolder, ref string defaultIconUrl)
+        {
+            int width = 0, height = 0, highQualityWidth = 0, highQualityHeight = 0;
+            return get_icon_parameters(applicationId, iconType, ref width, ref height,
+                ref highQualityWidth, ref highQualityHeight, ref folder, ref highQualityFolder, ref defaultIconUrl);
+        }
+
+        public static string get_icon_url(Guid? applicationId, DefaultIconTypes defaultIcon, 
             string extension = "", bool networkAddress = false)
         {
             string adr = string.Empty;
@@ -425,9 +447,17 @@ namespace RaaiVan.Modules.GlobalUtilities
             }.toJson(applicationId);
         }
 
-        public static string get_application_icon_url(Guid applicationId, bool highQuality = false, bool networkAddress = false)
+        public static string get_application_icon_url(Guid? applicationId, bool highQuality = false, bool networkAddress = false)
         {
             FolderNames folderName = highQuality ? FolderNames.HighQualityApplicationIcon : FolderNames.ApplicationIcons;
+
+            if (!applicationId.HasValue || applicationId == Guid.Empty)
+            {
+                string addr = RaaiVanSettings.LogoMiniURL;
+                
+                return highQuality ? string.Empty :
+                    (networkAddress ? addr.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : addr);
+            }
 
             DocFileInfo fi = new DocFileInfo() {
                 FileID = applicationId,
@@ -444,11 +474,17 @@ namespace RaaiVan.Modules.GlobalUtilities
         }
 
         public static string get_cover_photo_url(Guid? applicationId, 
-            Guid ownerId, bool networkAddress = false, bool highQuality = false)
+            Guid? ownerId, bool networkAddress = false, bool highQuality = false)
         {
             if (RaaiVanSettings.SAASBasedMultiTenancy) applicationId = null;
 
-            if (ownerId == Guid.Empty) return string.Empty;
+            if (!ownerId.HasValue || ownerId == Guid.Empty)
+            {
+                string addr = PublicConsts.DefaultCoverPhotoURL;
+
+                return highQuality ? string.Empty :
+                    (networkAddress ? addr.Replace("../..", RaaiVanSettings.RaaiVanURL(applicationId)) : addr);
+            }
 
             FolderNames folderName = highQuality ? FolderNames.HighQualityCoverPhoto : FolderNames.CoverPhoto;
 
