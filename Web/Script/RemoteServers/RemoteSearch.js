@@ -431,6 +431,12 @@
             details.forEach(d => {
                 if (d.TextValue) d.TextValue = Base64.decode(d.TextValue);
 
+                d.Info = GlobalUtilities.to_json(Base64.decode(d.Info)) || {};
+                d.Title = Base64.decode(d.Title);
+                d.Name = Base64.decode(d.Name);
+                d.TextValue = Base64.decode(d.TextValue);
+                jQuery.each(d.GuidItems || [], function (ind, val) { val.Name = Base64.decode(val.Name); });
+
                 var viewElement = ((FormElementTypes[d.Type] || {}).dataview || function () { })(d) || {};
 
                 if (viewElement.Container) {
@@ -440,7 +446,7 @@
                         Childs: [
                             {
                                 Type: "div", Style: "margin-bottom:0.5rem;",
-                                Childs: [{ Type: "text", TextValue: Base64.decode(d.Title) }]
+                                Childs: [{ Type: "text", TextValue: d.Title }]
                             },
                             { Type: "div", Name: "data" }
                         ]

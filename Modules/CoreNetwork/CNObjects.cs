@@ -320,10 +320,18 @@ namespace RaaiVan.Modules.CoreNetwork
         public bool? HasChild;
         public string IconURL;
         public string HighQualityIconURL;
+        public bool? IsService;
         public List<NodeType> Sub;
 
         public NodeType() {
             Sub = new List<NodeType>();
+        }
+
+        public bool IsCategory
+        {
+            get {
+                return (!IsService.HasValue || !IsService.Value) && RaaiVanSettings.SAASBasedMultiTenancy;
+            }
         }
 
         public string toJson(Guid? applicationId = null, bool iconUrl = false)
@@ -360,6 +368,10 @@ namespace RaaiVan.Modules.CoreNetwork
                     ",\"HighQualityIconURL\":\"" + HighQualityIconURL + "\"") +
                 (!HasChild.HasValue || !HasChild.Value ? string.Empty :
                     ",\"HasChild\":" + HasChild.Value.ToString().ToLower()) +
+                (!IsService.HasValue || !IsService.Value ? string.Empty :
+                    ",\"IsService\":" + IsService.Value.ToString().ToLower()) +
+                (!IsCategory ? string.Empty : 
+                    ",\"IsCategory\":" + IsCategory.ToString().ToLower()) +
                 (Sub == null || Sub.Count == 0 ? string.Empty :
                     ",\"Sub\":[" + string.Join(",", Sub.Select(s => s.toJson(applicationId, iconUrl))) + "]") +
                 "}";

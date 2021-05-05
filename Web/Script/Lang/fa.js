@@ -1245,6 +1245,7 @@
             "CannotChangeTheAdditionalIDOFThisNodeType": "امکان تغییر کد این کلاس وجود ندارد",
             "CannotDetermineDirector": "خطا در تعیین مسئول اقدام",
             "CannotFindAdmins": "هیچ مسئولی یافت نشد",
+            "CannotMoveCategoriesToSubLevels": "امکان انتقال دسته ها به سطوح پایین وجود ندارد",
             "CannotSelectMoreThanNItems": "امکان انتخاب بیش از «[n]» آیتم وجود ندارد",
             "CannotTransferToChilds": "امکان انتقال به شاخه های فرزند وجود ندارد",
             "CaptchaIsNotValid": "کد امنیتی صحیح نمی باشد",

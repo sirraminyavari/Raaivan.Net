@@ -142,7 +142,7 @@ namespace RaaiVan.Web.API
         {
             if (!paramsContainer.GBEdit) return false;
 
-            string nodeType = doc.DocumentElement.Attributes["nodetype"].Value;
+            string nodeType = PublicMethods.verify_string(doc.DocumentElement.Attributes["nodetype"].Value);
 
             List<ExchangeNode> exNodes = new List<ExchangeNode>();
 
@@ -159,9 +159,9 @@ namespace RaaiVan.Web.API
                 {
                     Name = _nd.Attributes["name"] == null ? null : _nd.Attributes["name"].Value.Trim(),
                     AdditionalID = _nd.Attributes["id"] == null || _nd.Attributes["id"].ToString() == string.Empty ? null :
-                        _nd.Attributes["id"].Value.Trim(),
+                        PublicMethods.verify_string(_nd.Attributes["id"].Value.Trim()),
                     ParentAdditionalID = _nd.Attributes["parentid"] == null || _nd.Attributes["parentid"].ToString() == string.Empty ?
-                        null : _nd.Attributes["parentid"].Value.Trim(),
+                        null : PublicMethods.verify_string(_nd.Attributes["parentid"].Value.Trim()),
                     Abstract = _nd.Attributes["abstract"] == null || _nd.Attributes["abstract"].ToString() == string.Empty ?
                         null : _nd.Attributes["abstract"].Value.Trim(),
                     Tags = tags
@@ -191,7 +191,7 @@ namespace RaaiVan.Web.API
         {
             if (!paramsContainer.GBEdit) return false;
 
-            string nodeType = doc.DocumentElement.Attributes["nodetype"].Value;
+            string nodeType = PublicMethods.verify_string(doc.DocumentElement.Attributes["nodetype"].Value);
 
             Guid? nodeTypeId = CNController.get_node_type_id(paramsContainer.Tenant.Id, nodeType);
 
@@ -203,9 +203,9 @@ namespace RaaiVan.Web.API
             foreach (XmlNode _nd in nodes)
             {
                 string id = _nd.Attributes["id"] == null || _nd.Attributes["id"].ToString() == string.Empty ? null :
-                    _nd.Attributes["id"].Value.Trim();
+                    PublicMethods.verify_string(_nd.Attributes["id"].Value.Trim());
                 string newId = _nd.Attributes["newid"] == null || _nd.Attributes["newid"].ToString() == string.Empty ? null :
-                    _nd.Attributes["newid"].Value.Trim();
+                    PublicMethods.verify_string(_nd.Attributes["newid"].Value.Trim());
 
                 if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(newId) && !exNodes.Any(n => n.Value == newId))
                     exNodes.Add(new KeyValuePair<string, string>(id, newId));
@@ -232,9 +232,9 @@ namespace RaaiVan.Web.API
             foreach (XmlNode _nd in nodes)
             {
                 string typeId = _nd.Attributes["typeid"] == null || _nd.Attributes["typeid"].ToString() == string.Empty ? null :
-                    _nd.Attributes["typeid"].Value.Trim();
+                    PublicMethods.verify_string(_nd.Attributes["typeid"].Value.Trim());
                 string id = _nd.Attributes["id"] == null || _nd.Attributes["id"].ToString() == string.Empty ? null :
-                    _nd.Attributes["id"].Value.Trim();
+                    PublicMethods.verify_string(_nd.Attributes["id"].Value.Trim());
 
                 if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(typeId) && !exNodes.Any(n => n.Value == typeId))
                     exNodes.Add(new KeyValuePair<string, string>(typeId, id));
@@ -264,8 +264,10 @@ namespace RaaiVan.Web.API
             {
                 ExchangeUser eu = new ExchangeUser()
                 {
-                    UserName = _usr.Attributes["username"] == null ? null : _usr.Attributes["username"].Value.Trim(),
-                    NewUserName = _usr.Attributes["newusername"] == null ? null : _usr.Attributes["newusername"].Value.Trim(),
+                    UserName = _usr.Attributes["username"] == null ? null :
+                        PublicMethods.verify_string(_usr.Attributes["username"].Value.Trim()),
+                    NewUserName = _usr.Attributes["newusername"] == null ? null :
+                        PublicMethods.verify_string(_usr.Attributes["newusername"].Value.Trim()),
                     FirstName = _usr.Attributes["firstname"] == null ? null : _usr.Attributes["firstname"].Value.Trim(),
                     LastName = _usr.Attributes["lastname"] == null ? null : _usr.Attributes["lastname"].Value.Trim(),
                     DepartmentID = _usr.Attributes["departmentid"] == null ? null : _usr.Attributes["departmentid"].Value.Trim()
@@ -317,9 +319,12 @@ namespace RaaiVan.Web.API
             {
                 ExchangeMember mm = new ExchangeMember()
                 {
-                    NodeTypeAdditionalID = _mbr.Attributes["nodetypeid"] == null ? null : _mbr.Attributes["nodetypeid"].Value.Trim(),
-                    NodeAdditionalID = _mbr.Attributes["nodeid"] == null ? null : _mbr.Attributes["nodeid"].Value.Trim(),
-                    UserName = _mbr.Attributes["username"] == null ? null : _mbr.Attributes["username"].Value.Trim(),
+                    NodeTypeAdditionalID = _mbr.Attributes["nodetypeid"] == null ? null :
+                        PublicMethods.verify_string(_mbr.Attributes["nodetypeid"].Value.Trim()),
+                    NodeAdditionalID = _mbr.Attributes["nodeid"] == null ? null :
+                        PublicMethods.verify_string(_mbr.Attributes["nodeid"].Value.Trim()),
+                    UserName = _mbr.Attributes["username"] == null ? null :
+                        PublicMethods.verify_string(_mbr.Attributes["username"].Value.Trim()),
                     IsAdmin = _mbr.Attributes["isadmin"] != null && _mbr.Attributes["isadmin"].Value.Trim().ToLower() == "true"
                 };
 
@@ -352,9 +357,12 @@ namespace RaaiVan.Web.API
             {
                 ExchangeMember ex = new ExchangeMember()
                 {
-                    NodeTypeAdditionalID = _xprt.Attributes["nodetypeid"] == null ? null : _xprt.Attributes["nodetypeid"].Value.Trim(),
-                    NodeAdditionalID = _xprt.Attributes["nodeid"] == null ? null : _xprt.Attributes["nodeid"].Value.Trim(),
-                    UserName = _xprt.Attributes["username"] == null ? null : _xprt.Attributes["username"].Value.Trim()
+                    NodeTypeAdditionalID = _xprt.Attributes["nodetypeid"] == null ? null :
+                        PublicMethods.verify_string(_xprt.Attributes["nodetypeid"].Value.Trim()),
+                    NodeAdditionalID = _xprt.Attributes["nodeid"] == null ? null :
+                        PublicMethods.verify_string(_xprt.Attributes["nodeid"].Value.Trim()),
+                    UserName = _xprt.Attributes["username"] == null ? null :
+                        PublicMethods.verify_string(_xprt.Attributes["username"].Value.Trim())
                 };
 
                 Guid nodeId = Guid.Empty;
@@ -384,10 +392,14 @@ namespace RaaiVan.Web.API
             {
                 ExchangeRelation rel = new ExchangeRelation()
                 {
-                    SourceTypeAdditionalID = r.Attributes["nodetypeid"] == null ? null : r.Attributes["nodetypeid"].Value.Trim(),
-                    SourceAdditionalID = r.Attributes["nodeid"] == null ? null : r.Attributes["nodeid"].Value.Trim(),
-                    DestinationTypeAdditionalID = r.Attributes["relatednodetypeid"] == null ? null : r.Attributes["relatednodetypeid"].Value.Trim(),
-                    DestinationAdditionalID = r.Attributes["relatedid"] == null ? null : r.Attributes["relatedid"].Value.Trim(),
+                    SourceTypeAdditionalID = r.Attributes["nodetypeid"] == null ? null :
+                        PublicMethods.verify_string(r.Attributes["nodetypeid"].Value.Trim()),
+                    SourceAdditionalID = r.Attributes["nodeid"] == null ? null :
+                        PublicMethods.verify_string(r.Attributes["nodeid"].Value.Trim()),
+                    DestinationTypeAdditionalID = r.Attributes["relatednodetypeid"] == null ? null :
+                        PublicMethods.verify_string(r.Attributes["relatednodetypeid"].Value.Trim()),
+                    DestinationAdditionalID = r.Attributes["relatedid"] == null ? null :
+                        PublicMethods.verify_string(r.Attributes["relatedid"].Value.Trim()),
                     Bidirectional = false //r.Attributes["bidirectional"] == null ? false : r.Attributes["bidirectional"].Value.ToLower() == "true"
                 };
                 
@@ -415,9 +427,12 @@ namespace RaaiVan.Web.API
             {
                 ExchangeAuthor item = new ExchangeAuthor()
                 {
-                    NodeTypeAdditionalID = a.Attributes["nodetypeid"] == null ? null : a.Attributes["nodetypeid"].Value.Trim(),
-                    NodeAdditionalID = a.Attributes["nodeid"] == null ? null : a.Attributes["nodeid"].Value.Trim(),
-                    UserName = a.Attributes["username"] == null ? null : a.Attributes["username"].Value.Trim(),
+                    NodeTypeAdditionalID = a.Attributes["nodetypeid"] == null ? null :
+                        PublicMethods.verify_string(a.Attributes["nodetypeid"].Value.Trim()),
+                    NodeAdditionalID = a.Attributes["nodeid"] == null ? null :
+                        PublicMethods.verify_string(a.Attributes["nodeid"].Value.Trim()),
+                    UserName = a.Attributes["username"] == null ? null :
+                        PublicMethods.verify_string(a.Attributes["username"].Value.Trim()),
                     Percentage = a.Attributes["percentage"] == null ? null : PublicMethods.parse_int(a.Attributes["percentage"].Value.Trim())
                 };
 
@@ -468,7 +483,8 @@ namespace RaaiVan.Web.API
 
             foreach (XmlNode a in authors)
             {
-                string un = a.Attributes["username"] == null ? null : a.Attributes["username"].Value.Trim();
+                string un = a.Attributes["username"] == null ? null :
+                        PublicMethods.verify_string(a.Attributes["username"].Value.Trim());
                 int? lId = a.Attributes["levelid"] == null ? null : PublicMethods.parse_int(a.Attributes["levelid"].Value.Trim());
 
                 if (!string.IsNullOrEmpty(un) && lId.HasValue && lId.Value > 0) exItems.Add(new KeyValuePair<string, int>(un, lId.Value));
@@ -501,11 +517,16 @@ namespace RaaiVan.Web.API
 
                 ExchangePermission item = new ExchangePermission()
                 {
-                    NodeTypeAdditionalID = a.Attributes["nodetypeid"] == null ? null : a.Attributes["nodetypeid"].Value.Trim(),
-                    NodeAdditionalID = a.Attributes["nodeid"] == null ? null : a.Attributes["nodeid"].Value.Trim(),
-                    GroupTypeAdditionalID = a.Attributes["grouptypeid"] == null ? null : a.Attributes["grouptypeid"].Value.Trim(),
-                    GroupAdditionalID = a.Attributes["groupid"] == null ? null : a.Attributes["groupid"].Value.Trim(),
-                    UserName = a.Attributes["username"] == null ? null : a.Attributes["username"].Value.Trim(),
+                    NodeTypeAdditionalID = a.Attributes["nodetypeid"] == null ? null :
+                        PublicMethods.verify_string(a.Attributes["nodetypeid"].Value.Trim()),
+                    NodeAdditionalID = a.Attributes["nodeid"] == null ? null :
+                        PublicMethods.verify_string(a.Attributes["nodeid"].Value.Trim()),
+                    GroupTypeAdditionalID = a.Attributes["grouptypeid"] == null ? null :
+                        PublicMethods.verify_string(a.Attributes["grouptypeid"].Value.Trim()),
+                    GroupAdditionalID = a.Attributes["groupid"] == null ? null :
+                        PublicMethods.verify_string(a.Attributes["groupid"].Value.Trim()),
+                    UserName = a.Attributes["username"] == null ? null :
+                        PublicMethods.verify_string(a.Attributes["username"].Value.Trim()),
                     PermissionType = pt,
                     Allow = !deny.HasValue || !deny.Value
                 };

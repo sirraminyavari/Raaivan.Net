@@ -12,6 +12,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         AdditionalIDPatternIsNotValid,
         AuthenticationCodeDidNotMatch,
         CannotFindAdmins,
+        CannotMoveCategoriesToSubLevels,
         CaptchaIsNotValid,
         CurrentlyThisStateContainsNItems,
         CurrentlyThisWorkFlowContainsNItems,

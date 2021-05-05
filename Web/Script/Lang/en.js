@@ -1245,6 +1245,7 @@
             "CannotChangeTheAdditionalIDOFThisNodeType": "this category's code is not editable",
             "CannotDetermineDirector": "cannot determine the director",
             "CannotFindAdmins": "cannot find any admins",
+            "CannotMoveCategoriesToSubLevels": "cannot move categories to sub-levels",
             "CannotSelectMoreThanNItems": "you cannot select more than [n] items",
             "CannotTransferToChilds": "transfer to children is not allowed",
             "CaptchaIsNotValid": "captcha is not valid",

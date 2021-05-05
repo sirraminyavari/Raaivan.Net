@@ -1101,7 +1101,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         public static string verify_string(string str, bool removeHtmlTags = true)
         {
             if (removeHtmlTags && !string.IsNullOrEmpty(str)) str = Expressions.replace(str, Expressions.Patterns.HTMLTag, " ");
-            return string.IsNullOrEmpty(str) ? str : str.Replace('ي', 'ی').Replace('ك', 'ک');
+            return convert_numbers_from_local(string.IsNullOrEmpty(str) ? str : str.Replace('ي', 'ی').Replace('ك', 'ک'));
         }
 
         //Arabic - Range: 0600–06FF, Arabic Supplement - Range: 0750–077F, Arabic Presentation Forms-A - Range: FB50–FDFF, Arabic Presentation Forms-B - Range: FE70–FEFF

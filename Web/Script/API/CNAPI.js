@@ -51,7 +51,8 @@
 
         var url = CNAPI.ResponseURL + "/AddNodeType?timeStamp=" + new Date().getTime();
         var queryString = (params.Name ? "&Name=" + params.Name : "") +
-            (params.Description ? "&Description=" + params.Description : "");
+            (params.ParentID ? "&ParentID=" + params.ParentID : "") +
+            (params.IsCategory ? "&IsCategory=" + params.IsCategory : "");
         return CNAPI._send(url, params, queryString);
     },
 

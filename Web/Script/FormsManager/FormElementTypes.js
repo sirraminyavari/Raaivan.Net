@@ -3334,23 +3334,21 @@
                         return !!val.NodeTypeID;
                     });
                     
-                    var _div = GlobalUtilities.create_nested_elements([
-                        {
-                            Type: "div", Class: "small-12 medium-12 large-12",
-                            Childs: [
-                                {
-                                    Type: "div", Name: "nodeTypes",
-                                    Style: "display:" + (nodeTypes.length ? "inline-block" : "none") + "; margin-" + RV_RevFloat + ":0.5rem;"
-                                },
-                                {
-                                    Type: "div", Class: "rv-air-button rv-border-radius-quarter",
-                                    Style: "display:" + (info.MultiSelect ? "inline-block" : "none") +
-                                        "; font-size:0.7rem; cursor:default;",
-                                    Childs: [{ Type: "text", TextValue: RVDic.MultiSelect }]
-                                }
-                            ]
-                        }
-                    ], container)["nodeTypes"];
+                    var _div = GlobalUtilities.create_nested_elements([{
+                        Type: "div", Class: "small-12 medium-12 large-12",
+                        Childs: [
+                            {
+                                Type: "div", Name: "nodeTypes",
+                                Style: "display:" + (nodeTypes.length ? "inline-block" : "none") + "; margin-" + RV_RevFloat + ":0.5rem;"
+                            },
+                            {
+                                Type: "div", Class: "rv-air-button rv-border-radius-quarter",
+                                Style: "display:" + (info.MultiSelect ? "inline-block" : "none") +
+                                    "; font-size:0.7rem; cursor:default;",
+                                Childs: [{ Type: "text", TextValue: RVDic.MultiSelect }]
+                            }
+                        ]
+                    }], container)["nodeTypes"];
 
                     jQuery.each(nodeTypes, function (ind, val) {
                         GlobalUtilities.create_nested_elements([
@@ -3610,21 +3608,19 @@
                 }
 
                 var _do_add = function (item) {
-                    GlobalUtilities.create_nested_elements([
-                        {
-                            Type: "div", Class: "rv-air-button rv-border-radius-quarter",
-                            Style: "display:inline-block; margin-bottom:0.3rem; margin-" + RV_RevFloat + ":0.3rem;" +
-                                (!item.ID ? "cursor:default;" : ""),
-                            Link: !item.ID || !urlFunc ? null : urlFunc(item),
-                            Childs: [
-                                itemType != "User" ? { Type: "text", TextValue: "" } : {
-                                    Type: "i", Class: "fa fa-user", Style: "margin-" + RV_RevFloat + ":0.4rem;",
-                                    Attributes: [{ Name: "aria-hidden", Value: true }]
-                                },
-                                { Type: "text", TextValue: item.Name }
-                            ]
-                        }
-                    ], container);
+                    GlobalUtilities.create_nested_elements([{
+                        Type: "div", Class: "rv-air-button rv-border-radius-quarter",
+                        Style: "display:inline-block; margin-bottom:0.3rem; margin-" + RV_RevFloat + ":0.3rem;" +
+                            (!item.ID ? "cursor:default;" : ""),
+                        Link: !item.ID || !urlFunc ? null : urlFunc(item),
+                        Childs: [
+                            itemType != "User" ? { Type: "text", TextValue: "" } : {
+                                Type: "i", Class: "fa fa-user", Style: "margin-" + RV_RevFloat + ":0.4rem;",
+                                Attributes: [{ Name: "aria-hidden", Value: true }]
+                            },
+                            { Type: "text", TextValue: item.Name }
+                        ]
+                    }], container);
                 };
 
                 var _add_item = function (item) {
@@ -3642,7 +3638,7 @@
                     Set: function (p) {
                         p = p || {};
                         container.innerHTML = "";
-
+                        
                         if ((p.GuidItems || []).length) jQuery.each(p.GuidItems, function (ind, val) { _add_item(val); });
                         else if (p.TextValue) {
                             jQuery.each(p.TextValue.split("~"), function (ind, val) {
@@ -3651,7 +3647,7 @@
                         }
                         else FormElementTypes.Text.nothing2display(container);
                     }
-                }
+                };
             },
 
             dataview: function (params) { return FormElementTypes.Node._dataview(params, "Node"); },

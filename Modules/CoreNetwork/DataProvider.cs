@@ -48,6 +48,7 @@ namespace RaaiVan.Modules.CoreNetwork
                         nodeType.HasDefaultPattern = false;
                     }
                     if (!string.IsNullOrEmpty(reader["Archive"].ToString())) nodeType.Archive = (bool)reader["Archive"];
+                    if (!string.IsNullOrEmpty(reader["IsService"].ToString())) nodeType.IsService = (bool)reader["IsService"];
 
                     lstNodeTypes.Add(nodeType);
                 }
@@ -879,7 +880,7 @@ namespace RaaiVan.Modules.CoreNetwork
                 if (Info.ParentID == Guid.Empty) Info.ParentID = null;
                 
                 return ProviderUtil.succeed(ProviderUtil.execute_reader(spName, applicationId, Info.NodeTypeID, 
-                    Info.NodeTypeAdditionalID, Info.Name, Info.ParentID, Info.CreatorUserID, DateTime.Now));
+                    Info.NodeTypeAdditionalID, Info.Name, Info.ParentID, Info.IsService, Info.CreatorUserID, DateTime.Now));
             }
             catch (Exception ex)
             {

@@ -2596,7 +2596,7 @@ namespace RaaiVan.Web.API
 
             //meta data
             Dictionary<string, string> metaData = new Dictionary<string, string>();
-
+            
             if (ownerNode != null)
             {
                 metaData["Confidentiality"] = string.IsNullOrEmpty(ownerNode.ConfidentialityLevel.Title) ? "__" :

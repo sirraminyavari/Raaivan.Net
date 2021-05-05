@@ -245,7 +245,8 @@ namespace RaaiVan.Web.API
                             PublicMethods.parse_string(context.Request.Params["Name"]));
 
                         add_node_type(typeName,
-                            PublicMethods.parse_guid(context.Request.Params["ParentID"]), ref responseText);
+                            PublicMethods.parse_guid(context.Request.Params["ParentID"]),
+                            PublicMethods.parse_bool(context.Request.Params["IsCategory"]), ref responseText);
                         _return_response(ref context, ref responseText);
                     }
                     return;
@@ -1535,10 +1536,18 @@ namespace RaaiVan.Web.API
             }
         }
 
-        protected void add_node_type(string typeName, Guid? parentId, ref string responseText)
+        protected void add_node_type(string typeName, Guid? parentId, bool? isCategory, ref string responseText)
         {
             //Privacy Check: OK
             if (!paramsContainer.GBEdit) return;
+
+            //Initial Checks
+            if (!RaaiVanSettings.SAASBasedMultiTenancy) isCategory = null;
+
+            if (isCategory.HasValue && isCategory.Value) parentId = null;
+
+            bool isService = (!isCategory.HasValue || !isCategory.Value) && RaaiVanSettings.SAASBasedMultiTenancy;
+            //end of Initial Checks
 
             if (!string.IsNullOrEmpty(typeName) && typeName.Length > 250)
             {
@@ -1566,13 +1575,20 @@ namespace RaaiVan.Web.API
                 AdditionalIDPattern = CNUtilities.DefaultAdditionalIDPattern,
                 CreatorUserID = paramsContainer.CurrentUserID.Value,
                 CreationDate = DateTime.Now,
-                Archive = false
+                Archive = false,
+                IsService = isService
             };
 
             bool result = CNController.add_node_type(paramsContainer.Tenant.Id, nodeType);
+
+            if (result && isService) CNController.initialize_extensions(paramsContainer.Tenant.Id, 
+                nodeType.NodeTypeID.Value, paramsContainer.CurrentUserID.Value);
+
             responseText = result ?
-                "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\",\"NodeTypeID\":\"" + nodeType.NodeTypeID.ToString() +
-                "\",\"NodeType\":" + nodeType.toJson() + "}" :
+                "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" + 
+                    ",\"NodeTypeID\":\"" + nodeType.NodeTypeID.ToString() + "\"" + 
+                    ",\"NodeType\":" + nodeType.toJson() + 
+                "}" :
                 "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
 
             //Save Log
@@ -1934,8 +1950,16 @@ namespace RaaiVan.Web.API
                 return;
             }
 
+            if (parentId.HasValue && RaaiVanSettings.SAASBasedMultiTenancy &&
+                CNController.get_node_types(paramsContainer.Tenant.Id, nodeTypeIds).Any(nt => nt.IsCategory))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.CannotMoveCategoriesToSubLevels + "\"}";
+                return;
+            }
+
             bool result = CNController.move_node_type(paramsContainer.Tenant.Id,
                 nodeTypeIds, parentId, paramsContainer.CurrentUserID.Value);
+
             responseText = result ?
                 "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" +/*,\"NodeType\":" + _get_node_type_json(nodeType, false) + */"}" :
                 "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
@@ -1973,6 +1997,7 @@ namespace RaaiVan.Web.API
 
             bool result = CNController.remove_node_types(paramsContainer.Tenant.Id,
                 nodeTypeIds, removeHierarchy, paramsContainer.CurrentUserID.Value);
+
             responseText = result ? "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}" :
                 "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
 
