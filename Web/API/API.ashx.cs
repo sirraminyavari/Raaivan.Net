@@ -22,9 +22,147 @@ namespace RaaiVan.Web.API
     {
         ParamsContainer paramsContainer = null;
 
+        //to be removed
+        private string getFileContent(string fileName)
+        {
+            return System.IO.File.ReadAllText(PublicMethods.map_path("~/example/" + fileName));
+        }
+
+        private byte[] topdf(string size, bool hasCover, bool hasHeader, bool hasFooter, 
+            string margin, string pageNumberPosition, string pdfPassword)
+        {
+            string url = "http://localhost:8080/html2pdf",
+                username = "user",
+                password = "pass",
+                html = getFileContent("main.html"),
+                css = getFileContent("style.css"),
+                header = !hasHeader ? null : getFileContent("header.html"),
+                footer = !hasFooter ? null : getFileContent("footer.html"),
+                cover = !hasCover? null : getFileContent("cover.html");
+
+            Dictionary<string, string> values = new Dictionary<string, string>();
+
+            values.Add("bodyUrl", null);
+            values.Add("bodyHtml", html);
+            values.Add("bodyStyle", css);
+            values.Add("header", header);
+            values.Add("footer", footer);
+            values.Add("cover", cover);
+            values.Add("paperSize", string.IsNullOrEmpty(size) ? "A4" : size);
+            values.Add("margin", string.IsNullOrEmpty(margin) ? "5% 5% 5% 5%" : margin);
+            values.Add("fontFamilyRTL", null);
+            values.Add("fontFamilyLTR", null);
+            values.Add("fontSizeRTL", null);
+            values.Add("fontSizeLTR", null);
+            values.Add("defaultDirection", null);
+            values.Add("pageNumberPosition", pageNumberPosition);
+            values.Add("password", pdfPassword);
+
+            /*
+            System.Net.WebClient client = new System.Net.WebClient();
+
+            string credentials = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(username + ":" + password));
+            client.Headers[System.Net.HttpRequestHeader.Authorization] = string.Format("Basic {0}", credentials);
+
+            return client.UploadValues(url, "POST", values);
+            */
+
+            System.Net.HttpWebRequest httpWebRequest = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url);
+            httpWebRequest.ContentType = "application/json";
+            httpWebRequest.Method = "POST";
+
+            string credentials = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(username + ":" + password));
+            httpWebRequest.Headers[System.Net.HttpRequestHeader.Authorization] = string.Format("Basic {0}", credentials);
+
+            using (System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(httpWebRequest.GetRequestStream()))
+                streamWriter.Write(PublicMethods.toJSON(values));
+
+            System.Net.HttpWebResponse httpResponse = (System.Net.HttpWebResponse)httpWebRequest.GetResponse();
+
+            byte[] buffer = new byte[16 * 1024];
+
+            using (System.IO.Stream stream = httpResponse.GetResponseStream())
+            using (System.IO.MemoryStream ms = new System.IO.MemoryStream())
+            {
+                int read;
+                while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
+                    ms.Write(buffer, 0, read);
+                return ms.ToArray();
+            }
+        }
+
+        private void processPDF2HTML(ParamsContainer paramsContainer, string mode)
+        {
+            switch (mode)
+            {
+                case "1":
+                    paramsContainer.file_response(topdf(
+                            size: "A5",
+                            hasCover: true,
+                            hasHeader: false,
+                            hasFooter: true,
+                            margin: "4% 3% 4% 3%",
+                            pageNumberPosition: "top-center",
+                            pdfPassword: null),
+                            "output1.pdf", "application/pdf", isAttachment: true);
+                    return;
+                case "2":
+                    paramsContainer.file_response(topdf(
+                            size: "Letter",
+                            hasCover: false,
+                            hasHeader: true,
+                            hasFooter: false,
+                            margin: "4% 3% 7% 6%",
+                            pageNumberPosition: "bottom-center",
+                            pdfPassword: null),
+                            "output2.pdf", "application/pdf", isAttachment: true);
+                    return;
+                case "3":
+                    paramsContainer.file_response(topdf(
+                            size: "A3",
+                            hasCover: false,
+                            hasHeader: false,
+                            hasFooter: false,
+                            margin: "1% 2% 3% 4%",
+                            pageNumberPosition: null,
+                            pdfPassword: null),
+                            "output3.pdf", "application/pdf", isAttachment: true);
+                    return;
+                case "4":
+                    paramsContainer.file_response(topdf(
+                            size: "A5",
+                            hasCover: true,
+                            hasHeader: true,
+                            hasFooter: true,
+                            margin: "15% 1% 5% 2%",
+                            pageNumberPosition: null,
+                            pdfPassword: "1234"),
+                            "output4.pdf", "application/pdf", isAttachment: true);
+                    return;
+                default:
+                    paramsContainer.file_response(topdf(
+                        size: "A4",
+                        hasCover: true,
+                        hasHeader: true,
+                        hasFooter: true,
+                        margin: "5% 5% 5% 5%",
+                        pageNumberPosition: null,
+                        pdfPassword: null),
+                        "output.pdf", "application/pdf", isAttachment: true);
+                    return;
+            }
+        }
+        //end of to be removed
+
         public void ProcessRequest(HttpContext context)
         {
             paramsContainer = new ParamsContainer(context, nullTenantResponse: false);
+
+            if (PublicMethods.parse_string(context.Request.Params["command"], false) == "abc123")
+            {
+                processPDF2HTML(paramsContainer, PublicMethods.parse_string(context.Request.Params["mode"], false));
+                return;
+            }
 
             if (PublicMethods.parse_string(context.Request.Params["command"], false) == "sql_scripts" && PublicMethods.is_dev())
             {
