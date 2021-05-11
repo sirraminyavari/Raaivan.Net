@@ -1,6 +1,7 @@
 /* 
 Codes: {
     "color": "#ffe035",
+    "verytransparent": "#ffe03533",
     "reverse": "#001fca",
     "verysoft": "#ffff68",
     "soft": "#fff94e",
@@ -19,6 +20,7 @@ Codes: {
 
 :root {
     --rv-color: #ffe035;
+    --rv-color-verytransparent: #ffe03533;
     --rv-color-reverse: #001fca;
     --rv-color-verysoft: #ffff68;
     --rv-color-soft: #fff94e;

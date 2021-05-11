@@ -112,7 +112,7 @@ namespace RaaiVan.Web.API
                             hasCover: false,
                             hasHeader: true,
                             hasFooter: false,
-                            margin: "4% 3% 7% 6%",
+                            margin: "4% 3.5% 7% 6%",
                             pageNumberPosition: "bottom-center",
                             pdfPassword: null),
                             "output2.pdf", "application/pdf", isAttachment: true);

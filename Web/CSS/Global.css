@@ -1,30 +1,32 @@
 ﻿:root {
     --rv-color: #b2d321;
+    --rv-color-verytransparent: #b2d32133;
     --rv-color-reverse: #4d2cde;
     --rv-color-verysoft: #eef7c9;
     --rv-color-soft: #e0f09d;
     --rv-color-lightwarm: #a9c820;
     --rv-color-warm: #9fbd1e;
     --rv-color-verywarm: #7a9117;
-    --rv-color-warmborder: #9bae46;
-    --rv-color-softborder: #c1eb09;
-    --rv-color-actionbutton: #b2d321;
     --rv-color-highlytransparentwarm: rgba(193, 235, 9, 0.06);
     --rv-color-verytransparentwarm: rgba(193, 235, 9, 0.1);
     --rv-color-mediumtransparentwarm: rgba(193, 235, 9, 0.5);
     --rv-color-transparentwarm: rgba(193, 235, 9, 0.7);
+    --rv-color-warmborder: #9bae46;
+    --rv-color-softborder: #c1eb09;
+    --rv-color-actionbutton: #b2d321;
     /* Theme Independent Colors */
     --rv-color-distant: #bac9dc;
+    --rv-color-freezed: #eef0f5;
     --rv-white-color: #ffffff;
-    --rv-black-color: #000000;
+    --rv-black-color: #090909;
     --rv-gray-color: #707070;
     --rv-gray-color-dark: #2b2727;
-    --rv-gray-color-light: #fcfcfc;
-    --rv-red-color: rgb(226,35,79);
-    --rv-red-color-soft: rgb(249,219,227);
-    --rv-red-color-verysoft: rgb(250,241,244);
-    --rv-red-color-lightwarm: rgb(206,28,68);
-    --rv-red-color-warm: rgb(188,24,62);
+    --rv-gray-color-light: #fcfcfd;
+    --rv-red-color: #E2234F;
+    --rv-red-color-soft: #f9dbe3;
+    --rv-red-color-verysoft: #faf1f4;
+    --rv-red-color-lightwarm: #ce1c44;
+    --rv-red-color-warm: #bc183e;
 }
 
 body {
@@ -406,6 +408,18 @@ pre > code {
     border: solid 1px var(--rv-color);
 }
 
+.rv-verytransparent {
+    color: var(--rv-color-verytransparent);
+}
+
+.rv-bg-color-verytransparent {
+    background-color: var(--rv-color-verytransparent);
+}
+
+.rv-border-verytransparent {
+    border: solid 1px var(--rv-color-verytransparent);
+}
+
 .rv-reverse {
     color: var(--rv-color-reverse);
 }
@@ -416,6 +430,18 @@ pre > code {
 
 .rv-border-reverse {
     border: solid 1px var(--rv-color-reverse);
+}
+
+.rv-verysoft {
+    color: var(--rv-color-verysoft);
+}
+
+.rv-bg-color-verysoft {
+    background-color: var(--rv-color-verysoft);
+}
+
+.rv-border-verysoft {
+    border: solid 1px var(--rv-color-verysoft);
 }
 
 .rv-soft {
@@ -466,6 +492,18 @@ pre > code {
     border: solid 1px var(--rv-color-verywarm);
 }
 
+.rv-verytransparentwarm {
+    color: var(--rv-color-verytransparentwarm);
+}
+
+.rv-bg-color-verytransparentwarm {
+    background-color: var(--rv-color-verytransparentwarm);
+}
+
+.rv-border-verytransparentwarm {
+    border: solid 1px var(--rv-color-verytransparentwarm);
+}
+
 .rv-distant {
     color: var(--rv-color-distant);
 }
@@ -476,6 +514,18 @@ pre > code {
 
 .rv-border-distant {
     border: solid 1px var(--rv-color-distant);
+}
+
+.rv-freezed {
+    color: var(--rv-color-freezed);
+}
+
+.rv-bg-color-freezed {
+    background-color: var(--rv-color-freezed);
+}
+
+.rv-border-freezed {
+    border: solid 1px var(--rv-color-freezed);
 }
 
 .rv-white {

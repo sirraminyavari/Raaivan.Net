@@ -4,6 +4,19 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <asp:HiddenField ID="initialJson" runat="server" ClientIDMode="Static" Value="" />
 
+    <link rel="stylesheet" href="../../Script/Kendo/kendo.common.css" type="text/css" />
+    <link rel="stylesheet" href="../../Script/Kendo/kendo.blueopal.css" type="text/css" />
+    <script type="text/javascript" src="../../Script/Kendo/kendo.core.js"></script>
+    <script type="text/javascript" src="../../Script/Kendo/kendo.data.js"></script>
+    <script type="text/javascript" src="../../Script/Kendo/kendo.reorderable.js"></script>
+    <script type="text/javascript" src="../../Script/Kendo/kendo.resizable.js"></script>
+    <script type="text/javascript" src="../../Script/Kendo/kendo.selectable.js"></script>
+    <script type="text/javascript" src="../../Script/Kendo/kendo.sortable.js"></script>
+    <script type="text/javascript" src="../../Script/Kendo/kendo.pager.js"></script>
+    <script type="text/javascript" src="../../Script/Kendo/kendo.userevents.js"></script>
+    <script type="text/javascript" src="../../Script/Kendo/kendo.draganddrop.js"></script>
+    <script type="text/javascript" src="../../Script/Kendo/kendo.grid.js"></script>
+
     <div id="reportsArea" class="small-12 medium-12 large-12" style="margin:0rem; padding:0vw 6vw; margin-bottom:5rem;"></div>
 
     <script type="text/javascript">

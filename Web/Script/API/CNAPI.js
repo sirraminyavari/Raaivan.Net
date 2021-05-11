@@ -92,6 +92,17 @@
         return CNAPI._send(url, params, queryString);
     },
 
+    MoveNodeType: function (params) {
+        params = params || {};
+
+        params.NodeTypeIDs = params.NodeTypeIDs || params.NodeTypeID;
+
+        var url = CNAPI.ResponseURL + "/MoveNodeType?timeStamp=" + new Date().getTime();
+        var queryString = (params.NodeTypeIDs ? "&NodeTypeIDs=" + params.NodeTypeIDs : "") +
+            (params.ParentID ? "&ParentID=" + params.ParentID : "");
+        return CNAPI._send(url, params, queryString);
+    },
+
     RemoveNodeType: function (params) {
         params = params || {};
 
