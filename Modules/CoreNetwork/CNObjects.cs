@@ -303,6 +303,7 @@ namespace RaaiVan.Modules.CoreNetwork
     public class NodeType
     {
         public Guid? NodeTypeID;
+        public Guid? TemplateTypeID;
         public int? AdditionalID;
         public Guid? ParentID;
         public string NodeTypeAdditionalID;

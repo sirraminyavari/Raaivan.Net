@@ -29,6 +29,8 @@
         _initialize: function () {
             var that = this;
 
+            var isSaaS = (window.RVGlobal || {}).SAASBasedMultiTenancy;
+
             //initialize variables
             var fullName = GlobalUtilities.trim(Base64.decode(that.Objects.User.FirstName) + " " + Base64.decode(that.Objects.User.LastName));
             var jobTitle = Base64.decode(that.Objects.User.JobTitle);
@@ -104,6 +106,11 @@
                         { Type: "div", Name: "friendSuggestions", Class: "small-12 medium-12 large-12", Style: "margin-top:1rem; display:none;" },
                         (!that.Options.Modules.SignUpViaInvitation ? null : {
                             Type: "div", Name: "invitationArea", Class: "small-12 medium-12 large-12", Style: "margin-top:1rem; display:none;"
+                        }),
+                        (!isSaaS ? null : {
+                            Type: "div", Class: "small-12 medium-12 large-12 rv-border-radius-quarter rv-air-button",
+                            Style: "margin-top:1rem;", Name: "templates",
+                            Childs: [{Type: "text", TextValue: "Templates"}]
                         })
                     ]
                 }
@@ -167,8 +174,8 @@
             }
             //end of Fill Friend Suggestions
 
-            
-            if (!RVGlobal.SAASBasedMultiTenancy) {
+
+            if (!isSaaS) {
                 GlobalUtilities.load_files(["API/PrivacyAPI.js"], {
                     OnLoad: function () {
                         PrivacyAPI.CheckAuthority({
@@ -196,6 +203,37 @@
                     }
                 });
             }
+
+            if (elems["templates"]) elems["templates"].onclick = function () {
+                var btn = this;
+
+                if (btn.Templates) {
+                    btn.Templates.Showed = GlobalUtilities.show(btn.Templates.Container);
+                    return;
+                }
+
+                btn.Templates = { Showed: null, Container: null };
+
+                var _div = btn.Templates.Container = GlobalUtilities.create_nested_elements([{
+                    Type: "div", Class: "small-10 medium-8 large-6 rv-border-radius-1 SoftBackgroundColor",
+                    Style: "margin:0 auto; padding:1rem;", Name: "_div"
+                }])["_div"];
+
+                GlobalUtilities.loading(_div);
+
+                btn.Templates.Showed = GlobalUtilities.show(_div);
+
+                GlobalUtilities.load_files(["API/CNAPI.js"], {
+                    OnLoad: function () {
+                        CNAPI.GetTemplates({
+                            ParseResults: true,
+                            ResponseHandler: function (result) {
+                                that.show_templates(_div, result);
+                            }
+                        });
+                    }
+                })
+            };
         },
 
         create_list: function (container, params) {
@@ -762,6 +800,28 @@
                     }
                 }
             });
+        },
+
+        show_templates: function (container, data) {
+            //console.log(data);
+
+            var tags = (data || {}).Tags || [];
+
+            tags.forEach(tg => {
+                tg.Templates = Object.keys((data || {}).TemplateTags || {})
+                    .map(key => ({ TemplateID: key, TagIDs: data.TemplateTags[key] || [] }))
+                    .filter(x => x.TagIDs.some(tId => tId == tg.NodeID) &&
+                        (data.Templates || []).some(t => t.NodeTypeID == x.TemplateID))
+                    .map(x => data.Templates.filter(t => t.NodeTypeID == x.TemplateID)[0]);
+            });
+
+            tags = tags.filter(t => (t.Templates || []).length);
+
+            var others = ((data || {}).Templates || [])
+                .filter(tmp => !tags.some(tg => tg.Templates.some(tt => tt.NodeTypeID == tmp.NodeTypeID)));
+
+            //console.log(tags.map(t => t.Templates));
+            console.log(others);
         }
     };
 })();

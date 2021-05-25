@@ -18,9 +18,9 @@ namespace RaaiVan.Modules.CoreNetwork
             return DataProvider.Initialize(applicationId);
         }
 
-        public static bool add_node_type(Guid applicationId, NodeType Info)
+        public static bool add_node_type(Guid applicationId, NodeType Info, Guid? templateFormId = null)
         {
-            return DataProvider.AddNodeType(applicationId, Info);
+            return DataProvider.AddNodeType(applicationId, Info, templateFormId);
         }
 
         public static bool rename_node_type(Guid applicationId, NodeType Info)

@@ -27,7 +27,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         public static List<Application> get_applications()
         {
             int totalCount = 0;
-            return DataProvider.GetApplications(0, 0, ref totalCount);
+            return DataProvider.GetApplications(count: 1000000, lowerBoundary: null, totalCount: ref totalCount);
         }
 
         public static List<Application> get_user_applications(Guid userId, bool isCreator = false, bool? archive = false)

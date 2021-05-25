@@ -550,7 +550,7 @@ namespace RaaiVan.Modules.FormGenerator
             try
             {
                 return ProviderUtil.succeed(ProviderUtil.execute_reader(spName, applicationId,
-                    Info.FormID, Info.Title, Info.Creator.UserID, DateTime.Now));
+                    Info.FormID, Info.TemplateFormID, Info.Title, Info.Creator.UserID, DateTime.Now));
             }
             catch(Exception ex)
             {
@@ -786,6 +786,7 @@ namespace RaaiVan.Modules.FormGenerator
             //Elements
             DataTable elementsTable = new DataTable();
             elementsTable.Columns.Add("ElementID", typeof(Guid));
+            elementsTable.Columns.Add("TemplateElementID", typeof(Guid));
             elementsTable.Columns.Add("InstanceID", typeof(Guid));
             elementsTable.Columns.Add("RefElementID", typeof(Guid));
             elementsTable.Columns.Add("Title", typeof(string));
@@ -811,7 +812,7 @@ namespace RaaiVan.Modules.FormGenerator
 
                 _elem.SequenceNumber = seq++;
 
-                elementsTable.Rows.Add(_elem.ElementID, Guid.NewGuid(), _elem.RefElementID,
+                elementsTable.Rows.Add(_elem.ElementID, _elem.TemplateElementID, Guid.NewGuid(), _elem.RefElementID,
                     PublicMethods.verify_string(_elem.Title), _elem.Name, _elem.SequenceNumber, _elem.Necessary,
                     _elem.UniqueValue, strType, PublicMethods.verify_string(_elem.Help), _elem.Info, _elem.Weight,
                     PublicMethods.verify_string(_elem.TextValue), _elem.FloatValue, _elem.BitValue, _elem.DateValue);
@@ -1119,6 +1120,7 @@ namespace RaaiVan.Modules.FormGenerator
             //Elements
             DataTable elementsTable = new DataTable();
             elementsTable.Columns.Add("ElementID", typeof(Guid));
+            elementsTable.Columns.Add("TemplateElementID", typeof(Guid));
             elementsTable.Columns.Add("InstanceID", typeof(Guid));
             elementsTable.Columns.Add("RefElementID", typeof(Guid));
             elementsTable.Columns.Add("Title", typeof(string));
@@ -1140,7 +1142,7 @@ namespace RaaiVan.Modules.FormGenerator
                 string strType = null;
                 if (_elem.Type.HasValue) strType = _elem.Type.Value.ToString();
 
-                elementsTable.Rows.Add(_elem.ElementID, _elem.FormInstanceID, _elem.RefElementID,
+                elementsTable.Rows.Add(_elem.ElementID, _elem.TemplateElementID, _elem.FormInstanceID, _elem.RefElementID,
                     PublicMethods.verify_string(_elem.Title), _elem.Name, _elem.SequenceNumber, _elem.Necessary,
                     _elem.UniqueValue, strType, PublicMethods.verify_string(_elem.Help), _elem.Info, _elem.Weight,
                     PublicMethods.verify_string(_elem.TextValue), _elem.FloatValue, _elem.BitValue, _elem.DateValue);

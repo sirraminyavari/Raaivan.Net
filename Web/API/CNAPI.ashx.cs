@@ -1315,6 +1315,10 @@ namespace RaaiVan.Web.API
                         _return_response(ref context, ref responseText);
                     }
                     return;
+                case "CheckNodeCreationAccess":
+                    check_node_creation_access(PublicMethods.parse_guid(context.Request.Params["NodeTypeID"]), ref responseText);
+                    _return_response(ref context, ref responseText);
+                    return;
                 case "RegisterNewNode":
                     string[] arrContributors = string.IsNullOrEmpty(context.Request.Params["Contributors"]) ? string.Empty.Split('|') :
                         context.Request.Params["Contributors"].Split('|');
@@ -7794,6 +7798,25 @@ namespace RaaiVan.Web.API
         {
             Node node = new Node();
             return get_replacement_dictionary(applicationId, currentUserId, nodeId, ref node, full);
+        }
+
+        public void check_node_creation_access(Guid? nodeTypeId, ref string responseText)
+        {
+            //Privacy Check: OK
+            if (!paramsContainer.GBEdit) return;
+
+            Service service = !nodeTypeId.HasValue ? null : CNController.get_service(paramsContainer.Tenant.Id, nodeTypeId.Value);
+
+            bool granted = service != null && !string.IsNullOrEmpty(service.Title);
+
+            bool isAdminServiceLevel = granted && _is_admin(paramsContainer.Tenant.Id, 
+                nodeTypeId.Value, paramsContainer.CurrentUserID.Value, AdminLevel.Service, false);
+
+            granted = granted && (isAdminServiceLevel || 
+                PrivacyController.check_access(paramsContainer.Tenant.Id, paramsContainer.CurrentUserID,
+                    nodeTypeId.Value, PrivacyObjectType.NodeType, PermissionType.Create));
+
+            responseText = "{\"Result\":" + granted.ToString().ToLower() + "}";
         }
 
         public bool register_new_node(Guid? nodeId, Guid? nodeTypeId, Guid? parentNodeId, Guid? documentTreeNodeId,

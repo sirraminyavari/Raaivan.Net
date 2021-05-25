@@ -16,9 +16,17 @@ namespace RaaiVan.Modules.GlobalUtilities
 
         public static bool check(HttpContext context, string input)
         {
+            if (string.IsNullOrEmpty(input)) input = string.Empty;
+
+            string sessionValue = null;
+
+            try { sessionValue = context.Session[_SessionVariableName].ToString(); }
+            catch { }
+
             if (RaaiVanSettings.SAASBasedMultiTenancy)
             {
-                return !string.IsNullOrEmpty(input) && input.Length > 100; //google validation API doesn't work with Iran's IP
+                return (!string.IsNullOrEmpty(sessionValue) && sessionValue == input.ToLower()) ||
+                    !string.IsNullOrEmpty(input) && input.Length > 100; //google validation API doesn't work with Iran's IP
 
                 if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(RaaiVanSettings.Google.Captcha.SecretKey) || 
                     string.IsNullOrEmpty(RaaiVanSettings.Google.Captcha.ValidationURL)) return false;
@@ -33,10 +41,7 @@ namespace RaaiVan.Modules.GlobalUtilities
                 return PublicMethods.get_dic_value<bool>(res, "success", defaultValue: false);
             }
             else
-            {
-                try { return context.Session[_SessionVariableName].ToString() == input.ToLower(); }
-                catch { return false; }
-            }
+                return !string.IsNullOrEmpty(sessionValue) && sessionValue == input.ToLower();
         }
 
         public static void generate(HttpContext context, int width, int height)

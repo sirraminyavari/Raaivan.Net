@@ -1436,6 +1436,14 @@
         return CNAPI._send(url, params, queryString);
     },
 
+    CheckNodeCreationAccess: function (params) {
+        params = params || {};
+
+        var url = CNAPI.ResponseURL + "/CheckNodeCreationAccess?timeStamp=" + new Date().getTime();
+        var queryString = (params.NodeTypeID ? "&NodeTypeID=" + params.NodeTypeID : "");
+        return CNAPI._send(url, params, queryString);
+    },
+
     RegisterNewNode: function (params) {
         params = params || {};
 

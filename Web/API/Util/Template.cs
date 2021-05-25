@@ -371,6 +371,7 @@ namespace RaaiVan.Web.API
 
             NodeType nodeType = new NodeType() {
                 NodeTypeID = IDs.new_id(tempNodeType.ID),
+                TemplateTypeID = IDs.get_id_from_template(tempNodeType.ID),
                 Name = tempNodeType.Name,
                 ParentID = parentNodeTypeId,
                 CreatorUserID = currentUserId
@@ -437,6 +438,7 @@ namespace RaaiVan.Web.API
 
             FormType form = new FormType() {
                 FormID = IDs.new_id(id),
+                TemplateFormID = IDs.get_id_from_template(id),
                 Title = tempForm.Title + " " + PublicMethods.get_random_number().ToString(),
                 Creator = new User() { UserID = currentUserId }
             };
@@ -447,6 +449,7 @@ namespace RaaiVan.Web.API
             {
                 FormElement newElem = new FormElement() {
                     ElementID = IDs.new_id(e.ID),
+                    TemplateElementID = IDs.get_id_from_template(e.ID),
                     Name = e.Code,
                     Title = e.Title,
                     Weight = e.Weight,

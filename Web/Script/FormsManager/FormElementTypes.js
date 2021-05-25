@@ -1215,7 +1215,7 @@
                     Set: function (info, _weight) { _set(info, _weight); },
                     Get: function () {
                         var items = !obj ? [] : (obj.get_items() || []);
-                        var retVal = { Options: [], AutoSuggestMode: autosuggestMode.checked === true, };
+                        var retVal = { Options: [], AutoSuggestMode: autosuggestMode.checked === true };
                         if (!isCheckbox) retVal.Data = [];
                         for (var i = 0, lnt = items.length; i < lnt; ++i) {
                             retVal.Options.push(Base64.encode(items[i].Title || ""));

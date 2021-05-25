@@ -870,7 +870,7 @@ namespace RaaiVan.Modules.CoreNetwork
             }
         }
 
-        public static bool AddNodeType(Guid applicationId, NodeType Info)
+        public static bool AddNodeType(Guid applicationId, NodeType Info, Guid? templateFormId)
         {
             string spName = GetFullyQualifiedName("AddNodeType");
 
@@ -880,7 +880,8 @@ namespace RaaiVan.Modules.CoreNetwork
                 if (Info.ParentID == Guid.Empty) Info.ParentID = null;
                 
                 return ProviderUtil.succeed(ProviderUtil.execute_reader(spName, applicationId, Info.NodeTypeID, 
-                    Info.NodeTypeAdditionalID, Info.Name, Info.ParentID, Info.IsService, Info.CreatorUserID, DateTime.Now));
+                    Info.NodeTypeAdditionalID, Info.Name, Info.ParentID, Info.IsService, Info.TemplateTypeID,
+                    templateFormId, Info.CreatorUserID, DateTime.Now));
             }
             catch (Exception ex)
             {
