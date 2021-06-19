@@ -80,6 +80,11 @@ namespace RaaiVan.Modules.Users
             return retInvitations;
         }
 
+        public static List<Application> get_current_invitations(Guid userId, string email)
+        {
+            return DataProvider.GetCurrentInvitations(userId, email);
+        }
+
         public static Guid? get_invitation_application_id(Guid invitationId, bool checkIfNotUsed)
         {
             return DataProvider.GetInvitationApplicationID(invitationId, checkIfNotUsed);

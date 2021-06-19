@@ -22,6 +22,8 @@ namespace RaaiVan.Web.API
 
         public void ProcessRequest(HttpContext context)
         {
+            bool isThatCommand = context.Request.Params["command"] == "GetApplications";
+
             paramsContainer = new ParamsContainer(context, nullTenantResponse: false);
 
             if (ProcessTenantIndependentRequest(context)) return;
@@ -268,6 +270,15 @@ namespace RaaiVan.Web.API
                     modify_application(PublicMethods.parse_guid(context.Request.Params["ApplicationID"]),
                         PublicMethods.parse_string(context.Request.Params["Title"]), ref responseText);
                     break;
+                case "SetApplicationSize":
+                    set_application_size(PublicMethods.parse_guid(context.Request.Params["ApplicationID"]), 
+                        PublicMethods.parse_string(context.Request.Params["Size"]), ref responseText);
+                    break;
+                case "SetApplicationFieldOfExpertise":
+                    set_application_field_of_expertise(PublicMethods.parse_guid(context.Request.Params["ApplicationID"]),
+                        PublicMethods.parse_guid(context.Request.Params["FieldID"]),
+                        PublicMethods.parse_string(context.Request.Params["FieldName"]), ref responseText);
+                    break;
                 case "RemoveApplication":
                     remove_application(PublicMethods.parse_guid(context.Request.Params["ApplicationID"]), ref responseText);
                     break;
@@ -297,99 +308,106 @@ namespace RaaiVan.Web.API
                     break;
                 case "Login":
                 case "LoginStepTwo":
-                    string failureText = string.Empty;
-
-                    int remainingLockoutTime = 0;
-                    Guid? userId = null;
-
-                    string authCookie = string.Empty;
-                    bool result = false, stepTwoNeeded = false, codeDisposed = false;
-
-                    if (command == "Login")
                     {
-                        string captcha = PublicMethods.parse_string(context.Request.Params["Captcha"]);
-                        bool hasValidCaptcha = !string.IsNullOrEmpty(captcha) &&
-                            Captcha.check(HttpContext.Current, captcha);
+                        string failureText = string.Empty;
 
-                        if (!string.IsNullOrEmpty(captcha) && !hasValidCaptcha)
-                            failureText = Messages.CaptchaIsNotValid.ToString();
+                        int remainingLockoutTime = 0;
 
-                        result = string.IsNullOrEmpty(failureText) && RaaiVanUtil.login(paramsContainer.ApplicationID,
-                            PublicMethods.parse_string(context.Request.Params["UserName"]),
-                            PublicMethods.parse_string(context.Request.Params["Password"]),
-                            PublicMethods.parse_string(context.Request.Params["DomainName"]),
-                            PublicMethods.parse_bool(context.Request.Params["RememberMe"]),
-                            PublicMethods.parse_guid(context.Request.Params["InvitationID"]),
-                            hasValidCaptcha,
-                            ref failureText, ref remainingLockoutTime, ref stepTwoNeeded, ref userId, ref context, ref authCookie);
-                    }
-                    else if (command == "LoginStepTwo")
-                    {
-                        result = RaaiVanUtil.login_step_two(paramsContainer.ApplicationID,
-                            PublicMethods.parse_string(context.Request.Params["TwoStepToken"], false),
-                            PublicMethods.parse_long(context.Request.Params["Code"]),
-                            PublicMethods.parse_bool(context.Request.Params["RememberMe"]),
-                            PublicMethods.parse_guid(context.Request.Params["InvitationID"]),
-                            ref failureText, ref codeDisposed, ref userId, ref context, ref authCookie);
-                    }
+                        Guid? userId = null;
 
-                    if (!result)
-                    {
-                        //Save Log
-                        if (!stepTwoNeeded)
+                        string authCookie = string.Empty;
+                        bool result = false, stepTwoNeeded = false, codeDisposed = false;
+
+                        if (command == "Login")
                         {
-                            try
+                            string captcha = PublicMethods.parse_string(context.Request.Params["Captcha"]);
+                            bool hasValidCaptcha = !string.IsNullOrEmpty(captcha) &&
+                                Captcha.check(HttpContext.Current, captcha);
+
+                            if (!string.IsNullOrEmpty(captcha) && !hasValidCaptcha)
+                                failureText = Messages.CaptchaIsNotValid.ToString();
+
+                            result = string.IsNullOrEmpty(failureText) && RaaiVanUtil.login(paramsContainer.ApplicationID,
+                                PublicMethods.parse_string(context.Request.Params["UserName"]),
+                                PublicMethods.parse_string(context.Request.Params["Password"]),
+                                PublicMethods.parse_string(context.Request.Params["DomainName"]),
+                                PublicMethods.parse_bool(context.Request.Params["RememberMe"]),
+                                PublicMethods.parse_guid(context.Request.Params["InvitationID"]),
+                                hasValidCaptcha,
+                                ref failureText, ref remainingLockoutTime, ref stepTwoNeeded, 
+                                ref userId, ref context, ref authCookie);
+                        }
+                        else if (command == "LoginStepTwo")
+                        {
+                            result = RaaiVanUtil.login_step_two(paramsContainer.ApplicationID,
+                                PublicMethods.parse_string(context.Request.Params["TwoStepToken"], false),
+                                PublicMethods.parse_long(context.Request.Params["Code"]),
+                                PublicMethods.parse_bool(context.Request.Params["RememberMe"]),
+                                PublicMethods.parse_guid(context.Request.Params["InvitationID"]),
+                                ref failureText, ref codeDisposed, ref userId, ref context, ref authCookie);
+                        }
+
+                        if (!result)
+                        {
+                            //Save Log
+                            if (!stepTwoNeeded)
                             {
-                                LogController.save_log(paramsContainer.ApplicationID, new Log()
+                                try
                                 {
-                                    UserID = userId,
-                                    HostAddress = PublicMethods.get_client_ip(HttpContext.Current),
-                                    HostName = PublicMethods.get_client_host_name(HttpContext.Current),
-                                    Action = Modules.Log.Action.Login_Failed,
-                                    SubjectID = userId,
-                                    Info = "{\"UserName\":\"" + context.Request.Params["UserName"] + "\"" +
-                                        ",\"Error\":\"" + Base64.encode(failureText) + "\"" +
-                                        ",\"RemainingLockoutTime\":" + remainingLockoutTime.ToString() +
-                                        "}",
-                                    ModuleIdentifier = ModuleIdentifier.RV
-                                });
+                                    LogController.save_log(paramsContainer.ApplicationID, new Log()
+                                    {
+                                        UserID = userId,
+                                        HostAddress = PublicMethods.get_client_ip(HttpContext.Current),
+                                        HostName = PublicMethods.get_client_host_name(HttpContext.Current),
+                                        Action = Modules.Log.Action.Login_Failed,
+                                        SubjectID = userId,
+                                        Info = "{\"UserName\":\"" + context.Request.Params["UserName"] + "\"" +
+                                            ",\"Error\":\"" + Base64.encode(failureText) + "\"" +
+                                            ",\"RemainingLockoutTime\":" + remainingLockoutTime.ToString() +
+                                            "}",
+                                        ModuleIdentifier = ModuleIdentifier.RV
+                                    });
+                                }
+                                catch { }
                             }
-                            catch { }
+                            //end of Save Log
                         }
-                        //end of Save Log
-                    }
-                    else if (userId.HasValue && paramsContainer.ApplicationID.HasValue)
-                    {
-                        Log lg = LogController.get_logs(paramsContainer.ApplicationID, new List<Guid>() { userId.Value },
-                            new List<Modules.Log.Action>() { Modules.Log.Action.Login },
-                            null, null, null, 1).FirstOrDefault();
-
-                        if (lg == null && paramsContainer.CurrentUserID.HasValue)
+                        else if (userId.HasValue && paramsContainer.ApplicationID.HasValue)
                         {
-                            GlobalController.set_variable(paramsContainer.ApplicationID,
-                                userId.ToString() + "_LastVersionSeen",
-                                "{\"Version\":\"" + PublicMethods.SystemVersion + "\",\"Tour\":\"Seen\"}",
-                                paramsContainer.CurrentUserID.Value);
+                            Log lg = LogController.get_logs(paramsContainer.ApplicationID, new List<Guid>() { userId.Value },
+                                new List<Modules.Log.Action>() { Modules.Log.Action.Login },
+                                null, null, null, 1).FirstOrDefault();
+
+                            if (lg == null && paramsContainer.CurrentUserID.HasValue)
+                            {
+                                GlobalController.set_variable(paramsContainer.ApplicationID,
+                                    userId.ToString() + "_LastVersionSeen",
+                                    "{\"Version\":\"" + PublicMethods.SystemVersion + "\",\"Tour\":\"Seen\"}",
+                                    paramsContainer.CurrentUserID.Value);
+                            }
                         }
+
+                        string loginMessage = !result ? string.Empty : get_login_message(paramsContainer.ApplicationID, userId);
+                        string strLastLogins = !result ? string.Empty : get_last_logins(paramsContainer.ApplicationID, userId);
+
+                        if (string.IsNullOrEmpty(failureText) || failureText[0] != '{')
+                            failureText = "\"" + failureText + "\"";
+
+                        User user = !result || !userId.HasValue ? null : 
+                            UsersController.get_user(paramsContainer.ApplicationID, userId.Value);
+
+                        responseText = result ?
+                            "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" +
+                            ",\"User\":" + (user == null ? "null" : user.toJson(paramsContainer.ApplicationID, profileImageUrl: true)) + 
+                            ",\"LoginMessage\":\"" + Base64.encode(loginMessage) + "\"" +
+                            ",\"AuthCookie\":" + (string.IsNullOrEmpty(authCookie) ? "null" : authCookie) +
+                            (string.IsNullOrEmpty(strLastLogins) ? string.Empty : ",\"LastLogins\":" + strLastLogins) +
+                            "}" :
+                            "{\"ErrorText\":" + failureText +
+                            ",\"CodeDisposed\":" + codeDisposed.ToString().ToLower() +
+                            ",\"RemainingLockoutTime\":" + remainingLockoutTime.ToString() +
+                            "}";
                     }
-
-                    string loginMessage = !result ? string.Empty : get_login_message(paramsContainer.ApplicationID, userId);
-                    string strLastLogins = !result ? string.Empty : get_last_logins(paramsContainer.ApplicationID, userId);
-
-                    if (string.IsNullOrEmpty(failureText) || failureText[0] != '{')
-                        failureText = "\"" + failureText + "\"";
-
-                    responseText = result ?
-                        "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" +
-                        ",\"LoginMessage\":\"" + Base64.encode(loginMessage) + "\"" +
-                        ",\"AuthCookie\":" + (string.IsNullOrEmpty(authCookie) ? "null" : authCookie) +
-                        (string.IsNullOrEmpty(strLastLogins) ? string.Empty : ",\"LastLogins\":" + strLastLogins) +
-                        "}" :
-                        "{\"ErrorText\":" + failureText +
-                        ",\"CodeDisposed\":" + codeDisposed.ToString().ToLower() +
-                        ",\"RemainingLockoutTime\":" + remainingLockoutTime.ToString() +
-                        "}";
-
                     break;
                 case "ResendVerificationCode":
                     responseText = VerificationCode.resend_code(
@@ -485,6 +503,9 @@ namespace RaaiVan.Web.API
 
                         return true;
                     }
+                case "log":
+                    log(PublicMethods.parse_string(context.Request.Params["Data"]), ref responseText);
+                    break;
             }
 
             if (!string.IsNullOrEmpty(responseText))
@@ -637,7 +658,10 @@ namespace RaaiVan.Web.API
             if (app != null) PublicMethods.set_current_application(app);
 
             responseText = app == null ? "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}" :
-                "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}";
+                "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" + 
+                    ",\"IsSystemAdmin\":" + (paramsContainer.CurrentUserID.HasValue && 
+                        PublicMethods.is_system_admin(applicationId, paramsContainer.CurrentUserID.Value)).ToString().ToLower() + 
+                "}";
         }
 
         public void create_application(string title, ref string responseText) {
@@ -729,6 +753,16 @@ namespace RaaiVan.Web.API
                 });
             }
             //end of Save Log
+        }
+
+        public void set_application_size(Guid? applicationId, string size, ref string responseText)
+        {
+            responseText = "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}";
+        }
+
+        public void set_application_field_of_expertise(Guid? applicationId, Guid? fieldId, string fieldName, ref string responseText)
+        {
+            responseText = "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}";
         }
 
         public void remove_application(Guid? applicationId, ref string responseText)
@@ -1427,6 +1461,16 @@ namespace RaaiVan.Web.API
                 ",\"FriendRequests\":" + friendRequests.ToString() +
                 ",\"Messages\":" + messages.ToString() +
                 "}";
+        }
+
+        protected void log(string data, ref string responseText) {
+            Dictionary<string, object> dic = PublicMethods.fromJSON(data);
+
+            //Check if data is a valid json
+            bool succeed = dic != null && dic.Keys.Count > 0;
+
+            responseText = succeed ? "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}" :
+                "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
         }
 
         public bool IsReusable

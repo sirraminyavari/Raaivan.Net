@@ -19,6 +19,11 @@ namespace RaaiVan.Modules.GlobalUtilities
             return DataProvider.SetApplications(applications);
         }
 
+        public static List<Application> get_applications(List<Guid> applicationIds)
+        {
+            return DataProvider.GetApplications(applicationIds);
+        }
+
         public static List<Application> get_applications(int? count, int? lowerBoundary, ref int totalCount)
         {
             return DataProvider.GetApplications(count, lowerBoundary, ref totalCount);

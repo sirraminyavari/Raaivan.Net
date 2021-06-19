@@ -399,6 +399,11 @@ namespace RaaiVan.Modules.FormGenerator
             return DataProvider.ConvertFormToTable(applicationId, formId);
         }
 
+        public static List<TemplateStatus> get_template_status(Guid applicationId, List<Guid> templateIds)
+        {
+            return DataProvider.GetTemplateStatus(applicationId, templateIds);
+        }
+
         //Polls
 
         public static List<Poll> get_polls(Guid applicationId, Guid? isCopyOfPollId, Guid? ownerId,

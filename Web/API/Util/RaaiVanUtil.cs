@@ -121,10 +121,13 @@ namespace RaaiVan.Web.API
 
             string curToken = _get_client_token(context);
 
-            if (string.IsNullOrEmpty(curToken) || !lst._Tokens.ContainsKey(curToken) ||
-                lst._Tokens[curToken].Expired) return string.Empty;
+            //the the Tokens list is empty, it means user has logged out, so a new token must be generated
 
-            if (!lst._Tokens[curToken].Expired && !lst._Tokens[curToken].Expiring) lst._Tokens[curToken].Use();
+            if (lst._Tokens.Count > 0 && (string.IsNullOrEmpty(curToken) || 
+                !lst._Tokens.ContainsKey(curToken) || lst._Tokens[curToken].Expired)) return string.Empty;
+
+            if (lst._Tokens.ContainsKey(curToken) && 
+                !lst._Tokens[curToken].Expired && !lst._Tokens[curToken].Expiring) lst._Tokens[curToken].Use();
 
             return string.IsNullOrEmpty(ticket) ? new_token(context) : RestAPI.new_token(ticket);
         }

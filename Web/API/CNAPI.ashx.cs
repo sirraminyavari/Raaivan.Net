@@ -1400,12 +1400,20 @@ namespace RaaiVan.Web.API
                         PublicMethods.parse_guid(context.Request.Params["OwnerID"]), ref responseText);
                     _return_response(ref context, ref responseText);
                     return;
+                case "GetTemplateTags":
+                    get_template_tags(ref responseText);
+                    _return_response(ref context, ref responseText);
+                    return;
                 case "GetTemplates":
-                    get_templates(ref responseText);
+                    get_templates(PublicMethods.parse_guid(context.Request.Params["TagID"]), ref responseText);
                     _return_response(ref context, ref responseText);
                     return;
                 case "GetTemplateJSON":
                     get_template_json(PublicMethods.parse_guid(context.Request.Params["NodeTypeID"]), ref responseText);
+                    _return_response(ref context, ref responseText);
+                    return;
+                case "GetTemplateStatus":
+                    get_template_status(PublicMethods.parse_string(context.Request.Params["Template"]), ref responseText);
                     _return_response(ref context, ref responseText);
                     return;
                 case "ActivateTemplate":
@@ -8228,7 +8236,23 @@ namespace RaaiVan.Web.API
 
         /* end of Service */
 
-        protected void get_templates(ref string responseText) {
+        protected void get_template_tags(ref string responseText)
+        {
+            //Constants
+            string TAG_CLASS_CODE = "tag";
+            //end of Constants
+
+            Guid? refAppId = RaaiVanSettings.ReferenceTenantID;
+
+            Guid? tagClassId = !refAppId.HasValue ? null : CNController.get_node_type_id(refAppId.Value, TAG_CLASS_CODE);
+
+            List<Node> tags = !tagClassId.HasValue ? new List<Node>() :
+                CNController.get_nodes(refAppId.Value, tagClassId.Value, count: 1000);
+
+            responseText = "{\"Tags\":[" + string.Join(",", tags.Select(t => t.toJson())) + "]}";
+        }
+
+        protected void get_templates(Guid? tagId, ref string responseText) {
             //Constants
             string TAG_CLASS_CODE = "tag";
             string TAG_ELEMENT_CODE = "template_tags";
@@ -8237,7 +8261,7 @@ namespace RaaiVan.Web.API
             Guid? refAppId = RaaiVanSettings.ReferenceTenantID;
             Guid? templateFormId = RaaiVanSettings.NodeTypeIdentityFormID;
 
-            if (!refAppId.HasValue) {
+            if (!refAppId.HasValue || paramsContainer.ApplicationID == refAppId) {
                 responseText = "{\"Templates\":[]}";
                 return;
             }
@@ -8292,20 +8316,45 @@ namespace RaaiVan.Web.API
                         });
                 });
 
-            responseText = "{\"Templates\":[" + 
-                    string.Join(",", NodeType.toTree(nodeTypes).Select(nt => nt.toJson(refAppId, iconUrl: true))) + "]" +
-                ",\"Tags\":[" + string.Join(",", tags.Select(
-                    t => t.toJson())) + "]" +
-                ",\"TemplateTags\":{" + string.Join(",", templateTags.Keys.Select(
-                    k => "\"" + k.ToString() + "\":" + 
-                        "[" + string.Join(",", templateTags[k].Select(t => "\"" + t.ToString() + "\"")) + "]")) + 
-                    "}" +
-                "}";
+            if (tagId.HasValue)
+            {
+                nodeTypes = nodeTypes.Where(nt => {
+                    return templateTags.ContainsKey(nt.NodeTypeID.Value) &&
+                        templateTags[nt.NodeTypeID.Value].Any(t => t == tagId.Value);
+                }).ToList();
+
+                responseText = "{\"Templates\":[" +
+                        string.Join(",", NodeType.toTree(nodeTypes).Select(nt => nt.toJson(refAppId, iconUrl: true))) + "]}";
+            }
+            else
+            {
+                responseText = "{\"Templates\":[" +
+                        string.Join(",", NodeType.toTree(nodeTypes).Select(nt => nt.toJson(refAppId, iconUrl: true))) + "]" +
+                    ",\"Tags\":[" + string.Join(",", tags.Select(t => t.toJson())) + "]" +
+                    ",\"TemplateTags\":{" + string.Join(",", templateTags.Keys.Select(
+                        k => "\"" + k.ToString() + "\":" +
+                            "[" + string.Join(",", templateTags[k].Select(t => "\"" + t.ToString() + "\"")) + "]")) +
+                        "}" +
+                    "}";
+            }
         }
 
         protected void get_template_json(Guid? nodeTypeId, ref string responseText)
         {
             responseText = PublicMethods.toJSON_typed<Template>(new Template(nodeTypeId));
+        }
+
+        protected void get_template_status(string templateContent, ref string responseText)
+        {
+            if (!PublicMethods.is_system_admin(paramsContainer.ApplicationID, paramsContainer.CurrentUserID.Value))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.AccessDenied + "\"}";
+                return;
+            }
+
+            Template template = PublicMethods.fromJSON_typed<Template>(templateContent);
+
+            responseText = template.get_template_status(paramsContainer.ApplicationID.Value);
         }
 
         protected void activate_template(string templateContent, ref string responseText) {
@@ -8321,7 +8370,7 @@ namespace RaaiVan.Web.API
 
             bool result = template != null && template.activate(paramsContainer.Tenant.Id, paramsContainer.CurrentUserID.Value);
 
-            responseText = result ? "{\"ErrorText\":\"" + Messages.OperationCompletedSuccessfully + "\"}" : 
+            responseText = result ? "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"}" : 
                 "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}";
         }
 

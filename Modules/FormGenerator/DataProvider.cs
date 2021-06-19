@@ -344,6 +344,51 @@ namespace RaaiVan.Modules.FormGenerator
             if (!reader.IsClosed) reader.Close();
         }
 
+        private static List<TemplateStatus> _parse_template_status(ref IDataReader reader)
+        {
+            List<TemplateStatus> lst = new List<TemplateStatus>();
+
+            while (reader.Read())
+            {
+                try
+                {
+                    TemplateStatus ts = new TemplateStatus();
+
+                    if (!string.IsNullOrEmpty(reader["TemplateID"].ToString())) ts.TemplateID = (Guid)reader["TemplateID"];
+                    if (!string.IsNullOrEmpty(reader["TemplateName"].ToString())) ts.TemplateName = (string)reader["TemplateName"];
+                    if (!string.IsNullOrEmpty(reader["ActivatedID"].ToString())) ts.ActivatedID = (Guid)reader["ActivatedID"];
+                    if (!string.IsNullOrEmpty(reader["ActivatedName"].ToString())) ts.ActivatedName = (string)reader["ActivatedName"];
+                    if (!string.IsNullOrEmpty(reader["ActivationDate"].ToString())) ts.ActivationDate = (DateTime)reader["ActivationDate"];
+                    if (!string.IsNullOrEmpty(reader["ActivatorUserID"].ToString())) ts.Activator.UserID = (Guid)reader["ActivatorUserID"];
+                    if (!string.IsNullOrEmpty(reader["ActivatorUserName"].ToString()))
+                        ts.Activator.UserName = (string)reader["ActivatorUserName"];
+                    if (!string.IsNullOrEmpty(reader["ActivatorFirstName"].ToString()))
+                        ts.Activator.FirstName = (string)reader["ActivatorFirstName"];
+                    if (!string.IsNullOrEmpty(reader["ActivatorLastName"].ToString()))
+                        ts.Activator.LastName = (string)reader["ActivatorLastName"];
+                    if (!string.IsNullOrEmpty(reader["TemplateElementsCount"].ToString()))
+                        ts.TemplateElementsCount = (int)reader["TemplateElementsCount"];
+                    if (!string.IsNullOrEmpty(reader["ElementsCount"].ToString())) ts.ElementsCount = (int)reader["ElementsCount"];
+                    if (!string.IsNullOrEmpty(reader["NewTemplateElementsCount"].ToString()))
+                        ts.NewTemplateElementsCount = (int)reader["NewTemplateElementsCount"];
+                    if (!string.IsNullOrEmpty(reader["RemovedTemplateElementsCount"].ToString()))
+                        ts.RemovedTemplateElementsCount = (int)reader["RemovedTemplateElementsCount"];
+                    if (!string.IsNullOrEmpty(reader["NewCustomElementsCount"].ToString()))
+                        ts.NewCustomElementsCount = (int)reader["NewCustomElementsCount"];
+
+                    lst.Add(ts);
+                }
+                catch (Exception ex)
+                {
+                    string strEx = ex.ToString();
+                }
+            }
+
+            if (!reader.IsClosed) reader.Close();
+
+            return lst;
+        }
+
         private static long _parse_polls(ref IDataReader reader, ref List<Poll> polls)
         {
             while (reader.Read())
@@ -1647,6 +1692,23 @@ namespace RaaiVan.Modules.FormGenerator
             {
                 LogController.save_error_log(applicationId, null, spName, ex, ModuleIdentifier.FG);
                 return false;
+            }
+        }
+
+        public static List<TemplateStatus> GetTemplateStatus(Guid applicationId, List<Guid> templateIds)
+        {
+            string spName = GetFullyQualifiedName("GetTemplateStatus");
+
+            try
+            {
+                IDataReader reader = ProviderUtil.execute_reader(spName, applicationId, 
+                    RaaiVanSettings.ReferenceTenantID, string.Join(",", templateIds.Select(id => id.ToString())), ',');
+                return _parse_template_status(ref reader);
+            }
+            catch (Exception ex)
+            {
+                LogController.save_error_log(applicationId, null, spName, ex, ModuleIdentifier.FG);
+                return new List<TemplateStatus>();
             }
         }
 

@@ -607,4 +607,40 @@ namespace RaaiVan.Modules.FormGenerator
             Values = new List<PollAbstractValue>();
         }
     }
+
+    public class TemplateStatus
+    {
+        public Guid? TemplateID;
+        public string TemplateName;
+        public Guid? ActivatedID;
+        public string ActivatedName;
+        public DateTime? ActivationDate;
+        public User Activator;
+        public int? TemplateElementsCount;
+        public int? ElementsCount;
+        public int? NewTemplateElementsCount;
+        public int? RemovedTemplateElementsCount;
+        public int? NewCustomElementsCount;
+
+        public TemplateStatus()
+        {
+            Activator = new User();
+        }
+
+        public string toJson(Guid applicationId) {
+            return "{\"TemplateID\":\"" + (!TemplateID.HasValue ? string.Empty : TemplateID.ToString()) + "\"" +
+                ",\"TemplateName\":\"" + Base64.encode(TemplateName) + "\"" +
+                ",\"ActivatedID\":\"" + (!ActivatedID.HasValue ? string.Empty : ActivatedID.ToString()) + "\"" +
+                ",\"ActivatedName\":\"" + Base64.encode(ActivatedName) + "\"" +
+                ",\"ActivationDate\":\"" + (!ActivationDate.HasValue ? string.Empty : ActivationDate.Value.ToString("yyyy-MM-dd")) + "\"" +
+                ",\"ActivationDate_Jalali\":\"" + PublicMethods.get_local_date(ActivationDate) + "\"" +
+                ",\"Activator\":" + Activator.toJson(applicationId, profileImageUrl: true) +
+                ",\"TemplateElementsCount\":" + (!TemplateElementsCount.HasValue ? 0 : TemplateElementsCount.Value).ToString() +
+                ",\"ElementsCount\":" + (!ElementsCount.HasValue ? 0 : ElementsCount.Value).ToString() +
+                ",\"NewTemplateElementsCount\":" + (!NewTemplateElementsCount.HasValue ? 0 : NewTemplateElementsCount.Value).ToString() +
+                ",\"RemovedTemplateElementsCount\":" + (!RemovedTemplateElementsCount.HasValue ? 0 : RemovedTemplateElementsCount.Value).ToString() +
+                ",\"NewCustomElementsCount\":" + (!NewCustomElementsCount.HasValue ? 0 : NewCustomElementsCount.Value).ToString() +
+                "}";
+        }
+    }
 }

@@ -280,6 +280,23 @@ namespace RaaiVan.Modules.GlobalUtilities
             finally { con.Close(); }
         }
 
+        public static List<Application> GetApplications(List<Guid> applicationIds)
+        {
+            try
+            {
+                if (applicationIds == null || applicationIds.Count == 0) return new List<Application>();
+
+                int totalCount = 0;
+
+                List<Application> ret = new List<Application>();
+                IDataReader reader = ProviderUtil.execute_reader(GetFullyQualifiedName("GetApplicationsByIDs"), 
+                    string.Join(",", applicationIds.Select(id => id.ToString())), ',');
+                _parse_applications(ref reader, ref ret, ref totalCount);
+                return ret;
+            }
+            catch (Exception ex) { return new List<Application>(); }
+        }
+
         public static List<Application> GetApplications(int? count, int? lowerBoundary, ref int totalCount)
         {
             try

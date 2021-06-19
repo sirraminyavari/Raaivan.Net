@@ -903,6 +903,24 @@ namespace RaaiVan.Modules.Users
             }
         }
 
+        public static List<Application> GetCurrentInvitations(Guid userId, string email)
+        {
+            string spName = GetFullyQualifiedName("GetCurrentInvitations");
+
+            try
+            {
+                IDataReader reader = ProviderUtil.execute_reader(spName, userId, email);
+                List<Guid> appIds = new List<Guid>();
+                ProviderUtil.parse_guids(ref reader, ref appIds);
+                return GlobalController.get_applications(appIds);
+            }
+            catch (Exception ex)
+            {
+                LogController.save_error_log(null, null, spName, ex, ModuleIdentifier.USR);
+                return new List<Application>();
+            }
+        }
+
         public static Guid? GetInvitationApplicationID(Guid invitationId, bool checkIfNotUsed)
         {
             string spName = GetFullyQualifiedName("GetInvitationApplicationID");

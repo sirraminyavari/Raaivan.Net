@@ -42,6 +42,7 @@ namespace RaaiVan.Web.API
         admin_help,
 
         login,
+        onboarding,
         teams,
         changepassword,
         newnode,
@@ -161,6 +162,7 @@ namespace RaaiVan.Web.API
                 !Modules.RaaiVanConfig.Modules.RestAPI(input.ParamsContainer.ApplicationID) || RaaiVanSettings.SAASBasedMultiTenancy ? 
                     RouteName.remotesearch : RouteName.none,
 
+                !RaaiVanSettings.SAASBasedMultiTenancy ? RouteName.onboarding : RouteName.none,
                 !RaaiVanSettings.SAASBasedMultiTenancy ? RouteName.teams : RouteName.none
             }.Where(n => n != RouteName.none).Distinct().ToList();
 
@@ -223,6 +225,7 @@ namespace RaaiVan.Web.API
             List<RouteName> CompleteProfileException = new List<RouteName>() {
                 RouteName.changepassword,
                 RouteName.login,
+                RouteName.onboarding,
                 RouteName.profile,
                 RouteName.accessdenied,
                 RouteName.error
@@ -259,6 +262,7 @@ namespace RaaiVan.Web.API
         private bool check_application(RouteActionParams input)
         {
             List<RouteName> CheckApplicationException = new List<RouteName>() {
+                RouteName.onboarding,
                 RouteName.teams,
                 RaaiVanSettings.SAASBasedMultiTenancy ? RouteName.login : RouteName.none,
                 RaaiVanSettings.SAASBasedMultiTenancy ? RouteName.profile : RouteName.none
@@ -367,7 +371,6 @@ namespace RaaiVan.Web.API
 
             Application currApp = PublicMethods.get_current_application();
             if (currApp != null) actionParams.Data["Application"] = PublicMethods.fromJSON(currApp.toJson(icon: true));
-
 
             Action?.Invoke(actionParams);
 
@@ -511,18 +514,23 @@ namespace RaaiVan.Web.API
 
             input.Data["RelatedItem"] = relatedItem;
 
-            ArrayList nodeTypesArr = new ArrayList();
+            input.Data["NodeTypes"] = new ArrayList(nodeTypes
+                .Select(nt => PublicMethods.fromJSON(nt.toJson(input.ParamsContainer.ApplicationID, iconUrl: true))).ToList());
 
-            nodeTypes.ForEach(nt =>
-            {
-                Dictionary<string, object> itm = new Dictionary<string, object>();
-                itm["NodeTypeID"] = nt.NodeTypeID;
-                itm["TypeName"] = Base64.encode(nt.Name);
+            if (ids.Count == 1 && input.ParamsContainer.ApplicationID.HasValue) {
+                List<string> hierarchy = CNController.get_node_type_hierarchy(input.ParamsContainer.ApplicationID.Value, ids[0])
+                    .Select(h => {
+                        return new NodeType()
+                        {
+                            NodeTypeID = h.ID,
+                            Name = h.Name
+                        }.toJson(input.ParamsContainer.ApplicationID.Value, iconUrl: true);
+                    }).ToList();
 
-                nodeTypesArr.Add(itm);
-            });
+                hierarchy.Reverse();
 
-            input.Data["NodeTypes"] = nodeTypesArr;
+                input.Data["Hierarchy"] = new ArrayList(hierarchy.Select(h => PublicMethods.fromJSON(h)).ToList());
+            }
         }
 
         private static void error(RouteActionParams input)

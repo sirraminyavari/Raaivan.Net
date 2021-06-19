@@ -539,6 +539,9 @@ namespace RaaiVan.Web.API
                         PublicMethods.parse_long(context.Request.Params["LowerBoundary"]),
                         ref responseText);
                     break;
+                case "GetCurrentInvitations":
+                    get_current_invitations(ref responseText);
+                    break;
                 case "SetPasswordResetTicket":
                     if (!Captcha.check(context, PublicMethods.parse_string(context.Request.Params["Captcha"], decode: false)))
                     {
@@ -1352,6 +1355,20 @@ namespace RaaiVan.Web.API
             }
 
             responseText += "]}";
+        }
+
+        public void get_current_invitations(ref string responseText)
+        {
+            //Privacy Check: OK
+            if (!paramsContainer.GBEdit || !RaaiVanSettings.SAASBasedMultiTenancy) return;
+
+            EmailAddress email = 
+                UsersController.get_users_main_email(new List<Guid>() { paramsContainer.CurrentUserID.Value }).FirstOrDefault();
+
+            List<Application> applications = email == null || string.IsNullOrEmpty(email.Address) ? new List<Application>() :
+                UsersController.get_current_invitations(paramsContainer.CurrentUserID.Value, email.Address);
+
+            responseText = "{\"Applications\":[" + applications.Select(a => a.toJson(icon: true)) + "]}";
         }
 
         public void set_password_reset_ticket(string username, string password, Guid? invitationId, ref string responseText)

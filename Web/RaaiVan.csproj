@@ -1851,6 +1851,9 @@
     <Content Include="Script\RVAdmin\SystemSettings.js" />
     <Content Include="Script\TabsManager\TabsManager.js" />
     <Content Include="Script\TeamSelect\TeamSelect.js" />
+    <Content Include="Script\Templates\TemplateGallery.js" />
+    <Content Include="Script\Templates\TemplateParser.js" />
+    <Content Include="Script\Templates\TemplateViewer.js" />
     <Content Include="Script\TextEncoding.js" />
     <Content Include="Script\TreeNodeViewer\TreeNodeViewer.js" />
     <Content Include="Script\TreeViewContainer\TreeMaker.js" />

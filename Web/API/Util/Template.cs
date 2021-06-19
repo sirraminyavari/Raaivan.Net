@@ -236,11 +236,12 @@ namespace RaaiVan.Web.API
             List<FormElement> formElements = form == null || !form.FormID.HasValue ? new List<FormElement>() :
                 FGController.get_form_elements(appId, form.FormID.Value);
 
-            TemplateNodeType newNodeType = new TemplateNodeType() {
+            TemplateNodeType newNodeType = new TemplateNodeType()
+            {
                 ID = newNtId,
-                Name = nodeType.Name,
-                ServiceTitle = service.Title,
-                ServiceDescription = service.Description,
+                Name = Base64.encode(nodeType.Name),
+                ServiceTitle = Base64.encode(service.Title),
+                ServiceDescription = Base64.encode(service.Description),
                 Extensions = extensions,
                 FormID = form == null ? null : IDs.resolve(form.FormID),
                 NoContent = service.NoContent,
@@ -251,6 +252,8 @@ namespace RaaiVan.Web.API
                 DisableFileUpload = service.DisableFileUpload,
                 DisableRelatedNodesSelect = service.DisableRelatedNodesSelect
             };
+
+            NodeTypes[newNtId] = newNodeType;
 
             if (form != null && form.FormID.HasValue)
             {
@@ -265,8 +268,6 @@ namespace RaaiVan.Web.API
                 newNodeType.ChildrenIDs = children.Select(c => IDs.resolve(c.NodeTypeID)).ToList();
                 children.ForEach(c => add_node_type(c.NodeTypeID));
             }
-
-            NodeTypes[newNtId] = newNodeType;
         }
 
         private void add_form(FormType form, List<FormElement> elements)
@@ -276,16 +277,20 @@ namespace RaaiVan.Web.API
             if (Forms.ContainsKey(newFormId)) return;
             //end of get new id
 
-            TemplateForm newForm = new TemplateForm() {
+            TemplateForm newForm = new TemplateForm()
+            {
                 ID = newFormId,
-                Title = form.Title
+                Title = Base64.encode(form.Title)
             };
 
+            Forms[newFormId] = newForm;
+
             elements.Where(e => e.Type.HasValue).ToList().ForEach(elem => {
-                TemplateFormElement newFormElement = new TemplateFormElement() {
+                TemplateFormElement newFormElement = new TemplateFormElement()
+                {
                     ID = IDs.resolve(elem.ElementID),
-                    Code = elem.Name,
-                    Title = elem.Title,
+                    Code = Base64.encode(elem.Name),
+                    Title = Base64.encode(elem.Title),
                     Type = elem.Type.Value.ToString(),
                     Weight = !elem.Weight.HasValue ? 0 : elem.Weight.Value,
                     Info = PublicMethods.fromJSON(elem.Info),
@@ -348,8 +353,6 @@ namespace RaaiVan.Web.API
                     newFormElement.Info["NodeTypes"] = newNts;
                 }
             });
-
-            Forms[newFormId] = newForm;
         }
 
         private void add_form(Guid formId) {
@@ -369,10 +372,11 @@ namespace RaaiVan.Web.API
             TemplateNodeType tempNodeType = !NodeTypes.ContainsKey(id) ? null : NodeTypes[id];
             if (tempNodeType == null) return null;
 
-            NodeType nodeType = new NodeType() {
+            NodeType nodeType = new NodeType()
+            {
                 NodeTypeID = IDs.new_id(tempNodeType.ID),
                 TemplateTypeID = IDs.get_id_from_template(tempNodeType.ID),
-                Name = tempNodeType.Name,
+                Name = Base64.decode(tempNodeType.Name),
                 ParentID = parentNodeTypeId,
                 CreatorUserID = currentUserId
             };
@@ -388,10 +392,10 @@ namespace RaaiVan.Web.API
             CNController.initialize_service(applicationId, nodeType.NodeTypeID.Value);
 
             if (!string.IsNullOrEmpty(tempNodeType.ServiceTitle))
-                CNController.set_service_title(applicationId, nodeType.NodeTypeID.Value, tempNodeType.ServiceTitle);
+                CNController.set_service_title(applicationId, nodeType.NodeTypeID.Value, Base64.decode(tempNodeType.ServiceTitle));
 
             if (!string.IsNullOrEmpty(tempNodeType.ServiceDescription))
-                CNController.set_service_description(applicationId, nodeType.NodeTypeID.Value, tempNodeType.ServiceDescription);
+                CNController.set_service_description(applicationId, nodeType.NodeTypeID.Value, Base64.decode(tempNodeType.ServiceDescription));
 
             if (tempNodeType.NoContent.HasValue && tempNodeType.NoContent.Value)
                 CNController.no_content_service(applicationId, nodeType.NodeTypeID.Value, true);
@@ -436,10 +440,11 @@ namespace RaaiVan.Web.API
             TemplateForm tempForm = !Forms.ContainsKey(id) ? null : Forms[id];
             if (tempForm == null) return null;
 
-            FormType form = new FormType() {
+            FormType form = new FormType()
+            {
                 FormID = IDs.new_id(id),
                 TemplateFormID = IDs.get_id_from_template(id),
-                Title = tempForm.Title + " " + PublicMethods.get_random_number().ToString(),
+                Title = Base64.decode(tempForm.Title) + " " + PublicMethods.get_random_number().ToString(),
                 Creator = new User() { UserID = currentUserId }
             };
 
@@ -447,11 +452,12 @@ namespace RaaiVan.Web.API
 
             List<FormElement> elements = tempForm.Elements == null ? new List<FormElement>() : tempForm.Elements.Select(e =>
             {
-                FormElement newElem = new FormElement() {
+                FormElement newElem = new FormElement()
+                {
                     ElementID = IDs.new_id(e.ID),
                     TemplateElementID = IDs.get_id_from_template(e.ID),
-                    Name = e.Code,
-                    Title = e.Title,
+                    Name = Base64.decode(e.Code),
+                    Title = Base64.decode(e.Title),
                     Weight = e.Weight,
                     Help = e.Help
                 };
@@ -554,6 +560,27 @@ namespace RaaiVan.Web.API
             };
 
             newPic.store(applicationId, fileContent);
+        }
+
+        public string get_template_status(Guid applicationId)
+        {
+            List<Guid> formIds = Forms.Keys
+                .Where(k => Dependencies.Any(d => d.Value.Contains(k)))
+                .Select(k => IDs.get_id_from_template(k))
+                .Where(id => id.HasValue)
+                .Select(id => id.Value)
+                .ToList();
+
+            List<TemplateStatus> status = FGController.get_template_status(applicationId, formIds);
+
+            List<string> lst = status
+                .Select(s => s.TemplateID.Value)
+                .Distinct()
+                .Select(id => "\"" + id.ToString() + "\":" +
+                    "[" + string.Join(",", status.Where(s => s.TemplateID == id).Select(s => s.toJson(applicationId))) + "]")
+                .ToList();
+
+            return "{" + string.Join(",", lst) + "}";
         }
     }
 }

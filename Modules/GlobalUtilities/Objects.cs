@@ -36,11 +36,16 @@ namespace RaaiVan.Modules.GlobalUtilities
             return "{\"ApplicationID\":\"" + (!ApplicationID.HasValue ? string.Empty : ApplicationID.ToString()) + "\"" +
                 ",\"Title\":\"" + Base64.encode(string.IsNullOrEmpty(Title) ? Name : Title) + "\"" +
                 ",\"Description\":\"" + Base64.encode(Description) + "\"" +
-                (string.IsNullOrEmpty(AvatarName) ? string.Empty : ",\"AvatarName\":\"" + AvatarName + "\"") +
-                (!icon ? string.Empty : ",\"IconURL\":\"" + (string.IsNullOrEmpty(iconUrl) ? "" : iconUrl) + "\"") +
-                (!highQualityIcon ? string.Empty : ",\"HighQualityIconURL\":\"" + highQualityIconUrl + "\"") +
+                (string.IsNullOrEmpty(AvatarName) ? string.Empty : 
+                    ",\"AvatarName\":\"" + AvatarName + "\"") +
+                (!icon ? string.Empty : 
+                    ",\"IconURL\":\"" + (string.IsNullOrEmpty(iconUrl) ? "" : iconUrl) + "\"") +
+                (!highQualityIcon ? string.Empty : 
+                    ",\"HighQualityIconURL\":\"" + highQualityIconUrl + "\"") +
                 (!currentUserId.HasValue ? string.Empty :
                     ",\"Removable\":" + (CreatorUserID.HasValue && CreatorUserID == currentUserId).ToString().ToLower()) +
+                (!currentUserId.HasValue ? string.Empty :
+                    ",\"Editable\":" + (CreatorUserID.HasValue && CreatorUserID == currentUserId).ToString().ToLower()) +
                 "}";
         }
     }
