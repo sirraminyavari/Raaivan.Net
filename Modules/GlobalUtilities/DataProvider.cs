@@ -749,7 +749,7 @@ namespace RaaiVan.Modules.GlobalUtilities
         {
             names = names.Where(n => n != RVSettingsItem.UseLocalVariables).ToList();
 
-            if (names.Count == 0) return new Dictionary<RVSettingsItem, string>();
+            if (applicationId == Guid.Empty && names.Count == 0) return new Dictionary<RVSettingsItem, string>();
 
             string spName = GetFullyQualifiedName("GetSystemSettings");
 

@@ -14,7 +14,7 @@
         (function () {
             var initialJson = JSON.parse(document.getElementById("initialJson").value) || {};
             var modules = (window.RVGlobal || {}).Modules || {};
-
+            
             //Set document title
             var userFullname = initialJson.User ?
                 Base64.decode(initialJson.User.FirstName) + " " + Base64.decode(initialJson.User.LastName) :
