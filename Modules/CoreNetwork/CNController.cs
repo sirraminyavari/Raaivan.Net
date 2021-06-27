@@ -529,12 +529,12 @@ namespace RaaiVan.Modules.CoreNetwork
             bool? isDocument = null, bool? isKnowledge = null, DateTime? lowerCreationDateLimit = null, 
             DateTime? upperCreationDateLimit = null,  int count = 1000, long? lowerBoundary = 0, bool? archive = false, 
             bool? searchable = true, bool? grabNoContentServices = null,List<FormFilter> filters = null, 
-            bool? matchAllFilters = null, Guid? currentUserId = null, bool? isMine = null, bool checkAccess = false)
+            bool? matchAllFilters = null, Guid? currentUserId = null, Guid? creatorUserId = null, bool checkAccess = false)
         {
             List<Node> retList = new List<Node>();
             DataProvider.GetNodes(applicationId, ref retList, nodeTypeIds, nodeType, useNodeTypeHierarchy, relatedToNodeId,
                 searchText, isDocument, isKnowledge, lowerCreationDateLimit, upperCreationDateLimit, count, lowerBoundary, 
-                searchable, archive, grabNoContentServices, filters, matchAllFilters, currentUserId, isMine,
+                searchable, archive, grabNoContentServices, filters, matchAllFilters, currentUserId, creatorUserId,
                 checkAccess, ref totalCount);
             return retList;
         }
@@ -578,11 +578,11 @@ namespace RaaiVan.Modules.CoreNetwork
             Guid? relatedToNodeId, string searchText, bool? isDocument, bool? isKnowledge, DateTime? lowerCreationDateLimit, 
             DateTime? upperCreationDateLimit, int count, long? lowerBoundary, ref long totalCount, bool? archive = false,
             bool? searchable = true, bool? grabNoContentServices = null, List<FormFilter> filters = null, 
-            bool? matchAllFilters = null, Guid? currentUserId = null, bool? isMine = null, bool checkAccess = false)
+            bool? matchAllFilters = null, Guid? currentUserId = null, Guid? creatorUserId = null, bool checkAccess = false)
         {
             return _get_nodes(applicationId, ref totalCount, nodeTypeIds, null, useNodeTypeHierarchy, relatedToNodeId,
                 searchText, isDocument, isKnowledge, lowerCreationDateLimit, upperCreationDateLimit, count, lowerBoundary,
-                archive, searchable, grabNoContentServices, filters, matchAllFilters, currentUserId, isMine, checkAccess);
+                archive, searchable, grabNoContentServices, filters, matchAllFilters, currentUserId, creatorUserId, checkAccess);
         }
         
         public static List<Node> get_nodes(Guid applicationId, NodeTypes nodeType, string searchText = null, 
@@ -599,10 +599,10 @@ namespace RaaiVan.Modules.CoreNetwork
 
         public static Dictionary<string, object> get_nodes_grouped(Guid applicationId, Guid nodeTypeId, Guid groupByFormElementId,
             Guid? relatedToNodeId, string searchText, DateTime? lowerCreationDateLimit, DateTime? upperCreationDateLimit,
-            bool? searchable, List<FormFilter> filters, bool? matchAllFilters, Guid? currentUserId, bool? isMine, bool checkAccess)
+            bool? searchable, List<FormFilter> filters, bool? matchAllFilters, Guid? currentUserId, Guid? creatorUserId, bool checkAccess)
         {
             return DataProvider.GetNodes(applicationId, nodeTypeId, groupByFormElementId, relatedToNodeId, searchText,
-                lowerCreationDateLimit, upperCreationDateLimit, searchable, filters, matchAllFilters, currentUserId, isMine, checkAccess);
+                lowerCreationDateLimit, upperCreationDateLimit, searchable, filters, matchAllFilters, currentUserId, creatorUserId, checkAccess);
         }
 
         public static List<Node> get_most_popular_nodes(Guid applicationId, List<Guid> nodeTypeIds, Guid? parentNodeId,

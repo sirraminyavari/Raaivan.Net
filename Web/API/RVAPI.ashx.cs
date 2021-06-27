@@ -447,7 +447,9 @@ namespace RaaiVan.Web.API
                         if (string.IsNullOrEmpty(name))
                             name = ThemeUtil.theme_name(paramsContainer.ApplicationID, paramsContainer.CurrentUserID, context);
 
-                        string themeContent = ThemeUtil.get_theme(paramsContainer.ApplicationID, name);
+                        RVLang lang = PublicMethods.get_current_language(paramsContainer.ApplicationID);
+
+                        string themeContent = ThemeUtil.get_theme(paramsContainer.ApplicationID, name, lang);
 
                         paramsContainer.file_response(themeContent, "thm.css", contentType: "text/css", isAttachment: false);
                         return true;

@@ -1900,7 +1900,7 @@ namespace RaaiVan.Modules.CoreNetwork
             NodeTypes? nodeType, bool? useNodeTypeHierarchy, Guid? relatedToNodeId, string searchText, 
             bool? isDocument, bool? isKnowledge, DateTime? lowerCreationDateLimit, DateTime? upperCreationDateLimit,
             int count, long? lowerBoundary, bool? searchable, bool? archive, bool? grabNoContentServices, 
-            List<FormFilter> filters, bool? matchAllFilters, Guid? currentUserId, bool? isMine, 
+            List<FormFilter> filters, bool? matchAllFilters, Guid? currentUserId, Guid? creatorUserId, 
             bool checkAccess, ref long totalCount, Guid? groupByFormElementId, ref Dictionary<string, object> groupedResults)
         {
             SqlConnection con = new SqlConnection(ProviderUtil.ConnectionString);
@@ -1957,7 +1957,7 @@ namespace RaaiVan.Modules.CoreNetwork
                 cmd.Parameters.AddWithValue("@SearchText", ProviderUtil.get_search_text(searchText));
             if (isDocument.HasValue) cmd.Parameters.AddWithValue("@IsDocument", isDocument.Value);
             if (isKnowledge.HasValue) cmd.Parameters.AddWithValue("@IsKnowledge", isKnowledge.Value);
-            if (isMine.HasValue) cmd.Parameters.AddWithValue("@IsMine", isMine.Value);
+            if (creatorUserId.HasValue) cmd.Parameters.AddWithValue("@CreatorUserID", creatorUserId);
             if (searchable.HasValue) cmd.Parameters.AddWithValue("@Searchable", searchable.Value);
             if (archive.HasValue) cmd.Parameters.AddWithValue("@Archive", archive.Value);
             if (grabNoContentServices.HasValue)
@@ -1988,7 +1988,7 @@ namespace RaaiVan.Modules.CoreNetwork
                 (!string.IsNullOrEmpty(searchText) ? "@SearchText" : "null") + sep +
                 (isDocument.HasValue ? "@IsDocument" : "null") + sep +
                 (isKnowledge.HasValue ? "@IsKnowledge" : "null") + sep +
-                (isMine.HasValue ? "@IsMine" : "null") + sep +
+                (creatorUserId.HasValue ? "@CreatorUserID" : "null") + sep +
                 (searchable.HasValue ? "@Searchable" : "null") + sep +
                 (archive.HasValue ? "@Archive" : "null") + sep +
                 (grabNoContentServices.HasValue ? "@GrabNoContentServices" : "null") + sep +
@@ -2027,20 +2027,20 @@ namespace RaaiVan.Modules.CoreNetwork
             NodeTypes? nodeType, bool? useNodeTypeHierarchy, Guid? relatedToNodeId, string searchText,
             bool? isDocument, bool? isKnowledge, DateTime? lowerCreationDateLimit, DateTime? upperCreationDateLimit,
             int count, long? lowerBoundary, bool? searchable, bool? archive, bool? grabNoContentServices,
-            List<FormFilter> filters, bool? matchAllFilters, Guid? currentUserId, bool? isMine,
+            List<FormFilter> filters, bool? matchAllFilters, Guid? currentUserId, Guid? creatorUserId,
             bool checkAccess, ref long totalCount)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
 
             GetNodes(applicationId, ref retNodes, nodeTypeIds, nodeType, useNodeTypeHierarchy, relatedToNodeId,
                 searchText, isDocument, isKnowledge, lowerCreationDateLimit, upperCreationDateLimit, count, lowerBoundary,
-                searchable, archive, grabNoContentServices, filters, matchAllFilters, currentUserId, isMine, checkAccess,
+                searchable, archive, grabNoContentServices, filters, matchAllFilters, currentUserId, creatorUserId, checkAccess,
                 ref totalCount, groupByFormElementId: null, groupedResults: ref dic);
         }
 
         public static Dictionary<string, object> GetNodes(Guid applicationId, Guid nodeTypeId, Guid groupByFormElementId,
             Guid? relatedToNodeId, string searchText, DateTime? lowerCreationDateLimit, DateTime? upperCreationDateLimit,
-            bool? searchable,  List<FormFilter> filters, bool? matchAllFilters, Guid? currentUserId, bool? isMine, bool checkAccess)
+            bool? searchable,  List<FormFilter> filters, bool? matchAllFilters, Guid? currentUserId, Guid? creatorUserId, bool checkAccess)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
 
@@ -2062,13 +2062,13 @@ namespace RaaiVan.Modules.CoreNetwork
                 searchable, 
                 archive: false, 
                 grabNoContentServices: null, 
-                filters, 
-                matchAllFilters, 
-                currentUserId, 
-                isMine, 
-                checkAccess,
-                ref totalCount, 
-                groupByFormElementId, 
+                filters: filters, 
+                matchAllFilters: matchAllFilters, 
+                currentUserId: currentUserId, 
+                creatorUserId: creatorUserId, 
+                checkAccess: checkAccess,
+                totalCount: ref totalCount, 
+                groupByFormElementId: groupByFormElementId, 
                 groupedResults: ref dic);
 
             return dic;

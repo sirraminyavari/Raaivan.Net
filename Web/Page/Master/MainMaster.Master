@@ -67,7 +67,7 @@
         </script>
     </head>
 
-    <body class="Direction TextAlign" style="font-family:IRANSans;">
+    <body class="Direction TextAlign">
         <form id="frmMainMaster" runat="server">
             <asp:ContentPlaceHolder ID="MainMasterBodySection" runat="server"></asp:ContentPlaceHolder>
 

@@ -559,6 +559,7 @@ namespace RaaiVan.Web.API
                                 PublicMethods.parse_bool(context.Request.Params["IsDocument"]),
                                 PublicMethods.parse_bool(context.Request.Params["IsKnowledge"]),
                                 PublicMethods.parse_bool(context.Request.Params["IsMine"]),
+                                PublicMethods.parse_guid(context.Request.Params["CreatorUserID"]),
                                 PublicMethods.parse_bool(context.Request.Params["Archive"]),
                                 lowerCreationDateLimit,
                                 upperCreationDateLimit,
@@ -3761,12 +3762,15 @@ namespace RaaiVan.Web.API
         }
 
         protected void get_nodes(List<Guid> nodeTypeIds, bool? useNodeTypeHierarchy, Guid? relatedToNodeId,
-            string searchText, bool? isDocument, bool? isKnowledge, bool? isMine, bool? archive,
+            string searchText, bool? isDocument, bool? isKnowledge, bool? isMine, Guid? creatorUserId, bool? archive,
             DateTime? lowerCreationDateLimit, DateTime? upperCreationDateLimit,
             int? count, long? lowerBoundary, bool? searchable, bool? hasChild, List<FormFilter> filters,
             bool? matchAllFilters, Guid? groupByElementId, ref string responseText)
         {
             if (!paramsContainer.GBView) return;
+
+            if (creatorUserId.HasValue) isMine = null;
+            else if (isMine.HasValue && isMine.Value) creatorUserId = paramsContainer.CurrentUserID;
 
             bool hasViewAccess = paramsContainer.CurrentUserID.HasValue &&
                 AuthorizationManager.has_right(AccessRoleName.ManageOntology, paramsContainer.CurrentUserID);
@@ -3789,7 +3793,7 @@ namespace RaaiVan.Web.API
             {
                 responseText = PublicMethods.toJSON(CNController.get_nodes_grouped(paramsContainer.Tenant.Id, nodeTypeIds[0],
                     groupByElementId.Value, relatedToNodeId, searchText, lowerCreationDateLimit, upperCreationDateLimit,
-                    searchable, filters, matchAllFilters, paramsContainer.CurrentUserID, isMine, checkAccess: !hasViewAccess));
+                    searchable, filters, matchAllFilters, paramsContainer.CurrentUserID, creatorUserId, checkAccess: !hasViewAccess));
             }
             else {
                 long totalCount = 0;
@@ -3799,7 +3803,7 @@ namespace RaaiVan.Web.API
                     count.Value, lowerBoundary, ref totalCount, archive: archive.HasValue && archive.Value,
                     searchable: searchable, grabNoContentServices: grabNoContentServices, filters: filters,
                     matchAllFilters: matchAllFilters, currentUserId: paramsContainer.CurrentUserID,
-                    isMine: isMine, checkAccess: !hasViewAccess);
+                    creatorUserId: creatorUserId, checkAccess: !hasViewAccess);
 
                 List<Guid> haveChild = !hasChild.HasValue || !hasChild.Value ? new List<Guid>() :
                     CNController.have_childs(paramsContainer.Tenant.Id, nodes.Select(u => u.NodeID.Value).ToList());
@@ -8341,7 +8345,7 @@ namespace RaaiVan.Web.API
 
         protected void get_template_json(Guid? nodeTypeId, ref string responseText)
         {
-            responseText = PublicMethods.toJSON_typed<Template>(new Template(nodeTypeId));
+            responseText = "{\"Template\":" + PublicMethods.toJSON_typed<Template>(new Template(nodeTypeId)) + "}";
         }
 
         protected void get_template_status(string templateContent, ref string responseText)

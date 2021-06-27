@@ -14,13 +14,13 @@ namespace RaaiVan.Web.API
     public class PDFTemplates
     {
         public static string FontName = "IRANSans";
-        public static string FontAddress = "~/Fonts/windows/IRANSans.ttf";
+        public static string FontAddress = PublicConsts.FontIranSansWindows;
 
         public static Font GetFont()
         {
             if (!FontFactory.IsRegistered(FontName))
                 FontFactory.Register(PublicMethods.map_path(FontAddress));
-
+            
             return FontFactory.GetFont(FontName, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         }
 

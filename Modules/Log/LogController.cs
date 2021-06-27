@@ -32,7 +32,7 @@ namespace RaaiVan.Modules.Log
         public static bool save_error_log(Guid? applicationId, Guid? userId, string subject, 
             string description, ModuleIdentifier? moduleIdentifier, LogLevel level = LogLevel.None)
         {
-            return DataProvider.SaveErrorLog(null, new ErrorLog() {
+            return DataProvider.SaveErrorLog(applicationId, new ErrorLog() {
                 UserID = userId,
                 Subject = subject,
                 Description = description,

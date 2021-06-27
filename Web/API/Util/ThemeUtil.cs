@@ -14,7 +14,9 @@ namespace RaaiVan.Web
             new Dictionary<string, Dictionary<string, string>>();
 
         private static string TemplateContent;
+        private static string GlobalContent;
         private static Dictionary<string, string> TemplateVariables = new Dictionary<string, string>();
+        private static Dictionary<RVLang, string> FontFace = new Dictionary<RVLang, string>();
 
         private static Dictionary<string, string> extract_variables(string content)
         {
@@ -57,18 +59,38 @@ namespace RaaiVan.Web
             return vars;
         }
 
+        private static string get_font_face(RVLang lang)
+        {
+            if (FontFace.ContainsKey(lang) && !string.IsNullOrEmpty(FontFace[lang])) return FontFace[lang];
+
+            string content = string.Empty;
+
+            string path = PublicMethods.map_path(lang == RVLang.fa ? PublicConsts.FontFaceIranSans : PublicConsts.FontFaceRoboto);
+
+            if (File.Exists(path))
+            {
+                content = File.ReadAllText(path);
+                if (!PublicMethods.is_dev()) FontFace[lang] = content;
+            }
+
+            return content;
+        }
+
         private static string get_template()
         {
             if (!string.IsNullOrEmpty(TemplateContent)) return TemplateContent;
 
             string content = string.Empty;
 
-            string path = PublicMethods.map_path(PublicConsts.GlobalCSS);
+            string path = PublicMethods.map_path(PublicConsts.ThemeCSS);
+
             if (File.Exists(path))
             {
                 content = File.ReadAllText(path);
 
-                TemplateVariables = extract_variables(content.Substring(0, content.IndexOf('}'))); 
+                TemplateVariables = extract_variables(content.Substring(0, content.IndexOf('}')));
+
+                if (TemplateVariables == null) TemplateVariables = new Dictionary<string, string>();
 
                 if (!PublicMethods.is_dev()) TemplateContent = content;
             }
@@ -76,22 +98,54 @@ namespace RaaiVan.Web
             return content;
         }
 
-        public static string get_theme(Guid? applicationId, string name)
+        private static string get_global()
         {
-            string template = get_template();
+            if (!string.IsNullOrEmpty(GlobalContent)) return GlobalContent;
+
+            string content = string.Empty;
+
+            string path = PublicMethods.map_path(PublicConsts.GlobalCSS);
+
+            if (File.Exists(path))
+            {
+                content = File.ReadAllText(path);
+                if (!PublicMethods.is_dev()) GlobalContent = content;
+            }
+
+            return content;
+        }
+
+        public static string get_theme(Guid? applicationId, string name, RVLang lang)
+        {
+            string template = get_template(), 
+                global = get_global(), 
+                fontFace = get_font_face(lang);
+
             Dictionary<string, string> dic = get_theme_content(applicationId, name);
 
             if (string.IsNullOrEmpty(template) || dic == null) return string.Empty;
-                
+            
+            /*
             dic.Keys.ToList().ForEach(k => {
                 template = template.Replace("var(" + k + ")", dic[k]);
             });
 
-            if(TemplateVariables != null) TemplateVariables.Keys.ToList().ForEach(k => {
+            TemplateVariables.Keys.ToList().ForEach(k => {
                 template = template.Replace("var(" + k + ")", TemplateVariables[k]);
             });
+            */
 
-            return template;
+            List<string> keys = dic.Keys.ToList();
+            keys.AddRange(TemplateVariables.Keys);
+
+            keys = keys.Distinct().ToList()
+                .Select(k => k + ": " + (dic.ContainsKey(k) ? dic[k] : TemplateVariables[k]) + ";").ToList();
+
+            template = Expressions.replace(template,
+                @":root\s*\{([^\}]+)\}",
+                "html {\r\n    " + string.Join("\r\n    ", keys) + "\r\n}");
+
+            return template + "\r\n\r\n" + fontFace + "\r\n\r\n" + global;
         }
 
         public static string theme_name(Guid? applicationId, Guid? userId, HttpContext context)

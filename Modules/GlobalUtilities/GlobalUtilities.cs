@@ -298,11 +298,16 @@ namespace RaaiVan.Modules.GlobalUtilities
             }
         }
 
-        public static string replace(string input, Patterns pattern, string replacement = " ")
+        public static string replace(string input, string pattern, string replacement = " ")
         {
             if (string.IsNullOrEmpty(input)) return input;
-            if (pattern == Patterns.HTMLTag) input = HttpUtility.HtmlDecode(input);
-            return Regex.Replace(input, _get_pattern(pattern), replacement);
+            if (pattern == Patterns.HTMLTag.ToString()) input = HttpUtility.HtmlDecode(input);
+            return Regex.Replace(input, pattern, replacement);
+        }
+
+        public static string replace(string input, Patterns pattern, string replacement = " ")
+        {
+            return replace(input, _get_pattern(pattern), replacement);
         }
 
         public static string replace(string input, ref Dictionary<string, string> dic, Patterns pattern,
@@ -404,7 +409,11 @@ namespace RaaiVan.Modules.GlobalUtilities
         public static string MagickCacheDirectory = "~/app_data/magick_cache";
         public static string EncryptedFileNamePrefix = "e_";
         public static string LicenseFilePath = "~/raaivan.license";
-        public static string GlobalCSS = "~/CSS/Global.css";
+        public static string ThemeCSS = "~/CSS/theme.css";
+        public static string GlobalCSS = "~/CSS/global.css";
+        public static string FontFaceIranSans = "~/CSS/font-face/iran-sans.css";
+        public static string FontFaceRoboto = "~/CSS/font-face/roboto.css";
+        public static string FontIranSansWindows = "~/Fonts/IRANSans/windows/IRANSans.ttf";
         public static string CSSLTR = "~/CSS/LTR.css";
         public static string CSSRTL = "~/CSS/RTL.css";
         public static string LanguageFile = "~/Script/Lang/[lang].js";
