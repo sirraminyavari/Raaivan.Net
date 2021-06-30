@@ -264,6 +264,7 @@ namespace RaaiVan.Web.API
             List<RouteName> CheckApplicationException = new List<RouteName>() {
                 RouteName.onboarding,
                 RouteName.teams,
+                RouteName.help,
                 RaaiVanSettings.SAASBasedMultiTenancy ? RouteName.login : RouteName.none,
                 RaaiVanSettings.SAASBasedMultiTenancy ? RouteName.profile : RouteName.none
             }.Where(n => n != RouteName.none).ToList();
@@ -297,12 +298,16 @@ namespace RaaiVan.Web.API
 
             bool accessDenied = false;
 
-            if (SystemAdminAccess.Any(x => x == RouteName) && (!input.ParamsContainer.CurrentUserID.HasValue ||
-                !PublicMethods.is_system_admin(input.ParamsContainer.ApplicationID, input.ParamsContainer.CurrentUserID.Value)))
-                accessDenied = true;
-
-            if (AccessRole != AccessRoleName.None && input.ParamsContainer.CurrentUserID.HasValue)
-                accessDenied = accessDenied && AuthorizationManager.has_right(AccessRole, input.ParamsContainer.CurrentUserID);
+            if (SystemAdminAccess.Any(x => x == RouteName))
+            {
+                accessDenied = !input.ParamsContainer.CurrentUserID.HasValue ||
+                    !PublicMethods.is_system_admin(input.ParamsContainer.ApplicationID, input.ParamsContainer.CurrentUserID.Value);
+            }
+            else if (AccessRole != AccessRoleName.None)
+            {
+                accessDenied = !input.ParamsContainer.CurrentUserID.HasValue ||
+                    !AuthorizationManager.has_right(AccessRole, input.ParamsContainer.CurrentUserID);
+            }
 
             if (accessDenied) input.set_access_denied();
 
