@@ -788,12 +788,17 @@ namespace RaaiVan.Web.API
                             PublicMethods.parse_string(context.Request.Params["text"]));
 
                         get_favorite_nodes(ListMaker.get_guid_items(context.Request.Params["NodeTypeIDs"], '|'),
+                            PublicMethods.parse_bool(context.Request.Params["UseNodeTypeHierarchy"]),
                             PublicMethods.parse_guid(context.Request.Params["UserID"]),
                             PublicMethods.parse_guid(context.Request.Params["NodeID"]),
                             PublicMethods.parse_string(context.Request.Params["AdditionalID"], false),
                             searchText,
                             PublicMethods.parse_bool(context.Request.Params["HasChild"]),
                             PublicMethods.parse_bool(context.Request.Params["IsDocument"]),
+                            PublicMethods.parse_guid(context.Request.Params["CreatorUserID"]),
+                            PublicMethods.parse_guid(context.Request.Params["RelatedToNodeID"]),
+                            FGUtilities.get_filters_from_json(PublicMethods.parse_string(context.Request.Params["FormFilters"])),
+                            PublicMethods.parse_bool(context.Request.Params["MatchAllFilters"]),
                             PublicMethods.parse_date(context.Request.Params["LowerDateLimit"]),
                             PublicMethods.parse_date(context.Request.Params["UpperDateLimit"], 1),
                             PublicMethods.parse_int(context.Request.Params["LowerBoundary"]),
@@ -2324,7 +2329,14 @@ namespace RaaiVan.Web.API
             //Privacy Check: OK
             if (!paramsContainer.GBEdit) return;
 
-            if (!string.IsNullOrEmpty(name) && name.Length > 250)
+            if (!string.IsNullOrEmpty(name)) name = name.Trim();
+
+            if (string.IsNullOrEmpty(name))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.TitleIsNotDetermined + "\"}";
+                return;
+            }
+            else if (!string.IsNullOrEmpty(name) && name.Length > 250)
             {
                 responseText = "{\"ErrorText\":\"" + Messages.MaxAllowedInputLengthExceeded + "\"}";
                 return;
@@ -3769,7 +3781,7 @@ namespace RaaiVan.Web.API
             bool? matchAllFilters, Guid? groupByElementId, ref string responseText)
         {
             if (!paramsContainer.GBView) return;
-
+            
             if (creatorUserId.HasValue) isMine = null;
             else if (isMine.HasValue && isMine.Value) creatorUserId = paramsContainer.CurrentUserID;
 
@@ -4575,9 +4587,10 @@ namespace RaaiVan.Web.API
                 u => _get_nodes_count_json(u))) + "]}";
         }
 
-        protected void get_favorite_nodes(List<Guid> nodeTypeIds, Guid? userId, Guid? nodeId, string additionalId,
-            string searchText, bool? hasChild, bool? isDocument, DateTime? lowerDateLimit, DateTime? upperDateLimit,
-            int? lowerBoundary, int? count, ref string responseText)
+        protected void get_favorite_nodes(List<Guid> nodeTypeIds, bool? useNodeTypeHierarchy, Guid? userId, Guid? nodeId, 
+            string additionalId, string searchText, bool? hasChild, bool? isDocument, Guid? creatorUserId, 
+            Guid? relatedToNodeId, List<FormFilter> filters, bool? matchAllFilters, DateTime? lowerDateLimit, 
+            DateTime? upperDateLimit, int? lowerBoundary, int? count, ref string responseText)
         {
             if (!paramsContainer.GBView) return;
 
@@ -4586,8 +4599,9 @@ namespace RaaiVan.Web.API
             long totalCount = 0;
 
             List<Node> nodes = !userId.HasValue ? new List<Node>() :
-                CNController.get_favorite_nodes(paramsContainer.Tenant.Id, userId.Value, nodeTypeIds, nodeId,
-                additionalId, searchText, isDocument, lowerDateLimit, upperDateLimit, lowerBoundary, count, ref totalCount);
+                CNController.get_favorite_nodes(paramsContainer.Tenant.Id, userId.Value, nodeTypeIds, useNodeTypeHierarchy, nodeId,
+                additionalId, searchText, isDocument, creatorUserId, relatedToNodeId, filters, matchAllFilters,
+                lowerDateLimit, upperDateLimit, lowerBoundary, count, ref totalCount);
 
             List<Guid> haveChild = !hasChild.HasValue || !hasChild.Value ? new List<Guid>() :
                 CNController.have_childs(paramsContainer.Tenant.Id, nodes.Select(u => u.NodeID.Value).ToList());
@@ -5324,8 +5338,8 @@ namespace RaaiVan.Web.API
                     itemId.Value, true, true, null, expertsNodeTypeId) : new List<Expert>();
                 List<Node> favoriteNodes =
                     fans.HasValue && fans.Value ? CNController.get_favorite_nodes(paramsContainer.Tenant.Id, itemId.Value, 
-                    !fansNodeTypeId.HasValue ? new List<Guid>() : new List<Guid>() { fansNodeTypeId.Value }, 
-                    null, null, null, null, null, null, null, 10000, ref totalCount) :
+                    !fansNodeTypeId.HasValue ? new List<Guid>() : new List<Guid>() { fansNodeTypeId.Value }, null,
+                    null, null, null, null, null, null, new List<FormFilter>(), null, null, null, null, 10000, ref totalCount) :
                     new List<Node>();
                 List<Node> createdNodes = !creators.HasValue || !creators.Value ? new List<Node>() :
                     (creatorsNodeTypeId.HasValue ?
@@ -7840,10 +7854,17 @@ namespace RaaiVan.Web.API
             //Privacy Check: OK
             if (!paramsContainer.GBEdit) return false;
 
+            if (!string.IsNullOrEmpty(name)) name = name.Trim();
+
             if (tags == null) tags = new List<string>();
             if (contributors == null) contributors = new List<NodeCreator>();
 
-            if ((!string.IsNullOrEmpty(name) && name.Length > 250) ||
+            if (string.IsNullOrEmpty(name))
+            {
+                responseText = "{\"ErrorText\":\"" + Messages.TitleIsNotDetermined + "\"}";
+                return false;
+            }
+            else if ((!string.IsNullOrEmpty(name) && name.Length > 250) ||
                 (tags != null && tags.Sum(u => string.IsNullOrEmpty(u) ? 0 : u.Length) > 1900))
             {
                 responseText = "{\"ErrorText\":\"" + Messages.MaxAllowedInputLengthExceeded + "\"}";

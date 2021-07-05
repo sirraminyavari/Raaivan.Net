@@ -1428,12 +1428,14 @@ namespace RaaiVan.Modules.CoreNetwork
         }
 
         public static List<Node> get_favorite_nodes(Guid applicationId, Guid userId, List<Guid> nodeTypeIds, 
-            Guid? nodeId, string additionalId, string searchText, bool? isDocument, DateTime? lowerDateLimit, 
-            DateTime? upperDateLimit, int? lowerBoundary, int? count, ref long totalCount)
+            bool? useNodeTypeHierarchy, Guid? nodeId, string additionalId, string searchText, bool? isDocument,
+            Guid? creatorUserId, Guid? relatedToNodeId, List<FormFilter> filters, bool? matchAllFilters,
+            DateTime? lowerDateLimit, DateTime? upperDateLimit, int? lowerBoundary, int? count, ref long totalCount)
         {
             List<Node> retList = new List<Node>();
-            DataProvider.GetFavoriteNodes(applicationId, ref retList, userId, nodeTypeIds, nodeId, 
-                additionalId, searchText, isDocument, lowerDateLimit, upperDateLimit, lowerBoundary, count, ref totalCount);
+            DataProvider.GetFavoriteNodes(applicationId, ref retList, userId, nodeTypeIds, useNodeTypeHierarchy, nodeId, 
+                additionalId, searchText, isDocument, creatorUserId, relatedToNodeId, filters, matchAllFilters, 
+                lowerDateLimit, upperDateLimit, lowerBoundary, count, ref totalCount);
             return retList;
         }
 

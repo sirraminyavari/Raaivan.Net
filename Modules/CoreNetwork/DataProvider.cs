@@ -2926,26 +2926,108 @@ namespace RaaiVan.Modules.CoreNetwork
         }
 
         public static void GetFavoriteNodes(Guid applicationId, ref List<Node> retItems, Guid userId,
-            List<Guid> nodeTypeIds, Guid? nodeId, string additionalId, string searchText, bool? isDocument,
+            List<Guid> nodeTypeIds, bool? useNodeTypeHierarchy, Guid? nodeId, string additionalId, string searchText, 
+            bool? isDocument, Guid? creatorUserId, Guid? relatedToNodeId, List<FormFilter> filters, bool? matchAllFilters,
             DateTime? lowerDateLimit, DateTime? upperDateLimit, int? lowerBoundary, int? count, ref long totalCount)
         {
+            if (nodeId == Guid.Empty) nodeId = null;
+            if (lowerBoundary.HasValue && lowerBoundary <= 0) lowerBoundary = null;
+            if (count.HasValue && count <= 0) count = null;
+
+            SqlConnection con = new SqlConnection(ProviderUtil.ConnectionString);
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = con;
+
+            //Add Filters
+            DataTable filtersTable = new DataTable();
+            filtersTable.Columns.Add("ElementID", typeof(Guid));
+            filtersTable.Columns.Add("OwnerID", typeof(Guid));
+            filtersTable.Columns.Add("Text", typeof(string));
+            filtersTable.Columns.Add("TextItems", typeof(string));
+            filtersTable.Columns.Add("Or", typeof(bool));
+            filtersTable.Columns.Add("Exact", typeof(bool));
+            filtersTable.Columns.Add("DateFrom", typeof(DateTime));
+            filtersTable.Columns.Add("DateTo", typeof(DateTime));
+            filtersTable.Columns.Add("FloatFrom", typeof(double));
+            filtersTable.Columns.Add("FloatTo", typeof(double));
+            filtersTable.Columns.Add("Bit", typeof(bool));
+            filtersTable.Columns.Add("Guid", typeof(Guid));
+            filtersTable.Columns.Add("GuidItems", typeof(string));
+            filtersTable.Columns.Add("Compulsory", typeof(bool));
+
+            if (filters != null)
+            {
+                foreach (FormFilter f in filters)
+                {
+                    filtersTable.Rows.Add(f.ElementID, f.OwnerID, f.Text, ProviderUtil.list_to_string<string>(f.TextItems),
+                        f.Or, f.Exact, f.DateFrom, f.DateTo, f.FloatFrom, f.FloatTo, f.Bit, f.Guid,
+                        ProviderUtil.list_to_string<Guid>(f.GuidItems), f.Compulsory);
+                }
+            }
+
+            SqlParameter filtersParam = new SqlParameter("@FormFilters", SqlDbType.Structured);
+            filtersParam.TypeName = "[dbo].[FormFilterTableType]";
+            filtersParam.Value = filtersTable;
+            //end of Add Filters
+
+            cmd.Parameters.AddWithValue("@ApplicationID", applicationId);
+            cmd.Parameters.AddWithValue("@UserID", userId);
+            if (nodeTypeIds != null && nodeTypeIds.Count > 0)
+                cmd.Parameters.AddWithValue("@strNodeTypeIDs", ProviderUtil.list_to_string<Guid>(nodeTypeIds));
+            cmd.Parameters.AddWithValue("@delimiter", ',');
+            if (useNodeTypeHierarchy.HasValue)
+                cmd.Parameters.AddWithValue("@UseNodeTypeHierarchy", useNodeTypeHierarchy.Value);
+            if (nodeId.HasValue) cmd.Parameters.AddWithValue("@NodeID", nodeId.Value);
+            if (!string.IsNullOrEmpty(additionalId))
+                cmd.Parameters.AddWithValue("@AdditionalID", additionalId);
+            if (!string.IsNullOrEmpty(searchText))
+                cmd.Parameters.AddWithValue("@SearchText", ProviderUtil.get_search_text(searchText));
+            if (isDocument.HasValue) cmd.Parameters.AddWithValue("@IsDocument", isDocument.Value);
+            if (creatorUserId.HasValue) cmd.Parameters.AddWithValue("@CreatorUserID", creatorUserId);
+            if (relatedToNodeId.HasValue)
+                cmd.Parameters.AddWithValue("@RelatedToNodeID", relatedToNodeId.Value);
+            cmd.Parameters.Add(filtersParam);
+            if (matchAllFilters.HasValue) cmd.Parameters.AddWithValue("@MatchAllFilters", matchAllFilters.Value);
+            if (lowerDateLimit.HasValue)
+                cmd.Parameters.AddWithValue("@LowerDateLimit", lowerDateLimit.Value);
+            if (upperDateLimit.HasValue)
+                cmd.Parameters.AddWithValue("@UpperDateLimit", upperDateLimit.Value);
+            if (lowerBoundary.HasValue) cmd.Parameters.AddWithValue("@LowerBoundary", lowerBoundary.Value);
+            cmd.Parameters.AddWithValue("@Count", count);
+
             string spName = GetFullyQualifiedName("GetFavoriteNodes");
 
+            string sep = ", ";
+            string arguments = "@ApplicationID" + sep +
+                "@UserID" + sep +
+                (nodeTypeIds != null && nodeTypeIds.Count > 0 ? "@strNodeTypeIDs" : "null") + sep +
+                "@delimiter" + sep +
+                (useNodeTypeHierarchy.HasValue ? "@UseNodeTypeHierarchy" : "null") + sep +
+                (nodeId.HasValue ? "@NodeID" : "null") + sep +
+                (!string.IsNullOrEmpty(additionalId) ? "@AdditionalID" : "null") + sep +
+                (!string.IsNullOrEmpty(searchText) ? "@SearchText" : "null") + sep +
+                (isDocument.HasValue ? "@IsDocument" : "null") + sep +
+                (creatorUserId.HasValue ? "@CreatorUserID" : "null") + sep +
+                (relatedToNodeId.HasValue ? "@RelatedToNodeID" : "null") + sep +
+                "@FormFilters" + sep +
+                (matchAllFilters.HasValue ? "@MatchAllFilters" : "null") + sep +
+                (lowerDateLimit.HasValue ? "@LowerDateLimit" : "null") + sep +
+                (upperDateLimit.HasValue ? "@UpperDateLimit" : "null") + sep +
+                (lowerBoundary.HasValue ? "@LowerBoundary" : "null") + sep +
+                "@Count";
+            cmd.CommandText = ("EXEC" + " " + spName + " " + arguments);
+
+            con.Open();
             try
             {
-                if (nodeId == Guid.Empty) nodeId = null;
-                if (lowerBoundary.HasValue && lowerBoundary <= 0) lowerBoundary = null;
-                if (count.HasValue && count <= 0) count = null;
-
-                IDataReader reader = ProviderUtil.execute_reader(spName, applicationId, userId, string.Join(",", nodeTypeIds), ',', 
-                    nodeId, additionalId, ProviderUtil.get_search_text(searchText), isDocument,
-                    lowerDateLimit, upperDateLimit, lowerBoundary, count);
+                IDataReader reader = (IDataReader)cmd.ExecuteReader();
                 totalCount = _parse_nodes(ref reader, ref retItems, null, hasTotalCount: true);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogController.save_error_log(applicationId, null, spName, ex, ModuleIdentifier.CN);
             }
+            finally { con.Close(); }
         }
 
         public static bool AddComplex(Guid applicationId, NodeList Info)
