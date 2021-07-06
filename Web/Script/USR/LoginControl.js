@@ -313,7 +313,7 @@
                                     result.RemainingLockoutTime && !that.Options.UseCaptcha;
 
                                 var err = (RVDic.MSG[result.ErrorText] || result.ErrorText)
-                                    .replace("[n]", result.RemainingLockoutTime || "");
+                                    .replace("[n]", result.RemainingLockoutTime || " ");
 
                                 if (needsCaptcha) {
                                     err = RVDic.Checks.PleaseEnterTheCaptcha;

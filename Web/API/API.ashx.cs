@@ -158,11 +158,13 @@ namespace RaaiVan.Web.API
         {
             paramsContainer = new ParamsContainer(context, nullTenantResponse: false);
 
+            /*
             if (PublicMethods.parse_string(context.Request.Params["command"], false) == "abc123")
             {
                 processPDF2HTML(paramsContainer, PublicMethods.parse_string(context.Request.Params["mode"], false));
                 return;
             }
+            */
 
             if (PublicMethods.parse_string(context.Request.Params["command"], false) == "sql_scripts" && PublicMethods.is_dev())
             {

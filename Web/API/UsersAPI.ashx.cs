@@ -31,7 +31,7 @@ namespace RaaiVan.Web.API
                 paramsContainer.return_response(PublicConsts.NullTenantResponse);
                 return;
             }
-            
+
             string responseText = string.Empty;
             string command = PublicMethods.parse_string(context.Request.Params["Command"], false);
 
@@ -488,6 +488,11 @@ namespace RaaiVan.Web.API
                         }
 
                         sign_in_with_google(PublicMethods.parse_string(context.Request.Params["GoogleToken"], false),
+                            PublicMethods.parse_string(context.Request.Params["Email"], decode: false),
+                            PublicMethods.parse_string(context.Request.Params["FirstName"]),
+                            PublicMethods.parse_string(context.Request.Params["LastName"]),
+                            PublicMethods.parse_string(context.Request.Params["GoogleID"], decode: false),
+                            PublicMethods.parse_string(context.Request.Params["ImageURL"], decode: false),
                             PublicMethods.parse_guid(context.Request.Params["InvitationID"]),
                             HttpContext.Current,
                             callback: res => paramsContainer.return_response(res));
@@ -922,45 +927,55 @@ namespace RaaiVan.Web.API
                 responseText: ref responseText);
         }
 
-        public async void sign_in_with_google(string token, Guid? invitationId, HttpContext context, Action<string> callback)
+        public async void sign_in_with_google(string token, string email, string firstName, string lastName, 
+            string googleId, string imageUrl, Guid? invitationId, HttpContext context, Action<string> callback)
         {
             //Privacy Check: OK
             if (!RaaiVanSettings.UserSignUp(paramsContainer.ApplicationID) &&
                 !RaaiVanSettings.SignUpViaInvitation(paramsContainer.ApplicationID)) return;
 
-            Google.Apis.Auth.GoogleJsonWebSignature.Payload payload = null;
+            //this is temporary and we only need it because google has block server-side checks from Iran!
+            bool ignoreServerSideCheck = !string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(email) &&
+                !string.IsNullOrEmpty(firstName) && !string.IsNullOrEmpty(googleId);
 
-            try
+            if (!ignoreServerSideCheck)
             {
-                payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(token);
-            }
-            catch(Exception ex) {
-                string strEx = ex.ToString();
-            }
+                Google.Apis.Auth.GoogleJsonWebSignature.Payload payload = null;
 
-            if (payload == null)
-            {
-                callback("{\"ErrorText\":\"" + Messages.TokenValidationFailed.ToString() + "\"}");
-                return;
-            }
+                try
+                {
+                    payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(token);
+                }
+                catch (Exception ex)
+                {
+                    string strEx = ex.ToString();
+                }
 
-            string email = payload.Email;
-            string firstName = string.IsNullOrEmpty(payload.Name) ? payload.GivenName : payload.Name;
-            string lastName = string.IsNullOrEmpty(payload.FamilyName) ? payload.GivenName : payload.FamilyName;
+                if (payload == null)
+                {
+                    callback("{\"ErrorText\":\"" + Messages.TokenValidationFailed.ToString() + "\"}");
+                    return;
+                }
 
-            if (string.IsNullOrEmpty(email))
-            {
-                callback("{\"ErrorText\":\"" + Messages.EmailIsNotValid.ToString() + "\"}");
-                return;
-            }
-            else if (!payload.EmailVerified)
-            {
-                callback("{\"ErrorText\":\"" + Messages.EmailIsNotVerified.ToString() + "\"}");
-                return;
+                email = payload.Email;
+                firstName = string.IsNullOrEmpty(payload.Name) ? payload.GivenName : payload.Name;
+                lastName = string.IsNullOrEmpty(payload.FamilyName) ? payload.GivenName : payload.FamilyName;
+
+
+                if (string.IsNullOrEmpty(email))
+                {
+                    callback("{\"ErrorText\":\"" + Messages.EmailIsNotValid.ToString() + "\"}");
+                    return;
+                }
+                else if (!payload.EmailVerified)
+                {
+                    callback("{\"ErrorText\":\"" + Messages.EmailIsNotVerified.ToString() + "\"}");
+                    return;
+                }
             }
 
             EmailAddress address = UsersController.get_email_owners(paramsContainer.ApplicationID, new List<string>() { email })
-                .Where(e => e.IsMain.HasValue && e.IsMain.Value).FirstOrDefault();
+               .Where(e => e.IsMain.HasValue && e.IsMain.Value).FirstOrDefault();
 
             string responseText = string.Empty;
 
