@@ -775,14 +775,18 @@ namespace RaaiVan.Web.API
             List<Extension> extensions = CNUtilities.extend_extensions(input.ParamsContainer.Tenant.Id,
                 CNController.get_extensions(input.ParamsContainer.Tenant.Id, nodeTypeId.Value));
 
+            Dictionary<string, object> extensionsDic = new Dictionary<string, object>();
+
+            extensions.Where(x => !x.Disabled.HasValue || !x.Disabled.Value).ToList()
+                .ForEach(ext => extensionsDic[ext.ExtensionType.ToString()] = PublicMethods.fromJSON(ext.toJson()));
+
             bool isServiceAdmin = CNController.is_service_admin(input.ParamsContainer.Tenant.Id,
                 nodeTypeId.Value, input.ParamsContainer.CurrentUserID.Value);
 
             KnowledgeType kt = KnowledgeController.get_knowledge_type(input.ParamsContainer.Tenant.Id, nodeTypeId.Value);
 
             input.Data["Service"] = PublicMethods.fromJSON(service.toJson(input.ParamsContainer.Tenant.Id));
-            input.Data["Extensions"] = new ArrayList(extensions
-                .Where(x => !x.Disabled.HasValue || !x.Disabled.Value).Select(u => u.ExtensionType.ToString()).ToArray());
+            input.Data["Extensions"] = extensionsDic;
             input.Data["IsServiceAdmin"] = isServiceAdmin;
             if (kt != null) input.Data["KnowledgeType"] = PublicMethods.fromJSON(kt.toJson());
             if (parentNode != null) input.Data["ParentNode"] = PublicMethods.fromJSON(parentNode.toJson());
