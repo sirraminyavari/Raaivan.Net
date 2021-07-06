@@ -249,52 +249,16 @@ namespace RaaiVan.Web.API
             List<User> users = UsersController.get_users(paramsContainer.Tenant.Id,
                 nots.Where(u => u.Sender.UserID.HasValue).Select(v => v.Sender.UserID.Value).ToList());
 
+            nots.ForEach(nt => nt.Sender = users.Where(u => u.UserID == nt.Sender.UserID).FirstOrDefault());
+
             Notification lastSeen = nots.Where(u => u.Seen == true).LastOrDefault();
             Notification lastNotSeen = nots.Where(u => !u.Seen.HasValue || u.Seen == false).LastOrDefault();
 
-            responseText = "{\"LastSeenID\":\"" + (lastSeen == null ? string.Empty : lastSeen.NotificationID.Value.ToString()) +
-                "\",\"LastNotSeenID\":\"" + (lastNotSeen == null ? string.Empty : lastNotSeen.NotificationID.Value.ToString()) +
-                "\",\"Now\":\"" + now.ToString() + "\",\"Notifications\":[";
-
-            bool isFirst = true;
-            foreach (Notification _nt in nots)
-            {
-                string subjectName = _nt.SubjectName;
-                string description = _nt.Description;
-
-                Base64.encode(ref subjectName);
-                Base64.encode(ref description);
-
-                string sender = "{}";
-                if (_nt.Sender.UserID.HasValue)
-                {
-                    User _user = users.Where(u => u.UserID == _nt.Sender.UserID).FirstOrDefault();
-                    if (_user != null) sender = _user.toJson();
-                }
-
-                if (!isFirst) responseText += ",";
-                isFirst = false;
-
-                responseText += "{\"NotificationID\":\"" + _nt.NotificationID.ToString() + "\"" +
-                    ",\"UserID\":\"" + _nt.UserID.ToString() + "\"" +
-                    ",\"SubjectID\":\"" + (_nt.SubjectID.HasValue ? _nt.SubjectID.ToString() : string.Empty) + "\"" +
-                    ",\"RefItemID\":\"" + _nt.RefItemID + "\"" +
-                    ",\"SubjectName\":\"" + subjectName + "\"" +
-                    ",\"SubjectType\":\"" + _nt.SubjectType + "\"" +
-                    ",\"Action\":\"" + _nt.Action + "\"" +
-                    ",\"SendDate\":\"" + (!_nt.SendDate.HasValue ? string.Empty :
-                        PublicMethods.get_local_date(_nt.SendDate.Value, true)) + "\"" +
-                    ",\"Description\":\"" + description + "\"" +
-                    ",\"Info\":\"" + Base64.encode(_nt.Info) + "\"" +
-                    ",\"UserStatus\":\"" + (_nt.UserStatus.HasValue ? _nt.UserStatus.Value.ToString() : string.Empty) + "\"" +
-                    ",\"Seen\":" + (!_nt.Seen.HasValue ? false : _nt.Seen).ToString().ToLower() +
-                    ",\"ViewDate\":\"" + (!_nt.ViewDate.HasValue ? string.Empty :
-                        PublicMethods.get_local_date(_nt.SendDate.Value)) + "\"" +
-                    ",\"Sender\":" + sender +
-                    "}";
-            }
-
-            responseText += "]}";
+            responseText = "{\"LastSeenID\":\"" + (lastSeen == null ? string.Empty : lastSeen.NotificationID.Value.ToString()) + "\"" +
+                ",\"LastNotSeenID\":\"" + (lastNotSeen == null ? string.Empty : lastNotSeen.NotificationID.Value.ToString()) + "\"" +
+                ",\"Now\":\"" + now.ToString() + "\"" +
+                ",\"Notifications\":[" + string.Join(",", nots.Select(nt => nt.toJson())) + "]" +
+                "}";
         }
 
         protected void set_notifications_as_seen(List<long> notificationIds, ref string responseText)

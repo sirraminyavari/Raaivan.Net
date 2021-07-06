@@ -126,6 +126,27 @@ namespace RaaiVan.Modules.NotificationCenter
         public Dictionary<UserStatus, List<Guid>> Audience;
         public Dictionary<string, string> ReplacementDic;
         public List<Guid> ReceiverUserIDs;
+
+        public string toJson()
+        {
+            return "{\"NotificationID\":\"" + (!NotificationID.HasValue ? string.Empty : NotificationID.ToString()) + "\"" +
+                ",\"UserID\":\"" + (!UserID.HasValue ? string.Empty : UserID.ToString()) + "\"" +
+                ",\"SubjectID\":\"" + (SubjectID.HasValue ? SubjectID.ToString() : string.Empty) + "\"" +
+                ",\"RefItemID\":\"" + (!RefItemID.HasValue ? string.Empty : RefItemID.Value.ToString()) + "\"" +
+                ",\"SubjectName\":\"" + Base64.encode(SubjectName) + "\"" +
+                ",\"SubjectType\":\"" + SubjectType + "\"" +
+                ",\"Action\":\"" + Action + "\"" +
+                ",\"SendDate\":\"" + (!SendDate.HasValue ? string.Empty :
+                    PublicMethods.get_local_date(SendDate.Value, true)) + "\"" +
+                ",\"Description\":\"" + Base64.encode(Description) + "\"" +
+                ",\"Info\":\"" + Base64.encode(Info) + "\"" +
+                ",\"UserStatus\":\"" + (UserStatus.HasValue ? UserStatus.Value.ToString() : string.Empty) + "\"" +
+                ",\"Seen\":" + (!Seen.HasValue ? false : Seen).ToString().ToLower() +
+                ",\"ViewDate\":\"" + (!ViewDate.HasValue ? string.Empty :
+                    PublicMethods.get_local_date(SendDate.Value)) + "\"" +
+                ",\"Sender\":" + (Sender == null || !Sender.UserID.HasValue ? "{}" : Sender.toJson()) +
+                "}";
+        }
     }
 
     public class MessageTemplate
