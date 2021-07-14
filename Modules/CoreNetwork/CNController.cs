@@ -524,17 +524,17 @@ namespace RaaiVan.Modules.CoreNetwork
             return get_nodes(applicationId, _nIds, full, currentUserId).FirstOrDefault();
         }
 
-        private static List<Node> _get_nodes(Guid applicationId, ref long totalCount, List<Guid> nodeTypeIds, 
-            NodeTypes? nodeType, bool? useNodeTypeHierarchy = null, Guid? relatedToNodeId = null, string searchText = null,
-            bool? isDocument = null, bool? isKnowledge = null, DateTime? lowerCreationDateLimit = null, 
+        private static List<Node> _get_nodes(Guid applicationId, ref long totalCount, ref List<NodesCount> nodesCount, 
+            List<Guid> nodeTypeIds, NodeTypes? nodeType, bool? useNodeTypeHierarchy = null, Guid? relatedToNodeId = null, 
+            string searchText = null, bool? isDocument = null, bool? isKnowledge = null, DateTime? lowerCreationDateLimit = null, 
             DateTime? upperCreationDateLimit = null,  int count = 1000, long? lowerBoundary = 0, bool? archive = false, 
             bool? searchable = true, bool? grabNoContentServices = null,List<FormFilter> filters = null, 
-            bool? matchAllFilters = null, Guid? currentUserId = null, Guid? creatorUserId = null, bool checkAccess = false)
+            bool? matchAllFilters = null, bool? fetchCounts = null, Guid? currentUserId = null, Guid? creatorUserId = null, bool checkAccess = false)
         {
             List<Node> retList = new List<Node>();
-            DataProvider.GetNodes(applicationId, ref retList, nodeTypeIds, nodeType, useNodeTypeHierarchy, relatedToNodeId,
+            DataProvider.GetNodes(applicationId, ref retList, ref nodesCount, nodeTypeIds, nodeType, useNodeTypeHierarchy, relatedToNodeId,
                 searchText, isDocument, isKnowledge, lowerCreationDateLimit, upperCreationDateLimit, count, lowerBoundary, 
-                searchable, archive, grabNoContentServices, filters, matchAllFilters, currentUserId, creatorUserId,
+                searchable, archive, grabNoContentServices, filters, matchAllFilters, fetchCounts, currentUserId, creatorUserId,
                 checkAccess, ref totalCount);
             return retList;
         }
@@ -545,10 +545,12 @@ namespace RaaiVan.Modules.CoreNetwork
             bool? archive = false, bool? searchable = true, bool? grabNoContentServices = null,
             List<FormFilter> filters = null, bool? matchAllFilters = null)
         {
+            List<NodesCount> cnts = new List<NodesCount>();
             long totalCount = 0;
-            return _get_nodes(applicationId, ref totalCount, null, null, null, null, searchText, isDocument, isKnowledge,
+
+            return _get_nodes(applicationId, ref totalCount, ref cnts, null, null, null, null, searchText, isDocument, isKnowledge,
                 lowerCreationDateLimit, upperCreationDateLimit, count, lowerBoundary, archive, searchable, 
-                grabNoContentServices, filters, matchAllFilters);
+                grabNoContentServices, filters, matchAllFilters, fetchCounts: false);
         }
 
         public static List<Node> get_nodes(Guid applicationId, List<Guid> nodeTypeIds, ref long totalCount, 
@@ -557,9 +559,11 @@ namespace RaaiVan.Modules.CoreNetwork
             long? lowerBoundary = 0, bool? archive = false, bool? searchable = true, bool? grabNoContentServices = null,
             List<FormFilter> filters = null, bool? matchAllFilters = null, bool checkAccess = false)
         {
-            return _get_nodes(applicationId, ref totalCount, nodeTypeIds, null, null, relatedToNodeId, searchText,
+            List<NodesCount> cnts = new List<NodesCount>();
+
+            return _get_nodes(applicationId, ref totalCount, ref cnts, nodeTypeIds, null, null, relatedToNodeId, searchText,
                 isDocument, isKnowledge, lowerCreationDateLimit, upperCreationDateLimit, count, lowerBoundary, archive,
-                searchable, grabNoContentServices, filters, matchAllFilters, checkAccess: checkAccess);
+                searchable, grabNoContentServices, filters, matchAllFilters, fetchCounts: false, checkAccess: checkAccess);
         }
 
         public static List<Node> get_nodes(Guid applicationId, Guid nodeTypeId, Guid? relatedToNodeId = null, 
@@ -576,13 +580,14 @@ namespace RaaiVan.Modules.CoreNetwork
 
         public static List<Node> get_nodes(Guid applicationId, List<Guid> nodeTypeIds, bool? useNodeTypeHierarchy,
             Guid? relatedToNodeId, string searchText, bool? isDocument, bool? isKnowledge, DateTime? lowerCreationDateLimit, 
-            DateTime? upperCreationDateLimit, int count, long? lowerBoundary, ref long totalCount, bool? archive = false,
-            bool? searchable = true, bool? grabNoContentServices = null, List<FormFilter> filters = null, 
-            bool? matchAllFilters = null, Guid? currentUserId = null, Guid? creatorUserId = null, bool checkAccess = false)
+            DateTime? upperCreationDateLimit, int count, long? lowerBoundary, ref long totalCount, ref List<NodesCount> nodesCount, 
+            bool? archive = false, bool? searchable = true, bool? grabNoContentServices = null, List<FormFilter> filters = null, 
+            bool? matchAllFilters = null, bool? fetchCounts = null, Guid? currentUserId = null, 
+            Guid? creatorUserId = null, bool checkAccess = false)
         {
-            return _get_nodes(applicationId, ref totalCount, nodeTypeIds, null, useNodeTypeHierarchy, relatedToNodeId,
+            return _get_nodes(applicationId, ref totalCount, ref nodesCount, nodeTypeIds, null, useNodeTypeHierarchy, relatedToNodeId,
                 searchText, isDocument, isKnowledge, lowerCreationDateLimit, upperCreationDateLimit, count, lowerBoundary,
-                archive, searchable, grabNoContentServices, filters, matchAllFilters, currentUserId, creatorUserId, checkAccess);
+                archive, searchable, grabNoContentServices, filters, matchAllFilters, fetchCounts, currentUserId, creatorUserId, checkAccess);
         }
         
         public static List<Node> get_nodes(Guid applicationId, NodeTypes nodeType, string searchText = null, 
@@ -591,10 +596,12 @@ namespace RaaiVan.Modules.CoreNetwork
             bool? archive = false, bool? searchable = true, bool? grabNoContentServices = null,
             List<FormFilter> filters = null, bool? matchAllFilters = null)
         {
+            List<NodesCount> cnts = new List<NodesCount>();
             long totalCount = 0;
-            return _get_nodes(applicationId, ref totalCount, null, nodeType, null, null, searchText, isDocument, isKnowledge, 
+
+            return _get_nodes(applicationId, ref totalCount, ref cnts, null, nodeType, null, null, searchText, isDocument, isKnowledge, 
                 lowerCreationDateLimit, upperCreationDateLimit, count, lowerBoundary, archive, searchable, 
-                grabNoContentServices, filters, matchAllFilters);
+                grabNoContentServices, filters, matchAllFilters, fetchCounts: false);
         }
 
         public static Dictionary<string, object> get_nodes_grouped(Guid applicationId, Guid nodeTypeId, Guid groupByFormElementId,

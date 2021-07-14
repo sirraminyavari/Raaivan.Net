@@ -107,7 +107,7 @@
         "ClickToSelectGroup": "برای انتخاب گروه کلیک کنید",
         "ClickToSelectTheOwnerOfTheIntellectualProperty": "برای انتخاب گروه دارنده مالکیت معنوی کلیک کنید",
         "ClickToUploadFile": "برای آپلود فایل کلیک کنید",
-        "CliqMind": "کلیک‌مایند",
+        "CliqMind": "کلیک مایند",
         "Close": "بستن",
         "Code": "کد",
         "CollaborationShare": "درصد مشارکت",

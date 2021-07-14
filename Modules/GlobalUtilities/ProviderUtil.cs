@@ -202,7 +202,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             return succeed_int(reader, ref msg);
         }
 
-        public static long succeed_long(IDataReader reader, ref string errorMessage)
+        public static long succeed_long(IDataReader reader, ref string errorMessage, bool dontClose = false)
         {
             try
             {
@@ -214,13 +214,13 @@ namespace RaaiVan.Modules.GlobalUtilities
                 return long.Parse(reader[0].ToString());
             }
             catch { return 0; }
-            finally { if (!reader.IsClosed) reader.Close(); }
+            finally { if (!dontClose && !reader.IsClosed) reader.Close(); }
         }
 
-        public static long succeed_long(IDataReader reader)
+        public static long succeed_long(IDataReader reader, bool dontClose = false)
         {
             string msg = string.Empty;
-            return succeed_long(reader, ref msg);
+            return succeed_long(reader, ref msg, dontClose);
         }
 
         public static string succeed_string(IDataReader reader, ref string errorMessage)

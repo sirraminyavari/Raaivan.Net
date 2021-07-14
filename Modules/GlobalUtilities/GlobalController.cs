@@ -251,5 +251,10 @@ namespace RaaiVan.Modules.GlobalUtilities
             DataProvider.RaaiVanStatistics(applicationId, ref dic, dateFrom, dateTo);
             return dic;
         }
+
+        public static List<SchemaInfo> get_schema_info()
+        {
+            return DataProvider.GetSchemaInfo();
+        }
     }
 }

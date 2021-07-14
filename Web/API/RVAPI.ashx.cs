@@ -662,7 +662,8 @@ namespace RaaiVan.Web.API
             responseText = app == null ? "{\"ErrorText\":\"" + Messages.OperationFailed + "\"}" :
                 "{\"Succeed\":\"" + Messages.OperationCompletedSuccessfully + "\"" + 
                     ",\"IsSystemAdmin\":" + (paramsContainer.CurrentUserID.HasValue && 
-                        PublicMethods.is_system_admin(applicationId, paramsContainer.CurrentUserID.Value)).ToString().ToLower() + 
+                        PublicMethods.is_system_admin(applicationId, paramsContainer.CurrentUserID.Value)).ToString().ToLower() +
+                    ",\"Onboarding\":{\"Name\":\"intro\",\"Step\":" + PublicMethods.get_random_number(1, 4).ToString() + "}" + 
                 "}";
         }
 

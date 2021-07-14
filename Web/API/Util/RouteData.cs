@@ -182,12 +182,13 @@ namespace RaaiVan.Web.API
             if (RouteName == RouteName.login && input.ParamsContainer.IsAuthenticated)
             {
                 Guid? invitationId = PublicMethods.parse_guid(input.ParamsContainer.request_param("inv"));
+                
                 RaaiVanUtil.init_user_application(invitationId, input.ParamsContainer.CurrentUserID.Value);
-
+                
                 if (!input.ParamsContainer.ApplicationID.HasValue && RaaiVanSettings.SAASBasedMultiTenancy)
                     input.set_redirect_to_teams();
                 else input.set_redirect_to_home();
-
+                
                 return false;
             }
 
@@ -484,7 +485,15 @@ namespace RaaiVan.Web.API
 
         private static void search(RouteActionParams input)
         {
+            string encoding = input.ParamsContainer.request_param("Encoding");
             string searchText = input.ParamsContainer.request_param("SearchText");
+
+            try
+            {
+                if (!string.IsNullOrEmpty(encoding) && encoding.ToLower().Trim() == "url" && !string.IsNullOrEmpty(searchText))
+                    searchText = Base64.encode(HttpUtility.UrlDecode(searchText));
+            }
+            catch { }
 
             if (!string.IsNullOrEmpty(searchText))
                 input.Data["SearchText"] = searchText.Replace('_', '/').Replace('~', '+');
@@ -521,6 +530,9 @@ namespace RaaiVan.Web.API
 
             input.Data["NodeTypes"] = new ArrayList(nodeTypes
                 .Select(nt => PublicMethods.fromJSON(nt.toJson(input.ParamsContainer.ApplicationID, iconUrl: true))).ToList());
+
+            bool? bookmarked = PublicMethods.parse_bool(input.ParamsContainer.request_param("Bookmarked"));
+            if (bookmarked.HasValue && bookmarked.Value) input.Data["Bookmarked"] = true;
 
             if (ids.Count == 1 && input.ParamsContainer.ApplicationID.HasValue) {
                 List<string> hierarchy = CNController.get_node_type_hierarchy(input.ParamsContainer.ApplicationID.Value, ids[0])

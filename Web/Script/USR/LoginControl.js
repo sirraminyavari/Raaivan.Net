@@ -126,7 +126,7 @@
                 {
                     Type: "div", Class: "small-12 medium-12 large-12", Style: "text-align:center; margin-bottom:1rem;",
                     Childs: [{
-                        Type: "img", Style: "max-width:50%;",
+                        Type: "img", Style: "max-width:50%; max-height:160px;",
                         Attributes: [{ Name: "src", Value: isSaaS ? RVGlobal.LogoURL : RVGlobal.LogoMiniURL }]
                     }]
                 },

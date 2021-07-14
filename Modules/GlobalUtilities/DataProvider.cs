@@ -238,7 +238,36 @@ namespace RaaiVan.Modules.GlobalUtilities
 
             if (!reader.IsClosed) reader.Close();
         }
-        
+
+        private static void _parse_schema_info(ref IDataReader reader, ref List<SchemaInfo> retItems)
+        {
+            while (reader.Read())
+            {
+                try
+                {
+                    SchemaInfo si = new SchemaInfo();
+
+                    if (!string.IsNullOrEmpty(reader["Table"].ToString())) si.Table = (string)reader["Table"];
+                    if (!string.IsNullOrEmpty(reader["Column"].ToString())) si.Column = (string)reader["Column"];
+                    if (!string.IsNullOrEmpty(reader["IsPrimaryKey"].ToString())) si.IsPrimaryKey = (bool)reader["IsPrimaryKey"];
+                    if (!string.IsNullOrEmpty(reader["IsIdentity"].ToString())) si.IsIdentity = (bool)reader["IsIdentity"];
+                    if (!string.IsNullOrEmpty(reader["IsNullable"].ToString())) si.IsNullable = (bool)reader["IsNullable"];
+                    if (!string.IsNullOrEmpty(reader["MaxLength"].ToString())) si.MaxLength = (int)reader["MaxLength"];
+                    if (!string.IsNullOrEmpty(reader["Order"].ToString())) si.Order = (int)reader["Order"];
+                    if (!string.IsNullOrEmpty(reader["DefaultValue"].ToString())) si.DefaultValue = (string)reader["DefaultValue"];
+
+                    MSSQLDataType dt = MSSQLDataType.None;
+                    if (!string.IsNullOrEmpty(reader["DataType"].ToString()) &&
+                        Enum.TryParse<MSSQLDataType>((string)reader["DataType"], true, out dt)) si.DataType = dt;
+
+                    retItems.Add(si);
+                }
+                catch { }
+            }
+
+            if (!reader.IsClosed) reader.Close();
+        }
+
         public static string GetSystemVersion()
         {
             try
@@ -786,6 +815,20 @@ namespace RaaiVan.Modules.GlobalUtilities
                 _parse_raaivan_statistics(ref reader, ref dic);
             }
             catch (Exception ex) { }
+        }
+
+        public static List<SchemaInfo> GetSchemaInfo()
+        {
+            string spName = GetFullyQualifiedName("SchemaInfo");
+
+            try
+            {
+                IDataReader reader = (IDataReader)ProviderUtil.execute_reader(spName);
+                List<SchemaInfo> items = new List<SchemaInfo>();
+                _parse_schema_info(ref reader, ref items);
+                return items;
+            }
+            catch (Exception ex) { return new List<SchemaInfo>(); }
         }
     }
 }

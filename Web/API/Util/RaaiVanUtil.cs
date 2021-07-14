@@ -1214,13 +1214,13 @@ namespace RaaiVan.Web.API
             }
             else
             {
-                _Context.Response.Clear();
-
-                _Context.Response.ContentType = "text/json";
-                _Context.Response.BufferOutput = true;
-                
                 try
                 {
+                    _Context.Response.Clear();
+
+                    _Context.Response.ContentType = "text/json";
+                    _Context.Response.BufferOutput = true;
+
                     _Context.Response.AppendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
                     _Context.Response.AppendHeader("Pragma", "no-cache");
                     _Context.Response.AppendHeader("Expires", "0");

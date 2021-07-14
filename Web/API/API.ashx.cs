@@ -166,7 +166,13 @@ namespace RaaiVan.Web.API
             }
             */
 
-            if (PublicMethods.parse_string(context.Request.Params["command"], false) == "sql_scripts" && PublicMethods.is_dev())
+            if (PublicMethods.parse_string(context.Request.Params["command"], false) == "postgresql_scripts" && PublicMethods.is_dev())
+            {
+                paramsContainer.file_response(System.Text.Encoding.UTF8.GetBytes(MSSQL2PostgreSQL.toScript(GlobalController.get_schema_info())),
+                    fileName: "postgre_script.sql", contentType: "application/sql", isAttachment: true);
+                return;
+            }
+            else if (PublicMethods.parse_string(context.Request.Params["command"], false) == "sql_scripts" && PublicMethods.is_dev())
             {
                 string fileName = PublicMethods.parse_string(paramsContainer.request_param("FileName"), decode: false);
                 paramsContainer.file_response(System.Text.Encoding.UTF8.GetBytes(PublicMethods.generate_script_file(fileName)),

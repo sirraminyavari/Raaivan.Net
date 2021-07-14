@@ -569,6 +569,7 @@ namespace RaaiVan.Web.API
                                 PublicMethods.parse_bool(context.Request.Params["HasChild"]),
                                 FGUtilities.get_filters_from_json(PublicMethods.parse_string(context.Request.Params["FormFilters"])),
                                 PublicMethods.parse_bool(context.Request.Params["MatchAllFilters"]),
+                                PublicMethods.parse_bool(context.Request.Params["FetchCounts"]),
                                 PublicMethods.parse_guid(context.Request.Params["GroupByElementID"]),
                                 ref responseText);
                         }
@@ -3778,7 +3779,7 @@ namespace RaaiVan.Web.API
             string searchText, bool? isDocument, bool? isKnowledge, bool? isMine, Guid? creatorUserId, bool? archive,
             DateTime? lowerCreationDateLimit, DateTime? upperCreationDateLimit,
             int? count, long? lowerBoundary, bool? searchable, bool? hasChild, List<FormFilter> filters,
-            bool? matchAllFilters, Guid? groupByElementId, ref string responseText)
+            bool? matchAllFilters, bool? fetchCounts, Guid? groupByElementId, ref string responseText)
         {
             if (!paramsContainer.GBView) return;
             
@@ -3811,11 +3812,13 @@ namespace RaaiVan.Web.API
             else {
                 long totalCount = 0;
 
+                List<NodesCount> nodesCount = new List<NodesCount>();
+
                 List<Node> nodes = CNController.get_nodes(paramsContainer.Tenant.Id, nodeTypeIds, useNodeTypeHierarchy,
                     relatedToNodeId, searchText, isDocument, isKnowledge, lowerCreationDateLimit, upperCreationDateLimit,
-                    count.Value, lowerBoundary, ref totalCount, archive: archive.HasValue && archive.Value,
+                    count.Value, lowerBoundary, ref totalCount, ref nodesCount, archive: archive.HasValue && archive.Value,
                     searchable: searchable, grabNoContentServices: grabNoContentServices, filters: filters,
-                    matchAllFilters: matchAllFilters, currentUserId: paramsContainer.CurrentUserID,
+                    matchAllFilters: matchAllFilters, fetchCounts: fetchCounts, currentUserId: paramsContainer.CurrentUserID,
                     creatorUserId: creatorUserId, checkAccess: !hasViewAccess);
 
                 List<Guid> haveChild = !hasChild.HasValue || !hasChild.Value ? new List<Guid>() :

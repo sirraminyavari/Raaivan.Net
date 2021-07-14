@@ -82,7 +82,8 @@ namespace RaaiVan.Modules.CoreNetwork
             if (!reader.IsClosed) reader.Close();
         }
 
-        private static long _parse_nodes(ref IDataReader reader, ref List<Node> lstNodes, bool? full, bool hasTotalCount = false)
+        private static long _parse_nodes(ref IDataReader reader, ref List<Node> lstNodes, 
+            ref List<NodesCount> lstCounts, bool? full, bool hasTotalCount = false, bool fetchCounts = false)
         {
             while (reader.Read())
             {
@@ -187,11 +188,19 @@ namespace RaaiVan.Modules.CoreNetwork
                 catch { }
             }
 
-            long totalCount = (hasTotalCount && reader.NextResult()) ? ProviderUtil.succeed_long(reader) : 0;
+            long totalCount = (hasTotalCount && reader.NextResult()) ? ProviderUtil.succeed_long(reader, dontClose: true) : 0;
+
+            if (fetchCounts && reader.NextResult()) _parse_nodes_count(ref reader, ref lstCounts);
 
             if (!reader.IsClosed) reader.Close();
 
             return totalCount;
+        }
+
+        private static long _parse_nodes(ref IDataReader reader, ref List<Node> lstNodes, bool? full, bool hasTotalCount = false)
+        {
+            List<NodesCount> lst = new List<NodesCount>();
+            return _parse_nodes(ref reader, ref lstNodes, ref lst, full, hasTotalCount, fetchCounts: false);
         }
 
         private static Dictionary<string, object> _parse_node_counts_grouped_by_element(ref IDataReader reader)
@@ -1896,11 +1905,11 @@ namespace RaaiVan.Modules.CoreNetwork
             }
         }
 
-        private static void GetNodes(Guid applicationId, ref List<Node> retNodes, List<Guid> nodeTypeIds, 
-            NodeTypes? nodeType, bool? useNodeTypeHierarchy, Guid? relatedToNodeId, string searchText, 
+        private static void GetNodes(Guid applicationId, ref List<Node> retNodes, ref List<NodesCount> retNodesCount, 
+            List<Guid> nodeTypeIds, NodeTypes? nodeType, bool? useNodeTypeHierarchy, Guid? relatedToNodeId, string searchText, 
             bool? isDocument, bool? isKnowledge, DateTime? lowerCreationDateLimit, DateTime? upperCreationDateLimit,
             int count, long? lowerBoundary, bool? searchable, bool? archive, bool? grabNoContentServices, 
-            List<FormFilter> filters, bool? matchAllFilters, Guid? currentUserId, Guid? creatorUserId, 
+            List<FormFilter> filters, bool? matchAllFilters, bool? fetchCounts, Guid? currentUserId, Guid? creatorUserId, 
             bool checkAccess, ref long totalCount, Guid? groupByFormElementId, ref Dictionary<string, object> groupedResults)
         {
             SqlConnection con = new SqlConnection(ProviderUtil.ConnectionString);
@@ -1970,6 +1979,7 @@ namespace RaaiVan.Modules.CoreNetwork
             if(lowerBoundary.HasValue) cmd.Parameters.AddWithValue("@LowerBoundary", lowerBoundary.Value);
             cmd.Parameters.Add(filtersParam);
             if (matchAllFilters.HasValue) cmd.Parameters.AddWithValue("@MatchAllFilters", matchAllFilters.Value);
+            if (fetchCounts.HasValue) cmd.Parameters.AddWithValue("@FetchCounts", fetchCounts.Value);
             cmd.Parameters.AddWithValue("@CheckAccess", checkAccess);
             cmd.Parameters.AddWithValue("@DefaultPrivacy", RaaiVanSettings.DefaultPrivacy(applicationId));
             if(groupByFormElementId.HasValue && groupByFormElementId != Guid.Empty)
@@ -1998,6 +2008,7 @@ namespace RaaiVan.Modules.CoreNetwork
                 (lowerBoundary.HasValue ? "@LowerBoundary" : "null") + sep +
                 "@FormFilters" + sep +
                 (matchAllFilters.HasValue ? "@MatchAllFilters" : "null") + sep +
+                (fetchCounts.HasValue ? "@FetchCounts" : "null") + sep +
                 "@CheckAccess" + sep +
                 "@DefaultPrivacy" + sep + 
                 (!groupByFormElementId.HasValue || groupByFormElementId == Guid.Empty ? "null" : "@GroupByFormElementID");
@@ -2012,7 +2023,8 @@ namespace RaaiVan.Modules.CoreNetwork
                     groupedResults = _parse_node_counts_grouped_by_element(ref reader);
                 else
                 {
-                    totalCount = _parse_nodes(ref reader, ref retNodes, false, true);
+                    totalCount = _parse_nodes(ref reader, ref retNodes, ref retNodesCount, false, true, 
+                        fetchCounts: fetchCounts.HasValue && fetchCounts.Value);
                     if (totalCount < 0) totalCount = 0;
                 }
             }
@@ -2023,19 +2035,19 @@ namespace RaaiVan.Modules.CoreNetwork
             finally { con.Close(); }
         }
 
-        public static void GetNodes(Guid applicationId, ref List<Node> retNodes, List<Guid> nodeTypeIds,
-            NodeTypes? nodeType, bool? useNodeTypeHierarchy, Guid? relatedToNodeId, string searchText,
+        public static void GetNodes(Guid applicationId, ref List<Node> retNodes, ref List<NodesCount> retNodesCount, 
+            List<Guid> nodeTypeIds, NodeTypes? nodeType, bool? useNodeTypeHierarchy, Guid? relatedToNodeId, string searchText,
             bool? isDocument, bool? isKnowledge, DateTime? lowerCreationDateLimit, DateTime? upperCreationDateLimit,
             int count, long? lowerBoundary, bool? searchable, bool? archive, bool? grabNoContentServices,
-            List<FormFilter> filters, bool? matchAllFilters, Guid? currentUserId, Guid? creatorUserId,
+            List<FormFilter> filters, bool? matchAllFilters, bool? fetchCounts, Guid? currentUserId, Guid? creatorUserId,
             bool checkAccess, ref long totalCount)
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
 
-            GetNodes(applicationId, ref retNodes, nodeTypeIds, nodeType, useNodeTypeHierarchy, relatedToNodeId,
+            GetNodes(applicationId, ref retNodes, ref retNodesCount, nodeTypeIds, nodeType, useNodeTypeHierarchy, relatedToNodeId,
                 searchText, isDocument, isKnowledge, lowerCreationDateLimit, upperCreationDateLimit, count, lowerBoundary,
-                searchable, archive, grabNoContentServices, filters, matchAllFilters, currentUserId, creatorUserId, checkAccess,
-                ref totalCount, groupByFormElementId: null, groupedResults: ref dic);
+                searchable, archive, grabNoContentServices, filters, matchAllFilters, fetchCounts, currentUserId, creatorUserId, 
+                checkAccess, ref totalCount, groupByFormElementId: null, groupedResults: ref dic);
         }
 
         public static Dictionary<string, object> GetNodes(Guid applicationId, Guid nodeTypeId, Guid groupByFormElementId,
@@ -2045,9 +2057,10 @@ namespace RaaiVan.Modules.CoreNetwork
             Dictionary<string, object> dic = new Dictionary<string, object>();
 
             List<Node> nds = new List<Node>();
+            List<NodesCount> cnts = new List<NodesCount>();
             long totalCount = 0;
 
-            GetNodes(applicationId, ref nds, 
+            GetNodes(applicationId, ref nds, ref cnts,
                 nodeTypeIds: new List<Guid>() { nodeTypeId }, 
                 nodeType: null, 
                 useNodeTypeHierarchy: null, 
@@ -2064,6 +2077,7 @@ namespace RaaiVan.Modules.CoreNetwork
                 grabNoContentServices: null, 
                 filters: filters, 
                 matchAllFilters: matchAllFilters, 
+                fetchCounts: false,
                 currentUserId: currentUserId, 
                 creatorUserId: creatorUserId, 
                 checkAccess: checkAccess,
