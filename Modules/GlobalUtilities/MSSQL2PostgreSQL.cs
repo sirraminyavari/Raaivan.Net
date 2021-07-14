@@ -62,6 +62,7 @@ namespace RaaiVan.Modules.GlobalUtilities
             else if (retStr == "user_name") retStr = "username";
             else if (retStr == "u_r_l") retStr = "url";
             else if (retStr == "birth_day") retStr = "birthdate";
+            else if (retStr == "like") retStr = "like_status";
 
             return retStr
                 .Replace("__", "_")
